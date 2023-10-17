@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PageTitle from "../../components/Guideline/PageTitle";
 import { faCirclePlus, faCopy } from "@fortawesome/free-solid-svg-icons";
-import { postData, getData } from "../../utils/api";
+// import { postData, getData } from "../../utils/api";
 
 const Sites = () => {
 	const btnGroup = [
