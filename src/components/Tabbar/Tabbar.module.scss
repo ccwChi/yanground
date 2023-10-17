@@ -1,0 +1,84 @@
+@use "sass:math";
+
+$d: calc(100vw / 3 - 3.875vw);
+$p: 0.2 * $d;
+$r: $p * math.sqrt(2);
+$o: 0.5 * $p;
+$br: 1.5rem;
+$bc: #ffffff;
+$iw: calc($d - ($p / 2));
+$ih: calc(5rem + 2vw);
+
+@property --k {
+	syntax: "<number>";
+	initial-value: 0;
+	inherits: true;
+}
+
+.nav {
+	&_wrapper {
+		position: absolute;
+		display: flex;
+		justify-content: space-around;
+		padding: 0 $p;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		font-size: 0.75em;
+		background: $bc;
+		border-radius: $br $br 0 0;
+		--mask: linear-gradient(red 0 0),
+			radial-gradient(circle at 0 #{$r}, transparent calc(#{$r} + -0.5px), gold calc(#{$r} + 0.5px))
+				calc((var(--k) + 0.5) *#{$d} + #{$p} + #{-1.5 * $r}) 0 / #{$r $o} no-repeat,
+			radial-gradient(circle at 100% #{$r}, transparent calc(#{$r} + -0.5px), gold calc(#{$r} + 0.5px))
+				calc((var(--k) + 0.5) *#{$d} + #{$p} + #{0.5 * $r}) 0 / #{$r $o} no-repeat,
+			radial-gradient(
+				circle at calc((var(--k) + 0.5) *#{$d} + #{$p}) #{0.5 * $o},
+				white calc(#{0.5 * $o} + -1px),
+				transparent #{0.5 * $o}
+			),
+			radial-gradient(
+				circle at calc((var(--k) + 0.5) *#{$d} + #{$p}) #{-$o},
+				blue calc(#{$r} + -0.5px),
+				transparent calc(#{$r} + 0.5px)
+			);
+		-webkit-mask: var(--mask);
+		mask: var(--mask);
+		-webkit-mask-composite: xor, source-over, source-over;
+		mask-composite: exclude, add, add;
+		transition: --k 0.35s cubic-bezier(0.5, -0.5, 0.5, 1.5);
+		z-index: 1024;
+		+ div {
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: calc($ih - 3rem);
+			box-shadow: rgba(0, 0, 0, 0.12) 0px -24px 20px, rgba(0, 0, 0, 0.24) 0px 0px 10px;
+		}
+	}
+	&_item {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: flex-end;
+		padding-bottom: 0.5rem;
+		// padding-top: $p;
+		width: $iw;
+		height: $ih;
+		text-align: center;
+		text-transform: capitalize;
+		color: hsl(0, 0%, 50%);
+		filter: invert(0) sepia(0) saturate(1) hue-rotate(0);
+		transition: filter 0.2s;
+		&:focus {
+			outline: none;
+		}
+		&:focus,
+		&:hover {
+			filter: invert(0) sepia(1) saturate(1) hue-rotate(var(--hr));
+		}
+		&[data-loc="true"] {
+			filter: invert(0.5) sepia(0.5) saturate(5) hue-rotate(var(--hr));
+		}
+	}
+}

@@ -1,0 +1,63 @@
+@import "../src/assets/styles/custom";
+$nav-height: 64px;
+
+.main_wrapper {
+	width: 74%;
+}
+
+.sidebar_wrapper {
+	top: $nav-height;
+	left: 1rem;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	z-index: 1025;
+	> div {
+		height: 100%;
+		width: 24%;
+	}
+}
+
+@media (max-width: 1023.98px) {
+	.main_wrapper {
+		width: 100%;
+	}
+
+	.sidebar_wrapper {
+		transition: width 0.35s ease-in-out;
+		&.hide {
+			width: 0;
+		}
+		> div {
+			width: 75vw;
+		}
+	}
+
+	.bg_overlay {
+		position: absolute;
+		top: 0;
+		right: 0;
+		left: 0;
+		bottom: 0;
+		// inset: 0;
+		z-index: 1025;
+		background-color: rgba(0, 0, 0, 0);
+		backdrop-filter: blur(0);
+		transition: all 0.35s ease;
+		pointer-events: none;
+		&.open {
+			background-color: rgba(0, 0, 0, 0.35);
+			backdrop-filter: blur(1px);
+			pointer-events: all;
+		}
+	}
+}
+
+/******** MUI **********/
+
+@media (max-width: 639.98px) {
+	.css-hip9hq-MuiPaper-root-MuiAppBar-root {
+		border-bottom: 1px solid #dee2e6;
+		box-shadow: none !important;
+	}
+}
