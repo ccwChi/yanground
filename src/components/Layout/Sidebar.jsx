@@ -27,19 +27,23 @@ const Sidebar = ({ menuItems, closeSidebar }) => {
 					alt="Logo"
 					className="h-16 sm:h-20 aspect-square rounded-full object-cover me-3"
 				/> */}
-				<Avatar
-					alt={userProfile.displayName}
-					src={userProfile.pictureUrl}
-					sx={{ width: 56, height: 56, bgcolor: "#547db7" }}
-				/>
-				<div className="inline-flex flex-col ms-3">
-					<p className="font-bold text-1xl">{userProfile.displayName}</p>
-					<span className="opacity-90">{userProfile.department.name}</span>
+				{userProfile && (
+					<>
+						<Avatar
+							alt={userProfile.displayName}
+							src={userProfile.pictureUrl}
+							sx={{ width: 56, height: 56, bgcolor: "#547db7" }}
+						/>
+						<div className="inline-flex flex-col ms-3">
+							<p className="font-bold text-1xl">{userProfile.displayName}</p>
+							<span className="opacity-90">{userProfile.department.name}</span>
 
-					<NavLink to="/user" className={"pt-1"}>
-						檢視你的帳戶
-					</NavLink>
-				</div>
+							<NavLink to="/user" className={"pt-1"}>
+								檢視你的帳戶
+							</NavLink>
+						</div>
+					</>
+				)}
 			</div>
 			<List className="mainMenu">
 				{menuItems.map((menuItem, index) => (

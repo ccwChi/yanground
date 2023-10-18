@@ -31,17 +31,19 @@ const Header = ({ toggleSidebar }) => {
 
 				<div className="flex gap-2">
 					{/* Desktop Right */}
-					<div className="hidden md:flex ml-4">
-						<Button variant="text" color="inherit" onClick={handleMobileMenuOpen} sx={{ textTransform: "none" }}>
-							<FontAwesomeIcon icon={faUser} className="mr-2" />
-							{userProfile.displayName}
-						</Button>
-						<Menu anchorEl={mobileMenuAnchor} open={Boolean(mobileMenuAnchor)} onClose={handleMobileMenuClose}>
-							<MenuItem>個人資料</MenuItem>
-							<MenuItem>設定</MenuItem>
-							<MenuItem>登出</MenuItem>
-						</Menu>
-					</div>
+					{userProfile && (
+						<div className="hidden md:flex ml-4">
+							<Button variant="text" color="inherit" onClick={handleMobileMenuOpen} sx={{ textTransform: "none" }}>
+								<FontAwesomeIcon icon={faUser} className="mr-2" />
+								{userProfile.displayName}
+							</Button>
+							<Menu anchorEl={mobileMenuAnchor} open={Boolean(mobileMenuAnchor)} onClose={handleMobileMenuClose}>
+								<MenuItem>個人資料</MenuItem>
+								<MenuItem>設定</MenuItem>
+								<MenuItem>登出</MenuItem>
+							</Menu>
+						</div>
+					)}
 
 					{/* Mobile Right (Hamburger Menu) */}
 					<div className="flex lg:hidden items-center">
