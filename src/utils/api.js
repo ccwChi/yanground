@@ -1,43 +1,73 @@
 // api.js
-
-const accessToken =
-	"eyJhbGciOiJIUzI1NiJ9.wImX6r-sy6D1pTEcWlvnjJv5KfOCupE19JZk7toqRnweNNVR36RtuUOCmNohAPUGtlOYAz-ASKKo9pkFT9WRxbBKdqbGR4JKj3P2UqR9mKFMMF4Z1MckUbFHAoS4HMGF330814xK2p4vGuhWpbSH1hk_ACagwwzKMi1qEYKmuJQ.YL69XPHzlb5Oz1TDznkuREI7zPceg1vdClSq928IKOI";
+const appUrl = process.env.REACT_APP_URL;
+const accessToken = JSON.parse(localStorage.getItem("accessToken"));
 const headers = {
 	Authorization: `Bearer ${accessToken}`,
 	"Content-Type": "application/json",
 };
 
 // GET
-const getData = (url) => {
-	return fetch(url, {
+const getData = (url = "") => {
+	return fetch(`${appUrl}/${url}`, {
 		method: "GET",
 		headers: headers,
 	})
 		.then((response) => {
-			if (!response.ok) {
-				throw new Error(`Network response was not ok: ${response.status}`);
-			}
 			return response.json();
 		})
 		.catch((error) => {
-			console.error("Error:", error);
-			throw error;
+			console.error("System Error：", error);
+			// throw error;
+			return { status: false, result: error.message };
 		});
 };
 
 // POST
-const postData = (url, data) => {
-	return fetch(url, {
+const postData = (url = "", data) => {
+	return fetch(`${appUrl}/${url}`, {
 		method: "POST",
 		headers: headers,
 		body: JSON.stringify(data),
 	})
 		.then((response) => {
-			return response.json();
+			if (response.status === 200) {
+				return { status: true };
+			} else if (response.status === 400) {
+				return response.json().then((json) => {
+					return { status: false, result: json };
+				});
+			} else {
+				return { status: false, result: response.status };
+			}
+			// return response.json();
 		})
 		.catch((error) => {
-			throw error;
+			console.error("System Error：", error);
+			// throw error;
+			return { status: false, result: error.message };
 		});
 };
 
 export { getData, postData };
+
+//****** How To Use ? ******//
+
+// GET
+// getData(url).then((result) => setGetDataResult(result));
+
+// POST
+// e.g. url = "project/7044555410912577110";
+// 			const data = {
+// 				name: "AAAB",
+// 				administrativeDivision: "",
+// 				street: "AAAB",
+// 				businessRepresentative: "7030915114245031340",
+// 			};
+//
+// postData(url, data).then((result) => {
+// 	if (result.status) {
+// 		// ok message
+// 	} else {
+// 		// error message
+// 	}
+// });

@@ -6,6 +6,7 @@ import Home from "./pages/Home/Home";
 import Sites from "./pages/Sites/Sites";
 import ErrorMessage from "./pages/Error/ErrorMessage";
 import ErrorPages from "./pages/Error/ErrorPages";
+import Forbidden from "./pages/Error/Forbidden";
 import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
 			{
 				path: "/sites",
 				element: <Sites />,
+			},
+			{
+				path: "/forbidden",
+				element: <Forbidden />,
 			},
 			{
 				path: "*",

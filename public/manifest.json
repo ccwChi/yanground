@@ -1,4 +1,5 @@
 {
+  "start_url": "https://bf4b-36-236-228-235.ngrok-free.app/",
 	"short_name": "元融科技",
 	"name": "元融科技有限公司",
 	"icons": [
@@ -18,7 +19,6 @@
 			"sizes": "512x512"
 		}
 	],
-	"start_url": ".",
 	"display": "standalone",
 	"theme_color": "#000000",
 	"background_color": "#ffffff"

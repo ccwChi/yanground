@@ -1,9 +1,25 @@
 import React, { useEffect, useState } from "react";
 import PageTitle from "../../components/Guideline/PageTitle";
+import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
+import TableTabber from "../../components/Tabbar/TableTabber";
+import AddIcon from "@mui/icons-material/Add";
+import FolderCopyIcon from "@mui/icons-material/FolderCopy";
 import { faCirclePlus, faCopy } from "@fortawesome/free-solid-svg-icons";
-// import { postData, getData } from "../../utils/api";
+import { postData, getData } from "../../utils/api";
 
 const Sites = () => {
+	// ApiUrl
+	const apiUrl = "site";
+	// cat = Category 設置 tab 分類
+	const [cat, setCat] = useState(null);
+	// ApiData
+	const [apiData, setApiData] = useState(null);
+	const tabGroup = [
+		{ f: "", text: "全部" },
+		{ f: "inprogress", text: "進行中" },
+		{ f: "unstarted", text: "尚未開始" },
+		{ f: "end", text: "已結束" },
+	];
 	const btnGroup = [
 		{
 			icon: faCirclePlus,
@@ -11,6 +27,8 @@ const Sites = () => {
 			variant: "contained",
 			color: "primary",
 			onClick: () => handleAdd(),
+			fabVariant: "success",
+			fab: <AddIcon fontSize="large" />,
 		},
 		{
 			icon: faCopy,
@@ -18,8 +36,21 @@ const Sites = () => {
 			variant: "contained",
 			color: "secondary",
 			onClick: () => handleExport(),
+			fabVariant: "warning",
+			fab: <FolderCopyIcon fontSize="large" />,
 		},
 	];
+
+	useEffect(() => {
+		getApiList();
+	}, []);
+
+	const getApiList = () => {
+		getData(apiUrl).then((result) => {
+			const data = result.result;
+			setApiData(data);
+		});
+	};
 
 	const handleAdd = () => {
 		console.log("新增案場被點擊");
@@ -29,48 +60,21 @@ const Sites = () => {
 		console.log("輸出派工清單被點擊");
 	};
 
-	// const [postDataResult, setPostDataResult] = useState(null);
-	// const [getDataResult, setGetDataResult] = useState(null);
-
-	// const handlePostClick = () => {
-	// 	const url = "https://api.yuanrong-tech.com.tw/project/7044555410912577110";
-	// 	const data = {
-	// 		name: "AAAB",
-	// 		administrativeDivision: "",
-	// 		street: "AAAB",
-	// 		businessRepresentative: "7030915114245031340",
-	// 	};
-
-	// 	postData(url, data).then((result) => setPostDataResult(result));
-	// };
-
-	// const handleGetClick = () => {
-	// 	const url = "https://api.yuanrong-tech.com.tw/project";
-
-	// 	getData(url).then((result) => setGetDataResult(result));
-	// };
-
 	return (
-		<div>
+		<>
+			{/* PageTitle */}
 			<PageTitle title="案場" btnGroup={btnGroup} />
 
-			{/* <button onClick={handlePostClick}>發送 POST 請求</button>
-			<button onClick={handleGetClick}>發送 GET 請求</button>
+			{/* TabBar */}
+			<TableTabber tabGroup={tabGroup} setCat={setCat} />
 
-			{postDataResult && (
-				<div>
-					<h2>POST 請求結果</h2>
-					<pre>{JSON.stringify(postDataResult, null, 2)}</pre>
-				</div>
-			)}
+			{/* Content */}
 
-			{getDataResult && (
-				<div>
-					<h2>GET 請求結果</h2>
-					<pre>{JSON.stringify(getDataResult, null, 2)}</pre>
-				</div>
-			)} */}
-		</div>
+			<div className="overflow-y-auto">{apiData && <pre>{JSON.stringify(apiData, null, 2)}</pre>}</div>
+
+			{/* Floating Action Button */}
+			<FloatingActionButton btnGroup={btnGroup} />
+		</>
 	);
 };
 

@@ -7,6 +7,7 @@ import logoIcon from "../../assets/Logo.png";
 
 const Header = ({ toggleSidebar }) => {
 	const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
+	const userProfile = JSON.parse(localStorage.getItem("userProfile"));
 
 	const handleMobileMenuOpen = (event) => {
 		setMobileMenuAnchor(event.currentTarget);
@@ -17,7 +18,7 @@ const Header = ({ toggleSidebar }) => {
 	};
 
 	return (
-		<AppBar position="static" style={{ zIndex: 1024 }}>
+		<AppBar position="static" elevation={3} style={{ zIndex: 1024 }}>
 			<Toolbar className="justify-between text-primary-800 bg-white">
 				<NavLink to="/" className="flex items-center text-1xl select-none">
 					{/* Logo */}
@@ -31,9 +32,9 @@ const Header = ({ toggleSidebar }) => {
 				<div className="flex gap-2">
 					{/* Desktop Right */}
 					<div className="hidden md:flex ml-4">
-						<Button variant="text" color="inherit" onClick={handleMobileMenuOpen}>
+						<Button variant="text" color="inherit" onClick={handleMobileMenuOpen} sx={{ textTransform: "none" }}>
 							<FontAwesomeIcon icon={faUser} className="mr-2" />
-							Kama
+							{userProfile.displayName}
 						</Button>
 						<Menu anchorEl={mobileMenuAnchor} open={Boolean(mobileMenuAnchor)} onClose={handleMobileMenuClose}>
 							<MenuItem>個人資料</MenuItem>

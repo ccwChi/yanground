@@ -1,17 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "./components/Layout/Header";
 import Sidebar from "./components/Layout/Sidebar";
 import Tabbar from "./components/Tabbar/Tabbar";
 import { faUserGear, faHelmetSafety, faToolbox, faVest, faPersonDigging } from "@fortawesome/free-solid-svg-icons";
-import { ThemeProvider } from '@mui/material/styles';
-import theme from './utils/theme';
+import { ThemeProvider } from "@mui/material/styles";
+import theme from "./utils/theme";
 import cx from "classnames";
 import "./app.scss";
+import { getData } from "./utils/api";
+import liff from "@line/liff";
+const LINE_ID = process.env.REACT_APP_LINEID;
 
 const App = () => {
+	// 設置 RWD 時，SideBar 是否顯示
 	const [showSidebar, setShowSidebar] = useState(false);
 
+	// SideBar 顯示資料
+	// icon => FontAwesome Icon
+	// text => Display Text
+	// herf => URL
 	const menuItems = [
 		{
 			icon: faHelmetSafety,
@@ -48,6 +56,45 @@ const App = () => {
 		},
 	];
 
+	useEffect(() => {
+		initLine();
+	}, []);
+
+	// Liff 登入 Line
+	const initLine = () => {
+		liff.init(
+			{ liffId: LINE_ID },
+			() => {
+				if (liff.isLoggedIn()) {
+					runApp();
+				} else {
+					liff.login();
+				}
+			},
+			(err) => console.error(err)
+		);
+	};
+
+	// 設置憑證與從後端讀取用戶資料
+	const runApp = () => {
+		const accessToken = liff.getAccessToken();
+		if (accessToken) {
+			localStorage.setItem("accessToken", JSON.stringify(accessToken));
+			getData().then((data) => {
+				if (data?.result) {
+					// console.log(data);
+					let d = data.result;
+					if (d.displayName) {
+						delete d.statusMessage;
+						delete d.userId;
+						localStorage.setItem("userProfile", JSON.stringify(d));
+					}
+				}
+			});
+		}
+	};
+
+	// SideBar 開關
 	const toggleSidebar = () => {
 		setShowSidebar(!showSidebar);
 	};
@@ -64,7 +111,7 @@ const App = () => {
 
 					{/* Main Content */}
 					<div className="lg:container w-full mx-auto px-0 sm:px-4 flex-1 overflow-hidden py-0 sm:py-4 lg:py-6">
-						<div className="flex flex-col main_wrapper bg-white h-full float-right sm:rounded-lg pt-4 pb-26 sm:pb-4 overflow-hidden">
+						<div className="relative flex flex-col main_wrapper bg-white h-full float-right sm:rounded-lg pb-26 sm:pb-4 overflow-hidden">
 							<Outlet />
 						</div>
 					</div>

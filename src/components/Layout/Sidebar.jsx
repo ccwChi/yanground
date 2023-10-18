@@ -7,6 +7,7 @@ import "./Layout.scss";
 
 const Sidebar = ({ menuItems, closeSidebar }) => {
 	const [expanded, setExpanded] = useState(null);
+	const userProfile = JSON.parse(localStorage.getItem("userProfile"));
 
 	const handleAccordionChange = (panel) => (event, isExpanded) => {
 		setExpanded(isExpanded ? panel : null);
@@ -26,10 +27,14 @@ const Sidebar = ({ menuItems, closeSidebar }) => {
 					alt="Logo"
 					className="h-16 sm:h-20 aspect-square rounded-full object-cover me-3"
 				/> */}
-				<Avatar alt="Kama" src="/static/images/avatar/1.jpg" sx={{ width: 56, height: 56, bgcolor: "#547db7" }} />
+				<Avatar
+					alt={userProfile.displayName}
+					src={userProfile.pictureUrl}
+					sx={{ width: 56, height: 56, bgcolor: "#547db7" }}
+				/>
 				<div className="inline-flex flex-col ms-3">
-					<p className="font-bold text-1xl">Kama</p>
-					<span className="opacity-90">資訊部</span>
+					<p className="font-bold text-1xl">{userProfile.displayName}</p>
+					<span className="opacity-90">{userProfile.department.name}</span>
 
 					<NavLink to="/user" className={"pt-1"}>
 						檢視你的帳戶
