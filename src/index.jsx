@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
 import Home from "./pages/Home/Home";
 import Sites from "./pages/Sites/Sites";
+import Punch from "./pages/Punch/Punch";
 import ErrorMessage from "./pages/Error/ErrorMessage";
 import ErrorPages from "./pages/Error/ErrorPages";
 import Forbidden from "./pages/Error/Forbidden";
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
 			{
 				path: "/sites",
 				element: <Sites />,
+			},
+			{
+				path: "/punch",
+				element: <Punch />,
 			},
 			{
 				path: "/forbidden",

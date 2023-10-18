@@ -18,7 +18,7 @@ const getData = (url = "") => {
 		.catch((error) => {
 			console.error("System Error：", error);
 			// throw error;
-			return { status: false, result: error.message };
+			return error.message;
 		});
 };
 
