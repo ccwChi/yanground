@@ -41,6 +41,28 @@ a {
 	text-decoration: none;
 }
 
+table {
+	thead {
+		tr {
+			background-color: $bg-l-color-1;
+			th {
+				padding: 12px !important;
+				border-bottom: none !important;
+			}
+		}
+	}
+	tbody {
+		tr {
+			height: 3.25rem;
+			td {
+				padding: 8px 12px !important;
+				font-size: 1rem !important;
+				color: $text-color-1 !important;
+			}
+		}
+	}
+}
+
 @media (min-width: 1024px) {
 	::-webkit-scrollbar {
 		width: 8px;

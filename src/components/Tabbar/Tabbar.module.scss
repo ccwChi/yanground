@@ -47,7 +47,7 @@ $ih: calc(5rem + 2vw);
 		-webkit-mask-composite: xor, source-over, source-over;
 		mask-composite: exclude, add, add;
 		transition: --k 0.35s cubic-bezier(0.5, -0.5, 0.5, 1.5);
-		z-index: 1024;
+		z-index: 1030;
 		+ div {
 			position: absolute;
 			left: 0;

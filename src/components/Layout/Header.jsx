@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import useLocalStorageValue from '../../hooks/useLocalStorageValue';
 import { AppBar, Toolbar, IconButton, Menu, MenuItem, Button } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faUser } from "@fortawesome/free-solid-svg-icons";
 import logoIcon from "../../assets/Logo.png";
+import liff from "@line/liff";
 
 const Header = ({ toggleSidebar }) => {
 	const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
-	const userProfile = JSON.parse(localStorage.getItem("userProfile"));
+  const userProfile = useLocalStorageValue("userProfile");
 
 	const handleMobileMenuOpen = (event) => {
 		setMobileMenuAnchor(event.currentTarget);
@@ -38,9 +40,21 @@ const Header = ({ toggleSidebar }) => {
 								{userProfile.displayName}
 							</Button>
 							<Menu anchorEl={mobileMenuAnchor} open={Boolean(mobileMenuAnchor)} onClose={handleMobileMenuClose}>
-								<MenuItem>個人資料</MenuItem>
-								<MenuItem>設定</MenuItem>
-								<MenuItem>登出</MenuItem>
+								<NavLink to="userinfo" className="text-text opacity-80">
+									<MenuItem>個人資料</MenuItem>
+								</NavLink>
+								<NavLink to="setting" className="text-text opacity-80">
+									<MenuItem>設定</MenuItem>
+								</NavLink>
+								<a
+									href="/"
+									className="text-text opacity-80"
+									onClick={() => {
+										liff.logout();
+										localStorage.clear();
+									}}>
+									<MenuItem>登出</MenuItem>
+								</a>
 							</Menu>
 						</div>
 					)}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
+import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 import { Avatar, Accordion, AccordionSummary, AccordionDetails, ListItemText, ListItemIcon, List } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
@@ -7,7 +8,7 @@ import "./Layout.scss";
 
 const Sidebar = ({ menuItems, closeSidebar }) => {
 	const [expanded, setExpanded] = useState(null);
-	const userProfile = JSON.parse(localStorage.getItem("userProfile"));
+	const userProfile = useLocalStorageValue("userProfile");
 
 	const handleAccordionChange = (panel) => (event, isExpanded) => {
 		setExpanded(isExpanded ? panel : null);
@@ -36,9 +37,9 @@ const Sidebar = ({ menuItems, closeSidebar }) => {
 						/>
 						<div className="inline-flex flex-col ms-3">
 							<p className="font-bold text-1xl">{userProfile.displayName}</p>
-							<span className="opacity-90">{userProfile.department.name}</span>
+							<span className="opacity-90">{userProfile.department && userProfile.department.name}</span>
 
-							<NavLink to="/user" className={"pt-1"}>
+							<NavLink to="/userinfo" className={"pt-1"} onClick={closeSidebar}>
 								檢視你的帳戶
 							</NavLink>
 						</div>
