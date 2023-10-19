@@ -31,6 +31,7 @@ const postData = (url = "", data) => {
 	})
 		.then((response) => {
 			if (response.status === 200) {
+				
 				return { status: true };
 			} else if (response.status === 400) {
 				return response.json().then((json) => {
