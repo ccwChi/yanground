@@ -57,7 +57,7 @@ const UserInfo = () => {
 			<PageTitle title="個人資料" />
 
 			{userProfile && (
-				<div className="flex flex-col md:flex-row items-center md:items-start md:justify-center px-6 pt-6 sm:py-6 gap-3 sm:gap-6 flex-1 overflow-hidden">
+				<div className="flex flex-col md:flex-row items-center md:items-start md:justify-center px-6 pt-6 sm:py-6 gap-3 sm:gap-6 flex-1 overflow-hidden ">
 					<div className="inline-flex flex-col items-center gap-2">
 						<Avatar
 							alt={userProfile.displayName}
@@ -68,7 +68,7 @@ const UserInfo = () => {
 							{userProfile.displayName}
 						</Typography>
 					</div>
-					<div className="w-full h-full overflow-y-auto border rounded-lg">
+					<div className="w-full h-full overflow-y-auto border rounded-lg bg-white">
 						<List sx={{ padding: 0 }}>
 							{personalInfo &&
 								personalInfo.map((info, index) => (
@@ -81,7 +81,7 @@ const UserInfo = () => {
 								))}
 						</List>
 					</div>
-					<div className="w-full md:max-w-xs h-full overflow-y-auto border rounded-lg">
+					<div className="w-full md:max-w-xs h-full overflow-y-auto border rounded-lg bg-white">
 						<Typography gutterBottom variant="p" component="div" className="ps-3 pt-3">
 							〈打卡歷程〉
 						</Typography>

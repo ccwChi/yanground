@@ -4,7 +4,9 @@ $z-index-b: 1025;
 $z-index-a: 1040;
 
 .main_wrapper {
+	padding-bottom: 1rem;
 	width: 74%;
+	background-color: $white-color;
 }
 
 .sidebar_wrapper {
@@ -19,6 +21,46 @@ $z-index-a: 1040;
 		width: 24%;
 	}
 }
+
+.text-text {
+	color: $text-color-1 !important;
+}
+
+//****** MUI ******//
+
+.MuiIconButton-colorCustom {
+	color: $text-color-1 !important;
+	background-color: $bg-l-color !important;
+	&:not(:first-of-type) {
+		margin-left: 0.5rem;
+	}
+}
+
+.customPagination {
+	> div {
+		justify-content: flex-start;
+	}
+	.MuiTablePagination-spacer {
+		flex: 0;
+	}
+	.MuiTablePagination-input {
+		margin-right: 1rem;
+		border-bottom: 1px solid $bg-d-color-1;
+	}
+	.MuiTablePagination-displayedRows {
+		padding-right: 1rem;
+		font-size: 0.75rem;
+		color: $bg-d-color-1;
+	}
+	.MuiSelect-select {
+		padding: 0.25rem 1.5rem 0.313rem 0.5rem;
+		font-size: 0.875rem;
+	}
+}
+
+//****** MUI END ******//
+
+//****** RWD ******//
 
 @media (max-width: 1023.98px) {
 	.main_wrapper {
@@ -55,19 +97,23 @@ $z-index-a: 1040;
 	}
 }
 
-@media (max-width: 639.98px) {
+@media (max-width: 575.98px) {
+	.main_wrapper {
+		padding-bottom: 6rem;
+		background-color: $bg-l-color-1;
+	}
 	.sidebar_wrapper,
 	.bg_overlay {
 		z-index: $z-index-a;
 	}
-}
 
-//****** MUI ******//
-
-.MuiIconButton-colorCustom {
-	color: $text-color-1 !important;
-	background-color: $bg-l-color !important;
-	&:not(:first-of-type) {
-		margin-left: 0.5rem;
+	/* MUI */
+	.customPagination {
+		> div {
+			padding-right: 1rem;
+		}
+		.MuiIconButton-root {
+			display: none;
+		}
 	}
 }

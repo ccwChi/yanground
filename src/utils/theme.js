@@ -24,6 +24,7 @@ const theme = createTheme({
 					backgroundColor: "#F7941D",
 				},
 				root: {
+					backgroundColor: "#FFFFFF",
 					"& .MuiTabs-scrollButtons": {
 						width: "24px",
 					},
@@ -61,6 +62,19 @@ const theme = createTheme({
 				secondary: {
 					fontSize: "1rem",
 					overflowWrap: "break-word",
+				},
+			},
+		},
+		MuiAccordion: {
+			styleOverrides: { root: { "&:before": { content: "none" } } },
+		},
+		MuiAccordionSummary: {
+			styleOverrides: {
+				content: {
+					margin: "8px 0",
+					"&.Mui-expanded": {
+						margin: "8px 0",
+					},
 				},
 			},
 		},
