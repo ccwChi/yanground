@@ -68,7 +68,7 @@ const Sidebar = ({ menuItems, closeSidebar }) => {
 											<NavLink
 												key={subIndex}
 												to={subMenuItem.href}
-												className="block ps-8 pe-4 font-bold text-sm sm-text-lg accordionLink select-none"
+												className="block ps-8 pe-4 font-bold text-sm sm:text-lg accordionLink select-none"
 												onClick={closeSidebar}>
 												<span className="text-base sm:text-lg">{subMenuItem.text}</span>
 											</NavLink>

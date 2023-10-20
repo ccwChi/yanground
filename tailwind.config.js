@@ -8,6 +8,7 @@ module.exports = {
 				notoSerif: ['"Noto Serif SC"', "cursive"],
 			},
 			spacing: {
+				13: "3.25rem",
 				15: "3.75rem",
 				26: "6.5rem",
 			},
@@ -26,6 +27,9 @@ module.exports = {
 					800: "#273057",
 					900: "#11374A",
 				},
+			},
+			screens: {
+				sm: "576px",
 			},
 		},
 	},

@@ -111,7 +111,7 @@ const App = () => {
 
 					{/* Main Content */}
 					<div className="lg:container w-full mx-auto px-0 sm:px-4 flex-1 overflow-hidden py-0 sm:py-4 lg:py-6">
-						<div className="relative flex flex-col main_wrapper bg-white h-full float-right sm:rounded-lg pb-26 sm:pb-4 overflow-hidden">
+						<div className="relative flex flex-col main_wrapper h-full float-right sm:rounded-lg overflow-hidden">
 							<Outlet />
 						</div>
 					</div>
@@ -141,3 +141,8 @@ const App = () => {
 };
 
 export default App;
+
+console.log(
+	"%c YuanRong!",
+	"font-weight: bold; font-size: 50px;color: red; text-shadow: 3px 3px 0 rgb(217,31,38) , 6px 6px 0 rgb(226,91,14) , 9px 9px 0 rgb(245,221,8) , 12px 12px 0 rgb(5,148,68) , 15px 15px 0 rgb(2,135,206) , 18px 18px 0 rgb(4,77,145) , 21px 21px 0 rgb(42,21,113); margin-bottom: 12px; padding: 5%"
+);
