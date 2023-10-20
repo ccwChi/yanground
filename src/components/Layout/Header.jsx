@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import useLocalStorageValue from '../../hooks/useLocalStorageValue';
 import { AppBar, Toolbar, IconButton, Menu, MenuItem, Button } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faUser } from "@fortawesome/free-solid-svg-icons";
 import logoIcon from "../../assets/Logo.png";
+import liff from "@line/liff";
 
 const Header = ({ toggleSidebar }) => {
 	const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
-	const userProfile = JSON.parse(localStorage.getItem("userProfile"));
+  const userProfile = useLocalStorageValue("userProfile");
 
 	const handleMobileMenuOpen = (event) => {
 		setMobileMenuAnchor(event.currentTarget);
@@ -31,17 +33,31 @@ const Header = ({ toggleSidebar }) => {
 
 				<div className="flex gap-2">
 					{/* Desktop Right */}
-					<div className="hidden md:flex ml-4">
-						<Button variant="text" color="inherit" onClick={handleMobileMenuOpen} sx={{ textTransform: "none" }}>
-							<FontAwesomeIcon icon={faUser} className="mr-2" />
-							{userProfile.displayName}
-						</Button>
-						<Menu anchorEl={mobileMenuAnchor} open={Boolean(mobileMenuAnchor)} onClose={handleMobileMenuClose}>
-							<MenuItem>個人資料</MenuItem>
-							<MenuItem>設定</MenuItem>
-							<MenuItem>登出</MenuItem>
-						</Menu>
-					</div>
+					{userProfile && (
+						<div className="hidden md:flex ml-4">
+							<Button variant="text" color="inherit" onClick={handleMobileMenuOpen} sx={{ textTransform: "none" }}>
+								<FontAwesomeIcon icon={faUser} className="mr-2" />
+								{userProfile.displayName}
+							</Button>
+							<Menu anchorEl={mobileMenuAnchor} open={Boolean(mobileMenuAnchor)} onClose={handleMobileMenuClose}>
+								<NavLink to="userinfo" className="text-text opacity-80">
+									<MenuItem>個人資料</MenuItem>
+								</NavLink>
+								<NavLink to="setting" className="text-text opacity-80">
+									<MenuItem>設定</MenuItem>
+								</NavLink>
+								<a
+									href="/"
+									className="text-text opacity-80"
+									onClick={() => {
+										liff.logout();
+										localStorage.clear();
+									}}>
+									<MenuItem>登出</MenuItem>
+								</a>
+							</Menu>
+						</div>
+					)}
 
 					{/* Mobile Right (Hamburger Menu) */}
 					<div className="flex lg:hidden items-center">

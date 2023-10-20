@@ -1,5 +1,7 @@
 @import "../src/assets/styles/custom";
 $nav-height: 64px;
+$z-index-b: 1025;
+$z-index-a: 1040;
 
 .main_wrapper {
 	width: 74%;
@@ -11,7 +13,7 @@ $nav-height: 64px;
 	right: 0;
 	bottom: 0;
 	width: 100%;
-	z-index: 1025;
+	z-index: $z-index-b;
 	> div {
 		height: 100%;
 		width: 24%;
@@ -40,7 +42,7 @@ $nav-height: 64px;
 		left: 0;
 		bottom: 0;
 		// inset: 0;
-		z-index: 1025;
+		z-index: $z-index-b;
 		background-color: rgba(0, 0, 0, 0);
 		backdrop-filter: blur(0);
 		transition: all 0.35s ease;
@@ -53,11 +55,19 @@ $nav-height: 64px;
 	}
 }
 
-/******** MUI **********/
-
 @media (max-width: 639.98px) {
-	.css-hip9hq-MuiPaper-root-MuiAppBar-root {
-		border-bottom: 1px solid #dee2e6;
-		box-shadow: none !important;
+	.sidebar_wrapper,
+	.bg_overlay {
+		z-index: $z-index-a;
+	}
+}
+
+//****** MUI ******//
+
+.MuiIconButton-colorCustom {
+	color: $text-color-1 !important;
+	background-color: $bg-l-color !important;
+	&:not(:first-of-type) {
+		margin-left: 0.5rem;
 	}
 }

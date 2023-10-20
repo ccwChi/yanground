@@ -1,16 +1,16 @@
 // api.js
 const appUrl = process.env.REACT_APP_URL;
-const accessToken = JSON.parse(localStorage.getItem("accessToken"));
-const headers = {
-	Authorization: `Bearer ${accessToken}`,
-	"Content-Type": "application/json",
-};
 
 // GET
-const getData = (url = "") => {
-	return fetch(`${appUrl}/${url}`, {
+const getData = async (url = "") => {
+	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
+	const headers = {
+		Authorization: `Bearer ${accessToken}`,
+		"Content-Type": "application/json",
+	};
+	return await fetch(`${appUrl}/${url}`, {
 		method: "GET",
-		headers: headers,
+		headers,
 	})
 		.then((response) => {
 			return response.json();
@@ -23,16 +23,22 @@ const getData = (url = "") => {
 };
 
 // POST
-const postData = (url = "", data) => {
-	return fetch(`${appUrl}/${url}`, {
+const postData = async (url = "", data) => {
+	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
+	const headers = {
+		Authorization: `Bearer ${accessToken}`,
+		"Content-Type": "application/json",
+	};
+	return await fetch(`${appUrl}/${url}`, {
 		method: "POST",
-		headers: headers,
+		headers,
 		body: JSON.stringify(data),
 	})
 		.then((response) => {
 			if (response.status === 200) {
-				
-				return { status: true };
+				return response.json().then((json) => {
+					return { status: true, result: json };
+				});
 			} else if (response.status === 400) {
 				return response.json().then((json) => {
 					return { status: false, result: json };

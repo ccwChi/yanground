@@ -12,7 +12,7 @@ const Map = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [punchState, setPunchState] = useState(1); //1為沒打卡，2打卡成功，3失敗
-  const [map, setMap] = useState(null);
+  const [punchTime, setPunchTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const initLine = () => {
@@ -78,14 +78,14 @@ const Map = () => {
       .join("&");
 
     // clockPunch / `${queryParams}`;
-    postData(`clockPunch?${queryParams}`).then((resoponse) => {
-      if (resoponse.status) {
+    postData(`clockPunch?${queryParams}`).then((response) => {
+      if (response.result.response === 200) {
         setPunchState(2);
-        console.log(resoponse);
+        setPunchTime(response.result.result.occurred )
         setIsLoading(false);
       } else {
         setPunchState(3);
-        console.log(resoponse);
+        console.log(response);
         setIsLoading(false);
       }
     });
@@ -132,7 +132,7 @@ const Map = () => {
                   variant="contained"
                   sx={{ width: "120px", margin: "-5px" }}
                 >
-                  {punchState === 2 ? new Date().toLocaleString() : "出現錯誤"}
+                  {punchState === 2 ? punchTime : "出現錯誤"}
                 </p>
               )}
             </Popup>

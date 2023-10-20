@@ -7,10 +7,10 @@ const Sites = ({ title, btnGroup, children }) => {
 	return (
 		<div
 			className={"relative hidden sm:flex justify-between text-primary-800 mb-3"}
-			style={{ padding: "0.75rem 2.25rem 1.5rem" }}>
-			<div className="inline-flex items-end gap-2">
+			style={{ padding: "1.25rem 2.25rem 1.5rem" }}>
+			<div className="inline-flex items-center gap-2">
 				<FontAwesomeIcon icon={faQuoteLeft} style={{ fontSize: "1.875rem" }} />
-				<span className="font-bold text-2xl">{title}</span>
+				<span className="font-bold text-2xl leading-10">{title}</span>
 				<svg
 					className="absolute start-0 bottom-0"
 					xmlns="http://www.w3.org/2000/svg"

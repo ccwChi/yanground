@@ -43,6 +43,27 @@ const theme = createTheme({
 				},
 			},
 		},
+		MuiListItem: {
+			styleOverrides: {
+				root: {
+					backgroundColor: "white",
+					"&:hover": {
+						backgroundColor: "#f0f0f0",
+					},
+				},
+			},
+		},
+		MuiListItemText: {
+			styleOverrides: {
+				primary: {
+					fontSize: "0.75rem",
+				},
+				secondary: {
+					fontSize: "1rem",
+					overflowWrap: "break-word",
+				},
+			},
+		},
 	},
 });
 

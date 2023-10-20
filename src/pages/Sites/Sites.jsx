@@ -2,18 +2,23 @@ import React, { useEffect, useState } from "react";
 import PageTitle from "../../components/Guideline/PageTitle";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 import TableTabber from "../../components/Tabbar/TableTabber";
+import RWDTable from "../../components/RWDTable/RWDTable";
 import AddIcon from "@mui/icons-material/Add";
 import FolderCopyIcon from "@mui/icons-material/FolderCopy";
+import WorkHistoryIcon from "@mui/icons-material/WorkHistory";
+import EditIcon from "@mui/icons-material/Edit";
 import { faCirclePlus, faCopy } from "@fortawesome/free-solid-svg-icons";
 import { postData, getData } from "../../utils/api";
 
 const Sites = () => {
 	// ApiUrl
-	const apiUrl = "site";
+	const apiUrl = "site?p=1&s=10";
 	// cat = Category 設置 tab 分類
 	const [cat, setCat] = useState(null);
 	// ApiData
 	const [apiData, setApiData] = useState(null);
+	// isLoading
+	const [isLoading, setIsLoading] = useState(false);
 	const tabGroup = [
 		{ f: "", text: "全部" },
 		{ f: "inprogress", text: "進行中" },
@@ -41,12 +46,24 @@ const Sites = () => {
 		},
 	];
 
-	useEffect(() => {
-		getApiList();
-	}, []);
+	const columns = [
+		{ key: "id", label: "ID" },
+		{ key: "name", label: "案場" },
+	];
+	// edit = 編輯案場名稱 ,dw = dispatch work 明日派工清單
+	const actions = [
+		{ value: "edit", icon: <EditIcon /> },
+		{ value: "dw", icon: <WorkHistoryIcon /> },
+	];
 
-	const getApiList = () => {
-		getData(apiUrl).then((result) => {
+	useEffect(() => {
+		getApiList(apiUrl);
+	}, [apiUrl]);
+
+	const getApiList = (url) => {
+		setIsLoading(true);
+		getData(url).then((result) => {
+			setIsLoading(false);
 			const data = result.result;
 			setApiData(data);
 		});
@@ -70,7 +87,10 @@ const Sites = () => {
 
 			{/* Content */}
 
-			<div className="overflow-y-auto">{apiData && <pre>{JSON.stringify(apiData, null, 2)}</pre>}</div>
+			<div className="overflow-y-auto">
+				{/* {apiData && <pre>{JSON.stringify(apiData, null, 2)}</pre>} */}
+				<RWDTable data={apiData} columns={columns} actions={actions} tableMinWidth={600} isLoading={isLoading} />
+			</div>
 
 			{/* Floating Action Button */}
 			<FloatingActionButton btnGroup={btnGroup} />
