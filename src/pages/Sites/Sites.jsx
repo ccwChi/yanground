@@ -4,12 +4,14 @@ import FloatingActionButton from "../../components/FloatingActionButton/Floating
 import TableTabber from "../../components/Tabbar/TableTabber";
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
+import ModalTemplete from "../../components/Modal/ModalTemplete";
 import AddIcon from "@mui/icons-material/Add";
 import FolderCopyIcon from "@mui/icons-material/FolderCopy";
 import WorkHistoryIcon from "@mui/icons-material/WorkHistory";
 import EditIcon from "@mui/icons-material/Edit";
 import { faCirclePlus, faCopy } from "@fortawesome/free-solid-svg-icons";
-import { postData, getData } from "../../utils/api";
+import { getData } from "../../utils/api";
+import { UpdatedModal, OutputListModal, EditModal, DispatchWorkModal } from "./SitesModal";
 
 const Sites = () => {
 	// cat = Category 設置 tab 分類
@@ -24,6 +26,8 @@ const Sites = () => {
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 	// ApiUrl
 	const apiUrl = `site?p=${page + 1}&s=${rowsPerPage}`;
+	// ModalValue 控制開啟的是哪一個 Modal
+	const [modalValue, setModalValue] = useState(false);
 
 	const tabGroup = [
 		{ f: "", text: "全部" },
@@ -33,20 +37,20 @@ const Sites = () => {
 	];
 	const btnGroup = [
 		{
+			mode: "create",
 			icon: faCirclePlus,
 			text: "新增案場",
 			variant: "contained",
 			color: "primary",
-			onClick: () => handleAdd(),
 			fabVariant: "success",
 			fab: <AddIcon fontSize="large" />,
 		},
 		{
+			mode: "outputList",
 			icon: faCopy,
 			text: "輸出派工清單",
 			variant: "contained",
 			color: "secondary",
-			onClick: () => handleExport(),
 			fabVariant: "warning",
 			fab: <FolderCopyIcon fontSize="large" />,
 		},
@@ -56,6 +60,21 @@ const Sites = () => {
 		{ key: "id", label: "ID" },
 		{ key: "name", label: "案場" },
 	];
+
+	// edit = 編輯案場名稱 ,dw = dispatch work 明日派工清單
+	const actions = [
+		{ value: "edit", icon: <EditIcon /> },
+		{ value: "dw", icon: <WorkHistoryIcon /> },
+	];
+
+	// modal 開啟參數與顯示標題
+	const modalConfig = [
+		{ modalValue: "create", title: "新增案場", modalComponent: <UpdatedModal /> },
+		{ modalValue: "outputList", title: "派工清單", modalComponent: <OutputListModal /> },
+		{ modalValue: "edit", title: "編輯案場", modalComponent: <EditModal /> },
+		{ modalValue: "dw", title: "明日派工", modalComponent: <DispatchWorkModal /> },
+	];
+	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
 
 	useEffect(() => {
 		getApiList(apiUrl);
@@ -79,26 +98,23 @@ const Sites = () => {
 		setPage(0);
 	};
 
-	const handleAdd = (event) => {
+	const handleActionClick = (event) => {
 		event.stopPropagation();
-		console.log("新增案場被點擊");
+		const dataMode = event.currentTarget.getAttribute("data-mode");
+		const dataValue = event.currentTarget.getAttribute("data-value");
+		setModalValue(dataMode);
+
+		console.log("Action button clicked", dataMode, dataValue);
 	};
 
-	const handleExport = (event) => {
-		event.stopPropagation();
-		console.log("輸出派工清單被點擊");
+	const onClose = () => {
+		setModalValue(false);
 	};
-
-	// edit = 編輯案場名稱 ,dw = dispatch work 明日派工清單
-	const actions = [
-		{ value: "edit", icon: <EditIcon /> },
-		{ value: "dw", icon: <WorkHistoryIcon /> },
-	];
 
 	return (
 		<>
 			{/* PageTitle */}
-			<PageTitle title="案場" btnGroup={btnGroup} />
+			<PageTitle title="案場" btnGroup={btnGroup} handleActionClick={handleActionClick} />
 
 			{/* TabBar */}
 			<TableTabber tabGroup={tabGroup} setCat={setCat} />
@@ -113,6 +129,7 @@ const Sites = () => {
 					cardTitleKey={"name"}
 					tableMinWidth={600}
 					isLoading={isLoading}
+					handleActionClick={handleActionClick}
 				/>
 			</div>
 
@@ -127,6 +144,11 @@ const Sites = () => {
 
 			{/* Floating Action Button */}
 			<FloatingActionButton btnGroup={btnGroup} />
+
+			{/* Modal */}
+			<ModalTemplete title={config ? config.title : ""} show={config ? true : false} onClose={onClose}>
+				{config && config.modalComponent}
+			</ModalTemplete>
 		</>
 	);
 };

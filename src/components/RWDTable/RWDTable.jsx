@@ -21,16 +21,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 const SKELETONITEM = 6;
 const CARD_BOX_SHADOW = "0px 4px 4px 0px rgba(0, 0, 0, 0.25)";
 
-const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoading }) => {
+const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoading, handleActionClick }) => {
 	const isSmallScreen = useMediaQuery("(max-width:575.98px)");
-
-	const handleActionClick = (event) => {
-		event.stopPropagation();
-		const dataMode = event.currentTarget.getAttribute("data-mode");
-		const dataValue = event.currentTarget.getAttribute("data-value");
-
-		console.log("Action button clicked", dataMode, dataValue);
-	};
 
 	if (isSmallScreen) {
 		return (
