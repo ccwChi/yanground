@@ -12,7 +12,7 @@ const Map = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [punchState, setPunchState] = useState(1); //1為沒打卡，2打卡成功，3失敗
-  const [punchTime, setPunchTime] = useState("");
+  const [apiData, setApiData] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const initLine = () => {
@@ -40,7 +40,9 @@ const Map = () => {
       localStorage.setItem("accessToken", JSON.stringify(accessToken));
     }
     liff.getProfile().then((profile) => {
-      if (profile) {
+      if (profile?.displayName) {
+        delete profile.statusMessage;
+        delete profile.userId;
         setUserProfile(profile);
       }
     });
@@ -51,14 +53,13 @@ const Map = () => {
       navigator.geolocation.getCurrentPosition((position) => {
         const { latitude, longitude } = position.coords;
         setSelectedLocation({ lat: latitude, lng: longitude });
-        //setUserProfile(JSON.parse(localStorage.getItem("userProfile")));
       });
     }
-  }, [navigator.geolocation]);
+  }, [navigator.geolocation, userProfile]);
 
   //需要把Marker的icon弄出來，不然會顯示錯誤圖片
   const customIcon = L.icon({
-    iconUrl: `${userProfile?.pictureUrl}.png`,
+    iconUrl: `${userProfile?.pictureUrl}`,
     iconSize: [48, 48],
     iconAnchor: [24, 24],
     popupAnchor: [0, -28],
@@ -81,7 +82,7 @@ const Map = () => {
     postData(`clockPunch?${queryParams}`).then((response) => {
       if (response.result.response === 200) {
         setPunchState(2);
-        setPunchTime(response.result.result.occurred )
+        setApiData(response.result.result.occurred);
         setIsLoading(false);
       } else {
         setPunchState(3);
@@ -119,20 +120,22 @@ const Map = () => {
               {punchState === 1 ? (
                 <Button
                   variant="contained"
-                  sx={{ width: "120px", margin: "-5px" }}
-									className=""
+                  //sx={{ width: "120px", margin: "-5px" }}
+                  className="w-32 h-10"
+                  disabled={isLoading}
                   onClick={() => {
                     handleSubmitPunch();
                   }}
                 >
-                  {isLoading ? <CircularProgress color="inherit" /> : "打卡"}
+                  {isLoading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : (
+                    "打卡"
+                  )}
                 </Button>
               ) : (
-                <p
-                  variant="contained"
-                  sx={{ width: "120px", margin: "-5px" }}
-                >
-                  {punchState === 2 ? punchTime : "出現錯誤"}
+                <p variant="contained" className="w-32 ">
+                  {punchState === 2 ? apiData : "出現錯誤"}
                 </p>
               )}
             </Popup>
