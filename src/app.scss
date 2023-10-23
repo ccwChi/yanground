@@ -26,6 +26,21 @@ $z-index-a: 1040;
 	color: $text-color-1 !important;
 }
 
+.inputPadding {
+	input,
+	.MuiSelect-select {
+		height: 2.125rem !important;
+		line-height: 2rem !important;
+	}
+	label {
+		line-height: 2rem !important;
+	}
+}
+
+#notistack-snackbar {
+	word-break: break-all;
+}
+
 //****** MUI ******//
 
 .MuiIconButton-colorCustom {

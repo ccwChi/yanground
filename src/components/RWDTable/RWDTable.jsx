@@ -92,8 +92,8 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 										{columns.map((column, index) => (
 											<div key={"AccordionRow-" + rowIndex + "-" + index}>
 												<div className="flex justify-between py-2">
-													<span className="text-neutral-500">{column.label}</span>
-													<p className="text-black">{item[column.key]}</p>
+													<span className="text-neutral-500 pe-2">{column.label}</span>
+													<p className="text-black break-all">{item[column.key]}</p>
 												</div>
 												<Divider />
 											</div>

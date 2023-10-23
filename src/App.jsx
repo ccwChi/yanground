@@ -6,11 +6,11 @@ import Tabbar from "./components/Tabbar/Tabbar";
 import { faUserGear, faHelmetSafety, faToolbox, faVest, faPersonDigging } from "@fortawesome/free-solid-svg-icons";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./utils/theme";
-import cx from "classnames";
 import "./app.scss";
 import { getData } from "./utils/api";
 import liff from "@line/liff";
-// const LINE_ID = process.env.REACT_APP_LINEID;
+import { SnackbarProvider } from 'notistack';
+const LINE_ID = process.env.REACT_APP_LINEID;
 
 const App = () => {
 	// 設置 RWD 時，SideBar 是否顯示
@@ -56,43 +56,43 @@ const App = () => {
 		},
 	];
 
-	// useEffect(() => {
-	// 	initLine();
-	// }, []);
+	useEffect(() => {
+		initLine();
+	}, []);
 
-	// // Liff 登入 Line
-	// const initLine = () => {
-	// 	liff.init(
-	// 		{ liffId: LINE_ID },
-	// 		() => {
-	// 			if (liff.isLoggedIn()) {
-	// 				runApp();
-	// 			} else {
-	// 				liff.login();
-	// 			}
-	// 		},
-	// 		(err) => console.error(err)
-	// 	);
-	// };
+	// Liff 登入 Line
+	const initLine = () => {
+		liff.init(
+			{ liffId: LINE_ID },
+			() => {
+				if (liff.isLoggedIn()) {
+					runApp();
+				} else {
+					liff.login();
+				}
+			},
+			(err) => console.error(err)
+		);
+	};
 
-	// // 設置憑證與從後端讀取用戶資料
-	// const runApp = () => {
-	// 	const accessToken = liff.getAccessToken();
-	// 	if (accessToken) {
-	// 		localStorage.setItem("accessToken", JSON.stringify(accessToken));
-	// 		getData().then((data) => {
-	// 			if (data?.result) {
-	// 				// console.log(data);
-	// 				let d = data.result;
-	// 				if (d.displayName) {
-	// 					delete d.statusMessage;
-	// 					delete d.userId;
-	// 					localStorage.setItem("userProfile", JSON.stringify(d));
-	// 				}
-	// 			}
-	// 		});
-	// 	}
-	// };
+	// 設置憑證與從後端讀取用戶資料
+	const runApp = () => {
+		const accessToken = liff.getAccessToken();
+		if (accessToken) {
+			localStorage.setItem("accessToken", JSON.stringify(accessToken));
+			getData().then((data) => {
+				if (data?.result) {
+					// console.log(data);
+					let d = data.result;
+					if (d.displayName) {
+						delete d.statusMessage;
+						delete d.userId;
+						localStorage.setItem("userProfile", JSON.stringify(d));
+					}
+				}
+			});
+		}
+	};
 
 	// SideBar 開關
 	const toggleSidebar = () => {
@@ -104,38 +104,39 @@ const App = () => {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<div className="flex justify-end overflow-x-hidden">
-				<div className="relative flex flex-col w-screen min-w-screen">
-					{/* Header */}
-					<Header toggleSidebar={toggleSidebar} />
+			<SnackbarProvider maxSnack={5}>
+				<div className="flex justify-end overflow-x-hidden">
+					<div className="relative flex flex-col w-screen min-w-screen">
+						{/* Header */}
+						<Header toggleSidebar={toggleSidebar} />
 
-					{/* Main Content */}
-					<div className="lg:container w-full mx-auto px-0 sm:px-4 flex-1 overflow-hidden py-0 sm:py-4 lg:py-6">
-						<div className="relative flex flex-col main_wrapper h-full float-right sm:rounded-lg overflow-hidden">
-							<Outlet />
+						{/* Main Content */}
+						<div className="lg:container w-full mx-auto px-0 sm:px-4 flex-1 overflow-hidden py-0 sm:py-4 lg:py-6">
+							<div className="relative flex flex-col main_wrapper h-full float-right sm:rounded-lg overflow-hidden">
+								<Outlet />
+							</div>
+						</div>
+
+						{/* overlay */}
+						<div className={`bg_overlay ${showSidebar ? "open" : ""}`} onClick={closeSidebar}></div>
+					</div>
+
+					{/* SideBar */}
+					<div
+						className={`lg:absolute static lg:container mx-auto sidebar_wrapper pointer-events-none lg:bg-transparent bg-white py-4 lg:py-6 ${
+							!showSidebar ? "hide" : ""
+						}`}>
+						<div className={"flex flex-col overflow-y-auto pointer-events-auto lg:max-w-none max-w-sm"}>
+							<Sidebar menuItems={menuItems} closeSidebar={closeSidebar} />
 						</div>
 					</div>
 
-					{/* overlay */}
-					<div className={cx("bg_overlay", { open: showSidebar })} onClick={closeSidebar}></div>
-				</div>
-
-				{/* SideBar */}
-				<div
-					className={cx(
-						"lg:absolute static lg:container mx-auto sidebar_wrapper pointer-events-none lg:bg-transparent bg-white py-4 lg:py-6",
-						{ hide: !showSidebar }
-					)}>
-					<div className={"flex flex-col overflow-y-auto pointer-events-auto lg:max-w-none max-w-sm"}>
-						<Sidebar menuItems={menuItems} closeSidebar={closeSidebar} />
+					{/* Tabbar */}
+					<div className="sm:hidden">
+						<Tabbar />
 					</div>
 				</div>
-
-				{/* Tabbar */}
-				<div className="sm:hidden">
-					<Tabbar />
-				</div>
-			</div>
+			</SnackbarProvider>
 		</ThemeProvider>
 	);
 };

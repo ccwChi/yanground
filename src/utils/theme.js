@@ -12,6 +12,9 @@ const theme = createTheme({
 		success: {
 			main: "#039e8e",
 		},
+		dark: {
+			main: "#1F1F21",
+		},
 	},
 	typography: {
 		fontFamily:
