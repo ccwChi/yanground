@@ -76,19 +76,21 @@ const Sites = () => {
 		{ value: "dw", icon: <WorkHistoryIcon /> },
 	];
 
+	// 取得列表資料
 	useEffect(() => {
 		getApiList(apiUrl);
 	}, [apiUrl]);
-
 	const getApiList = useCallback((url) => {
 		setIsLoading(true);
-		getData(url).then((result) => {
-			setIsLoading(false);
-			const data = result.result;
-			setApiData(data);
-		});
+		getData(url)
+			.then((result) => {
+				setIsLoading(false);
+				const data = result.result;
+				setApiData(data);
+			})
 	}, []);
 
+	// 傳遞給後端資料
 	const sendDataToBackend = (fd, mode, otherData) => {
 		let url = "";
 		let message = [];
@@ -98,8 +100,12 @@ const Sites = () => {
 				message = ["案場新增成功！"];
 				break;
 			case "edit":
-				url = furl + "/" + otherData;
+				url = furl + "/" + otherData[0];
 				message = ["案場編輯成功！"];
+				break;
+			case "dw":
+				url = furl + "/" + otherData[0] + "/" + otherData[1];
+				message = ["明日派工指定成功！"];
 				break;
 			default:
 				break;
@@ -131,25 +137,28 @@ const Sites = () => {
 		}
 	};
 
+	// 設置頁數
 	const handleChangePage = useCallback((event, newPage) => {
 		setPage(newPage);
 	}, []);
 
+	// 設置每頁顯示並返回第一頁
 	const handleChangeRowsPerPage = (event) => {
 		setRowsPerPage(parseInt(event.target.value, 10));
 		setPage(0);
 	};
 
+	// 當活動按鈕點擊時開啟 modal 並進行動作
 	const handleActionClick = (event) => {
 		event.stopPropagation();
 		const dataMode = event.currentTarget.getAttribute("data-mode");
 		const dataValue = event.currentTarget.getAttribute("data-value");
 		setModalValue(dataMode);
 		setDeliverInfo([dataValue, dataValue ? apiData.find((item) => item.id === dataValue).name : ""]);
-
 		// console.log("Action button clicked", dataMode, dataValue);
 	};
 
+	// 關閉 Modal 清除資料
 	const onClose = () => {
 		setModalValue(false);
 		setDeliverInfo(null);
@@ -168,7 +177,17 @@ const Sites = () => {
 				<EditModal title="編輯案場" deliverInfo={deliverInfo} sendDataToBackend={sendDataToBackend} onClose={onClose} />
 			),
 		},
-		{ modalValue: "dw", modalComponent: <DispatchWorkModal title="明日派工" onClose={onClose} /> },
+		{
+			modalValue: "dw",
+			modalComponent: (
+				<DispatchWorkModal
+					title="明日派工"
+					deliverInfo={deliverInfo}
+					sendDataToBackend={sendDataToBackend}
+					onClose={onClose}
+				/>
+			),
+		},
 	];
 	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
 

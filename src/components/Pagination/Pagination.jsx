@@ -23,7 +23,7 @@ const Pagination = ({ totalElement, page, onPageChange, rowsPerPage, onRowsPerPa
 				ActionsComponent={() => (
 					<div className="flex flex-1">
 						<div className="flex-1"></div>
-						<div className="inline-flex items-center text-sm">
+						<div className="inline-flex items-center text-sm gap-1">
 							第
 							<Select value={page} variant="standard" onChange={(e) => onPageChange(null, e.target.value)}>
 								{Array.from({ length: Math.ceil(totalElement / rowsPerPage) }, (_, i) => (

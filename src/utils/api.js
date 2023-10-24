@@ -13,6 +13,15 @@ const getData = async (url = "") => {
 		headers,
 	})
 		.then((response) => {
+			if (!response.ok) {
+				const statusCode = response.status;
+				console.error('HTTP Error: Status Code', statusCode);
+				if (statusCode === 403) {
+					window.location.href = '/forbidden';
+				} else if (statusCode === 401) {
+					window.location.href = '/unauthorized';
+				}
+			}
 			return response.json();
 		})
 		.catch((error) => {

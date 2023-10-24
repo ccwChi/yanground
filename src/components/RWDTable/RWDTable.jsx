@@ -18,6 +18,7 @@ import {
 	Skeleton,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Empty from "./Empty";
 const SKELETONITEM = 6;
 const CARD_BOX_SHADOW = "0px 4px 4px 0px rgba(0, 0, 0, 0.25)";
 
@@ -27,8 +28,9 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 	if (isSmallScreen) {
 		return (
 			<div className="flex flex-col gap-3 pt-2">
-				{!isLoading
-					? data?.map((item, rowIndex) => (
+				{!isLoading ? (
+					data && data.length > 0 ? (
+						data.map((item, rowIndex) => (
 							<Grow in={true} key={"Accordion" + rowIndex}>
 								<Accordion
 									sx={[
@@ -101,33 +103,38 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 									</AccordionDetails>
 								</Accordion>
 							</Grow>
-					  ))
-					: Array.from({ length: SKELETONITEM }).map((_, index) => (
-							<Grow in={true} key={"Skeleton" + index}>
-								<div
-									className="flex items-center h-13 px-4 mx-4 bg-white rounded-lg gap-3"
-									style={{ boxShadow: CARD_BOX_SHADOW }}>
-									<Skeleton
-										animation="wave"
-										height={34}
-										sx={{ display: "inline-flex", margin: 0, transform: "none", flex: 1 }}
-									/>
-									<Skeleton
-										variant="circular"
-										animation="wave"
-										width={34}
-										height={34}
-										sx={{ display: "inline-block", transform: "none" }}
-									/>
-								</div>
-							</Grow>
-					  ))}
+						))
+					) : (
+						<Empty />
+					)
+				) : (
+					Array.from({ length: SKELETONITEM }).map((_, index) => (
+						<Grow in={true} key={"Skeleton" + index}>
+							<div
+								className="flex items-center h-13 px-4 mx-4 bg-white rounded-lg gap-3"
+								style={{ boxShadow: CARD_BOX_SHADOW }}>
+								<Skeleton
+									animation="wave"
+									height={34}
+									sx={{ display: "inline-flex", margin: 0, transform: "none", flex: 1 }}
+								/>
+								<Skeleton
+									variant="circular"
+									animation="wave"
+									width={34}
+									height={34}
+									sx={{ display: "inline-block", transform: "none" }}
+								/>
+							</div>
+						</Grow>
+					))
+				)}
 			</div>
 		);
 	}
 
 	return (
-		<TableContainer component={Paper} sx={{ boxShadow: "none" }}>
+		<TableContainer component={Paper} sx={{ boxShadow: "none", borderTop: "2px solid rgb(230, 230, 230)" }}>
 			<Table sx={{ minWidth: tableMinWidth }}>
 				<TableHead>
 					<TableRow>
@@ -150,8 +157,9 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{!isLoading
-						? data?.map((item, rowIndex) => (
+					{!isLoading ? (
+						data && data.length > 0 ? (
+							data.map((item, rowIndex) => (
 								<Grow in={true} key={"TableItem" + rowIndex}>
 									<TableRow>
 										{columns.map(
@@ -182,45 +190,50 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 										)}
 									</TableRow>
 								</Grow>
-						  ))
-						: Array.from({ length: SKELETONITEM }).map((_, index) => (
-								<Grow in={true} key={"Skeleton" + index}>
-									<TableRow>
-										<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
-											<Skeleton
-												animation="wave"
-												width={"calc(30% - 18px)"}
-												height={35.5}
-												sx={{ display: "inline-block", margin: "0 24px 0 12px", transform: "none" }}
-											/>
-											<Skeleton
-												animation="wave"
-												width={"calc(70% - 18px)"}
-												height={35.5}
-												sx={{ display: "inline-block", transform: "none" }}
-											/>
-										</TableCell>
-										<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
-											<Skeleton
-												animation="wave"
-												height={35.5}
-												sx={{
-													display: "inline-block",
-													width: "calc(100% - 35.5px - 36px)",
-													transform: "none",
-												}}
-											/>
-											<Skeleton
-												animation="wave"
-												width={35.5}
-												height={35.5}
-												sx={{ display: "inline-block", margin: "0 12px 0 24px", transform: "none" }}
-												variant="circular"
-											/>
-										</TableCell>
-									</TableRow>
-								</Grow>
-						  ))}
+							))
+						) : (
+							<Empty />
+						)
+					) : (
+						Array.from({ length: SKELETONITEM }).map((_, index) => (
+							<Grow in={true} key={"Skeleton" + index}>
+								<TableRow>
+									<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
+										<Skeleton
+											animation="wave"
+											width={"calc(30% - 18px)"}
+											height={35.5}
+											sx={{ display: "inline-block", margin: "0 24px 0 12px", transform: "none" }}
+										/>
+										<Skeleton
+											animation="wave"
+											width={"calc(70% - 18px)"}
+											height={35.5}
+											sx={{ display: "inline-block", transform: "none" }}
+										/>
+									</TableCell>
+									<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
+										<Skeleton
+											animation="wave"
+											height={35.5}
+											sx={{
+												display: "inline-block",
+												width: "calc(100% - 35.5px - 36px)",
+												transform: "none",
+											}}
+										/>
+										<Skeleton
+											animation="wave"
+											width={35.5}
+											height={35.5}
+											sx={{ display: "inline-block", margin: "0 12px 0 24px", transform: "none" }}
+											variant="circular"
+										/>
+									</TableCell>
+								</TableRow>
+							</Grow>
+						))
+					)}
 				</TableBody>
 			</Table>
 		</TableContainer>
