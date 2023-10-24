@@ -41,6 +41,19 @@ $z-index-a: 1040;
 	word-break: break-all;
 }
 
+.leaflet-popup-content-wrapper {
+	height: 100%;
+}
+.leaflet-popup-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	margin: 0 !important;
+	padding: 1rem 1.5rem;
+	height: 100%;
+}
+
 //****** MUI ******//
 
 .MuiIconButton-colorCustom {
