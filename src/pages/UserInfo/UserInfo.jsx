@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 import PageTitle from "../../components/Guideline/PageTitle";
-import { Avatar, List, ListItem, ListItemText, Divider, Typography } from "@mui/material";
+import { Avatar, List, ListItem, ListItemText, Divider, Typography, CircularProgress } from "@mui/material";
 import { getData } from "../../utils/api";
 
 const UserInfo = () => {
@@ -56,7 +56,7 @@ const UserInfo = () => {
 			{/* PageTitle */}
 			<PageTitle title="個人資料" />
 
-			{userProfile && (
+			{userProfile ? (
 				<div className="flex flex-col md:flex-row items-center md:items-start md:justify-center px-6 pt-6 sm:py-6 gap-3 sm:gap-6 flex-1 overflow-hidden ">
 					<div className="inline-flex flex-col items-center gap-2">
 						<Avatar
@@ -102,6 +102,11 @@ const UserInfo = () => {
 								))}
 						</List>
 					</div>
+				</div>
+			) : (
+				<div className="h-full flex flex-col justify-center items-center gap-5">
+					<CircularProgress color="inherit" size={80} />
+					<p>載入中... </p>
 				</div>
 			)}
 		</>

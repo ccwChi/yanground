@@ -1,7 +1,6 @@
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import style from "./Tabbar.module.scss";
-import cx from "classnames";
 import PunchClockIcon from "@mui/icons-material/PunchClock";
 import HomeIcon from "@mui/icons-material/Home";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
@@ -32,7 +31,7 @@ const Tabbar = () => {
 				{navItems.map((item) => (
 					<NavLink
 						key={item.id}
-						className={cx("tabbar_item", style.nav_item)}
+						className={`tabbar_item ${style.nav_item}`}
 						to={item.href}
 						data-loc={item.id === getKid()}
 						data-ico={item.emoji}

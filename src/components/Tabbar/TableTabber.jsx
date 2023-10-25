@@ -17,7 +17,7 @@ const TableTabber = ({ tabGroup, setCat }) => {
 			scrollButtons
 			allowScrollButtonsMobile
 			aria-label="scrollable auto tabs example"
-			style={{ color: "#273057", borderBottom: "2px solid #E6E6E6" }}>
+			style={{ color: "#273057" }}>
 			{tabGroup.map((tab) => (
 				<Tab key={tab.f} label={tab.text} />
 			))}

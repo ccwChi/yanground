@@ -13,6 +13,15 @@ const getData = async (url = "") => {
 		headers,
 	})
 		.then((response) => {
+			if (!response.ok) {
+				const statusCode = response.status;
+				console.error('HTTP Error: Status Code', statusCode);
+				if (statusCode === 403) {
+					window.location.href = '/forbidden';
+				} else if (statusCode === 401) {
+					window.location.href = '/unauthorized';
+				}
+			}
 			return response.json();
 		})
 		.catch((error) => {
@@ -23,29 +32,24 @@ const getData = async (url = "") => {
 };
 
 // POST
-const postData = async (url = "", data) => {
+const postData = async (url = "", formData) => {
 	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
 	const headers = {
 		Authorization: `Bearer ${accessToken}`,
 		"Content-Type": "application/json",
 	};
-	return await fetch(`${appUrl}/${url}`, {
+	const params = new URLSearchParams(formData);
+	return await fetch(`${appUrl}/${url}?${params}`, {
 		method: "POST",
 		headers,
-		body: JSON.stringify(data),
 	})
 		.then((response) => {
-			if (response.status === 200) {
-				return response.json().then((json) => {
-					return { status: true, result: json };
-				});
-			} else if (response.status === 400) {
-				return response.json().then((json) => {
-					return { status: false, result: json };
-				});
-			} else {
-				return { status: false, result: response.status };
-			}
+			return response.json().then((res) => {
+				if (res.response === 200) return { status: true, result: res };
+				else {
+					return { status: false, result: res };
+				}
+			});
 			// return response.json();
 		})
 		.catch((error) => {
