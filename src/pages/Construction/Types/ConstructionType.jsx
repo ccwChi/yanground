@@ -1,86 +1,76 @@
 import React, { useCallback, useEffect, useState } from "react";
-import PageTitle from "../../components/Guideline/PageTitle";
-import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
-import TableTabber from "../../components/Tabbar/TableTabber";
-import RWDTable from "../../components/RWDTable/RWDTable";
-import Pagination from "../../components/Pagination/Pagination";
+import { useNavigate, useParams } from "react-router-dom";
+import PageTitle from "../../../components/Guideline/PageTitle";
+import RWDTable from "../../../components/RWDTable/RWDTable";
+import Pagination from "../../../components/Pagination/Pagination";
+import FloatingActionButton from "../../../components/FloatingActionButton/FloatingActionButton";
 import AddIcon from "@mui/icons-material/Add";
-import FolderCopyIcon from "@mui/icons-material/FolderCopy";
-import WorkHistoryIcon from "@mui/icons-material/WorkHistory";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
-import { getData, postData } from "../../utils/api";
-import { UpdatedModal, OutputListModal, EditModal, DispatchWorkModal } from "./SitesModal";
-import { useNotification } from "../../hooks/useNotification";
+import { getData, postData } from "../../../utils/api";
+import { UpdatedModal, EditModal } from "./ConstructionTypeModal";
+import { useNotification } from "../../../hooks/useNotification";
 
-const Sites = () => {
+const ConstructionType = () => {
+	const params = useParams();
+	const types = params.type.split("+");
+	const navigate = useNavigate();
 	const showNotification = useNotification();
 
-	// cat = Category 設置 tab 分類
-	const [cat, setCat] = useState(null);
+	// ApiUrl
+	const apiUrl = `constructionType/${types[1]}`;
 	// API List Data
 	const [apiData, setApiData] = useState(null);
-	// isLoading 等待請求 api
+	// isLoading 等待請求 API
 	const [isLoading, setIsLoading] = useState(true);
 	// Page 頁數設置
 	const [page, setPage] = useState(0);
 	// rows per Page 多少筆等同於一頁
 	const [rowsPerPage, setRowsPerPage] = useState(10);
-	// ApiUrl
-	const furl = "site";
-	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
 	// ModalValue 控制開啟的是哪一個 Modal
 	const [modalValue, setModalValue] = useState(false);
 	// 傳送額外資訊給 Modal
 	const [deliverInfo, setDeliverInfo] = useState(null);
-
-	// Tab 列表對應 api 搜尋參數
-	const tabGroup = [
-		{ f: "", text: "全部" },
-		{ f: "inprogress", text: "進行中" },
-		{ f: "unstarted", text: "尚未開始" },
-		{ f: "end", text: "已結束" },
-	];
 
 	// 上方區塊功能按鈕清單
 	const btnGroup = [
 		{
 			mode: "create",
 			icon: <AddCircleIcon fontSize="small" />,
-			text: "新增案場",
+			text: "新增工程項目",
 			variant: "contained",
 			color: "primary",
 			fabVariant: "success",
 			fab: <AddIcon fontSize="large" />,
-		},
-		{
-			mode: "outputList",
-			icon: <FileCopyIcon fontSize="small" />,
-			text: "輸出派工清單",
-			variant: "contained",
-			color: "secondary",
-			fabVariant: "warning",
-			fab: <FolderCopyIcon fontSize="large" />,
 		},
 	];
 
 	// 對照 api table 所顯示 key
 	const columns = [
 		{ key: "id", label: "ID" },
-		{ key: "name", label: "案場" },
+		{ key: "name", label: "名稱" },
 	];
 
 	// edit = 編輯案場名稱 ,dw = dispatch work 明日派工清單
-	const actions = [
-		{ value: "edit", icon: <EditIcon /> },
-		{ value: "dw", icon: <WorkHistoryIcon /> },
-	];
+	const actions = [{ value: "edit", icon: <EditIcon /> }];
+
+	// 取得對照參數，檢查路由是否存在
+	useEffect(() => {
+		checkRouteExists(apiUrl);
+	}, []);
+	const checkRouteExists = (url) => {
+		setIsLoading(true);
+		getData(url).then((result) => {
+			if (result.response !== 200) {
+				navigate("/404");
+			}
+		});
+	};
 
 	// 取得列表資料
 	useEffect(() => {
-		getApiList(apiUrl);
-	}, [apiUrl]);
+		getApiList(`${apiUrl}/job?p=${page + 1}&s=${rowsPerPage}`);
+	}, [apiUrl, page, rowsPerPage]);
 	const getApiList = useCallback((url) => {
 		setIsLoading(true);
 		getData(url).then((result) => {
@@ -94,30 +84,29 @@ const Sites = () => {
 	const sendDataToBackend = (fd, mode, otherData) => {
 		let url = "";
 		let message = [];
+		fd.append("constructionType", types[1]);
 		switch (mode) {
 			case "create":
-				url = furl;
-				message = ["案場新增成功！"];
+				url = "constructionJob";
+				message = ["工程項目新增成功！"];
 				break;
 			case "edit":
-				url = furl + "/" + otherData[0];
-				message = ["案場編輯成功！"];
-				break;
-			case "dw":
-				url = furl + "/" + otherData[0] + "/" + otherData[1];
-				message = ["明日派工指定成功！"];
+				url = "constructionJob" + "/" + otherData;
+				message = ["工程項目編輯成功！"];
 				break;
 			default:
 				break;
 		}
+
 		postData(url, fd).then((result) => {
 			if (result.status) {
 				showNotification(message[0], true);
-				getApiList(apiUrl);
+				getApiList(`${apiUrl}/job?p=${page + 1}&s=${rowsPerPage}`);
 			} else {
 				showNotification(result.result.reason, false);
 			}
 		});
+
 		for (var pair of fd.entries()) {
 			console.log(pair);
 		}
@@ -140,8 +129,7 @@ const Sites = () => {
 		const dataMode = event.currentTarget.getAttribute("data-mode");
 		const dataValue = event.currentTarget.getAttribute("data-value");
 		setModalValue(dataMode);
-		setDeliverInfo([dataValue, dataValue ? apiData.find((item) => item.id === dataValue).name : ""]);
-		// console.log("Action button clicked", dataMode, dataValue);
+		setDeliverInfo(dataValue ? apiData.find((item) => item.id === +dataValue) : "");
 	};
 
 	// 關閉 Modal 清除資料
@@ -154,20 +142,13 @@ const Sites = () => {
 	const modalConfig = [
 		{
 			modalValue: "create",
-			modalComponent: <UpdatedModal title="新增案場" sendDataToBackend={sendDataToBackend} onClose={onClose} />,
+			modalComponent: <UpdatedModal title="新增工程項目" sendDataToBackend={sendDataToBackend} onClose={onClose} />,
 		},
-		{ modalValue: "outputList", modalComponent: <OutputListModal title="派工清單" onClose={onClose} /> },
 		{
 			modalValue: "edit",
 			modalComponent: (
-				<EditModal title="編輯案場" deliverInfo={deliverInfo} sendDataToBackend={sendDataToBackend} onClose={onClose} />
-			),
-		},
-		{
-			modalValue: "dw",
-			modalComponent: (
-				<DispatchWorkModal
-					title="明日派工"
+				<EditModal
+					title="編輯工程項目"
 					deliverInfo={deliverInfo}
 					sendDataToBackend={sendDataToBackend}
 					onClose={onClose}
@@ -180,10 +161,7 @@ const Sites = () => {
 	return (
 		<>
 			{/* PageTitle */}
-			<PageTitle title="案場" btnGroup={btnGroup} handleActionClick={handleActionClick} />
-
-			{/* TabBar */}
-			<TableTabber tabGroup={tabGroup} setCat={setCat} />
+			<PageTitle title={"工程項目 - " + types[0]} btnGroup={btnGroup} handleActionClick={handleActionClick} />
 
 			{/* Table */}
 			<div className="overflow-y-auto h-full order-3 sm:order-1">
@@ -216,4 +194,4 @@ const Sites = () => {
 	);
 };
 
-export default Sites;
+export default ConstructionType;

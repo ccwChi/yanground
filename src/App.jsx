@@ -29,7 +29,7 @@ const App = () => {
 		{
 			icon: faVest,
 			text: "工程部",
-			href: "constructionType",
+			href: "constructionTypes",
 		},
 		{
 			icon: faUserGear,

@@ -44,27 +44,19 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 										},
 									]}>
 									<AccordionSummary
-										className="flex-row-reverse"
-										expandIcon={
-											<ExpandMoreIcon
-												className="text-text"
-												fontSize="large"
-												sx={{
-													margin: "8px 0",
-												}}
-											/>
-										}
+										className="flex-row-reverse !items-center"
+										expandIcon={<ExpandMoreIcon className="text-text opacity-75" sx={{ fontSize: "1.85rem" }} />}
 										sx={[
 											{
 												alignItems: "flex-start",
 												"&.Mui-expanded": {
-													height: "52px",
+													height: "50px",
 													minHeight: "48px",
 												},
 											},
 										]}>
 										<div className="flex w-full justify-between gap-1">
-											<Typography variant="h6" sx={{ wordBreak: "break-word" }}>
+											<Typography variant="h6" className="!text-lg !leading-relaxed" sx={{ wordBreak: "break-word" }}>
 												{item[cardTitleKey]}
 											</Typography>
 											{actions && (
@@ -86,6 +78,7 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 										</div>
 									</AccordionSummary>
 									<AccordionDetails
+										className="text-sm"
 										sx={[
 											{
 												borderTop: "1px solid rgba(224, 224, 224, 1)",

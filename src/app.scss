@@ -26,17 +26,6 @@ $z-index-a: 1040;
 	color: $text-color-1 !important;
 }
 
-.inputPadding {
-	input,
-	.MuiSelect-select {
-		height: 2.125rem !important;
-		line-height: 2rem !important;
-	}
-	label {
-		line-height: 2rem !important;
-	}
-}
-
 #notistack-snackbar {
 	word-break: break-all;
 }
@@ -55,6 +44,20 @@ $z-index-a: 1040;
 }
 
 //****** MUI ******//
+.inputPadding {
+	input,
+	.MuiSelect-select {
+		height: 2.125rem !important;
+		font-size: 1rem !important;
+		line-height: 2rem !important;
+	}
+	textarea {
+		font-size: 1rem !important;
+	}
+	label {
+		line-height: 2rem !important;
+	}
+}
 
 .MuiIconButton-colorCustom {
 	color: $text-color-1 !important;
@@ -136,6 +139,13 @@ $z-index-a: 1040;
 	}
 
 	/* MUI */
+	.inputPadding {
+		input,
+		.MuiSelect-select,
+		textarea {
+			font-size: 0.875rem !important;
+		}
+	}
 	.customPagination {
 		> div {
 			padding-right: 1rem;

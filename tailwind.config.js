@@ -8,7 +8,7 @@ module.exports = {
 				notoSerif: ['"Noto Serif SC"', "cursive"],
 			},
 			spacing: {
-				13: "3.25rem",
+				13: "3.125rem",
 				15: "3.75rem",
 				26: "6.5rem",
 			},
