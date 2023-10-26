@@ -10,7 +10,7 @@ import "./app.scss";
 import { getData } from "./utils/api";
 import liff from "@line/liff";
 import { SnackbarProvider } from 'notistack';
-// const LINE_ID = process.env.REACT_APP_LINEID;
+const LINE_ID = process.env.REACT_APP_LINEID;
 
 const App = () => {
 	// 設置 RWD 時，SideBar 是否顯示
@@ -29,7 +29,7 @@ const App = () => {
 		{
 			icon: faVest,
 			text: "工程部",
-			href: "constructionType",
+			href: "constructionTypes",
 		},
 		{
 			icon: faUserGear,

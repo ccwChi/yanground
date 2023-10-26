@@ -1,3 +1,5 @@
+// 這是一個便於檢查 localStorage 是否存在要求 Key 的 Hook
+
 import React, { useState, useEffect } from "react";
 
 const useLocalStorageValue = (key) => {
