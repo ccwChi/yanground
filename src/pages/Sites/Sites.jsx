@@ -186,7 +186,7 @@ const Sites = () => {
 			<TableTabber tabGroup={tabGroup} setCat={setCat} />
 
 			{/* Table */}
-			<div className="overflow-y-auto h-full order-3 sm:order-1">
+			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
 				<RWDTable
 					data={apiData}
 					columns={columns}

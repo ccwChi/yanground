@@ -127,8 +127,11 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 	}
 
 	return (
-		<TableContainer component={Paper} sx={{ boxShadow: "none", borderTop: "2px solid rgb(230, 230, 230)" }}>
-			<Table sx={{ minWidth: tableMinWidth }}>
+		<TableContainer
+			component={Paper}
+			className="h-full"
+			sx={{ boxShadow: "none", borderTop: "2px solid rgb(230, 230, 230)" }}>
+			<Table stickyHeader sx={{ minWidth: tableMinWidth }}>
 				<TableHead>
 					<TableRow>
 						{columns.map(

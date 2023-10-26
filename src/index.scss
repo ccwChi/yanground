@@ -44,10 +44,10 @@ a {
 table {
 	thead {
 		tr {
-			background-color: $bg-l-color-1;
 			th {
 				padding: 12px !important;
 				border-bottom: none !important;
+				background-color: $bg-l-color-1 !important;
 			}
 		}
 	}
