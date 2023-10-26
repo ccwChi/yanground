@@ -5,7 +5,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import zhTW from "date-fns/locale/zh-TW";
 
-const DatePicker = ({ defaultValue, setDates }) => {
+const DatePicker = ({ defaultValue, setDates, format = 'yyyy/MM/dd EE' }) => {
 	// 取得當前格式化後的日期
 	const formatToYYYYMMDD = (date) => {
 		const year = date.getFullYear();
@@ -19,7 +19,7 @@ const DatePicker = ({ defaultValue, setDates }) => {
 			<MobileDatePicker
 				slotProps={{ textField: { size: "small" } }}
 				className="inputPadding"
-				format="yyyy/MM/dd EE"
+				format={format}
 				defaultValue={defaultValue}
 				dayOfWeekFormatter={(_day, weekday) => {
 					console.log(); // AVOID BUG
