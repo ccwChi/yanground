@@ -27,6 +27,7 @@ import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getData } from "../../utils/api";
+import { format } from "date-fns";
 import { useNotification } from "../../hooks/useNotification";
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -41,7 +42,7 @@ const MenuProps = {
 	},
 };
 
-const UpdatedModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
+const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }) => {
 	// Alert 開關
 	const [alertOpen, setAlertOpen] = useState(false);
 
@@ -152,14 +153,13 @@ const UpdatedModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
 			/>
 		</>
 	);
-};
+});
 
-const OutputListModal = ({ title, deliverInfo, onClose }) => {
+const OutputListModal = React.memo(({ title, deliverInfo, onClose }) => {
 	const showNotification = useNotification();
-
 	const textFieldRef = useRef(null);
 	const [selectedLoc, setSelectedLoc] = useState([]);
-	const [dates, setDates] = useState();
+	const [dates, setDates] = useState(tomorrow);
 	const [textHelf, setTextHelf] = useState("出工");
 	const [valueHelf, setValueHelf] = useState("");
 	// isLoading 等待請求 api
@@ -170,20 +170,12 @@ const OutputListModal = ({ title, deliverInfo, onClose }) => {
 		setSelectedLoc(selected);
 	};
 
-	// 取得當前格式化後的日期
-	const formatDate = (date, result = "yyyy-mm-dd") => {
-		const year = date.getFullYear();
-		const month = String(date.getMonth() + 1).padStart(2, "0");
-		const day = String(date.getDate()).padStart(2, "0");
-		return result === "yyyy-mm-dd" ? `${year}-${month}-${day}` : `${month}/${day}`;
-	};
-
 	// 取得所有所選地點的現場人員 api (過濾顯示)
 	const getMemberList = () => {
 		setIsLoading(true);
 		let promises = []; // 用於儲存所有的 promise
 		selectedLoc.forEach((locId) => {
-			let url = `site/${locId}/${dates ? formatDate(dates) : formatDate(tomorrow)}`;
+			let url = `site/${locId}/${format(dates, "yyyy-MM-dd")}`;
 			let title = deliverInfo.find((item) => item.id === locId).name;
 			const promise = getData(url).then((result) => {
 				const data = result.result;
@@ -227,7 +219,7 @@ const OutputListModal = ({ title, deliverInfo, onClose }) => {
 	return (
 		<ModalTemplete title={title} show={true} onClose={onClose}>
 			<div className="flex flex-col pt-4 gap-4">
-				<DatePicker defaultValue={tomorrow} setDates={setDates} />
+				<DatePicker defaultValue={dates} setDates={setDates} />
 				<div className="inline-flex gap-3">
 					<Button
 						variant="outlined"
@@ -275,7 +267,7 @@ const OutputListModal = ({ title, deliverInfo, onClose }) => {
 				<TextField
 					multiline
 					rows={8}
-					value={`${dates ? formatDate(dates, "mm/dd") : formatDate(tomorrow, "mm/dd")} ${textHelf}\n\n${valueHelf}`}
+					value={`${format(dates, "MM/dd")} ${textHelf}\n\n${valueHelf}`}
 					InputProps={{
 						readOnly: true,
 					}}
@@ -295,13 +287,13 @@ const OutputListModal = ({ title, deliverInfo, onClose }) => {
 			</div>
 		</ModalTemplete>
 	);
-};
+});
 
-const DispatchWorkModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
+const DispatchWorkModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }) => {
 	const [persons, setPersons] = useState([]);
 	const [selectedPersons, setSelectedPersons] = useState([]);
 	const [selectedPerson, setSelectedPerson] = useState("");
-	const [dates, setDates] = useState();
+	const [dates, setDates] = useState(tomorrow);
 	// 檢查是否被汙染
 	const [isDirty, setIsDirty] = useState(false);
 	// Alert 開關
@@ -317,20 +309,12 @@ const DispatchWorkModal = ({ title, deliverInfo, sendDataToBackend, onClose }) =
 		return collator.compare(a.nickname, b.nickname);
 	};
 
-	// 取得當前格式化後的日期
-	const formatDate = (date) => {
-		const year = date.getFullYear();
-		const month = String(date.getMonth() + 1).padStart(2, "0");
-		const day = String(date.getDate()).padStart(2, "0");
-		return `${year}-${month}-${day}`;
-	};
-
 	const furl = "site";
 	useEffect(() => {
 		setIsLoading(true);
 		resetModal();
 
-		let url = furl + "/" + deliverInfo.id + "/" + (dates ? formatDate(dates) : formatDate(tomorrow));
+		let url = furl + "/" + deliverInfo.id + "/" + format(dates, "yyyy-MM-dd");
 		getData(url).then((result) => {
 			setIsLoading(false);
 			const data = result.result;
@@ -367,7 +351,7 @@ const DispatchWorkModal = ({ title, deliverInfo, sendDataToBackend, onClose }) =
 		const fd = new FormData();
 		fd.append("labourer", ids.join(","));
 
-		sendDataToBackend(fd, "dw", [deliverInfo.id, dates ? formatDate(dates) : formatDate(tomorrow, "mm/dd")]);
+		sendDataToBackend(fd, "dw", [deliverInfo.id, format(dates, "yyyy-MM-dd")]);
 	};
 
 	const resetModal = () => {
@@ -481,7 +465,7 @@ const DispatchWorkModal = ({ title, deliverInfo, sendDataToBackend, onClose }) =
 			/>
 		</>
 	);
-};
+});
 
 export { UpdatedModal, OutputListModal, DispatchWorkModal };
 

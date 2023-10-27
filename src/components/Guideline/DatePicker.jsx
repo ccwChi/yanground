@@ -5,8 +5,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import zhTW from "date-fns/locale/zh-TW";
 
-const DatePicker = ({ defaultValue, setDates, format = 'yyyy/MM/dd EE' }) => {
-
+const DatePicker = ({ defaultValue, setDates, format = "yyyy/MM/dd EE" }) => {
 	return (
 		<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={zhTW}>
 			<MobileDatePicker

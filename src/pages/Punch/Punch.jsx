@@ -63,7 +63,7 @@ const Map = () => {
 				position: "fixed",
 				top: "55px",
 				left: 0,
-				zIndex: "1025",
+				zIndex: "1026",
 				height: "100%",
 				width: "100%",
 			}}>
