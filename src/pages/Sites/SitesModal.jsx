@@ -27,6 +27,7 @@ import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getData } from "../../utils/api";
+import { useNotification } from "../../hooks/useNotification";
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
 const ITEM_HEIGHT = 48;
@@ -154,6 +155,8 @@ const UpdatedModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
 };
 
 const OutputListModal = ({ title, deliverInfo, onClose }) => {
+	const showNotification = useNotification();
+
 	const textFieldRef = useRef(null);
 	const [selectedLoc, setSelectedLoc] = useState([]);
 	const [dates, setDates] = useState();
@@ -198,7 +201,7 @@ const OutputListModal = ({ title, deliverInfo, onClose }) => {
 				setValueHelf(datalist);
 			})
 			.catch((error) => {
-				console.error("Error:", error);
+				showNotification(`請求 API 失敗：${error}`, false);
 			});
 	};
 
@@ -213,10 +216,10 @@ const OutputListModal = ({ title, deliverInfo, onClose }) => {
 			navigator.clipboard
 				.writeText(textToCopy)
 				.then(() => {
-					alert("文本已成功复制到剪贴板！");
+					showNotification("文本已成功複製至剪貼板！", true);
 				})
 				.catch((error) => {
-					console.error("复制到剪贴板失败:", error);
+					showNotification(`文本複製至剪貼板失敗：${error}`, false);
 				});
 		}
 	};
