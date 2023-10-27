@@ -6,6 +6,7 @@ import Home from "./pages/Home/Home";
 import Sites from "./pages/Sites/Sites";
 import ConstructionTypes from "./pages/Construction/ConstructionTypes";
 import ConstructionType from "./pages/Construction/Types/ConstructionType";
+import ConstructionJob from "./pages/Construction/Jobs/ConstructionJob";
 import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
 import ErrorMessage from "./pages/Error/ErrorMessage";
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
 			{
 				path: "/constructiontypes/:type",
 				element: <ConstructionType />,
+			},
+			{
+				path: "/constructiontypes/:type/:job",
+				element: <ConstructionJob />,
 			},
 			{
 				path: "/punch",

@@ -20,14 +20,23 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Empty from "./Empty";
 const SKELETONITEM = 6;
-const CARD_BOX_SHADOW = "0px 4px 4px 0px rgba(0, 0, 0, 0.25)";
+const CARD_BOX_SHADOW = "0px 2px 2px 0px rgba(0, 0, 0, 0.25)";
 
-const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoading, handleActionClick }) => {
+const RWDTable = ({
+	data,
+	columns,
+	actions,
+	cardTitleKey,
+	tableMinWidth,
+	isLoading,
+	handleActionClick,
+	actionSpec = false,
+}) => {
 	const isSmallScreen = useMediaQuery("(max-width:575.98px)");
 
 	if (isSmallScreen) {
 		return (
-			<div className="flex flex-col gap-3 pt-2">
+			<div className="flex flex-col gap-3 py-4">
 				{!isLoading ? (
 					data && data.length > 0 ? (
 						data.map((item, rowIndex) => (
@@ -50,8 +59,7 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 											{
 												alignItems: "flex-start",
 												"&.Mui-expanded": {
-													height: "50px",
-													minHeight: "48px",
+													minHeight: "50px",
 												},
 											},
 										]}>
@@ -59,22 +67,42 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 											<Typography variant="h6" className="!text-lg !leading-relaxed" sx={{ wordBreak: "break-word" }}>
 												{item[cardTitleKey]}
 											</Typography>
-											{actions && (
-												<div className="whitespace-nowrap">
-													{actions.map((action, index) => (
-														<IconButton
-															key={"AccordionActionKey" + rowIndex + "-" + index}
-															aria-label={action.value}
-															color="custom"
-															size="small"
-															data-mode={action.value}
-															data-value={item.id}
-															onClick={handleActionClick}>
-															{action.icon}
-														</IconButton>
-													))}
-												</div>
-											)}
+											<div className="flex gap-2 ms-2">
+												{actionSpec && (
+													<div className="whitespace-nowrap">
+														{actionSpec[1].map((action, index) => (
+															<IconButton
+																key={"AccordionActionKey" + rowIndex + "-" + index}
+																title={action.title}
+																aria-label={action.value}
+																color="custom"
+																size="small"
+																data-mode={action.value}
+																data-value={item.id}
+																onClick={handleActionClick}>
+																{action.icon}
+															</IconButton>
+														))}
+													</div>
+												)}
+												{actions && (
+													<div className="whitespace-nowrap">
+														{actions.map((action, index) => (
+															<IconButton
+																key={"AccordionActionKey" + rowIndex + "-" + index}
+																title={action.title}
+																aria-label={action.value}
+																color="custom"
+																size="small"
+																data-mode={action.value}
+																data-value={item.id}
+																onClick={handleActionClick}>
+																{action.icon}
+															</IconButton>
+														))}
+													</div>
+												)}
+											</div>
 										</div>
 									</AccordionSummary>
 									<AccordionDetails
@@ -134,6 +162,11 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 			<Table stickyHeader sx={{ minWidth: tableMinWidth }}>
 				<TableHead>
 					<TableRow>
+						{actionSpec && (
+							<TableCell width="140px" sx={{ textAlign: "center", verticalAlign: "middle" }}>
+								{actionSpec[0]}
+							</TableCell>
+						)}
 						{columns.map(
 							(column) =>
 								column.key !== "id" && (
@@ -152,12 +185,29 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 						)}
 					</TableRow>
 				</TableHead>
-				<TableBody>
-					{!isLoading ? (
-						data && data.length > 0 ? (
+				<TableBody className={`${!isLoading ? "" : "absolute w-full"}`}>
+					{!isLoading &&
+						(data && data.length > 0 ? (
 							data.map((item, rowIndex) => (
 								<Grow in={true} key={"TableItem" + rowIndex}>
 									<TableRow>
+										{actionSpec && (
+											<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
+												{actionSpec[1].map((action, index) => (
+													<IconButton
+														key={"TableActionAction" + index}
+														title={action.title}
+														aria-label={action.value}
+														color="custom"
+														size="small"
+														data-mode={action.value}
+														data-value={item.id}
+														onClick={handleActionClick}>
+														{action.icon}
+													</IconButton>
+												))}
+											</TableCell>
+										)}
 										{columns.map(
 											(column) =>
 												column.key !== "id" && (
@@ -173,6 +223,7 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 												{actions.map((action, index) => (
 													<IconButton
 														key={"TableActionAction" + index}
+														title={action.title}
 														aria-label={action.value}
 														color="custom"
 														size="small"
@@ -189,49 +240,45 @@ const RWDTable = ({ data, columns, actions, cardTitleKey, tableMinWidth, isLoadi
 							))
 						) : (
 							<Empty />
-						)
-					) : (
-						Array.from({ length: SKELETONITEM }).map((_, index) => (
-							<Grow in={true} key={"Skeleton" + index}>
-								<TableRow>
-									<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
-										<Skeleton
-											animation="wave"
-											width={"calc(30% - 18px)"}
-											height={35.5}
-											sx={{ display: "inline-block", margin: "0 24px 0 12px", transform: "none" }}
-										/>
-										<Skeleton
-											animation="wave"
-											width={"calc(70% - 18px)"}
-											height={35.5}
-											sx={{ display: "inline-block", transform: "none" }}
-										/>
-									</TableCell>
-									<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
-										<Skeleton
-											animation="wave"
-											height={35.5}
-											sx={{
-												display: "inline-block",
-												width: "calc(100% - 35.5px - 36px)",
-												transform: "none",
-											}}
-										/>
-										<Skeleton
-											animation="wave"
-											width={35.5}
-											height={35.5}
-											sx={{ display: "inline-block", margin: "0 12px 0 24px", transform: "none" }}
-											variant="circular"
-										/>
-									</TableCell>
-								</TableRow>
-							</Grow>
-						))
-					)}
+						))}
 				</TableBody>
 			</Table>
+			{isLoading &&
+				Array.from({ length: SKELETONITEM }).map((_, index) => (
+					<Grow in={true} key={"Skeleton" + index}>
+						<div className="!flex items-center py-2">
+							<Skeleton
+								animation="wave"
+								width={"15%"}
+								height={34}
+								sx={{ display: "inline-block", margin: "0 12px", transform: "none" }}
+							/>
+							<Skeleton
+								animation="wave"
+								width={"30%"}
+								height={34}
+								sx={{ display: "inline-block", margin: "0 12px", transform: "none" }}
+							/>
+							<Skeleton
+								animation="wave"
+								width={"55%"}
+								height={34}
+								sx={{
+									display: "inline-block",
+									margin: "0 12px",
+									transform: "none",
+								}}
+							/>
+							<Skeleton
+								animation="wave"
+								width={34}
+								height={34}
+								sx={{ display: "inline-block", margin: "0 12px", minWidth: "34px", transform: "none" }}
+								variant="circular"
+							/>
+						</div>
+					</Grow>
+				))}
 		</TableContainer>
 	);
 };

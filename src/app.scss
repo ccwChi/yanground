@@ -67,6 +67,12 @@ $z-index-a: 1040;
 	}
 }
 
+.MuiSelect-select {
+	.Mui-checked {
+		display: none;
+	}
+}
+
 .customPagination {
 	> div {
 		justify-content: flex-start;

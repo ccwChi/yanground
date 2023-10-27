@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 import PageTitle from "../../components/Guideline/PageTitle";
-import { Avatar, List, ListItem, ListItemText, Divider, Typography, CircularProgress } from "@mui/material";
+import Loading from "../../components/Loader/Loading";
+import { Avatar, List, ListItem, ListItemText, Divider, Typography } from "@mui/material";
 import { getData } from "../../utils/api";
 
 const UserInfo = () => {
@@ -15,11 +16,11 @@ const UserInfo = () => {
 			const parsedData = [
 				{
 					title: "姓氏",
-					content: userProfile.firstname,
+					content: userProfile.lastname,
 				},
 				{
 					title: "名字",
-					content: userProfile.lastname,
+					content: userProfile.firstname,
 				},
 				{
 					title: "暱稱",
@@ -104,10 +105,7 @@ const UserInfo = () => {
 					</div>
 				</div>
 			) : (
-				<div className="h-full flex flex-col justify-center items-center gap-5">
-					<CircularProgress color="inherit" size={80} />
-					<p>載入中... </p>
-				</div>
+				<Loading />
 			)}
 		</>
 	);

@@ -11,7 +11,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import { getData, postData } from "../../utils/api";
-import { UpdatedModal, OutputListModal, EditModal, DispatchWorkModal } from "./SitesModal";
+import { UpdatedModal, OutputListModal, DispatchWorkModal } from "./SitesModal";
 import { useNotification } from "../../hooks/useNotification";
 
 const Sites = () => {
@@ -26,7 +26,7 @@ const Sites = () => {
 	// Page 頁數設置
 	const [page, setPage] = useState(0);
 	// rows per Page 多少筆等同於一頁
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [rowsPerPage, setRowsPerPage] = useState(100);
 	// ApiUrl
 	const furl = "site";
 	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
@@ -71,10 +71,9 @@ const Sites = () => {
 		{ key: "name", label: "案場" },
 	];
 
-	// edit = 編輯案場名稱 ,dw = dispatch work 明日派工清單
 	const actions = [
-		{ value: "edit", icon: <EditIcon /> },
-		{ value: "dw", icon: <WorkHistoryIcon /> },
+		{ value: "edit", icon: <EditIcon />, title: "編輯案場名稱" },
+		{ value: "dw", icon: <WorkHistoryIcon />, title: "明日派工清單" },
 	];
 
 	// 取得列表資料
@@ -100,7 +99,7 @@ const Sites = () => {
 				message = ["案場新增成功！"];
 				break;
 			case "edit":
-				url = furl + "/" + otherData[0];
+				url = furl + "/" + otherData;
 				message = ["案場編輯成功！"];
 				break;
 			case "dw":
@@ -114,13 +113,15 @@ const Sites = () => {
 			if (result.status) {
 				showNotification(message[0], true);
 				getApiList(apiUrl);
+				onClose();
 			} else {
 				showNotification(result.result.reason, false);
 			}
 		});
-		for (var pair of fd.entries()) {
-			console.log(pair);
-		}
+
+		// for (var pair of fd.entries()) {
+		// 	console.log(pair);
+		// }
 	};
 
 	// 設置頁數
@@ -140,8 +141,10 @@ const Sites = () => {
 		const dataMode = event.currentTarget.getAttribute("data-mode");
 		const dataValue = event.currentTarget.getAttribute("data-value");
 		setModalValue(dataMode);
-		setDeliverInfo([dataValue, dataValue ? apiData.find((item) => item.id === dataValue).name : ""]);
-		// console.log("Action button clicked", dataMode, dataValue);
+		setDeliverInfo(dataValue ? apiData.find((item) => item.id === dataValue) : "");
+		if (dataMode === "outputList") {
+			setDeliverInfo(apiData);
+		}
 	};
 
 	// 關閉 Modal 清除資料
@@ -156,11 +159,19 @@ const Sites = () => {
 			modalValue: "create",
 			modalComponent: <UpdatedModal title="新增案場" sendDataToBackend={sendDataToBackend} onClose={onClose} />,
 		},
-		{ modalValue: "outputList", modalComponent: <OutputListModal title="派工清單" onClose={onClose} /> },
+		{
+			modalValue: "outputList",
+			modalComponent: <OutputListModal title="派工清單" deliverInfo={deliverInfo} onClose={onClose} />,
+		},
 		{
 			modalValue: "edit",
 			modalComponent: (
-				<EditModal title="編輯案場" deliverInfo={deliverInfo} sendDataToBackend={sendDataToBackend} onClose={onClose} />
+				<UpdatedModal
+					title="編輯案場"
+					deliverInfo={deliverInfo}
+					sendDataToBackend={sendDataToBackend}
+					onClose={onClose}
+				/>
 			),
 		},
 		{
@@ -180,10 +191,10 @@ const Sites = () => {
 	return (
 		<>
 			{/* PageTitle */}
-			<PageTitle title="案場" btnGroup={btnGroup} handleActionClick={handleActionClick} />
+			<PageTitle title="案場" btnGroup={btnGroup} handleActionClick={handleActionClick} isLoading={!isLoading} />
 
 			{/* TabBar */}
-			<TableTabber tabGroup={tabGroup} setCat={setCat} />
+			{/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}
 
 			{/* Table */}
 			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
@@ -199,13 +210,13 @@ const Sites = () => {
 			</div>
 
 			{/* Pagination */}
-			<Pagination
+			{/* <Pagination
 				totalElement={apiData ? apiData.length : 0}
 				page={page}
 				onPageChange={handleChangePage}
 				rowsPerPage={rowsPerPage}
 				onRowsPerPageChange={handleChangeRowsPerPage}
-			/>
+			/> */}
 
 			{/* Floating Action Button */}
 			<FloatingActionButton btnGroup={btnGroup} handleActionClick={handleActionClick} />
