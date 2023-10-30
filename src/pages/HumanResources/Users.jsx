@@ -116,11 +116,9 @@ const Users = () => {
     const dataMode = event.currentTarget.getAttribute("data-mode");
     const dataValue = event.currentTarget.getAttribute("data-value");
     setModalValue(dataMode);
-    console.log(dataValue);
     setDeliverInfo(
       dataValue ? apiData?.content.find((item) => item.id === dataValue) : null
     );
-    // console.log("Action button clicked", dataMode, dataValue);
   };
 
   // 關閉 Modal 清除資料

@@ -13,28 +13,19 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-  Divider,
   FormHelperText,
   RadioGroup,
   FormControlLabel,
   Radio,
   FormLabel,
   FormGroup,
-  Checkbox,
   Box,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getData } from "../../utils/api";
 import { IOSSwitch } from "../../components/Switch/Switch";
-import { faL } from "@fortawesome/free-solid-svg-icons";
 import { useNotification } from "../../hooks/useNotification";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
@@ -334,17 +325,7 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
                 control={control}
                 render={({ field }) => (
                   <FormControl>
-                    <FormLabel
-                      id="demo-row-radio-buttons-group-label"
-                      onClick={() => {
-                        console.log(
-                          "departmentList",
-                          departmentList,
-                          "authorityList",
-                          authorityList
-                        );
-                      }}
-                    >
+                    <FormLabel id="demo-row-radio-buttons-group-label">
                       性別
                     </FormLabel>
                     <RadioGroup
@@ -370,13 +351,7 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <p
-                onClick={() => {
-                  console.log(deliverInfo);
-                }}
-              >
-                生日：
-              </p>
+              <p>生日：</p>
               <LocalizationProvider
                 dateAdapter={AdapterDateFns}
                 adapterLocale={zhTW}
@@ -389,7 +364,7 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
                       slotProps={{ textField: { size: "small" } }}
                       className="inputPadding"
                       dayOfWeekFormatter={(_day, weekday) => {
-                        console.log(); // AVOID BUG
+                        //console.log(); // AVOID BUG
                       }}
                       sx={[
                         {
@@ -418,7 +393,7 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
                       slotProps={{ textField: { size: "small" } }}
                       className="inputPadding"
                       dayOfWeekFormatter={(_day, weekday) => {
-                        console.log(); // AVOID BUG
+                        //console.log(); // AVOID BUG
                       }}
                       sx={[{ width: "100%" }]}
                       {...field}
