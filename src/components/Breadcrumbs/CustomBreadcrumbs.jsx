@@ -1,5 +1,7 @@
 import React from "react";
-import { Breadcrumbs, Link, Typography } from "@mui/material";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
 import { NavLink, useLocation } from "react-router-dom";
 
 const CustomBreadcrumbs = () => {
@@ -17,7 +19,7 @@ const CustomBreadcrumbs = () => {
 		<Breadcrumbs
 			aria-label="breadcrumb"
 			maxItems={3}
-			className={`pt-3 sm:pt-4 px-5 !text-sm ${pathnames.length > 0 ? "" : "!pt-0"}`}>
+			className={`pt-3 sm:pt-4 pb-2 sm:pb-0 px-5 !text-sm ${pathnames.length > 0 ? "" : "!pt-0"}`}>
 			{pathnames.length > 0 && (
 				<Link component={NavLink} color="inherit" underline="hover" to="/">
 					首頁

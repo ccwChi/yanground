@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 import PageTitle from "../../components/Guideline/PageTitle";
 import Loading from "../../components/Loader/Loading";
-import { Avatar, List, ListItem, ListItemText, Divider, Typography } from "@mui/material";
+import Avatar from "@mui/material/Avatar";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
 import { getData } from "../../utils/api";
 
 const UserInfo = () => {

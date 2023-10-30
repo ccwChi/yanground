@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
-import { Avatar, Accordion, AccordionSummary, AccordionDetails, ListItemText, ListItemIcon, List } from "@mui/material";
+import Avatar from "@mui/material/Avatar";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import List from "@mui/material/List";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import "./Layout.scss";

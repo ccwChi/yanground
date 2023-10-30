@@ -1,22 +1,20 @@
 import React from "react";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import {
-	Accordion,
-	AccordionSummary,
-	AccordionDetails,
-	Divider,
-	Grow,
-	IconButton,
-	Typography,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
-	Paper,
-	Skeleton,
-} from "@mui/material";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Divider from "@mui/material/Divider";
+import Grow from "@mui/material/Grow";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import Skeleton from "@mui/material/Skeleton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Empty from "./Empty";
 const SKELETONITEM = 6;
@@ -36,7 +34,7 @@ const RWDTable = ({
 
 	if (isSmallScreen) {
 		return (
-			<div className="flex flex-col gap-3 py-3.5">
+			<div className="flex flex-col gap-3 pt-1 pb-3.5">
 				{!isLoading ? (
 					data && data.length > 0 ? (
 						data.map((item, rowIndex) => (
