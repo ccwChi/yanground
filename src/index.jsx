@@ -45,12 +45,12 @@ const router = createBrowserRouter([
 				element: <ConstructionJob />,
 			},
 			{
-				path: "/punch",
-				element: <Punch />,
-			},
-			{
 				path: "/users",
 				element: <Users />,
+			},
+			{
+				path: "/punch",
+				element: <Punch />,
 			},
 			{
 				path: "/userInfo",

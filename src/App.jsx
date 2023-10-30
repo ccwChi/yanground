@@ -57,43 +57,43 @@ const App = () => {
 		// },
 	];
 
-	// useEffect(() => {
-	// 	initLine();
-	// }, []);
+	useEffect(() => {
+		initLine();
+	}, []);
 
-	// // Liff 登入 Line
-	// const initLine = () => {
-	// 	liff.init(
-	// 		{ liffId: LINE_ID },
-	// 		() => {
-	// 			if (liff.isLoggedIn()) {
-	// 				runApp();
-	// 			} else {
-	// 				liff.login();
-	// 			}
-	// 		},
-	// 		(err) => console.error(err)
-	// 	);
-	// };
+	// Liff 登入 Line
+	const initLine = () => {
+		liff.init(
+			{ liffId: LINE_ID },
+			() => {
+				if (liff.isLoggedIn()) {
+					runApp();
+				} else {
+					liff.login();
+				}
+			},
+			(err) => console.error(err)
+		);
+	};
 
-	// // 設置憑證與從後端讀取用戶資料
-	// const runApp = () => {
-	// 	const accessToken = liff.getAccessToken();
-	// 	if (accessToken) {
-	// 		localStorage.setItem("accessToken", JSON.stringify(accessToken));
-	// 		getData().then((data) => {
-	// 			if (data?.result) {
-	// 				// console.log(data);
-	// 				let d = data.result;
-	// 				if (d.displayName) {
-	// 					delete d.statusMessage;
-	// 					delete d.userId;
-	// 					localStorage.setItem("userProfile", JSON.stringify(d));
-	// 				}
-	// 			}
-	// 		});
-	// 	}
-	// };
+	// 設置憑證與從後端讀取用戶資料
+	const runApp = () => {
+		const accessToken = liff.getAccessToken();
+		if (accessToken) {
+			localStorage.setItem("accessToken", JSON.stringify(accessToken));
+			getData().then((data) => {
+				if (data?.result) {
+					// console.log(data);
+					let d = data.result;
+					if (d.displayName) {
+						delete d.statusMessage;
+						delete d.userId;
+						localStorage.setItem("userProfile", JSON.stringify(d));
+					}
+				}
+			});
+		}
+	};
 
 	// SideBar 開關
 	const toggleSidebar = () => {
