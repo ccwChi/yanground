@@ -15,6 +15,7 @@ import Unauthorized from "./pages/Error/Unauthorized";
 import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
+import Users from "./pages/HumanResources/Users";
 
 const router = createBrowserRouter([
 	{
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
 			{
 				path: "/punch",
 				element: <Punch />,
+			},
+			{
+				path: "/users",
+				element: <Users />,
 			},
 			{
 				path: "/userInfo",
