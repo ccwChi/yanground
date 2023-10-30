@@ -6,7 +6,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import FormHelperText from "@mui/material/FormHelperText";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -26,14 +26,16 @@ const UpdatedModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
 	});
 
 	// 使用 useForm Hook 來管理表單狀態和驗證
+	const methods = useForm({
+		defaultValues,
+		resolver: yupResolver(schema),
+	});
+
 	const {
 		control,
 		handleSubmit,
 		formState: { errors, isDirty },
-	} = useForm({
-		defaultValues,
-		resolver: yupResolver(schema),
-	});
+	} = methods;
 
 	// 提交表單資料到後端並執行相關操作
 	const onSubmit = (data) => {
@@ -71,54 +73,56 @@ const UpdatedModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
 		<>
 			{/* Modal */}
 			<ModalTemplete title={title} show={true} onClose={onCheckDirty}>
-				<form onSubmit={handleSubmit(onSubmit)}>
-					<div className="flex flex-col pt-4 gap-4">
-						<div className="inline-flex flex-col gap-1">
-							<div>
-								<InputTitle title={"項目名稱"} />
-								<Controller
-									name="name"
-									control={control}
-									render={({ field }) => (
-										<TextField
-											variant="outlined"
-											size="small"
-											className="inputPadding"
-											placeholder="請輸入項目名稱"
-											fullWidth
-											inputProps={{ maxLength: 25 }}
-											{...field}
-										/>
-									)}
-								/>
-								<FormHelperText className="!text-red-600 break-words" sx={{ minHeight: "1.25rem" }}>
-									{errors["name"]?.message}
-								</FormHelperText>
+				<FormProvider {...methods}>
+					<form onSubmit={handleSubmit(onSubmit)}>
+						<div className="flex flex-col pt-4 gap-4">
+							<div className="inline-flex flex-col gap-1">
+								<div>
+									<InputTitle title={"項目名稱"} />
+									<Controller
+										name="name"
+										control={control}
+										render={({ field }) => (
+											<TextField
+												variant="outlined"
+												size="small"
+												className="inputPadding"
+												placeholder="請輸入項目名稱"
+												fullWidth
+												inputProps={{ maxLength: 25 }}
+												{...field}
+											/>
+										)}
+									/>
+									<FormHelperText className="!text-red-600 break-words" sx={{ minHeight: "1.25rem" }}>
+										{errors["name"]?.message}
+									</FormHelperText>
+								</div>
+								<div>
+									<InputTitle title={"說明"} required={false} />
+									<Controller
+										name="explanation"
+										control={control}
+										render={({ field }) => (
+											<TextField
+												multiline
+												rows={6}
+												className="inputPadding"
+												placeholder="請輸入項目說明"
+												fullWidth
+												{...field}
+											/>
+										)}
+									/>
+									{/* <FormHelperText className="!text-red-600 h-5">{errors["explanation"]?.message}</FormHelperText> */}
+								</div>
 							</div>
-							<div>
-								<InputTitle title={"說明"} required={false} />
-								<Controller
-									name="explanation"
-									control={control}
-									render={({ field }) => (
-										<TextField
-											multiline
-											rows={6}
-											className="inputPadding"
-											placeholder="請輸入項目說明"
-											fullWidth
-											{...field}
-										/>
-									)}
-								/>
-								<FormHelperText className="!text-red-600 h-5">{errors["explanation"]?.message}</FormHelperText>
-							</div>
+							<Button type="submit" variant="contained" color="success" className="!text-base !h-12" fullWidth>
+								儲存
+							</Button>
 						</div>
-						<Button type="submit" variant="contained" color="success" className="!text-base !h-12" fullWidth>
-							儲存
-						</Button>
-					</div>
-				</form>
+					</form>
+				</FormProvider>
 			</ModalTemplete>
 
 			{/* Alert */}

@@ -1,5 +1,6 @@
 import React from "react";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import Avatar from "@mui/material/Avatar";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -22,7 +23,8 @@ const CARD_BOX_SHADOW = "0px 2px 2px 0px rgba(0, 0, 0, 0.25)";
 
 const RWDTable = ({
 	data,
-	columns,
+	columnsPC,
+	columnsMobile,
 	actions,
 	cardTitleKey,
 	tableMinWidth,
@@ -110,11 +112,31 @@ const RWDTable = ({
 												borderTop: "1px solid rgba(224, 224, 224, 1)",
 											},
 										]}>
-										{columns.map((column, index) => (
+										{columnsMobile.map((column, index) => (
 											<div key={"AccordionRow-" + rowIndex + "-" + index}>
 												<div className="flex justify-between py-2">
 													<span className="text-neutral-500 pe-2">{column.label}</span>
-													<p className="text-black break-all">{item[column.key]}</p>
+													<p className="text-black break-all">
+														{column.key === "department" ? (
+															item.department ? (
+																item.department.name
+															) : (
+																<span className="italic text-neutral-500 text-sm">(尚未分配)</span>
+															)
+														) : column.key === "gender" ? (
+															item.gender ? (
+																"男性"
+															) : item.gender === false ? (
+																"女性"
+															) : (
+																"?"
+															)
+														) : item[column.key] ? (
+															item[column.key]
+														) : (
+															<span className="italic text-neutral-500 text-sm">(無)</span>
+														)}
+													</p>
 												</div>
 												<Divider />
 											</div>
@@ -165,7 +187,7 @@ const RWDTable = ({
 								{actionSpec[0]}
 							</TableCell>
 						)}
-						{columns.map(
+						{columnsPC.map(
 							(column) =>
 								column.key !== "id" && (
 									<TableCell
@@ -177,7 +199,7 @@ const RWDTable = ({
 								)
 						)}
 						{actions && (
-							<TableCell width="140px" sx={{ textAlign: "center", verticalAlign: "middle" }}>
+							<TableCell width="160px" sx={{ textAlign: "center", verticalAlign: "middle" }}>
 								操作
 							</TableCell>
 						)}
@@ -185,59 +207,83 @@ const RWDTable = ({
 				</TableHead>
 				<TableBody className={`${!isLoading ? "" : "absolute w-full"}`}>
 					{!isLoading &&
-						(data && data.length > 0 ? (
-							data.map((item, rowIndex) => (
-								<Grow in={true} key={"TableItem" + rowIndex}>
-									<TableRow>
-										{actionSpec && (
-											<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
-												{actionSpec[1].map((action, index) => (
-													<IconButton
-														key={"TableActionAction" + index}
-														title={action.title}
-														aria-label={action.value}
-														color="custom"
-														size="small"
-														data-mode={action.value}
-														data-value={item.id}
-														onClick={handleActionClick}>
-														{action.icon}
-													</IconButton>
-												))}
-											</TableCell>
-										)}
-										{columns.map(
-											(column) =>
-												column.key !== "id" && (
-													<TableCell
-														key={"TableTitleList" + column.key}
-														sx={{ textAlign: "center", verticalAlign: "middle" }}>
-														{item[column.key]}
-													</TableCell>
-												)
-										)}
-										{actions && (
-											<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
-												{actions.map((action, index) => (
-													<IconButton
-														key={"TableActionAction" + index}
-														title={action.title}
-														aria-label={action.value}
-														color="custom"
-														size="small"
-														data-mode={action.value}
-														data-value={item.id}
-														onClick={handleActionClick}>
-														{action.icon}
-													</IconButton>
-												))}
-											</TableCell>
-										)}
-									</TableRow>
-								</Grow>
-							))
-						) : (
-							<Empty />
+						data &&
+						data.length > 0 &&
+						data.map((item, rowIndex) => (
+							<Grow in={true} key={"TableItem" + rowIndex}>
+								<TableRow>
+									{actionSpec && (
+										<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
+											{actionSpec[1].map((action, index) => (
+												<IconButton
+													key={"TableActionAction" + index}
+													title={action.title}
+													aria-label={action.value}
+													color="custom"
+													size="small"
+													data-mode={action.value}
+													data-value={item.id}
+													onClick={handleActionClick}>
+													{action.icon}
+												</IconButton>
+											))}
+										</TableCell>
+									)}
+									{columnsPC.map(
+										(column) =>
+											column.key !== "id" && (
+												<TableCell
+													key={"TableTitleList" + column.key}
+													sx={{ textAlign: "center", verticalAlign: "middle" }}>
+													{column.key === "department" ? (
+														item.department ? (
+															item.department.name
+														) : (
+															<span className="italic text-neutral-500 text-sm">(尚未分配)</span>
+														)
+													) : column.key === "pictureUrl" ? (
+														item.pictureUrl ? (
+															<div className="flex items-center justify-center">
+																<Avatar src={item.pictureUrl} alt={item.displayName} />
+															</div>
+														) : (
+															<span className="italic text-neutral-500 text-sm">(無)</span>
+														)
+													) : column.key === "gender" ? (
+														item.gender ? (
+															"男性"
+														) : item.gender === false ? (
+															"女性"
+														) : (
+															"?"
+														)
+													) : item[column.key] ? (
+														item[column.key]
+													) : (
+														<span className="italic text-neutral-500 text-sm">(無)</span>
+													)}
+												</TableCell>
+											)
+									)}
+									{actions && (
+										<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
+											{actions.map((action, index) => (
+												<IconButton
+													key={"TableActionAction" + index}
+													title={action.title}
+													aria-label={action.value}
+													color="custom"
+													size="small"
+													data-mode={action.value}
+													data-value={item.id}
+													onClick={handleActionClick}>
+													{action.icon}
+												</IconButton>
+											))}
+										</TableCell>
+									)}
+								</TableRow>
+							</Grow>
 						))}
 				</TableBody>
 			</Table>
@@ -277,6 +323,7 @@ const RWDTable = ({
 						</div>
 					</Grow>
 				))}
+			{!isLoading && data && data.length <= 0 && <Empty />}
 		</TableContainer>
 	);
 };

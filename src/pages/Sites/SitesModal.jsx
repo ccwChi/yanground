@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import ModalTemplete from "../../components/Modal/ModalTemplete";
 import InputTitle from "../../components/Guideline/InputTitle";
-import DatePicker from "../../components/Guideline/DatePicker";
+import DatePicker from "../../components/DatePicker/DatePicker";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import Loading from "../../components/Loader/Loading";
 import TextField from "@mui/material/TextField";
@@ -21,7 +21,7 @@ import Checkbox from "@mui/material/Checkbox";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import { TransitionGroup } from "react-transition-group";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getData } from "../../utils/api";
@@ -54,27 +54,16 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 		name: yup.string().required("不可為空值！"),
 	});
 
-	// 處理表單驗證錯誤時的回調函數
-	const onError = (errors) => {
-		if (Object.keys(errors).length > 0) {
-			for (const key in errors) {
-				if (errors.hasOwnProperty(key)) {
-					const errorMessage = errors[key]?.message;
-				}
-			}
-		}
-	};
-
 	// 使用 useForm Hook 來管理表單狀態和驗證
-	const {
-		control,
-		handleSubmit,
-		reset,
-		formState: { errors, isDirty },
-	} = useForm({
+	const methods = useForm({
 		defaultValues,
 		resolver: yupResolver(schema),
 	});
+	const {
+		control,
+		handleSubmit,
+		formState: { errors, isDirty },
+	} = methods;
 
 	// 提交表單資料到後端並執行相關操作
 	const onSubmit = (data) => {
@@ -112,31 +101,33 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 		<>
 			{/* Modal */}
 			<ModalTemplete title={title} show={true} onClose={onCheckDirty}>
-				<form onSubmit={handleSubmit(onSubmit, onError)}>
-					<div className="flex flex-col pt-4 gap-4">
-						<div>
-							<Controller
-								name="name"
-								control={control}
-								render={({ field }) => (
-									<TextField
-										variant="outlined"
-										size="small"
-										className="inputPadding"
-										label="案場名稱"
-										placeholder="請輸入案場名稱"
-										fullWidth
-										{...field}
-									/>
-								)}
-							/>
-							<FormHelperText className="!text-red-600 h-5">{errors["name"]?.message}</FormHelperText>
+				<FormProvider {...methods}>
+					<form onSubmit={handleSubmit(onSubmit)}>
+						<div className="flex flex-col pt-4 gap-4">
+							<div>
+								<Controller
+									name="name"
+									control={control}
+									render={({ field }) => (
+										<TextField
+											variant="outlined"
+											size="small"
+											className="inputPadding"
+											label="案場名稱"
+											placeholder="請輸入案場名稱"
+											fullWidth
+											{...field}
+										/>
+									)}
+								/>
+								<FormHelperText className="!text-red-600 h-5">{errors["name"]?.message}</FormHelperText>
+							</div>
+							<Button type="submit" variant="contained" color="success" className="!text-base !h-12" fullWidth>
+								儲存
+							</Button>
 						</div>
-						<Button type="submit" variant="contained" color="success" className="!text-base !h-12" fullWidth>
-							儲存
-						</Button>
-					</div>
-				</form>
+					</form>
+				</FormProvider>
 			</ModalTemplete>
 
 			{/* Alert */}
@@ -424,7 +415,7 @@ const DispatchWorkModal = React.memo(({ title, deliverInfo, sendDataToBackend, o
 								<TransitionGroup>
 									{selectedPersons.map((person) => (
 										<Collapse key={"selected" + person.id}>
-											<ListItem>
+											<ListItem className="!py-1">
 												<ListItemText secondary={person.nickname} />
 												<IconButton onClick={() => handleRemovePerson(person.id)}>
 													<DeleteIcon />

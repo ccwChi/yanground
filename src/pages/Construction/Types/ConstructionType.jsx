@@ -49,7 +49,11 @@ const ConstructionType = () => {
 	];
 
 	// 對照 api table 所顯示 key
-	const columns = [
+	const columnsPC = [
+		{ key: "id", label: "ID" },
+		{ key: "name", label: "名稱" },
+	];
+	const columnsMobile = [
 		{ key: "id", label: "ID" },
 		{ key: "name", label: "名稱" },
 	];
@@ -184,7 +188,8 @@ const ConstructionType = () => {
 			<div className="overflow-y-auto h-full order-3 sm:order-1">
 				<RWDTable
 					data={apiData}
-					columns={columns}
+					columnsPC={columnsPC}
+					columnsMobile={columnsMobile}
 					actions={actions}
 					cardTitleKey={"name"}
 					tableMinWidth={540}

@@ -7,13 +7,14 @@ import {NavLink, useLocation} from "react-router-dom";
 const CustomBreadcrumbs = () => {
 	const location = useLocation();
 	const pathnames = location.pathname.split("/").filter((x) => x);
-	console.log(pathnames);
 
 	const nameMappings = [
 		{name: "userinfo", display: "個人資料"},
 		{name: "constructionTypes", display: "工程類別"},
 		{name: "users", display: "職員清單"},
 		{name: "sites", display: "案場"},
+		{name: "setting", display: "設定"},
+		{name: "punch", display: "打卡"},
 	];
 
 	return (
