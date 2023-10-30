@@ -53,11 +53,15 @@ table {
 	}
 	tbody {
 		tr {
-			height: 3.25rem;
+			height: 3.125rem;
 			td {
 				padding: 8px 12px !important;
 				font-size: 1rem !important;
 				color: $text-color-1 !important;
+			}
+			&:first-of-type td button[data-mode="up"],
+			&:last-of-type td button[data-mode="down"] {
+				display: none;
 			}
 		}
 	}

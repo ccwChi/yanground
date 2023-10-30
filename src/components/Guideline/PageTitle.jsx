@@ -3,11 +3,11 @@ import Button from "@mui/material/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuoteLeft } from "@fortawesome/free-solid-svg-icons";
 
-const PageTitle = ({ title, btnGroup, handleActionClick, children }) => {
+const PageTitle = ({ title, btnGroup, handleActionClick, isLoading = true, children }) => {
 	return (
 		<div
 			className={"relative hidden sm:flex justify-between text-primary-800 mb-3"}
-			style={{ padding: "1.25rem 2rem 1.5rem" }}>
+			style={{ padding: "0.5rem 2rem 1.5rem" }}>
 			<div className="inline-flex items-center gap-2">
 				<FontAwesomeIcon icon={faQuoteLeft} style={{ fontSize: "1.875rem" }} />
 				<span className="font-bold text-2xl leading-10">{title}</span>
@@ -30,11 +30,12 @@ const PageTitle = ({ title, btnGroup, handleActionClick, children }) => {
 							key={btn.text}
 							variant={btn.variant}
 							color={btn.color}
-							className="gap-1.5"
+							className="gap-1.5 !ease-in-out !duration-300"
 							style={{ transform: "translateY(1rem)" }}
 							sx={{ fontSize: "1rem" }}
 							data-mode={btn.mode}
-							onClick={handleActionClick}>
+							onClick={handleActionClick}
+							disabled={!isLoading}>
 							{/* <FontAwesomeIcon icon={btn.icon} className="pe-2" /> */}
 							{btn.icon}
 							{btn.text}

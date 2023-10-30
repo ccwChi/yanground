@@ -73,7 +73,7 @@ const UpdatedModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
 					<div className="flex flex-col pt-4 gap-4">
 						<div className="inline-flex flex-col gap-1">
 							<div>
-								<InputTitle title={"項目名稱"} />
+								<InputTitle title={"工項名稱"} />
 								<Controller
 									name="name"
 									control={control}
@@ -82,7 +82,7 @@ const UpdatedModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
 											variant="outlined"
 											size="small"
 											className="inputPadding"
-											placeholder="請輸入項目名稱"
+											placeholder="請輸入工項名稱"
 											fullWidth
 											inputProps={{ maxLength: 25 }}
 											{...field}

@@ -12,7 +12,7 @@ export const useNotification = () => {
 				vertical: "bottom",       // 垂直，可選：'top', 'bottom'
 				horizontal: "center",     // 水平，可選：'left', 'center', 'right'
 			},
-			autoHideDuration: 3000,
+			autoHideDuration: 5000,
 		});
 	};
 
