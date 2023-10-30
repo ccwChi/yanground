@@ -109,13 +109,14 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
     if (deliverInfo?.id) {
       setIsLoading(true);
       reset({
-        empolyeeId: deliverInfo?.empolyeeId || "",
-        displayName: deliverInfo?.displayName || "",
-        nickname: deliverInfo?.nickname || "",
-        lastname: deliverInfo?.lastname || "",
-        firstname: deliverInfo?.firstname || "",
-        nationalIdentityCardNumber:
-          deliverInfo?.nationalIdentityCardNumber || "",
+        empolyeeId: deliverInfo?.empolyeeId ? deliverInfo.empolyeeId : "",
+        displayName: deliverInfo?.displayName ? deliverInfo.displayName : "",
+        nickname: deliverInfo?.nickname ? deliverInfo?.nickname : "",
+        lastname: deliverInfo?.lastname ? deliverInfo.lastname : "",
+        firstname: deliverInfo?.firstname ? deliverInfo.firstname : "",
+        nationalIdentityCardNumber: deliverInfo?.nationalIdentityCardNumber
+          ? deliverInfo.nationalIdentityCardNumber
+          : "",
         birthDate: deliverInfo?.birthDate
           ? new Date(deliverInfo.birthDate)
           : null,
@@ -128,9 +129,12 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
         startedOn: deliverInfo?.startedOn
           ? new Date(deliverInfo.startedOn)
           : null,
-        department: deliverInfo?.department?.id,
-        authorities:
-          deliverInfo?.authorities.map((authority) => authority.id) || [],
+        department: deliverInfo?.department?.id
+          ? deliverInfo.department.id
+          : "",
+        authorities: deliverInfo?.authorities
+          ? deliverInfo?.authorities.map((authority) => authority.id)
+          : [],
       });
       setIsLoading(false);
     }
