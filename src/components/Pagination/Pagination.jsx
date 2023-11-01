@@ -20,12 +20,20 @@ const Pagination = ({ totalElement, page, onPageChange, rowsPerPage, onRowsPerPa
 				onRowsPerPageChange={onRowsPerPageChange}
 				labelRowsPerPage="每頁行數"
 				labelDisplayedRows={({ from, to, count }) => `${count} 項中的 ${from}-${to} 項`}
+				sx={[
+					{
+						"> div": {
+							justifyContent: "flex-start",
+						},
+					},
+				]}
 				ActionsComponent={() => (
 					<div className="flex flex-1">
 						<div className="flex-1"></div>
 						<div className="inline-flex items-center text-sm gap-1">
 							第
 							<Select value={page} variant="standard" onChange={(e) => onPageChange(null, e.target.value)}>
+								<MenuItem value="0" className="hidden !p-0"></MenuItem>
 								{Array.from({ length: Math.ceil(totalElement / rowsPerPage) }, (_, i) => (
 									<MenuItem key={i} value={i}>
 										{i + 1}

@@ -18,6 +18,12 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+input {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 #root,
 #root > div {
 	height: inherit;

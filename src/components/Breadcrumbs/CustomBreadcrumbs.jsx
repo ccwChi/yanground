@@ -2,19 +2,20 @@ import React from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
-import {NavLink, useLocation} from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
 const CustomBreadcrumbs = () => {
 	const location = useLocation();
 	const pathnames = location.pathname.split("/").filter((x) => x);
 
 	const nameMappings = [
-		{name: "userinfo", display: "個人資料"},
-		{name: "constructionTypes", display: "工程類別"},
-		{name: "users", display: "職員清單"},
-		{name: "sites", display: "案場"},
-		{name: "setting", display: "設定"},
-		{name: "punch", display: "打卡"},
+		{ name: "userinfo", display: "個人資料" },
+		{ name: "sites", display: "案場" },
+		{ name: "constructionTypes", display: "工程類別" },
+		{ name: "users", display: "職員清單" },
+		{ name: "project", display: "專案管理" },
+		{ name: "setting", display: "設定" },
+		{ name: "punch", display: "打卡" },
 	];
 
 	return (

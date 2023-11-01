@@ -1,5 +1,6 @@
 @import "../src/assets/styles/custom";
 $nav-height: 64px;
+$z-index-c: 1020;
 $z-index-b: 1025;
 $z-index-a: 1040;
 
@@ -15,7 +16,7 @@ $z-index-a: 1040;
 	right: 0;
 	bottom: 0;
 	width: 100%;
-	z-index: $z-index-b;
+	z-index: $z-index-c;
 	> div {
 		height: 100%;
 		width: 24%;
@@ -51,6 +52,7 @@ $z-index-a: 1040;
 		// height: 2.125rem !important;
 		font-size: 1rem !important;
 		line-height: 2rem !important;
+		padding: 8.5px 14px !important;
 	}
 	textarea {
 		font-size: 1rem !important;
@@ -76,7 +78,7 @@ $z-index-a: 1040;
 
 .customPagination {
 	> div {
-		justify-content: flex-start;
+		min-height: 48px;
 	}
 	.MuiTablePagination-spacer {
 		flex: 0;
@@ -107,6 +109,7 @@ $z-index-a: 1040;
 
 	.sidebar_wrapper {
 		transition: width 0.35s ease-in-out;
+		z-index: $z-index-b;
 		&.hide {
 			width: 0;
 		}
@@ -156,6 +159,8 @@ $z-index-a: 1040;
 	.customPagination {
 		> div {
 			padding-right: 1rem;
+			padding-bottom: 0.5rem;
+			min-height: 0;
 		}
 		.MuiIconButton-root {
 			display: none;

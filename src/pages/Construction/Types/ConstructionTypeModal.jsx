@@ -10,7 +10,7 @@ import { useForm, FormProvider, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-const UpdatedModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
+const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }) => {
 	// Alert 開關
 	const [alertOpen, setAlertOpen] = useState(false);
 
@@ -94,7 +94,7 @@ const UpdatedModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
 											/>
 										)}
 									/>
-									<FormHelperText className="!text-red-600 break-words" sx={{ minHeight: "1.25rem" }}>
+									<FormHelperText className="!text-red-600 break-words !text-right !mt-0" sx={{ minHeight: "1.25rem" }}>
 										{errors["name"]?.message}
 									</FormHelperText>
 								</div>
@@ -137,6 +137,6 @@ const UpdatedModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
 			/>
 		</>
 	);
-};
+});
 
 export { UpdatedModal };

@@ -16,26 +16,10 @@ const theme = createTheme({
 			main: "#1F1F21",
 			contrastText: "#fff",
 		},
-		// group1: {
-		// 	main: "#C6A570",
-		// 	contrastText: "#fff",
-		// },
-		// group2: {
-		// 	main: "#4D9697",
-		// 	contrastText: "#fff",
-		// },
-		// group3: {
-		// 	main: "#85B082",
-		// 	contrastText: "#fff",
-		// },
-		// group4: {
-		// 	main: "#949494",
-		// 	contrastText: "#fff",
-		// },
-		// group5: {
-		// 	main: "#343434",
-		// 	contrastText: "#fff",
-		// },
+		purple: {
+			main: "#6262a7",
+			contrastText: "#fff",
+		},
 	},
 	typography: {
 		fontFamily:

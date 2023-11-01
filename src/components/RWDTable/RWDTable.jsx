@@ -131,6 +131,12 @@ const RWDTable = ({
 															) : (
 																"?"
 															)
+														) : column.key === "administrativeDivision" ? (
+															item.administrativeDivision ? (
+																item.administrativeDivision.administeredBy.name + item.administrativeDivision.name
+															) : (
+																<span className="italic text-neutral-500 text-sm">(無)</span>
+															)
 														) : item[column.key] ? (
 															item[column.key]
 														) : (
@@ -244,7 +250,7 @@ const RWDTable = ({
 													) : column.key === "pictureUrl" ? (
 														item.pictureUrl ? (
 															<div className="flex items-center justify-center">
-																<Avatar src={item.pictureUrl} alt={item.displayName} />
+																<Avatar src={item.pictureUrl} alt={item.nickname} />
 															</div>
 														) : (
 															<span className="italic text-neutral-500 text-sm">(無)</span>
@@ -256,6 +262,12 @@ const RWDTable = ({
 															"女性"
 														) : (
 															"?"
+														)
+													) : column.key === "administrativeDivision" ? (
+														item.administrativeDivision ? (
+															item.administrativeDivision.administeredBy.name + item.administrativeDivision.name
+														) : (
+															<span className="italic text-neutral-500 text-sm">(無)</span>
 														)
 													) : item[column.key] ? (
 														item[column.key]

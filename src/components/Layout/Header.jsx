@@ -49,6 +49,9 @@ const Header = ({ toggleSidebar }) => {
 								<NavLink to="userinfo" className="text-text opacity-80">
 									<MenuItem>個人資料</MenuItem>
 								</NavLink>
+								<NavLink to="punch" className="text-text opacity-80">
+									<MenuItem>打卡</MenuItem>
+								</NavLink>
 								<NavLink to="setting" className="text-text opacity-80">
 									<MenuItem>設定</MenuItem>
 								</NavLink>

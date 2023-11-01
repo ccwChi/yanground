@@ -1,16 +1,16 @@
-import React, {useEffect, useState} from "react";
-import {Outlet} from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
 import Header from "./components/Layout/Header";
 import Sidebar from "./components/Layout/Sidebar";
 import Tabbar from "./components/Tabbar/Tabbar";
 import CustomBreadcrumbs from "./components/Breadcrumbs/CustomBreadcrumbs";
-import {faUserGear, faHelmetSafety, faToolbox, faVest, faPersonDigging} from "@fortawesome/free-solid-svg-icons";
-import {ThemeProvider} from "@mui/material/styles";
+import { faUserGear, faHelmetSafety, faToolbox, faVest, faPersonDigging } from "@fortawesome/free-solid-svg-icons";
+import { ThemeProvider } from "@mui/material/styles";
 import theme from "./utils/theme";
 import "./app.scss";
-import {getData} from "./utils/api";
+import { getData } from "./utils/api";
 import liff from "@line/liff";
-import {SnackbarProvider} from "notistack";
+import { SnackbarProvider } from "notistack";
 const LINE_ID = process.env.REACT_APP_LINEID;
 
 const App = () => {
@@ -36,6 +36,11 @@ const App = () => {
 			icon: faUserGear,
 			text: "職員清單",
 			href: "users",
+		},
+		{
+			icon: faToolbox,
+			text: "專案管理",
+			href: "project",
 		},
 		// {
 		// 	icon: faToolbox,
