@@ -3,25 +3,18 @@ import ModalTemplete from "../../components/Modal/ModalTemplete";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 import { format } from "date-fns"; // format(data, 'yyyy-MM-dd')
 import {
-	TextField,
-	Button,
-	Select,
-	MenuItem,
-	FormControl,
-	InputLabel,
-	List,
-	ListItem,
-	ListItemText,
-	IconButton,
-	Divider,
-	FormHelperText,
-	RadioGroup,
-	FormControlLabel,
-	Radio,
-	FormLabel,
-	FormGroup,
-	Checkbox,
-	Box,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  FormHelperText,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormLabel,
+  FormGroup,
+  Box,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useForm, FormProvider, Controller } from "react-hook-form";
@@ -29,7 +22,6 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getData } from "../../utils/api";
 import { IOSSwitch } from "../../components/Switch/Switch";
-import { faL } from "@fortawesome/free-solid-svg-icons";
 import { useNotification } from "../../hooks/useNotification";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
@@ -98,26 +90,41 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
 		formState: { errors, isDirty },
 	} = methods;
 
-	//將外面傳進來的員工資料deliverInfo代入到每個空格之中
-	useEffect(() => {
-		if (deliverInfo?.id) {
-			setIsLoading(true);
-			reset({
-				empolyeeId: deliverInfo?.empolyeeId || "",
-				displayName: deliverInfo?.displayName || "",
-				nickname: deliverInfo?.nickname || "",
-				lastname: deliverInfo?.lastname || "",
-				firstname: deliverInfo?.firstname || "",
-				nationalIdentityCardNumber: deliverInfo?.nationalIdentityCardNumber || "",
-				birthDate: deliverInfo?.birthDate ? new Date(deliverInfo.birthDate) : null,
-				gender: deliverInfo?.gender === null ? null : deliverInfo?.gender === true ? "male" : "female",
-				startedOn: deliverInfo?.startedOn ? new Date(deliverInfo.startedOn) : null,
-				department: deliverInfo?.department?.id,
-				authorities: deliverInfo?.authorities.map((authority) => authority.id) || [],
-			});
-			setIsLoading(false);
-		}
-	}, [deliverInfo, reset]);
+  //將外面傳進來的員工資料deliverInfo代入到每個空格之中
+  useEffect(() => {
+    if (deliverInfo?.id) {
+      setIsLoading(true);
+      reset({
+        empolyeeId: deliverInfo?.empolyeeId ? deliverInfo.empolyeeId : "",
+        displayName: deliverInfo?.displayName ? deliverInfo.displayName : "",
+        nickname: deliverInfo?.nickname ? deliverInfo?.nickname : "",
+        lastname: deliverInfo?.lastname ? deliverInfo.lastname : "",
+        firstname: deliverInfo?.firstname ? deliverInfo.firstname : "",
+        nationalIdentityCardNumber: deliverInfo?.nationalIdentityCardNumber
+          ? deliverInfo.nationalIdentityCardNumber
+          : "",
+        birthDate: deliverInfo?.birthDate
+          ? new Date(deliverInfo.birthDate)
+          : null,
+        gender:
+          deliverInfo?.gender === null
+            ? null
+            : deliverInfo?.gender === true
+            ? "male"
+            : "female",
+        startedOn: deliverInfo?.startedOn
+          ? new Date(deliverInfo.startedOn)
+          : null,
+        department: deliverInfo?.department?.id
+          ? deliverInfo.department.id
+          : "",
+        authorities: deliverInfo?.authorities
+          ? deliverInfo?.authorities.map((authority) => authority.id)
+          : [],
+      });
+      setIsLoading(false);
+    }
+  }, [deliverInfo, reset]);
 
 	const onSubmit = (data) => {
 		const fd = new FormData();
@@ -300,14 +307,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
 										<FormControl>
 											<FormLabel
 												id="demo-row-radio-buttons-group-label"
-												// onClick={() => {
-												//   console.log(
-												//     "departmentList",
-												//     departmentList,
-												//     "authorityList",
-												//     authorityList
-												//   );
-												// }}
 											>
 												性別
 											</FormLabel>

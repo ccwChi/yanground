@@ -118,16 +118,16 @@ const Users = () => {
 		setPage(0);
 	};
 
-	// 當活動按鈕點擊時開啟 modal 並進行動作
-	const handleActionClick = (event) => {
-		event.stopPropagation();
-		const dataMode = event.currentTarget.getAttribute("data-mode");
-		const dataValue = event.currentTarget.getAttribute("data-value");
-		setModalValue(dataMode);
-		// console.log(dataValue);
-		setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
-		// console.log("Action button clicked", dataMode, dataValue);
-	};
+  // 當活動按鈕點擊時開啟 modal 並進行動作
+  const handleActionClick = (event) => {
+    event.stopPropagation();
+    const dataMode = event.currentTarget.getAttribute("data-mode");
+    const dataValue = event.currentTarget.getAttribute("data-value");
+    setModalValue(dataMode);
+    setDeliverInfo(
+      dataValue ? apiData?.content.find((item) => item.id === dataValue) : null
+    );
+  };
 
 	// 關閉 Modal 清除資料
 	const onClose = () => {
