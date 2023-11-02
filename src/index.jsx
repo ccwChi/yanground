@@ -17,6 +17,7 @@ import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import Users from "./pages/HumanResources/Users";
+import ConstructionSummary from "./pages/ConstructionSummary/ConstructionSummary";
 
 const router = createBrowserRouter([
 	{
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
 			{
 				path: "/constructiontypes/:type/:job",
 				element: <ConstructionJob />,
+			},
+			{
+				path: "/constructionsummary",
+				element: <ConstructionSummary />,
 			},
 			{
 				path: "/punch",

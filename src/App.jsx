@@ -4,7 +4,7 @@ import Header from "./components/Layout/Header";
 import Sidebar from "./components/Layout/Sidebar";
 import Tabbar from "./components/Tabbar/Tabbar";
 import CustomBreadcrumbs from "./components/Breadcrumbs/CustomBreadcrumbs";
-import { faUserGear, faHelmetSafety, faToolbox, faVest, faPersonDigging } from "@fortawesome/free-solid-svg-icons";
+import { faUserGear, faHelmetSafety, faToolbox, faVest, faPersonDigging, faFileLines } from "@fortawesome/free-solid-svg-icons";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./utils/theme";
 import "./app.scss";
@@ -33,6 +33,11 @@ const App = () => {
 			href: "constructionTypes",
 		},
 		{
+			icon: faFileLines,
+			text: "工程清單",
+			href: "constructionsummary",
+		},
+		{
 			icon: faUserGear,
 			text: "人事部",
 			href: "users",
@@ -58,7 +63,7 @@ const App = () => {
 	];
 
 	useEffect(() => {
-		initLine();
+		//initLine();
 	}, []);
 
 	// Liff 登入 Line
