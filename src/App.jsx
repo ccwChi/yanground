@@ -4,7 +4,7 @@ import Header from "./components/Layout/Header";
 import Sidebar from "./components/Layout/Sidebar";
 import Tabbar from "./components/Tabbar/Tabbar";
 import CustomBreadcrumbs from "./components/Breadcrumbs/CustomBreadcrumbs";
-import { faUserGear, faHelmetSafety, faToolbox, faVest, faPersonDigging } from "@fortawesome/free-solid-svg-icons";
+import { faUserGear, faHelmetSafety, faToolbox, faVest, faPersonDigging, faFileLines } from "@fortawesome/free-solid-svg-icons";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./utils/theme";
 import "./app.scss";
@@ -33,6 +33,11 @@ const App = () => {
 			href: "constructionTypes",
 		},
 		{
+			icon: faFileLines,
+			text: "施工清單",
+			href: "constructionsummary",
+		},
+		{
 			icon: faUserGear,
 			text: "職員清單",
 			href: "users",
@@ -59,43 +64,43 @@ const App = () => {
 		// },
 	];
 
-	// useEffect(() => {
-	// 	initLine();
-	// }, []);
+	useEffect(() => {
+		initLine();
+	}, []);
 
-	// // Liff 登入 Line
-	// const initLine = () => {
-	// 	liff.init(
-	// 		{ liffId: LINE_ID },
-	// 		() => {
-	// 			if (liff.isLoggedIn()) {
-	// 				runApp();
-	// 			} else {
-	// 				liff.login();
-	// 			}
-	// 		},
-	// 		(err) => console.error(err)
-	// 	);
-	// };
+	// Liff 登入 Line
+	const initLine = () => {
+		liff.init(
+			{ liffId: LINE_ID },
+			() => {
+				if (liff.isLoggedIn()) {
+					runApp();
+				} else {
+					liff.login();
+				}
+			},
+			(err) => console.error(err)
+		);
+	};
 
-	// // 設置憑證與從後端讀取用戶資料
-	// const runApp = () => {
-	// 	const accessToken = liff.getAccessToken();
-	// 	if (accessToken) {
-	// 		localStorage.setItem("accessToken", JSON.stringify(accessToken));
-	// 		getData().then((data) => {
-	// 			if (data?.result) {
-	// 				// console.log(data);
-	// 				let d = data.result;
-	// 				if (d.displayName) {
-	// 					delete d.statusMessage;
-	// 					delete d.userId;
-	// 					localStorage.setItem("userProfile", JSON.stringify(d));
-	// 				}
-	// 			}
-	// 		});
-	// 	}
-	// };
+	// 設置憑證與從後端讀取用戶資料
+	const runApp = () => {
+		const accessToken = liff.getAccessToken();
+		if (accessToken) {
+			localStorage.setItem("accessToken", JSON.stringify(accessToken));
+			getData().then((data) => {
+				if (data?.result) {
+					// console.log(data);
+					let d = data.result;
+					if (d.displayName) {
+						delete d.statusMessage;
+						delete d.userId;
+						localStorage.setItem("userProfile", JSON.stringify(d));
+					}
+				}
+			});
+		}
+	};
 
 	// SideBar 開關
 	const toggleSidebar = () => {

@@ -12,6 +12,7 @@ const CustomBreadcrumbs = () => {
 		{ name: "userinfo", display: "個人資料" },
 		{ name: "sites", display: "案場" },
 		{ name: "constructionTypes", display: "工程類別" },
+		{ name: "constructionsummary", display: "施工清單" },
 		{ name: "users", display: "職員清單" },
 		{ name: "dispatchList", display: "派工清單" },
 		{ name: "project", display: "專案管理" },
