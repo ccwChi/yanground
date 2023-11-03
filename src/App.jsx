@@ -68,7 +68,7 @@ const App = () => {
 	];
 
 	useEffect(() => {
-		//initLine();
+		initLine();
 	}, []);
 
 	// Liff 登入 Line
