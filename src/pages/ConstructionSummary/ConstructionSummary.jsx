@@ -127,10 +127,9 @@ const ConstructionSummary = () => {
           showNotification(message[0], true);
           getApiList(apiUrl);
           onClose();
-        } else if (result.result.response === 400) {
+        } else if (result.result.response !== 200) {
           //console.log(result.result);
-          showNotification("阿", false);
-
+          showNotification("權限不足", false);
         }
       });
     }
@@ -183,7 +182,7 @@ const ConstructionSummary = () => {
       modalValue: "edit",
       modalComponent: (
         <UpdatedModal
-          title="修改清單"
+          title="修改施工清單"
           deliverInfo={deliverInfo}
           sendDataToBackend={sendDataToBackend}
           onClose={onClose}
@@ -194,7 +193,7 @@ const ConstructionSummary = () => {
       modalValue: "task",
       modalComponent: (
         <TaskModal
-          title="清單工項編輯"
+          title="施工清單工項執行"
           deliverInfo={deliverInfo}
           sendDataToBackend={sendDataToBackend}
           onClose={onClose}
@@ -223,7 +222,8 @@ const ConstructionSummary = () => {
       <div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
         <RWDTable
           data={apiData?.content ? apiData.content : null}
-          columns={columns}
+          columnsPC={columns}
+          columnsMobile={columns}
           actions={actions}
           cardTitleKey={"name"}
           tableMinWidth={540}

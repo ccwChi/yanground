@@ -29,7 +29,7 @@ const App = () => {
 		},
 		{
 			icon: faVest,
-			text: "工程部",
+			text: "工程類別",
 			href: "constructionTypes",
 		},
 		{
@@ -39,27 +39,32 @@ const App = () => {
 		},
 		{
 			icon: faUserGear,
-			text: "人事部",
+			text: "職員清單",
 			href: "users",
 		},
 		{
 			icon: faToolbox,
-			text: "業務部",
-			href: "#",
-			subMenuItems: [
-				{ text: "專案管理", href: "project" },
-				{ text: "派工清單", href: "dispatchPrint" },
-			],
+			text: "專案管理",
+			href: "project",
 		},
-		{
-			icon: faPersonDigging,
-			text: "範例",
-			href: "#",
-			subMenuItems: [
-				{ text: "403", href: "forbidden" },
-				{ text: "登出(暫放)", href: "logout" },
-			],
-		},
+		// {
+		// 	icon: faToolbox,
+		// 	text: "業務部",
+		// 	href: "#",
+		// 	subMenuItems: [
+		// 		{ text: "專案管理", href: "project" },
+		// 		{ text: "派工清單", href: "dispatchPrint" },
+		// 	],
+		// },
+		// {
+		// 	icon: faPersonDigging,
+		// 	text: "範例",
+		// 	href: "#",
+		// 	subMenuItems: [
+		// 		{ text: "403", href: "forbidden" },
+		// 		{ text: "登出(暫放)", href: "logout" },
+		// 	],
+		// },
 	];
 
 	useEffect(() => {

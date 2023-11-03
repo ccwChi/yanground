@@ -1,46 +1,42 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import PageTitle from "../../../components/Guideline/PageTitle";
-import RWDTable from "../../../components/RWDTable/RWDTable";
-import Pagination from "../../../components/Pagination/Pagination";
-import FloatingActionButton from "../../../components/FloatingActionButton/FloatingActionButton";
-import AddIcon from "@mui/icons-material/Add";
+import PageTitle from "../../components/Guideline/PageTitle";
+import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
+import RWDTable from "../../components/RWDTable/RWDTable";
+import Pagination from "../../components/Pagination/Pagination";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { getData, postData } from "../../../utils/api";
-import { UpdatedModal } from "./ConstructionTypeModal";
-import { useNotification } from "../../../hooks/useNotification";
+import { getData, postData } from "../../utils/api";
+import { UpdatedModal } from "./ProjectModal";
+import { useNotification } from "../../hooks/useNotification";
 
-const ConstructionType = () => {
-	const params = useParams();
-	const types = params.type.split("+");
-	const navigate = useNavigate();
+const Project = () => {
 	const showNotification = useNotification();
 
-	// ApiUrl 1
-	const apiUrl = `constructionType/${types[1]}`;
 	// API List Data
 	const [apiData, setApiData] = useState(null);
-	// isLoading 等待請求 API
+	// isLoading 等待請求 api
 	const [isLoading, setIsLoading] = useState(true);
 	// Page 頁數設置
 	const [page, setPage] = useState(0);
 	// rows per Page 多少筆等同於一頁
 	const [rowsPerPage, setRowsPerPage] = useState(10);
+	// ApiUrl
+	const furl = "project";
+	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
 	// ModalValue 控制開啟的是哪一個 Modal
 	const [modalValue, setModalValue] = useState(false);
 	// 傳送額外資訊給 Modal
 	const [deliverInfo, setDeliverInfo] = useState(null);
-	// ApiUrl 2
-	const apiUrl_ = `${apiUrl}/job?p=${page + 1}&s=${rowsPerPage}`;
+	// 縣市清單
+	const [cityList, setCityList] = useState(null);
 
 	// 上方區塊功能按鈕清單
 	const btnGroup = [
 		{
 			mode: "create",
 			icon: <AddCircleIcon fontSize="small" />,
-			text: "新增工程項目",
+			text: "新增專案",
 			variant: "contained",
 			color: "primary",
 			fabVariant: "success",
@@ -50,36 +46,20 @@ const ConstructionType = () => {
 
 	// 對照 api table 所顯示 key
 	const columnsPC = [
-		{ key: "id", label: "ID" },
-		{ key: "name", label: "名稱" },
+		{ key: "name", label: "專案" },
+		{ key: "administrativeDivision", label: "地點" },
 	];
 	const columnsMobile = [
-		{ key: "id", label: "ID" },
-		{ key: "name", label: "名稱" },
+		{ key: "name", label: "專案" },
+		{ key: "administrativeDivision", label: "地點" },
 	];
 
-	const actions = [
-		{ value: "edit", icon: <EditIcon />, title: "編輯工程項目" },
-		{ value: "goto", icon: <ArrowForwardIcon />, title: "前往工項執行" },
-	];
-
-	// 取得對照參數，檢查路由是否存在
-	useEffect(() => {
-		checkRouteExists(apiUrl);
-	}, []);
-	const checkRouteExists = (url) => {
-		setIsLoading(true);
-		getData(url).then((result) => {
-			if (result.response !== 200) {
-				navigate("/404");
-			}
-		});
-	};
+	const actions = [{ value: "edit", icon: <EditIcon />, title: "編輯專案" }];
 
 	// 取得列表資料
 	useEffect(() => {
-		getApiList(apiUrl_);
-	}, [apiUrl_]);
+		getApiList(apiUrl);
+	}, [apiUrl]);
 	const getApiList = useCallback((url) => {
 		setIsLoading(true);
 		getData(url).then((result) => {
@@ -89,27 +69,33 @@ const ConstructionType = () => {
 		});
 	}, []);
 
+	// 取得縣市資料
+	useEffect(() => {
+		getData("administrativeDivision??p=1&s=50").then((result) => {
+			const data = result.result.content;
+			setCityList(data);
+		});
+	}, []);
+
 	// 傳遞給後端資料
 	const sendDataToBackend = (fd, mode, otherData) => {
-		let url = "constructionJob";
+		let url = furl;
 		let message = [];
-		fd.append("constructionType", types[1]);
 		switch (mode) {
 			case "create":
-				message = ["工程項目新增成功！"];
+				message = ["專案新增成功！"];
 				break;
 			case "edit":
 				url += "/" + otherData;
-				message = ["工程項目編輯成功！"];
+				message = ["專案編輯成功！"];
 				break;
 			default:
 				break;
 		}
-
 		postData(url, fd).then((result) => {
 			if (result.status) {
 				showNotification(message[0], true);
-				getApiList(apiUrl_);
+				getApiList(apiUrl);
 				onClose();
 			} else {
 				showNotification(result.result.reason, false);
@@ -138,14 +124,7 @@ const ConstructionType = () => {
 		const dataMode = event.currentTarget.getAttribute("data-mode");
 		const dataValue = event.currentTarget.getAttribute("data-value");
 		setModalValue(dataMode);
-
-		if (dataValue) {
-			const data = apiData.find((item) => item.id === +dataValue);
-			if (dataMode === "goto") {
-				navigate(`${data.name}+${data.id}`);
-			}
-			setDeliverInfo(data);
-		}
+		setDeliverInfo(dataValue ? apiData.content.find((item) => item.id === dataValue) : "");
 	};
 
 	// 關閉 Modal 清除資料
@@ -158,15 +137,18 @@ const ConstructionType = () => {
 	const modalConfig = [
 		{
 			modalValue: "create",
-			modalComponent: <UpdatedModal title="新增工程項目" sendDataToBackend={sendDataToBackend} onClose={onClose} />,
+			modalComponent: (
+				<UpdatedModal title="新增專案" sendDataToBackend={sendDataToBackend} cityList={cityList} onClose={onClose} />
+			),
 		},
 		{
 			modalValue: "edit",
 			modalComponent: (
 				<UpdatedModal
-					title="編輯工程項目"
+					title="編輯專案"
 					deliverInfo={deliverInfo}
 					sendDataToBackend={sendDataToBackend}
+					cityList={cityList}
 					onClose={onClose}
 				/>
 			),
@@ -177,17 +159,12 @@ const ConstructionType = () => {
 	return (
 		<>
 			{/* PageTitle */}
-			<PageTitle
-				title={"工程項目 - " + types[0]}
-				btnGroup={btnGroup}
-				handleActionClick={handleActionClick}
-				isLoading={!isLoading}
-			/>
+			<PageTitle title="專案管理" btnGroup={btnGroup} handleActionClick={handleActionClick} isLoading={!isLoading} />
 
 			{/* Table */}
-			<div className="overflow-y-auto h-full order-3 sm:order-1">
+			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
 				<RWDTable
-					data={apiData}
+					data={apiData?.content}
 					columnsPC={columnsPC}
 					columnsMobile={columnsMobile}
 					actions={actions}
@@ -199,13 +176,13 @@ const ConstructionType = () => {
 			</div>
 
 			{/* Pagination */}
-			{/* <Pagination
-				totalElement={apiData ? apiData.length : 0}
+			<Pagination
+				totalElement={apiData ? apiData.totalElements : 0}
 				page={page}
 				onPageChange={handleChangePage}
 				rowsPerPage={rowsPerPage}
 				onRowsPerPageChange={handleChangeRowsPerPage}
-			/> */}
+			/>
 
 			{/* Floating Action Button */}
 			<FloatingActionButton btnGroup={btnGroup} handleActionClick={handleActionClick} />
@@ -216,4 +193,4 @@ const ConstructionType = () => {
 	);
 };
 
-export default ConstructionType;
+export default Project;

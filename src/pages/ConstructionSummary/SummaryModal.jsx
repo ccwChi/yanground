@@ -1,14 +1,10 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import ModalTemplete from "../../components/Modal/ModalTemplete";
 
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
-import zhTW from "date-fns/locale/zh-TW";
-import { format } from "date-fns"; // format(data, 'yyyy-MM-dd')
-
 import InputTitle from "../../components/Guideline/InputTitle";
-import DatePicker from "../../components/Guideline/DatePicker";
+
+import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
+import { format } from "date-fns";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import Loading from "../../components/Loader/Loading";
 import {
@@ -35,7 +31,7 @@ import Edit from "@mui/icons-material/Edit";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { TransitionGroup } from "react-transition-group";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, FormProvider } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getData } from "../../utils/api";
@@ -122,7 +118,9 @@ const UpdatedModal = React.memo(
         }
       }
     };
-
+    const methods = useForm({
+      resolver: yupResolver(schema),
+    });
     // 使用 useForm Hook 來管理表單狀態和驗證
     const {
       control,
@@ -130,9 +128,7 @@ const UpdatedModal = React.memo(
       reset,
       setValue,
       formState: { errors, isDirty },
-    } = useForm({
-      resolver: yupResolver(schema),
-    });
+    } = methods;
 
     //將外面傳進來的員工資料deliverInfo代入到每個空格之中
     useEffect(() => {
@@ -217,248 +213,205 @@ const UpdatedModal = React.memo(
           }
           onClose={onCheckDirty}
         >
-          <form onSubmit={handleSubmit(onSubmit, onError)}>
-            <div className="flex flex-col pt-4 gap-4">
-              <div>
-                <Controller
-                  name="name"
-                  control={control}
-                  defaultValue={""}
-                  render={({ field }) => (
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      className="inputPadding"
-                      //label="清單標題"
-                      label={
-                        !!errors.name ? (
-                          <span className=" text-red-700 m-0">
-                            {errors?.name?.message}
-                          </span>
-                        ) : (
-                          "清單標題"
-                        )
-                      }
-                      placeholder="清單標題"
-                      fullWidth
-                      {...field}
-                    />
-                  )}
-                />
-              </div>
+          <FormProvider {...methods}>
+            <form onSubmit={handleSubmit(onSubmit, onError)}>
+              <div className="flex flex-col pt-4 gap-4">
+                <div>
+                  <Controller
+                    name="name"
+                    control={control}
+                    defaultValue={""}
+                    render={({ field }) => (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        className="inputPadding"
+                        //label="清單標題"
+                        label={
+                          !!errors.name ? (
+                            <span className=" text-red-700 m-0">
+                              {errors?.name?.message}
+                            </span>
+                          ) : (
+                            "專案(案場)"
+                          )
+                        }
+                        placeholder="清單標題"
+                        fullWidth
+                        {...field}
+                      />
+                    )}
+                  />
+                </div>
 
-              <div>
-                <Controller
-                  name="rocYear"
-                  control={control}
-                  defaultValue={""}
-                  render={({ field }) => (
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      className="inputPadding"
-                      //   label="專案年度"
-                      //   placeholder="ex: 112"
-                      label={
-                        !!errors.rocYear ? (
-                          <span className=" text-red-700 m-0">
-                            {errors?.rocYear?.message}
-                          </span>
-                        ) : (
-                          "專案年度"
-                        )
-                      }
-                      placeholder="專案年度"
-                      fullWidth
-                      {...field}
-                    />
-                  )}
-                />
-              </div>
+                <div>
+                  <Controller
+                    name="rocYear"
+                    control={control}
+                    defaultValue={""}
+                    render={({ field }) => (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        className="inputPadding"
+                        //   label="專案年度"
+                        //   placeholder="ex: 112"
+                        label={
+                          !!errors.rocYear ? (
+                            <span className=" text-red-700 m-0">
+                              {errors?.rocYear?.message}
+                            </span>
+                          ) : (
+                            "專案年度"
+                          )
+                        }
+                        placeholder="專案年度"
+                        fullWidth
+                        {...field}
+                      />
+                    )}
+                  />
+                </div>
 
-              <div className="flex flex-col gap-1.5">
-                <span>工程類別及項目</span>
-                <Controller
-                  name="type"
-                  control={control}
-                  defaultValue=""
-                  render={({ field: { value, onChange } }) => (
-                    <FormControl
-                      size="small"
-                      className="inputPadding"
-                      fullWidth
-                    >
-                      {value === "" ? (
-                        <InputLabel
-                          id="type-select-label"
-                          disableAnimation
-                          shrink={false}
-                          focused={false}
-                        >
-                          請選擇工程類別
-                        </InputLabel>
-                      ) : null}
-                      <Select
-                        labelId="type-select-label"
-                        MenuProps={{
-                          PaperProps: {
-                            style: { maxHeight: "250px" },
-                          },
-                        }}
-                        value={value}
-                        onChange={(e) => {
-                          onChange(e);
-                          getConstructionTypeList(e.target.value);
-                          setValue("job", "");
-                        }}
+                <div className="flex flex-col gap-1.5">
+                  <span>工程類別</span>
+                  <Controller
+                    name="type"
+                    control={control}
+                    defaultValue=""
+                    render={({ field: { value, onChange } }) => (
+                      <FormControl
+                        size="small"
+                        className="inputPadding"
+                        fullWidth
                       >
-                        {constructionTypeList?.map((type) => (
-                          <MenuItem
-                            key={"select" + type.ordinal}
-                            value={type.name}
+                        {value === "" ? (
+                          <InputLabel
+                            id="type-select-label"
+                            disableAnimation
+                            shrink={false}
+                            focused={false}
                           >
-                            {type.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  )}
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <Controller
-                  name="job"
-                  control={control}
-                  defaultValue=""
-                  render={({ field: { value, onChange } }) => (
-                    <FormControl
-                      size="small"
-                      className="inputPadding"
-                      fullWidth
-                    >
-                      {value === "" ? (
-                        <InputLabel
-                          id="job-select-label"
-                          disableAnimation
-                          shrink={false}
-                          focused={false}
+                            請選擇工程類別
+                          </InputLabel>
+                        ) : null}
+                        <Select
+                          readOnly={deliverInfo?.constructionSummaryJobTasks.length>0}
+                          labelId="type-select-label"
+                          MenuProps={{
+                            PaperProps: {
+                              style: { maxHeight: "250px" },
+                            },
+                          }}
+                          value={value}
+                          onChange={(e) => {
+                            onChange(e);
+                            getConstructionTypeList(e.target.value);
+                            setValue("job", "");
+                          }}
                         >
-                          請選擇工程項目
-                        </InputLabel>
-                      ) : null}
-
-                      <Select
-                        labelId="job-select-label"
-                        MenuProps={{
-                          PaperProps: {
-                            style: { maxHeight: "250px" },
-                          },
-                        }}
-                        value={value}
-                        onChange={onChange}
-                      >
-                        {!!constructionJobList &&
-                          constructionJobList.map((type) => (
-                            <MenuItem key={"select" + type.id} value={type.id}>
-                              {type.name}
+                          {constructionTypeList?.map((type) => (
+                            <MenuItem
+                              key={"select" + type.ordinal}
+                              value={type.name}
+                            >
+                              {type.label}
                             </MenuItem>
                           ))}
-                      </Select>
-                    </FormControl>
-                  )}
-                />
-                <FormHelperText className="!text-red-600 h-3">
-                  {errors.type && (
-                    <p className="text-danger m-0">
-                      {errors.type.message}
-                      {/* {showNotification(`${errors.type.message}`, false)} */}
-                    </p>
-                  )}
-                  {errors.job && (
-                    <p className="text-danger m-0">
-                      {errors.job.message}
-                      {/* {showNotification(`${errors.job.message}`, false)} */}
-                    </p>
-                  )}
-                </FormHelperText>
-              </div>
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+                </div>
+                <span>工程項目</span>
+                <div className="flex flex-col gap-1.5">
+                  <Controller
+                    name="job"
+                    control={control}
+                    defaultValue=""
+                    render={({ field: { value, onChange } }) => (
+                      <FormControl
+                        size="small"
+                        className="inputPadding"
+                        fullWidth
+                      >
+                        {value === "" ? (
+                          <InputLabel
+                            id="job-select-label"
+                            disableAnimation
+                            shrink={false}
+                            focused={false}
+                          >
+                            請選擇工程項目
+                          </InputLabel>
+                        ) : null}
 
-              <div className="flex flex-col gap-1.5">
-                <span>
-                  開工日期：
-                  <span className=" text-sm text-gray-400"> (可先不填)</span>
-                </span>
-                <LocalizationProvider
-                  dateAdapter={AdapterDateFns}
-                  adapterLocale={zhTW}
-                >
-                  <Controller
-                    name="since"
-                    control={control}
-                    defaultValue={null}
-                    render={({ field }) => (
-                      <MobileDatePicker
-                        slotProps={{ textField: { size: "small" } }}
-                        className="inputPadding"
-                        dayOfWeekFormatter={(_day, weekday) => {
-                          //console.log(); // AVOID BUG
-                        }}
-                        sx={[
-                          {
-                            width: "100%",
-                          },
-                        ]}
-                        {...field}
-                        format="yyyy-MM-dd"
-                      />
+                        <Select
+                          labelId="job-select-label"
+						  readOnly={deliverInfo?.constructionSummaryJobTasks.length>0}
+                          MenuProps={{
+                            PaperProps: {
+                              style: { maxHeight: "250px" },
+                            },
+                          }}
+                          value={value}
+                          onChange={onChange}
+                        >
+                          {!!constructionJobList &&
+                            constructionJobList.map((type) => (
+                              <MenuItem
+                                key={"select" + type.id}
+                                value={type.id}
+                              >
+                                {type.name}
+                              </MenuItem>
+                            ))}
+                        </Select>
+                      </FormControl>
                     )}
                   />
-                </LocalizationProvider>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <span>
-                  完工日期：{" "}
-                  <span className=" text-sm text-gray-400"> (可先不填)</span>
-                </span>
-                <LocalizationProvider
-                  dateAdapter={AdapterDateFns}
-                  adapterLocale={zhTW}
-                >
-                  <Controller
-                    name="until"
-                    control={control}
-                    defaultValue={null}
-                    render={({ field }) => (
-                      <MobileDatePicker
-                        slotProps={{ textField: { size: "small" } }}
-                        className="inputPadding"
-                        dayOfWeekFormatter={(_day, weekday) => {
-                          //console.log(); // AVOID BUG
-                        }}
-                        sx={[
-                          {
-                            width: "100%",
-                          },
-                        ]}
-                        {...field}
-                        format="yyyy-MM-dd"
-                      />
+                  <FormHelperText className="!text-red-600 h-3">
+                    {errors.type && (
+                      <p className="text-danger m-0">
+                        {errors.type.message}
+                        {/* {showNotification(`${errors.type.message}`, false)} */}
+                      </p>
                     )}
-                  />
-                </LocalizationProvider>
+                    {errors.job && (
+                      <p className="text-danger m-0">
+                        {errors.job.message}
+                        {/* {showNotification(`${errors.job.message}`, false)} */}
+                      </p>
+                    )}
+                  </FormHelperText>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <span>
+                    開工日期
+                    <span className=" text-sm text-gray-400"> </span>
+                  </span>
+                  <ControlledDatePicker name="since" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span>
+                    完工日期
+                    <span className=" text-sm text-gray-400"> </span>
+                  </span>
+                  <ControlledDatePicker name="until" />
+                </div>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="success"
+                  className="!text-base !h-12"
+                  fullWidth
+                >
+                  儲存
+                </Button>
               </div>
-              <Button
-                type="submit"
-                variant="contained"
-                color="success"
-                className="!text-base !h-12"
-                fullWidth
-              >
-                儲存
-              </Button>
-            </div>
-          </form>
+            </form>
+          </FormProvider>
         </ModalTemplete>
 
         {/* Alert */}
@@ -523,15 +476,13 @@ const TaskModal = React.memo(
     };
 
     // 使用 useForm Hook 來管理表單狀態和驗證
+    const methods = useForm();
     const {
       control,
       handleSubmit,
       reset,
-      setValue,
       formState: { errors },
-    } = useForm({
-      //   resolver: yupResolver(schema),
-    });
+    } = methods;
 
     //取得工程項目執行並設定已選擇及剩下能選擇的清單
     useEffect(() => {
@@ -701,146 +652,148 @@ const TaskModal = React.memo(
         >
           <div className="flex gap-3 relative">
             <div className="w-[360px] bg-bue-500">
-              <form onSubmit={handleSubmit(onSubmit, onError)}>
-                <div
-                  className="flex flex-col pt-4 gap-4 !overflow-y-auto"
-                  style={{ height: "70vh", scrollbarWidth: "thin" }}
-                >
-                  <div>
-                    <Controller
-                      name="name"
-                      control={control}
-                      defaultValue={""}
-                      render={({ field }) => (
-                        <TextField
-                          variant="outlined"
-                          size="small"
-                          className="inputPadding"
-                          label="清單標題"
-                          fullWidth
-                          inputProps={{ readOnly: true }}
-                          {...field}
-                        />
-                      )}
-                    />
-                  </div>
-
-                  <div className="inline-flex gap-3">
-                    <FormControl
-                      size="small"
-                      className="inputPadding"
-                      fullWidth
-                    >
-                      {selectedTask === "" ? (
-                        <InputLabel
-                          id="task-select-label"
-                          disableAnimation
-                          shrink={false}
-                          focused={false}
-                        >
-                          請選擇工項執行
-                        </InputLabel>
-                      ) : null}
-                      <Select
-                        labelId="task-select-label"
-                        value={selectedTask}
-                        onChange={handleTaskChange}
-                        //MenuProps={MenuProps}
-                      >
-                        {constructionTaskList?.map((task) => (
-                          <MenuItem key={"select" + task.id} value={task.id}>
-                            {task.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <Button
-                      variant="contained"
-                      color="dark"
-                      onClick={handleAddTask}
-                      disabled={!selectedTask}
-                      className="!text-base !h-12"
-                    >
-                      新增
-                    </Button>
-                  </div>
-                  <List
-                    className="overflow-y-auto border border-neutral-300 rounded"
-                    sx={{ height: "100%" }}
+              <FormProvider {...methods}>
+                <form onSubmit={handleSubmit(onSubmit, onError)}>
+                  <div
+                    className="flex flex-col pt-4 gap-4 !overflow-y-auto"
+                    style={{ height: "70vh", scrollbarWidth: "thin" }}
                   >
-                    {!isLoading ? (
-                      <TransitionGroup>
-                        {selectedTasks.map((task) => (
-                          <Collapse
-                            key={"selected" + task.constructionJobTask?.id}
+                    <div>
+                      <Controller
+                        name="name"
+                        control={control}
+                        defaultValue={""}
+                        render={({ field }) => (
+                          <TextField
+                            variant="outlined"
+                            size="small"
+                            className="inputPadding"
+                            label="清單標題"
+                            fullWidth
+                            inputProps={{ readOnly: true }}
+                            {...field}
+                          />
+                        )}
+                      />
+                    </div>
+
+                    <div className="inline-flex gap-3">
+                      <FormControl
+                        size="small"
+                        className="inputPadding"
+                        fullWidth
+                      >
+                        {selectedTask === "" ? (
+                          <InputLabel
+                            id="task-select-label"
+                            disableAnimation
+                            shrink={false}
+                            focused={false}
                           >
-                            <ListItem>
-                              <ListItemText
-                                secondary={task.constructionJobTask?.name}
-                              />
-                              <IconButton
-                                onClick={() => {
-                                  handleEditTask(task);
-                                }}
-                              >
-                                <Edit />
-                              </IconButton>
-                              {task.id.length === 0 && (
-                                <IconButton
-                                  onClick={() => {
-                                    handleRemoveTask(
-                                      task.constructionJobTask.id
-                                    );
-                                  }}
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              )}
-                            </ListItem>
-                            <Divider variant="middle" />
-                          </Collapse>
-                        ))}
-                      </TransitionGroup>
-                    ) : (
-                      <Loading size={18} />
-                    )}
-                  </List>
-                  {padScreen ? (
-                    <div className="flex gap-x-3">
+                            請選擇工項執行
+                          </InputLabel>
+                        ) : null}
+                        <Select
+                          labelId="task-select-label"
+                          value={selectedTask}
+                          onChange={handleTaskChange}
+                          //MenuProps={MenuProps}
+                        >
+                          {constructionTaskList?.map((task) => (
+                            <MenuItem key={"select" + task.id} value={task.id}>
+                              {task.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                       <Button
                         variant="contained"
-                        color="success"
-                        className="!text-base "
-                        fullWidth
-                        onClick={() => {
-                          setIsCheckingList(!isCheckingList);
-                        }}
+                        color="dark"
+                        onClick={handleAddTask}
+                        disabled={!selectedTask}
+                        className="!text-base !h-12"
                       >
-                        {isCheckingList ? "返回" : "預覽清單"}
+                        新增
                       </Button>
+                    </div>
+                    <List
+                      className="overflow-y-auto border border-neutral-300 rounded"
+                      sx={{ height: "100%" }}
+                    >
+                      {!isLoading ? (
+                        <TransitionGroup>
+                          {selectedTasks.map((task) => (
+                            <Collapse
+                              key={"selected" + task.constructionJobTask?.id}
+                            >
+                              <ListItem>
+                                <ListItemText
+                                  secondary={task.constructionJobTask?.name}
+                                />
+                                <IconButton
+                                  onClick={() => {
+                                    handleEditTask(task);
+                                  }}
+                                >
+                                  <Edit />
+                                </IconButton>
+                                {task.id.length === 0 && (
+                                  <IconButton
+                                    onClick={() => {
+                                      handleRemoveTask(
+                                        task.constructionJobTask.id
+                                      );
+                                    }}
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                )}
+                              </ListItem>
+                              <Divider variant="middle" />
+                            </Collapse>
+                          ))}
+                        </TransitionGroup>
+                      ) : (
+                        <Loading size={18} />
+                      )}
+                    </List>
+                    {padScreen ? (
+                      <div className="flex gap-x-3">
+                        <Button
+                          variant="contained"
+                          color="success"
+                          className="!text-base "
+                          fullWidth
+                          onClick={() => {
+                            setIsCheckingList(!isCheckingList);
+                          }}
+                        >
+                          {isCheckingList ? "返回" : "預覽清單"}
+                        </Button>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          color="success"
+                          className="!text-base "
+                          fullWidth
+                        >
+                          儲存
+                        </Button>
+                      </div>
+                    ) : (
                       <Button
                         type="submit"
                         variant="contained"
                         color="success"
-                        className="!text-base "
+                        className="!text-base !h-12"
                         fullWidth
                       >
                         儲存
                       </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      color="success"
-                      className="!text-base !h-12"
-                      fullWidth
-                    >
-                      儲存
-                    </Button>
-                  )}
-                </div>
-              </form>
+                    )}
+                  </div>
+                </form>
+              </FormProvider>
             </div>
             <div
               className={`${
@@ -942,15 +895,14 @@ const TaskEditDialog = React.memo(
       setAlertOpen(false);
     };
 
+    const methods = useForm();
     const {
       control,
       handleSubmit,
       reset,
       setValue,
       formState: { errors, isDirty },
-    } = useForm({
-      //   resolver: yupResolver(schema),
-    });
+    } = methods;
     // deliverTaskInfo 傳進來的 {id: '7056078833492952896', constructionJobTask: {…}, estimatedSince: null, estimatedUntil: null, location: '', …}
     // 格式 {id: '', constructionJobTask:1 , estimatedSince: '', estimatedUntil: '', location: '', remarK:''}
 
@@ -992,151 +944,99 @@ const TaskEditDialog = React.memo(
       };
 
       // 把convertData轉成=deliveryTaskInfo {id: '..896', constructionJobTask: {…}, estimatedSince: null, estimatedUntil: null, location: '', …}
-
+      console.log(convertData);
       sendDataToTaskEdit(convertData);
       onClose();
     };
 
     return (
       <>
-        {" "}
         <Dialog
           fullScreen={phoneScreen}
           open={isOpen}
           onClose={onCheckDirty}
           className=""
         >
-          <DialogTitle id="responsive-dialog-title" className="mt-5">
+          <DialogTitle id="responsive-dialog-title" className="mt-5 ">
             <span className=" border-b-2 p-2">
               {deliverTaskInfo?.constructionJobTask?.name}{" "}
               <span className="text-sm mx-2">編輯</span>
             </span>
           </DialogTitle>
           <DialogContent>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="flex flex-col gap-1.5 mt-3">
-                <span>預計施工日期：</span>
-                <LocalizationProvider
-                  dateAdapter={AdapterDateFns}
-                  adapterLocale={zhTW}
-                >
+            <FormProvider {...methods}>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="flex flex-col gap-1.5 mt-3">
+                  <span>預計施工日期</span>
+                  <ControlledDatePicker name="estimatedSince" />
+                </div>
+                <div className="flex flex-col gap-1.5 mt-3">
+                  <span>預計完工日期</span>
+                  <ControlledDatePicker name="estimatedUntil" />
+                </div>
+                <div className="flex flex-col gap-1.5 mt-3">
+                  <span>施工位置</span>
                   <Controller
-                    name="estimatedSince"
+                    name="location"
                     control={control}
-                    defaultValue={null}
+                    defaultValue={""}
                     render={({ field }) => (
-                      <MobileDatePicker
-                        slotProps={{ textField: { size: "small" } }}
+                      <TextField
+                        variant="outlined"
+                        size="small"
                         className="inputPadding"
-                        dayOfWeekFormatter={(_day, weekday) => {
-                          //console.log(); // AVOID BUG
-                        }}
-                        sx={[
-                          {
-                            width: "100%",
-                          },
-                        ]}
+                        placeholder="請輸入施工位置"
+                        //   inputProps={{ readOnly: true }}
+                        fullWidth
                         {...field}
-                        format="yyyy-MM-dd"
                       />
                     )}
                   />
-                </LocalizationProvider>
-              </div>
-              <div className="flex flex-col gap-1.5 mt-3">
-                <span>預計完工日期： </span>
-                <LocalizationProvider
-                  dateAdapter={AdapterDateFns}
-                  adapterLocale={zhTW}
-                >
+                </div>
+                <div className="flex flex-col gap-1.5 mt-3">
+                  <span>說明 / 備註</span>
                   <Controller
-                    name="estimatedUntil"
+                    name="remark"
                     control={control}
-                    defaultValue={null}
+                    defaultValue={""}
                     render={({ field }) => (
-                      <MobileDatePicker
-                        slotProps={{ textField: { size: "small" } }}
+                      <TextField
+                        variant="outlined"
+                        size="small"
                         className="inputPadding"
-                        dayOfWeekFormatter={(_day, weekday) => {
-                          //console.log(); // AVOID BUG
-                        }}
-                        sx={[
-                          {
-                            width: "100%",
-                          },
-                        ]}
+                        placeholder="請輸入說明或備註"
+                        //   inputProps={{ readOnly: true }}
+                        fullWidth
                         {...field}
-                        format="yyyy-MM-dd"
                       />
                     )}
                   />
-                </LocalizationProvider>
-              </div>
+                </div>
 
-              <div>
-                <span className="gap-3 mt-3 mb-2">施工位置:</span>
-                <Controller
-                  name="location"
-                  control={control}
-                  defaultValue={""}
-                  render={({ field }) => (
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      className="inputPadding"
-                      placeholder="請輸入施工位置"
-                      //   inputProps={{ readOnly: true }}
-                      fullWidth
-                      {...field}
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <span className="gap-3 mt-3 mb-2">說明 / 備註:</span>
-                <Controller
-                  name="remark"
-                  control={control}
-                  defaultValue={""}
-                  render={({ field }) => (
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      className="inputPadding"
-                      placeholder="請輸入說明或備註"
-                      //   inputProps={{ readOnly: true }}
-                      fullWidth
-                      {...field}
-                    />
-                  )}
-                />
-              </div>
-
-              <hr />
-              <div className="d-flex inline-flex w-full gap-2 mt-4">
-                <Button
-                  variant="contained"
-                  color="success"
-                  className="!text-base !h-12 "
-                  fullWidth
-                  onClick={() => {
-                    onCheckDirty();
-                  }}
-                >
-                  返回
-                </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="success"
-                  className="!text-base !h-12 "
-                  fullWidth
-                >
-                  儲存
-                </Button>
-              </div>
-            </form>
-
+                <div className="d-flex inline-flex w-full gap-2 mt-4">
+                  <Button
+                    variant="contained"
+                    color="success"
+                    className="!text-base !h-12 "
+                    fullWidth
+                    onClick={() => {
+                      onCheckDirty();
+                    }}
+                  >
+                    返回
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="success"
+                    className="!text-base !h-12 "
+                    fullWidth
+                  >
+                    儲存
+                  </Button>
+                </div>
+              </form>
+            </FormProvider>
             {/* <DialogContentText></DialogContentText> */}
           </DialogContent>
         </Dialog>

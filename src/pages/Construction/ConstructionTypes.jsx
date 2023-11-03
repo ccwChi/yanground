@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import PageTitle from "../../components/Guideline/PageTitle";
-import { Button, Grow, Grid, Skeleton } from "@mui/material";
+import Button from "@mui/material/Button";
+import Grow from "@mui/material/Grow";
+import Grid from "@mui/material/Grid";
+import Skeleton from "@mui/material/Skeleton";
 import { useMediaQuery } from "@mui/material";
 import { getData } from "../../utils/api";
 const SKELETONITEM = 1;

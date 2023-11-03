@@ -12,14 +12,11 @@ const Tabbar = () => {
 		// color deg: 68(綠), 155(藍), 200(紫), 290(粉), 345(橘)
 		{ id: 0, text: "打卡", href: "/punch", icon: <PunchClockIcon fontSize="large" />, hotRotate: "68deg" },
 		{ id: 1, text: "Home", href: "/", icon: <HomeIcon fontSize="large" />, hotRotate: "345deg" },
-		{ id: 2, text: "個人資料", href: "/userInfo", icon: <ManageAccountsIcon fontSize="large" />, hotRotate: "290deg" },
+		{ id: 2, text: "個人資料", href: "/userinfo", icon: <ManageAccountsIcon fontSize="large" />, hotRotate: "290deg" },
 	];
 
 	const getKid = () => {
 		let path = "/" + location.pathname.split("/")[1];
-		if (path === "/constructionJob") {
-			path = "/constructionType";
-		}
 		const foundItem = navItems.find((item) => item.href === path);
 		const foundId = foundItem ? foundItem.id : navItems.length;
 		return foundId;

@@ -66,7 +66,11 @@ const Sites = () => {
 	];
 
 	// 對照 api table 所顯示 key
-	const columns = [
+	const columnsPC = [
+		{ key: "id", label: "ID" },
+		{ key: "name", label: "案場" },
+	];
+	const columnsMobile = [
 		{ key: "id", label: "ID" },
 		{ key: "name", label: "案場" },
 	];
@@ -200,7 +204,8 @@ const Sites = () => {
 			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
 				<RWDTable
 					data={apiData}
-					columns={columns}
+					columnsPC={columnsPC}
+					columnsMobile={columnsMobile}
 					actions={actions}
 					cardTitleKey={"name"}
 					tableMinWidth={540}

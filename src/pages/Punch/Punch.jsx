@@ -3,7 +3,9 @@ import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 import "leaflet/dist/leaflet.css";
-import { Button, LinearProgress, CircularProgress } from "@mui/material";
+import Button from "@mui/material/Button";
+import LinearProgress from "@mui/material/LinearProgress";
+import CircularProgress from "@mui/material/CircularProgress";
 import { postData } from "../../utils/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarCheck } from "@fortawesome/free-solid-svg-icons";
@@ -63,7 +65,7 @@ const Map = () => {
 				position: "fixed",
 				top: "55px",
 				left: 0,
-				zIndex: "1026",
+				zIndex: "1025",
 				height: "100%",
 				width: "100%",
 			}}>

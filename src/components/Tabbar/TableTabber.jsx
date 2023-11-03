@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Tabs, Tab } from "@mui/material";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 
 const TableTabber = ({ tabGroup, setCat }) => {
 	const [value, setValue] = useState(0);
