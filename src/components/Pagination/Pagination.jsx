@@ -33,7 +33,7 @@ const Pagination = ({ totalElement, page, onPageChange, rowsPerPage, onRowsPerPa
 						<div className="inline-flex items-center text-sm gap-1">
 							第
 							<Select value={page} variant="standard" onChange={(e) => onPageChange(null, e.target.value)}>
-								<MenuItem value="0" className="hidden !p-0"></MenuItem>
+								<MenuItem value="0" className="!hidden !p-0"></MenuItem>
 								{Array.from({ length: Math.ceil(totalElement / rowsPerPage) }, (_, i) => (
 									<MenuItem key={i} value={i}>
 										{i + 1}

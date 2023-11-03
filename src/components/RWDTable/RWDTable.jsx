@@ -117,13 +117,7 @@ const RWDTable = ({
 												<div className="flex justify-between py-2">
 													<span className="text-neutral-500 pe-2">{column.label}</span>
 													<p className="text-black break-all">
-														{column.key === "department" ? (
-															item.department ? (
-																item.department.name
-															) : (
-																<span className="italic text-neutral-500 text-sm">(尚未分配)</span>
-															)
-														) : column.key === "gender" ? (
+														{column.key === "gender" ? (
 															item.gender ? (
 																"男性"
 															) : item.gender === false ? (
@@ -134,6 +128,12 @@ const RWDTable = ({
 														) : column.key === "administrativeDivision" ? (
 															item.administrativeDivision ? (
 																item.administrativeDivision.administeredBy.name + item.administrativeDivision.name
+															) : (
+																<span className="italic text-neutral-500 text-sm">(無)</span>
+															)
+														) : column.children ? (
+															item[column.key] ? (
+																item[column.key][column.children.key]
 															) : (
 																<span className="italic text-neutral-500 text-sm">(無)</span>
 															)
@@ -236,18 +236,12 @@ const RWDTable = ({
 										</TableCell>
 									)}
 									{columnsPC.map(
-										(column) =>
+										(column, index) =>
 											column.key !== "id" && (
 												<TableCell
-													key={"TableTitleList" + column.key}
+													key={"TableTitleList" + column.key + index}
 													sx={{ textAlign: "center", verticalAlign: "middle" }}>
-													{column.key === "department" ? (
-														item.department ? (
-															item.department.name
-														) : (
-															<span className="italic text-neutral-500 text-sm">(尚未分配)</span>
-														)
-													) : column.key === "pictureUrl" ? (
+													{column.key === "pictureUrl" ? (
 														item.pictureUrl ? (
 															<div className="flex items-center justify-center">
 																<Avatar src={item.pictureUrl} alt={item.nickname} />
@@ -266,6 +260,12 @@ const RWDTable = ({
 													) : column.key === "administrativeDivision" ? (
 														item.administrativeDivision ? (
 															item.administrativeDivision.administeredBy.name + item.administrativeDivision.name
+														) : (
+															<span className="italic text-neutral-500 text-sm">(無)</span>
+														)
+													) : column.children ? (
+														item[column.key] ? (
+															item[column.key][column.children.key]
 														) : (
 															<span className="italic text-neutral-500 text-sm">(無)</span>
 														)

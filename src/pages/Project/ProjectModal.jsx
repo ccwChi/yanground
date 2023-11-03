@@ -177,7 +177,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 													fullWidth
 													MenuProps={MenuProps}>
 													<MenuItem value="" disabled>
-														<span className="text-neutral-400 font-light">請輸入專案人員</span>
+														<span className="text-neutral-400 font-light">請選擇專案人員</span>
 													</MenuItem>
 													{userList.map((user) => (
 														<MenuItem key={user.id} value={user.id}>

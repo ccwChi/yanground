@@ -46,15 +46,19 @@ const Project = () => {
 
 	// 對照 api table 所顯示 key
 	const columnsPC = [
-		{ key: "name", label: "專案" },
-		{ key: "administrativeDivision", label: "地點" },
+		{ key: "name", label: "專案名稱" },
+		{ key: "businessRepresentative", label: "負責人", children: { key: "nickname" }, size: "15%" },
+		{ key: "administrativeDivision", label: "地點", size: "20%" },
 	];
 	const columnsMobile = [
-		{ key: "name", label: "專案" },
+		{ key: "name", label: "專案名稱" },
+		{ key: "businessRepresentative", label: "負責人", children: { key: "nickname" } },
 		{ key: "administrativeDivision", label: "地點" },
 	];
 
-	const actions = [{ value: "edit", icon: <EditIcon />, title: "編輯專案" }];
+	const actions = [
+		{ value: "edit", icon: <EditIcon />, title: "編輯專案" },
+	];
 
 	// 取得列表資料
 	useEffect(() => {

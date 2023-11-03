@@ -8,6 +8,7 @@ import ConstructionTypes from "./pages/Construction/ConstructionTypes";
 import ConstructionType from "./pages/Construction/Types/ConstructionType";
 import ConstructionJob from "./pages/Construction/Jobs/ConstructionJob";
 import Project from "./pages/Project/Project";
+import DispatchList from "./pages/DispatchList/DispatchList";
 import Users from "./pages/HumanResources/Users";
 import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
 			{
 				path: "/project",
 				element: <Project />,
+			},
+			{
+				path: "/dispatchList",
+				element: <DispatchList />,
 			},
 			{
 				path: "/users",
