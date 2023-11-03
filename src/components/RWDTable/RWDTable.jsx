@@ -65,7 +65,9 @@ const RWDTable = ({
 										]}>
 										<div className="flex w-full justify-between gap-1">
 											<Typography variant="h6" className="!text-lg !leading-relaxed" sx={{ wordBreak: "break-word" }}>
-												{item[cardTitleKey]}
+												{Array.isArray(cardTitleKey)
+													? cardTitleKey.reduce((item, key) => item[key], item)
+													: item[cardTitleKey]}
 											</Typography>
 											<div className="flex gap-2 ms-2">
 												{actionSpec && (
@@ -117,31 +119,45 @@ const RWDTable = ({
 												<div className="flex justify-between py-2">
 													<span className="text-neutral-500 pe-2">{column.label}</span>
 													<p className="text-black break-all">
-														{column.key === "gender" ? (
-															item.gender ? (
-																"男性"
-															) : item.gender === false ? (
-																"女性"
-															) : (
-																"?"
-															)
-														) : column.key === "administrativeDivision" ? (
-															item.administrativeDivision ? (
-																item.administrativeDivision.administeredBy.name + item.administrativeDivision.name
-															) : (
-																<span className="italic text-neutral-500 text-sm">(無)</span>
-															)
-														) : column.children ? (
-															item[column.key] ? (
-																item[column.key][column.children.key]
-															) : (
-																<span className="italic text-neutral-500 text-sm">(無)</span>
-															)
-														) : item[column.key] ? (
-															item[column.key]
-														) : (
-															<span className="italic text-neutral-500 text-sm">(無)</span>
-														)}
+														{(() => {
+															switch (column.key) {
+																case "gender":
+																	return item.gender ? "男性" : item.gender === false ? "女性" : "?";
+																case "administrativeDivision":
+																	return item.administrativeDivision ? (
+																		item.administrativeDivision.administeredBy.name + item.administrativeDivision.name
+																	) : (
+																		<span className="italic text-neutral-500 text-sm">(無)</span>
+																	);
+																default:
+																	const columnData = columnsMobile.find((col) => col.key === column.key);
+																	if (columnData) {
+																		const columnKeys = Array.isArray(columnData.key)
+																			? columnData.key
+																			: [columnData.key];
+																		const value = columnKeys.reduce((item, key) => (item && item[key]) || null, item);
+
+																		if (value !== null) {
+																			return value;
+																		}
+																	}
+
+																	return <span className="italic text-neutral-500 text-sm">(無)</span>;
+																// if (column.children) {
+																// 	return item[column.key] ? (
+																// 		item[column.key][column.children.key]
+																// 	) : (
+																// 		<span className="italic text-neutral-500 text-sm">(無)</span>
+																// 	);
+																// } else {
+																// 	return item[column.key] ? (
+																// 		item[column.key]
+																// 	) : (
+																// 		<span className="italic text-neutral-500 text-sm">(無)</span>
+																// 	);
+																// }
+															}
+														})()}
 													</p>
 												</div>
 												<Divider />
@@ -241,39 +257,52 @@ const RWDTable = ({
 												<TableCell
 													key={"TableTitleList" + column.key + index}
 													sx={{ textAlign: "center", verticalAlign: "middle" }}>
-													{column.key === "pictureUrl" ? (
-														item.pictureUrl ? (
-															<div className="flex items-center justify-center">
-																<Avatar src={item.pictureUrl} alt={item.nickname} />
-															</div>
-														) : (
-															<span className="italic text-neutral-500 text-sm">(無)</span>
-														)
-													) : column.key === "gender" ? (
-														item.gender ? (
-															"男性"
-														) : item.gender === false ? (
-															"女性"
-														) : (
-															"?"
-														)
-													) : column.key === "administrativeDivision" ? (
-														item.administrativeDivision ? (
-															item.administrativeDivision.administeredBy.name + item.administrativeDivision.name
-														) : (
-															<span className="italic text-neutral-500 text-sm">(無)</span>
-														)
-													) : column.children ? (
-														item[column.key] ? (
-															item[column.key][column.children.key]
-														) : (
-															<span className="italic text-neutral-500 text-sm">(無)</span>
-														)
-													) : item[column.key] ? (
-														item[column.key]
-													) : (
-														<span className="italic text-neutral-500 text-sm">(無)</span>
-													)}
+													{(() => {
+														switch (column.key) {
+															case "pictureUrl":
+																return item.pictureUrl ? (
+																	<div className="flex items-center justify-center">
+																		<Avatar src={item.pictureUrl} alt={item.nickname} />
+																	</div>
+																) : (
+																	<span className="italic text-neutral-500 text-sm">(無)</span>
+																);
+															case "gender":
+																return item.gender ? "男性" : item.gender === false ? "女性" : "?";
+															case "administrativeDivision":
+																return item.administrativeDivision ? (
+																	item.administrativeDivision.administeredBy.name + item.administrativeDivision.name
+																) : (
+																	<span className="italic text-neutral-500 text-sm">(無)</span>
+																);
+															default: {
+																const columnData = columnsPC.find((col) => col.key === column.key);
+																if (columnData) {
+																	const columnKeys = Array.isArray(columnData.key) ? columnData.key : [columnData.key];
+																	const value = columnKeys.reduce((item, key) => (item && item[key]) || null, item);
+
+																	if (value !== null) {
+																		return value;
+																	}
+																}
+
+																return <span className="italic text-neutral-500 text-sm">(無)</span>;
+															}
+															// if (column.children) {
+															// 	return item[column.key] ? (
+															// 		item[column.key][column.children.key]
+															// 	) : (
+															// 		<span className="italic text-neutral-500 text-sm">(無)</span>
+															// 	);
+															// } else {
+															// 	return item[column.key] ? (
+															// 		item[column.key]
+															// 	) : (
+															// 		<span className="italic text-neutral-500 text-sm">(無)</span>
+															// 	);
+															// }
+														}
+													})()}
 												</TableCell>
 											)
 									)}

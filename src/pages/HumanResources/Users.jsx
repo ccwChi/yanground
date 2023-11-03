@@ -45,13 +45,13 @@ const Users = () => {
 		{ key: "pictureUrl", label: "頭像", size: "15%" },
 		{ key: "displayName", label: "line名稱", size: "25%" },
 		{ key: "nickname", label: "暱稱", size: "25%" },
-		{ key: "department", label: "部門", children: { key: "name" }, size: "18%" },
+		{ key: ["department", "name"], label: "部門", size: "18%" },
 	];
 	// 對照 api table 所顯示 key
 	const columnsMobile = [
 		{ key: "displayName", label: "line名稱" },
 		{ key: "nickname", label: "暱稱" },
-		{ key: "department", label: "部門", children: { key: "name" } },
+		{ key: ["department", "name"], label: "部門" },
 		{ key: "gender", label: "性別" },
 	];
 

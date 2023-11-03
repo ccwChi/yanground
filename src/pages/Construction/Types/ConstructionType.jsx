@@ -112,7 +112,7 @@ const ConstructionType = () => {
 				getApiList(apiUrl_);
 				onClose();
 			} else {
-				showNotification(result.result.reason, false);
+				showNotification(result.result.reason ? result.result.reason : "權限不足", false);
 			}
 		});
 

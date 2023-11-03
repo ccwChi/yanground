@@ -5,15 +5,24 @@ import AlertDialog from "../../components/Alert/AlertDialog";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import Collapse from "@mui/material/Collapse";
+import Divider from "@mui/material/Divider";
 import FormHelperText from "@mui/material/FormHelperText";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import { TransitionGroup } from "react-transition-group";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getData } from "../../utils/api";
 import { format } from "date-fns";
+import { useNotification } from "../../hooks/useNotification";
 const ITEM_HEIGHT = 36;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -122,7 +131,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 			}
 		}
 
-		return null;
+		return "";
 	}, []);
 
 	return (
@@ -276,25 +285,104 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 	);
 });
 
-const AddDispatcherModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }) => {
-	// 檢查是否被汙染
-	const [isDirty, setIsDirty] = useState(false);
+const AddDispatcherModal = React.memo(({ title, deliverInfo, departmentList, sendDataToBackend, onClose }) => {
+	const showNotification = useNotification();
+
+	// 人員清單
+	const [memberList, setMemberList] = useState(null);
+	// 已選清單
+	const [selectedMembers, setSelectedMembers] = useState([]);
 	// Alert 開關
 	const [alertOpen, setAlertOpen] = useState(false);
+	// 是否為初始化時
+	const [initialized, setInitialized] = useState(true);
 
-	const onSubmit = () => {
-		// const ids = selectedPersons.map((item) => item.id);
-		// const fd = new FormData();
-		// fd.append("labourer", ids.join(","));
+	useEffect(() => {
+		if (deliverInfo) {
+			const initialSelectedMembers = deliverInfo.staffs.map((item) => ({
+				department: item.department.name,
+				member: item.displayName,
+				memberId: item.id,
+			}));
+			setSelectedMembers(initialSelectedMembers);
+		}
+	}, [deliverInfo]);
 
-		// sendDataToBackend(fd, "dw", [deliverInfo.id, format(dates, "yyyy-MM-dd")]);
+	// 初始預設 default 值
+	const defaultValues = {
+		department: "",
+		member: "",
 	};
 
-	// const resetModal = () => {
-	// 	setPersons([]);
-	// 	setSelectedPersons([]);
-	// 	setSelectedPerson("");
-	// };
+	// 使用 Yup 來定義表單驗證規則
+	const schema = yup.object().shape({
+		department: yup.string().required("不可為空值！"),
+		member: yup.string().required("不可為空值！"),
+	});
+
+	// 使用 useForm Hook 來管理表單狀態和驗證
+	const methods = useForm({
+		defaultValues,
+		resolver: yupResolver(schema),
+	});
+	const {
+		control,
+		watch,
+		handleSubmit,
+		setValue,
+		getValues,
+		reset,
+		formState: { errors, isDirty },
+	} = methods;
+	const dep_ = watch("department");
+
+	// 取得該部門內的人員
+	useEffect(() => {
+		if (dep_) {
+			if (!initialized) {
+				setValue("member", "");
+			} else {
+				setInitialized(false);
+			}
+			setMemberList(null);
+			getData(`department/${dep_}/staff`).then((result) => {
+				const data = result.result;
+				setMemberList(data);
+			});
+		}
+	}, [dep_]);
+
+	const onSubmit = (data) => {
+		const { department, member } = data;
+		const existingMember = selectedMembers.find((m) => m.memberId === member);
+
+		const departmentText = departmentList.find((d) => d.id === department).name;
+		const memberText = memberList.find((m) => m.id === member).nickname;
+
+		if (existingMember) {
+			showNotification(`〔${departmentText} / ${memberText}〕已存在清單內，不可重複新增！`, false);
+			return;
+		}
+
+		setSelectedMembers([{ department: departmentText, member: memberText, memberId: member }, ...selectedMembers]);
+
+		setValue("member", "");
+	};
+
+	// 移除派工人員暫存清單
+	const handleRemoveMember = (member) => {
+		const updatedMembers = selectedMembers.filter((m) => m.member !== member);
+		setSelectedMembers(updatedMembers);
+	};
+
+	// 儲存按鈕，傳遞資料給後端
+	const handleSave = () => {
+		const selectedMemberIds = selectedMembers.map((m) => m.memberId);
+
+		const fd = new FormData();
+		fd.append("staffs", selectedMemberIds.join(","));
+		sendDataToBackend(fd, "awl", deliverInfo.id);
+	};
 
 	// 檢查表單是否汙染
 	const onCheckDirty = () => {
@@ -316,19 +404,104 @@ const AddDispatcherModal = React.memo(({ title, deliverInfo, sendDataToBackend, 
 	return (
 		<>
 			{/* Modal */}
-			<ModalTemplete title={title} show={true} onClose={onCheckDirty}>
-				<form>
-					<div className="flex flex-col pt-4 gap-2.5">
-						<Button
-							variant="contained"
-							onClick={onSubmit}
-							color="success"
-							className="!text-base !h-12"
-							fullWidth>
-							送出
-						</Button>
-					</div>
-				</form>
+			<ModalTemplete title={title} show={true} maxWidth={"540px"} onClose={onCheckDirty}>
+				<FormProvider {...methods}>
+					<form onSubmit={handleSubmit(onSubmit)}>
+						<div className="flex flex-col pt-4 gap-2.5">
+							<div className="inline-flex flex-row gap-2">
+								<div className="w-full">
+									<InputTitle title={"部門"} />
+									<Controller
+										name="department"
+										control={control}
+										render={({ field }) => (
+											<Select
+												error={!!errors["department"]?.message}
+												className="inputPadding"
+												displayEmpty
+												{...field}
+												fullWidth
+												MenuProps={MenuProps}>
+												<MenuItem value="" disabled>
+													<span className="text-neutral-400 font-light">請選擇部門</span>
+												</MenuItem>
+												{departmentList.map((dep) => (
+													<MenuItem key={"select" + dep.id} value={dep.id}>
+														{dep.name}
+													</MenuItem>
+												))}
+											</Select>
+										)}
+									/>
+									<FormHelperText className="!text-red-600 break-words !text-right !mt-0" sx={{ minHeight: "1.25rem" }}>
+										{errors["department"]?.message}
+									</FormHelperText>
+								</div>
+								<div className="w-full">
+									<InputTitle title={"人員"} />
+									<Controller
+										name="member"
+										control={control}
+										render={({ field }) => (
+											<Select
+												error={!!errors["member"]?.message}
+												className="inputPadding"
+												displayEmpty
+												{...field}
+												fullWidth
+												disabled={!memberList && !initialized}
+												MenuProps={MenuProps}>
+												<MenuItem value="" disabled>
+													<span className="text-neutral-400 font-light">請選擇人員</span>
+												</MenuItem>
+												{memberList
+													? memberList.map((m) => (
+															<MenuItem key={m.id} value={m.id}>
+																{m.nickname}
+															</MenuItem>
+													  ))
+													: getValues("member") && <MenuItem value={getValues("member")}></MenuItem>}
+											</Select>
+										)}
+									/>
+									<FormHelperText className="!text-red-600 break-words !text-right !mt-0" sx={{ minHeight: "1.25rem" }}>
+										{errors["member"]?.message}
+									</FormHelperText>
+								</div>
+							</div>
+							<Button type="submit" variant="contained" color="purple" className="!text-base !h-12" fullWidth>
+								新增人員
+							</Button>
+						</div>
+					</form>
+				</FormProvider>
+
+				{/* ------------------------------------------------------ */}
+				<Divider variant="middle" className="!my-5" />
+				{/* ------------------------------------------------------ */}
+
+				<InputTitle title={"派工人員"} required={false}>
+					<span className="italic text-neutral-500 text-sm">(已選取 {selectedMembers.length} 名人員)</span>
+				</InputTitle>
+				<List className="overflow-y-auto border border-neutral-300 rounded !mb-2.5" sx={{ height: "22.5vh" }}>
+					<TransitionGroup>
+						{selectedMembers.map((member) => (
+							<Collapse key={member.member}>
+								<ListItem className="!py-1">
+									<ListItemText secondary={member.department + " / " + member.member} />
+									<IconButton aria-label="delete" title="Delete" onClick={() => handleRemoveMember(member.member)}>
+										<DeleteIcon />
+									</IconButton>
+								</ListItem>
+								<Divider variant="middle" />
+							</Collapse>
+						))}
+					</TransitionGroup>
+				</List>
+
+				<Button variant="contained" color="success" className="!text-base !h-12" fullWidth onClick={handleSave}>
+					儲存
+				</Button>
 			</ModalTemplete>
 
 			{/* Alert */}

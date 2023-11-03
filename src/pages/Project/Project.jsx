@@ -47,18 +47,16 @@ const Project = () => {
 	// 對照 api table 所顯示 key
 	const columnsPC = [
 		{ key: "name", label: "專案名稱" },
-		{ key: "businessRepresentative", label: "負責人", children: { key: "nickname" }, size: "15%" },
-		{ key: "administrativeDivision", label: "地點", size: "20%" },
+		{ key: ["businessRepresentative", "nickname"], label: "負責人", size: "15%" },
+		{ key: "administrativeDivision", label: "地點", size: "22.5%" },
 	];
 	const columnsMobile = [
 		{ key: "name", label: "專案名稱" },
-		{ key: "businessRepresentative", label: "負責人", children: { key: "nickname" } },
+		{ key: ["businessRepresentative", "nickname"], label: "負責人" },
 		{ key: "administrativeDivision", label: "地點" },
 	];
 
-	const actions = [
-		{ value: "edit", icon: <EditIcon />, title: "編輯專案" },
-	];
+	const actions = [{ value: "edit", icon: <EditIcon />, title: "編輯專案" }];
 
 	// 取得列表資料
 	useEffect(() => {
@@ -97,12 +95,13 @@ const Project = () => {
 				break;
 		}
 		postData(url, fd).then((result) => {
+			console.log(result);
 			if (result.status) {
 				showNotification(message[0], true);
 				getApiList(apiUrl);
 				onClose();
 			} else {
-				showNotification(result.result.reason, false);
+				showNotification(result.result.reason ? result.result.reason : "權限不足", false);
 			}
 		});
 

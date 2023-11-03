@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import PageTitle from "../../components/Guideline/PageTitle";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 import RWDTable from "../../components/RWDTable/RWDTable";
@@ -9,8 +9,18 @@ import EditIcon from "@mui/icons-material/Edit";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import PrintIcon from "@mui/icons-material/Print";
 import { getData, postData } from "../../utils/api";
-import { UpdatedModal, AddDispatcherModal } from "./DispatchListModal";
 import { useNotification } from "../../hooks/useNotification";
+import { UpdatedModal, AddDispatcherModal } from "./DispatchListModal";
+
+/** 到時候可以移除套件 **/
+import Docxtemplater from "docxtemplater";
+import PizZip from "pizzip";
+import PizZipUtils from "pizzip/utils/index.js";
+import { saveAs } from "file-saver";
+
+const loadFile = (url, callback) => {
+	PizZipUtils.getBinaryContent(url, callback);
+};
 
 const DispatchList = () => {
 	const showNotification = useNotification();
@@ -49,28 +59,24 @@ const DispatchList = () => {
 	// 對照 api table 所顯示 key
 	const columnsPC = [
 		{
-			key: "project",
+			key: ["project", "name"],
 			label: "專案名稱",
-			children: { key: "name" },
 		},
 		{
-			key: "applicant",
+			key: ["applicant", "nickname"],
 			label: "申請人",
-			children: { key: "nickname" },
 			size: "15%",
 		},
 		{ key: "dispatchedOn", label: "申請日期", size: "20%" },
 	];
 	const columnsMobile = [
 		{
-			key: "project",
+			key: ["project", "name"],
 			label: "專案名稱",
-			children: { key: "name" },
 		},
 		{
-			key: "applicant",
+			key: ["applicant", "nickname"],
 			label: "申請人",
-			children: { key: "nickname" },
 			size: "15%",
 		},
 		{ key: "dispatchedOn", label: "申請日期" },
@@ -100,7 +106,6 @@ const DispatchList = () => {
 		getData("department").then((result) => {
 			const data = result.result.content;
 			setDepartmentList(data);
-			console.log(data);
 		});
 	}, []);
 
@@ -115,6 +120,10 @@ const DispatchList = () => {
 			case "edit":
 				url += "/" + otherData;
 				message = ["派工清單編輯成功！"];
+				break;
+			case "awl":
+				url += "/" + otherData + "/staff";
+				message = ["派工人員新增成功！"];
 				break;
 			default:
 				break;
@@ -145,13 +154,104 @@ const DispatchList = () => {
 		setPage(0);
 	};
 
+	// 資料進入模板
+	const generateDocument = (data) => {
+		// 讀取 Word 模板文件
+		loadFile("/dispatchListTemplete.docx", function (error, content) {
+			if (error) {
+				throw error;
+			}
+
+			// 創建 PizZip 對象並將 Word 模板加載到其中
+			var zip = new PizZip(content);
+
+			// 創建 docxtemplater 實例
+			var doc = new Docxtemplater(zip, {
+				paragraphLoop: true,
+				linebreaks: true,
+			});
+
+			// 將 departmentsAndNames 轉換為一個對象，其中鍵是 "departmentX" 和 "nameX"，X 是索引
+			// (16 為 Table 下欄位的數量)
+			const d = [...Array(16)].reduce((result, _, index) => {
+				const staff = data.staffs[index];
+				result[`department${index + 1}`] = staff ? staff.department.name : "";
+				result[`name${index + 1}`] = staff ? staff.nickname : "";
+				return result;
+			}, {});
+
+			// 定義要插入的資料 & 插入資料到模板
+			doc.setData({
+				department: data.department ? data.department.name : "",
+				applicant: data.applicant ? data.applicant.nickname : "",
+				dispatchedOn: data.dispatchedOn ? data.dispatchedOn : "",
+				projectName: data.project ? data.project.name : "",
+				administrativeDivision: data.project
+					? data.project.administrativeDivision.administeredBy.name + data.project.administrativeDivision.name
+					: "",
+				content: data.content ? data.content : "",
+				...d,
+			});
+
+			try {
+				// 嘗試渲染 docxtemplater 文檔
+				doc.render();
+			} catch (error) {
+				// 如果渲染過程中出現錯誤，捕獲錯誤並處理它
+
+				// 將錯誤對象轉換為 JSON
+				const replaceErrors = (key, value) => {
+					if (value instanceof Error) {
+						return Object.getOwnPropertyNames(value).reduce(function (error, key) {
+							error[key] = value[key];
+							return error;
+						}, {});
+					}
+					return value;
+				};
+
+				// 將錯誤信息轉換為 JSON 字符串並打印到控制台
+				console.log(JSON.stringify({ error: error }, replaceErrors));
+
+				// 如果錯誤具有 properties 屬性並包含一個 errors 數組，則提取並打印錯誤消息
+				if (error.properties && error.properties.errors instanceof Array) {
+					const errorMessages = error.properties.errors
+						.map(function (error) {
+							return error.properties.explanation;
+						})
+						.join("\n");
+					console.log("errorMessages", errorMessages);
+				}
+
+				// 抛出錯誤以進一步處理或報告給用戶
+				throw error;
+			}
+
+			// 將合併後的 Word 文檔轉換為 ArrayBuffer
+			var out = doc.getZip().generate({
+				type: "blob",
+				mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+			});
+
+			// 保存或下載生成的 Word 文檔
+			saveAs(out, `臨時派工單${data.project ? " - " + data.project.name : ""}.docx`);
+		});
+	};
+
 	// 當活動按鈕點擊時開啟 modal 並進行動作
 	const handleActionClick = (event) => {
 		event.stopPropagation();
 		const dataMode = event.currentTarget.getAttribute("data-mode");
 		const dataValue = event.currentTarget.getAttribute("data-value");
 		setModalValue(dataMode);
-		setDeliverInfo(dataValue ? apiData.content.find((item) => item.id === dataValue) : "");
+
+		if (dataValue) {
+			const mainData = apiData.content.find((item) => item.id === dataValue);
+			setDeliverInfo(mainData);
+			if (dataMode === "print") {
+				generateDocument(mainData);
+			}
+		}
 	};
 
 	// 關閉 Modal 清除資料
@@ -183,6 +283,7 @@ const DispatchList = () => {
 				<AddDispatcherModal
 					title="新增派工人員"
 					deliverInfo={deliverInfo}
+					departmentList={departmentList}
 					sendDataToBackend={sendDataToBackend}
 					onClose={onClose}
 				/>
@@ -203,7 +304,7 @@ const DispatchList = () => {
 					columnsPC={columnsPC}
 					columnsMobile={columnsMobile}
 					actions={actions}
-					cardTitleKey={"name"}
+					cardTitleKey={["project", "name"]}
 					tableMinWidth={540}
 					isLoading={isLoading}
 					handleActionClick={handleActionClick}

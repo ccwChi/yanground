@@ -417,7 +417,7 @@ const DispatchWorkModal = React.memo(({ title, deliverInfo, sendDataToBackend, o
 										<Collapse key={"selected" + person.id}>
 											<ListItem className="!py-1">
 												<ListItemText secondary={person.nickname} />
-												<IconButton onClick={() => handleRemovePerson(person.id)}>
+												<IconButton aria-label="delete" title="Delete" onClick={() => handleRemovePerson(person.id)}>
 													<DeleteIcon />
 												</IconButton>
 											</ListItem>

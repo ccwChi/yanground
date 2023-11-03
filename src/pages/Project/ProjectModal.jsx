@@ -100,7 +100,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 	const onSubmit = (data) => {
 		const fd = new FormData();
 
-		delete data.administrativeDivision_;
+		// delete data.administrativeDivision_;
 		for (let key in data) {
 			fd.append(key, data[key]);
 		}

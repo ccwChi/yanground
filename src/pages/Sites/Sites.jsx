@@ -119,7 +119,7 @@ const Sites = () => {
 				getApiList(apiUrl);
 				onClose();
 			} else {
-				showNotification(result.result.reason, false);
+				showNotification(result.result.reason ? result.result.reason : "權限不足", false);
 			}
 		});
 
