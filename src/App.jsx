@@ -38,11 +38,6 @@ const App = () => {
 			href: "constructionsummary",
 		},
 		{
-			icon: faUserGear,
-			text: "職員清單",
-			href: "users",
-		},
-		{
 			icon: faToolbox,
 			text: "專案管理",
 			href: "project",
@@ -51,6 +46,11 @@ const App = () => {
 			icon: faPersonDigging,
 			text: "派工清單",
 			href: "dispatchList",
+		},
+		{
+			icon: faUserGear,
+			text: "職員清單",
+			href: "users",
 		},
 		// },
 		// {

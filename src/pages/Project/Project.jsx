@@ -73,7 +73,7 @@ const Project = () => {
 
 	// 取得縣市資料
 	useEffect(() => {
-		getData("administrativeDivision??p=1&s=50").then((result) => {
+		getData("administrativeDivision?p=1&s=50").then((result) => {
 			const data = result.result.content;
 			setCityList(data);
 		});

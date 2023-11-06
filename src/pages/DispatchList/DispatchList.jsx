@@ -77,7 +77,6 @@ const DispatchList = () => {
 		{
 			key: ["applicant", "nickname"],
 			label: "申請人",
-			size: "15%",
 		},
 		{ key: "dispatchedOn", label: "申請日期" },
 	];
