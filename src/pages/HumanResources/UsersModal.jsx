@@ -170,7 +170,7 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div
-              className="flex flex-col gap-5  !overflow-y-auto borderx md:flex-wrap md:min-h-[540px] md:max-h-[540px]"
+              className="flex flex-col gap-5  !overflow-y-auto borderx md:flex-wrap md:min-h-[520px] md:max-h-[540px]"
               style={{ height: "70vh", scrollbarWidth: "thin" }}
             >
               <div className="flex flex-col gap-1.5 w-100 md:w-[320px] mt-5">
@@ -389,7 +389,7 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
               <FormControl
                 component="fieldset"
                 variant="standard"
-                className="flex flex-col gap-1.5 w-100 md:w-[320px] !mt-3"
+                className="flex flex-col gap-1.5 w-100 md:w-[320px]"
               >
                 <span>權限</span>
                 <Box className="w-full h-[150px]  overflow-y-auto  bg-slate-50 border-2 rounded-lg">
@@ -428,7 +428,7 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
               type="submit"
               variant="contained"
               color="success"
-              className="!text-base !h-12 "
+              className="!text-base !mt-4 md:!mt-0"
               fullWidth
             >
               儲存
