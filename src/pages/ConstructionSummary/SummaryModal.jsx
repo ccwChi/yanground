@@ -67,8 +67,8 @@ const UpdatedModal = React.memo(
           /^[0-9]{3}$/.test(val.toString())
         )
         .typeError("應填寫民國年 ex: 112"),
-      type: yup.string().required().typeError("需選擇工程類別!"),
-      job: yup.number().required().typeError("需選擇工程類別及項目!"),
+      type: yup.string().required("需選擇工程類別!"),
+      job: yup.number().required("需選擇工程項目!").typeError("需選擇工程項目!"),
       project: yup.string().required("需選擇所屬專案！"),
     });
 
