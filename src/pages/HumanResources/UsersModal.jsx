@@ -25,10 +25,16 @@ import { useNotification } from "../../hooks/useNotification";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 
-const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
+const EditModal = ({
+  title,
+  deliverInfo,
+  sendDataToBackend,
+  onClose,
+  departmentList,
+  authorityList,
+}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [departmentList, setDepartmentList] = useState(null);
-  const [authorityList, setAuthorityList] = useState(null);
+
   // 檢查是否被汙染
   const [alertOpen, setAlertOpen] = useState(false);
 
@@ -61,24 +67,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
     }
     setAlertOpen(false);
   };
-
-  //取得部門清單跟權限清單
-  useEffect(() => {
-    setIsLoading(true);
-    const departurl = "department";
-    const authorityurl = "authority";
-    getData(departurl).then((result) => {
-      setIsLoading(false);
-      const data = result.result.content;
-      setDepartmentList(data);
-    });
-    getData(authorityurl).then((result) => {
-      setIsLoading(false);
-      const data = result.result;
-      const sortedAuthorityList = data.slice().sort((a, b) => a.id - b.id);
-      setAuthorityList(sortedAuthorityList);
-    });
-  }, []);
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -191,15 +179,12 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
                     />
                   )}
                 />
-                {/* <FormHelperText className="!text-red-600 h-5">{errors["name"]?.message}</FormHelperText> */}
               </div>
-
               <div className="flex flex-col gap-1.5  w-100 md:w-[320px]">
                 <span>line名稱</span>
                 <Controller
                   name="displayName"
                   control={control}
-                  //defaultValue={deliverInfo ? deliverInfo[1] : ""}
                   render={({ field }) => (
                     <TextField
                       variant="outlined"
@@ -212,7 +197,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
                     />
                   )}
                 />
-                {/* <FormHelperText className="!text-red-600 h-5">{errors["name"]?.message}</FormHelperText> */}
               </div>
               {/* 姓名 */}
               <div className="flex gap-x-4  w-100 md:w-[320px]">
@@ -221,7 +205,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
                   <Controller
                     name="lastname"
                     control={control}
-                    //defaultValue={deliverInfo ? deliverInfo[1] : ""}
                     render={({ field }) => (
                       <TextField
                         variant="outlined"
@@ -233,7 +216,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
                       />
                     )}
                   />
-                  {/* <FormHelperText className="!text-red-600 h-5">{errors["name"]?.message}</FormHelperText> */}
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -241,7 +223,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
                   <Controller
                     name="firstname"
                     control={control}
-                    //defaultValue={deliverInfo ? deliverInfo[1] : ""}
                     render={({ field }) => (
                       <TextField
                         variant="outlined"
@@ -253,7 +234,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
                       />
                     )}
                   />
-                  {/* <FormHelperText className="!text-red-600 h-5">{errors["name"]?.message}</FormHelperText> */}
                 </div>
               </div>
               {/* 暱稱性別 */}
@@ -273,7 +253,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
                           errors.nickname && (
                             <span className=" text-red-700 m-0">
                               {errors.nickname.message}
-                              {/* {showNotification("身分證格式錯誤", false)} */}
                             </span>
                           )
                         }
@@ -338,7 +317,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose }) => {
                         errors.nationalIdentityCardNumber && (
                           <span className=" text-red-700 m-0">
                             {errors.nationalIdentityCardNumber.message}
-                            {/* {showNotification("身分證格式錯誤", false)} */}
                           </span>
                         )
                       }

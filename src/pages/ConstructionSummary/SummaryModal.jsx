@@ -1,7 +1,5 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import ModalTemplete from "../../components/Modal/ModalTemplete";
-
-import InputTitle from "../../components/Guideline/InputTitle";
 
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 import { format } from "date-fns";
@@ -21,7 +19,6 @@ import {
   Divider,
   FormHelperText,
   Collapse,
-  Checkbox,
   Card,
   CardContent,
   Typography,
@@ -29,7 +26,6 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { TransitionGroup } from "react-transition-group";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import * as yup from "yup";
@@ -38,63 +34,29 @@ import { getData } from "../../utils/api";
 import { useNotification } from "../../hooks/useNotification";
 
 import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import { TaskAltSharp } from "@mui/icons-material";
+import InputTitle from "../../components/Guideline/InputTitle";
 
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
-const constructionTypeList = [
-  {
-    label: "土木",
-    name: "CIVIL_CONSTRUCTION",
-    ordinal: 0,
-  },
-  {
-    label: "機電",
-    name: "MECHATRONICS_ENGINEERING",
-    ordinal: 1,
-  },
-  {
-    label: "測量",
-    name: "CONSTRUCTION_SURVEYING",
-    ordinal: 2,
-  },
-  {
-    label: "鋼構(組裝)",
-    name: "STEEL_FRAME_ASSEMBLING",
-    ordinal: 3,
-  },
-  {
-    label: "鋼構(製造)",
-    name: "STEEL_FRAME_MANUFACTURE",
-    ordinal: 4,
-  },
-];
 
 const UpdatedModal = React.memo(
-  ({ title, deliverInfo, sendDataToBackend, onClose }) => {
+  ({
+    title,
+    deliverInfo,
+    sendDataToBackend,
+    onClose,
+    constructionTypeList,
+    projectsList,
+  }) => {
     // Alert 開關
     const [alertOpen, setAlertOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [constructionJobList, setConstructionJobList] = useState(null);
 
-    const showNotification = useNotification();
     // 使用 Yup 來定義表單驗證規則
     const schema = yup.object().shape({
       name: yup.string().required("清單標題不可為空值！"),
@@ -105,20 +67,28 @@ const UpdatedModal = React.memo(
           /^[0-9]{3}$/.test(val.toString())
         )
         .typeError("應填寫民國年 ex: 112"),
-      job: yup.number().required().typeError("需選擇工程類別及項目"),
+      type: yup.string().required().typeError("需選擇工程類別!"),
+      job: yup.number().required().typeError("需選擇工程類別及項目!"),
+      project: yup.string().required("需選擇所屬專案！"),
     });
 
-    // 處理表單驗證錯誤時的回調函數
-    const onError = (errors) => {
-      if (Object.keys(errors).length > 0) {
-        for (const key in errors) {
-          if (errors.hasOwnProperty(key)) {
-            const errorMessage = errors[key]?.message;
-          }
-        }
-      }
+    const defaultValues = {
+      name: deliverInfo?.name ? deliverInfo.name : "",
+      project: deliverInfo?.project ? deliverInfo.project.id : "",
+      rocYear: deliverInfo?.rocYear ? deliverInfo.rocYear : "",
+      type: deliverInfo?.constructionJob?.constructionType
+        ? deliverInfo.constructionJob.constructionType
+        : "",
+      job: deliverInfo?.constructionJob?.id
+        ? deliverInfo.constructionJob.id
+        : "",
+      since: deliverInfo?.since ? new Date(deliverInfo.since) : null,
+      until: deliverInfo?.until ? new Date(deliverInfo.until) : null,
     };
+    // 處理表單驗證錯誤時的回調函數
+
     const methods = useForm({
+      defaultValues,
       resolver: yupResolver(schema),
     });
     // 使用 useForm Hook 來管理表單狀態和驗證
@@ -135,18 +105,6 @@ const UpdatedModal = React.memo(
       if (deliverInfo?.id && deliverInfo?.constructionJob?.constructionType) {
         setIsLoading(true);
         getConstructionTypeList(deliverInfo?.constructionJob?.constructionType);
-        reset({
-          name: deliverInfo?.name ? deliverInfo.name : "",
-          rocYear: deliverInfo?.rocYear ? deliverInfo.rocYear : "",
-          type: deliverInfo?.constructionJob?.constructionType
-            ? deliverInfo.constructionJob.constructionType
-            : "",
-          job: deliverInfo?.constructionJob?.id
-            ? deliverInfo.constructionJob.id
-            : "",
-          since: deliverInfo?.since ? new Date(deliverInfo.since) : null,
-          until: deliverInfo?.until ? new Date(deliverInfo.until) : null,
-        });
         setIsLoading(false);
       }
     }, [deliverInfo, reset]);
@@ -158,9 +116,10 @@ const UpdatedModal = React.memo(
         since: data?.since ? format(data.since, "yyyy-MM-dd") : "",
         until: data?.until ? format(data.until, "yyyy-MM-dd") : "",
       };
-      delete convertData.t;
+      delete convertData.type;
       const fd = new FormData();
-
+      // console.log(data);
+      // console.log(convertData);
       for (let key in convertData) {
         fd.append(key, convertData[key]);
       }
@@ -198,7 +157,7 @@ const UpdatedModal = React.memo(
         setConstructionJobList(data);
       });
     };
-
+    //constructionTypeList
     return (
       <>
         {/* Modal */}
@@ -211,194 +170,254 @@ const UpdatedModal = React.memo(
               ? true
               : false
           }
+          maxWidth={"640px"}
           onClose={onCheckDirty}
         >
           <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit, onError)}>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div className="flex flex-col pt-4 gap-4">
-                <div>
-                  <Controller
-                    name="name"
-                    control={control}
-                    defaultValue={""}
-                    render={({ field }) => (
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        className="inputPadding"
-                        //label="清單標題"
-                        label={
-                          !!errors.name ? (
-                            <span className=" text-red-700 m-0">
-                              {errors?.name?.message}
-                            </span>
-                          ) : (
-                            "專案(案場)"
-                          )
-                        }
-                        placeholder="清單標題"
-                        fullWidth
-                        {...field}
-                      />
-                    )}
-                  />
-                </div>
-
-                <div>
-                  <Controller
-                    name="rocYear"
-                    control={control}
-                    defaultValue={""}
-                    render={({ field }) => (
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        className="inputPadding"
-                        //   label="專案年度"
-                        //   placeholder="ex: 112"
-                        label={
-                          !!errors.rocYear ? (
-                            <span className=" text-red-700 m-0">
-                              {errors?.rocYear?.message}
-                            </span>
-                          ) : (
-                            "專案年度"
-                          )
-                        }
-                        placeholder="專案年度"
-                        fullWidth
-                        {...field}
-                      />
-                    )}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <span>工程類別</span>
-                  <Controller
-                    name="type"
-                    control={control}
-                    defaultValue=""
-                    render={({ field: { value, onChange } }) => (
-                      <FormControl
-                        size="small"
-                        className="inputPadding"
-                        fullWidth
-                      >
-                        {value === "" ? (
-                          <InputLabel
-                            id="type-select-label"
-                            disableAnimation
-                            shrink={false}
-                            focused={false}
-                          >
-                            請選擇工程類別
-                          </InputLabel>
-                        ) : null}
-                        <Select
-                          readOnly={deliverInfo?.constructionSummaryJobTasks.length>0}
-                          labelId="type-select-label"
-                          MenuProps={{
-                            PaperProps: {
-                              style: { maxHeight: "250px" },
-                            },
-                          }}
-                          value={value}
-                          onChange={(e) => {
-                            onChange(e);
-                            getConstructionTypeList(e.target.value);
-                            setValue("job", "");
-                          }}
+                <div
+                  className="flex flex-col overflow-y-auto px-1 pb-2"
+                  style={{ maxHeight: "60vh" }}
+                >
+                  {/* 所屬專案 */}
+                  <div className="">
+                    <InputTitle title={"所屬專案"} />
+                    <Controller
+                      name="project"
+                      control={control}
+                      render={({ field: { value, onChange } }) => (
+                        <FormControl
+                          size="small"
+                          className="inputPadding"
+                          fullWidth
                         >
-                          {constructionTypeList?.map((type) => (
-                            <MenuItem
-                              key={"select" + type.ordinal}
-                              value={type.name}
+                          {value === "" ? (
+                            <InputLabel
+                              id="project-select-label"
+                              disableAnimation
+                              shrink={false}
+                              focused={false}
                             >
-                              {type.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
-                  />
-                </div>
-                <span>工程項目</span>
-                <div className="flex flex-col gap-1.5">
-                  <Controller
-                    name="job"
-                    control={control}
-                    defaultValue=""
-                    render={({ field: { value, onChange } }) => (
-                      <FormControl
-                        size="small"
-                        className="inputPadding"
-                        fullWidth
-                      >
-                        {value === "" ? (
-                          <InputLabel
-                            id="job-select-label"
-                            disableAnimation
-                            shrink={false}
-                            focused={false}
+                              請選擇所屬專案
+                            </InputLabel>
+                          ) : null}
+                          <Select
+                            labelId="project-select-label"
+                            MenuProps={{
+                              PaperProps: {
+                                style: { maxHeight: "250px" },
+                              },
+                            }}
+                            value={value}
+                            onChange={(e) => {
+                              onChange(e);
+                            }}
                           >
-                            請選擇工程項目
-                          </InputLabel>
-                        ) : null}
-
-                        <Select
-                          labelId="job-select-label"
-						  readOnly={deliverInfo?.constructionSummaryJobTasks.length>0}
-                          MenuProps={{
-                            PaperProps: {
-                              style: { maxHeight: "250px" },
-                            },
-                          }}
-                          value={value}
-                          onChange={onChange}
-                        >
-                          {!!constructionJobList &&
-                            constructionJobList.map((type) => (
+                            {projectsList?.map((project) => (
                               <MenuItem
-                                key={"select" + type.id}
-                                value={type.id}
+                                key={"select" + project.id}
+                                value={project.id}
                               >
-                                {type.name}
+                                {project.name}
                               </MenuItem>
                             ))}
-                        </Select>
-                      </FormControl>
-                    )}
-                  />
-                  <FormHelperText className="!text-red-600 h-3">
-                    {errors.type && (
-                      <p className="text-danger m-0">
-                        {errors.type.message}
-                        {/* {showNotification(`${errors.type.message}`, false)} */}
-                      </p>
-                    )}
-                    {errors.job && (
-                      <p className="text-danger m-0">
-                        {errors.job.message}
-                        {/* {showNotification(`${errors.job.message}`, false)} */}
-                      </p>
-                    )}
-                  </FormHelperText>
-                </div>
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                    <FormHelperText
+                      className="!text-red-600 break-words !text-right !mt-0"
+                      sx={{ minHeight: "1.25rem" }}
+                    >
+                      {errors["project"]?.message}
+                    </FormHelperText>
+                  </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <span>
-                    開工日期
-                    <span className=" text-sm text-gray-400"> </span>
-                  </span>
-                  <ControlledDatePicker name="since" />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <span>
-                    完工日期
-                    <span className=" text-sm text-gray-400"> </span>
-                  </span>
-                  <ControlledDatePicker name="until" />
+                  {/* 專案名稱 */}
+                  <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-0 mb-5 sm:mb-0">
+                    <div className="w-full">
+                      <InputTitle title={"專案(案場)"} />
+                      <Controller
+                        name="name"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            variant="outlined"
+                            size="small"
+                            className="inputPadding"
+                            placeholder="清單標題"
+                            fullWidth
+                            {...field}
+                          />
+                        )}
+                      />
+                      <FormHelperText
+                        className="!text-red-600 break-words !text-right !mt-0"
+                        sx={{ minHeight: "1.25rem" }}
+                      >
+                        {errors["name"]?.message}
+                      </FormHelperText>
+                    </div>
+
+                    {/* 所屬年度 */}
+                    <div className="w-full">
+                      <InputTitle title={"專案年度"} />
+                      <Controller
+                        name="rocYear"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            variant="outlined"
+                            size="small"
+                            className="inputPadding"
+                            placeholder="專案年度"
+                            fullWidth
+                            {...field}
+                          />
+                        )}
+                      />
+                      <FormHelperText
+                        className="!text-red-600 break-words !text-right !mt-0"
+                        sx={{ minHeight: "1.25rem" }}
+                      >
+                        {errors["rocYear"]?.message}
+                      </FormHelperText>
+                    </div>
+                  </div>
+
+                  <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-0 mb-5 sm:mb-0">
+                    {/* 工程類別 */}
+                    <div className="w-full">
+                      <InputTitle title={"工程類別"} />
+                      <Controller
+                        name="type"
+                        control={control}
+                        render={({ field: { value, onChange } }) => (
+                          <FormControl
+                            size="small"
+                            className="inputPadding"
+                            fullWidth
+                          >
+                            {value === "" ? (
+                              <InputLabel
+                                id="type-select-label"
+                                disableAnimation
+                                shrink={false}
+                                focused={false}
+                              >
+                                請選擇工程類別
+                              </InputLabel>
+                            ) : null}
+                            <Select
+                              readOnly={
+                                deliverInfo?.constructionSummaryJobTasks
+                                  .length > 0
+                              }
+                              labelId="type-select-label"
+                              MenuProps={{
+                                PaperProps: {
+                                  style: { maxHeight: "250px" },
+                                },
+                              }}
+                              value={value}
+                              onChange={(e) => {
+                                onChange(e);
+                                getConstructionTypeList(e.target.value);
+                                setValue("job", ""); //選了別種類別就要把項目選擇欄位清空
+                              }}
+                            >
+                              {constructionTypeList?.map((type) => (
+                                <MenuItem
+                                  key={"select" + type.ordinal}
+                                  value={type.name}
+                                >
+                                  {type.label}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        )}
+                      />
+                      <FormHelperText
+                        className="!text-red-600 break-words !text-right !mt-0"
+                        sx={{ minHeight: "1.25rem" }}
+                      >
+                        {errors["type"]?.message}
+                      </FormHelperText>
+                    </div>
+
+                    {/* 工程項目 */}
+                    <div className="w-full">
+                      <InputTitle title={"工程項目"} />
+                      <Controller
+                        name="job"
+                        control={control}
+                        render={({ field: { value, onChange } }) => (
+                          <FormControl
+                            size="small"
+                            className="inputPadding"
+                            fullWidth
+                          >
+                            {value === "" ? (
+                              <InputLabel
+                                id="job-select-label"
+                                disableAnimation
+                                shrink={false}
+                                focused={false}
+                              >
+                                請選擇工程項目
+                              </InputLabel>
+                            ) : null}
+
+                            <Select
+                              labelId="job-select-label"
+                              readOnly={
+                                deliverInfo?.constructionSummaryJobTasks
+                                  .length > 0
+                              }
+                              MenuProps={{
+                                PaperProps: {
+                                  style: { maxHeight: "250px" },
+                                },
+                              }}
+                              value={value}
+                              onChange={onChange}
+                            >
+                              {!!constructionJobList &&
+                                constructionJobList.map((type) => (
+                                  <MenuItem
+                                    key={"select" + type.id}
+                                    value={type.id}
+                                  >
+                                    {type.name}
+                                  </MenuItem>
+                                ))}
+                            </Select>
+                          </FormControl>
+                        )}
+                      />
+                      <FormHelperText
+                        className="!text-red-600 break-words !text-right !mt-0"
+                        sx={{ minHeight: "1.25rem" }}
+                      >
+                        {errors["job"]?.message}
+                      </FormHelperText>
+                    </div>
+                  </div>
+                  <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-0 mb-5 sm:mb-0">
+                    {/* 施工日期 */}
+                    <div className="w-full">
+                      <InputTitle title={"施工日期"} required={false} />
+                      <ControlledDatePicker name="since" />
+                    </div>
+
+                    {/* 完工日期 */}
+                    <div className="w-full">
+                      <InputTitle title={"完工日期"} required={false} />
+                      <ControlledDatePicker name="until" />
+                    </div>
+                  </div>
                 </div>
                 <Button
                   type="submit"
@@ -429,6 +448,7 @@ const UpdatedModal = React.memo(
   }
 );
 
+// taskModal沒有使用react-form-hook
 const TaskModal = React.memo(
   ({ title, deliverInfo, sendDataToBackend, onClose }) => {
     // Alert 開關
@@ -449,40 +469,6 @@ const TaskModal = React.memo(
 
     // 檢查是否被汙染
     const [isDirty, setIsDirty] = useState(false);
-
-    const showNotification = useNotification();
-    // 使用 Yup 來定義表單驗證規則
-    //const schema = yup.object().shape({
-    //   name: yup.string().required("清單標題不可為空值！"),
-    //   rocYear: yup
-    //     .number("應為數字")
-    //     .required("不可為空值！")
-    //     .test("len", "格式應為民國年", (val) =>
-    //       /^[0-9]{3}$/.test(val.toString())
-    //     )
-    //     .typeError("應填寫民國年 ex: 112"),
-    //   job: yup.number().required().typeError("需選擇工程類別及項目"),
-    //});
-
-    // 處理表單驗證錯誤時的回調函數
-    const onError = (errors) => {
-      if (Object.keys(errors).length > 0) {
-        for (const key in errors) {
-          if (errors.hasOwnProperty(key)) {
-            const errorMessage = errors[key]?.message;
-          }
-        }
-      }
-    };
-
-    // 使用 useForm Hook 來管理表單狀態和驗證
-    const methods = useForm();
-    const {
-      control,
-      handleSubmit,
-      reset,
-      formState: { errors },
-    } = methods;
 
     //取得工程項目執行並設定已選擇及剩下能選擇的清單
     useEffect(() => {
@@ -512,26 +498,6 @@ const TaskModal = React.memo(
         });
       }
     }, [deliverInfo]);
-
-    //將外面傳進來的資料deliverInfo代入到每個空格之中
-    useEffect(() => {
-      if (constructionTaskList && deliverInfo) {
-        setIsLoading(true);
-        reset({
-          name: deliverInfo?.name ? deliverInfo.name : "",
-          rocYear: deliverInfo?.rocYear ? deliverInfo.rocYear : "",
-          type: deliverInfo?.constructionJob?.constructionType
-            ? deliverInfo.constructionJob.constructionType
-            : "",
-          job: deliverInfo?.constructionJob?.id
-            ? deliverInfo.constructionJob.id
-            : "",
-          since: deliverInfo?.since ? deliverInfo.since : "",
-          until: deliverInfo?.until ? deliverInfo.until : "",
-        });
-        setIsLoading(false);
-      }
-    }, [constructionTaskList, reset]);
 
     // 選擇新增移除御三家
     const handleTaskChange = useCallback((event) => {
@@ -593,6 +559,7 @@ const TaskModal = React.memo(
 
     // edit dialo傳回來的data統合
     const sendDataToTaskEdit = (data) => {
+      if (!isDirty) setIsDirty(true);
       const checkListIndex = selectedTasks.findIndex(
         (i) => i.constructionJobTask.id === data.constructionJobTask.id
       );
@@ -619,6 +586,7 @@ const TaskModal = React.memo(
           delete tempTask.id;
         }
         convertData.push(tempTask);
+        //console.log(convertData)
       }
       sendDataToBackend(convertData, "task", deliverInfo.id);
     };
@@ -648,152 +616,139 @@ const TaskModal = React.memo(
           show={constructionTaskList ? true : false}
           //show={true}
           onClose={onCheckDirty}
-          maxWidth={padScreen ? 428 : "660px"}
+          maxWidth={padScreen ? "428px" : "660px"}
         >
           <div className="flex gap-3 relative">
             <div className="w-[360px] bg-bue-500">
-              <FormProvider {...methods}>
-                <form onSubmit={handleSubmit(onSubmit, onError)}>
-                  <div
-                    className="flex flex-col pt-4 gap-4 !overflow-y-auto"
-                    style={{ height: "70vh", scrollbarWidth: "thin" }}
-                  >
-                    <div>
-                      <Controller
-                        name="name"
-                        control={control}
-                        defaultValue={""}
-                        render={({ field }) => (
-                          <TextField
-                            variant="outlined"
-                            size="small"
-                            className="inputPadding"
-                            label="清單標題"
-                            fullWidth
-                            inputProps={{ readOnly: true }}
-                            {...field}
-                          />
-                        )}
-                      />
-                    </div>
+              {/* <FormProvider {...methods}>
+                <form onSubmit={handleSubmit(onSubmit)}> */}
+              <div
+                className="flex flex-col pt-4 gap-4 !overflow-y-auto"
+                style={{ height: "70vh", scrollbarWidth: "thin" }}
+              >
+                <div>
+                  <TextField
+                    variant="outlined"
+                    size="small"
+                    className="inputPadding"
+                    label="清單標題"
+                    value={deliverInfo?.name ? deliverInfo.name : ""}
+                    fullWidth
+                    inputProps={{ readOnly: true }}
+                  />
+                </div>
 
-                    <div className="inline-flex gap-3">
-                      <FormControl
-                        size="small"
-                        className="inputPadding"
-                        fullWidth
+                <div className="inline-flex gap-3">
+                  <FormControl size="small" className="inputPadding" fullWidth>
+                    {selectedTask === "" ? (
+                      <InputLabel
+                        id="task-select-label"
+                        disableAnimation
+                        shrink={false}
+                        focused={false}
                       >
-                        {selectedTask === "" ? (
-                          <InputLabel
-                            id="task-select-label"
-                            disableAnimation
-                            shrink={false}
-                            focused={false}
-                          >
-                            請選擇工項執行
-                          </InputLabel>
-                        ) : null}
-                        <Select
-                          labelId="task-select-label"
-                          value={selectedTask}
-                          onChange={handleTaskChange}
-                          //MenuProps={MenuProps}
-                        >
-                          {constructionTaskList?.map((task) => (
-                            <MenuItem key={"select" + task.id} value={task.id}>
-                              {task.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                      <Button
-                        variant="contained"
-                        color="dark"
-                        onClick={handleAddTask}
-                        disabled={!selectedTask}
-                        className="!text-base !h-12"
-                      >
-                        新增
-                      </Button>
-                    </div>
-                    <List
-                      className="overflow-y-auto border border-neutral-300 rounded"
-                      sx={{ height: "100%" }}
+                        請選擇工項執行
+                      </InputLabel>
+                    ) : null}
+                    <Select
+                      labelId="task-select-label"
+                      value={selectedTask}
+                      onChange={handleTaskChange}
+                      //MenuProps={MenuProps}
                     >
-                      {!isLoading ? (
-                        <TransitionGroup>
-                          {selectedTasks.map((task) => (
-                            <Collapse
-                              key={"selected" + task.constructionJobTask?.id}
+                      {constructionTaskList?.map((task) => (
+                        <MenuItem key={"select" + task.id} value={task.id}>
+                          {task.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <Button
+                    variant="contained"
+                    color="dark"
+                    onClick={handleAddTask}
+                    disabled={!selectedTask}
+                    className="!text-base !h-12"
+                  >
+                    新增
+                  </Button>
+                </div>
+                <List
+                  className="overflow-y-auto border border-neutral-300 rounded"
+                  sx={{ height: "100%" }}
+                >
+                  {!isLoading ? (
+                    <TransitionGroup>
+                      {selectedTasks.map((task) => (
+                        <Collapse
+                          key={"selected" + task.constructionJobTask?.id}
+                        >
+                          <ListItem>
+                            <ListItemText
+                              secondary={task.constructionJobTask?.name}
+                            />
+                            <IconButton
+                              onClick={() => {
+                                handleEditTask(task);
+                              }}
                             >
-                              <ListItem>
-                                <ListItemText
-                                  secondary={task.constructionJobTask?.name}
-                                />
-                                <IconButton
-                                  onClick={() => {
-                                    handleEditTask(task);
-                                  }}
-                                >
-                                  <Edit />
-                                </IconButton>
-                                {task.id.length === 0 && (
-                                  <IconButton
-                                    onClick={() => {
-                                      handleRemoveTask(
-                                        task.constructionJobTask.id
-                                      );
-                                    }}
-                                  >
-                                    <DeleteIcon />
-                                  </IconButton>
-                                )}
-                              </ListItem>
-                              <Divider variant="middle" />
-                            </Collapse>
-                          ))}
-                        </TransitionGroup>
-                      ) : (
-                        <Loading size={18} />
-                      )}
-                    </List>
-                    {padScreen ? (
-                      <div className="flex gap-x-3">
-                        <Button
-                          variant="contained"
-                          color="success"
-                          className="!text-base "
-                          fullWidth
-                          onClick={() => {
-                            setIsCheckingList(!isCheckingList);
-                          }}
-                        >
-                          {isCheckingList ? "返回" : "預覽清單"}
-                        </Button>
-                        <Button
-                          type="submit"
-                          variant="contained"
-                          color="success"
-                          className="!text-base "
-                          fullWidth
-                        >
-                          儲存
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        color="success"
-                        className="!text-base !h-12"
-                        fullWidth
-                      >
-                        儲存
-                      </Button>
-                    )}
+                              <Edit />
+                            </IconButton>
+                            {task.id.length === 0 && (
+                              <IconButton
+                                onClick={() => {
+                                  handleRemoveTask(task.constructionJobTask.id);
+                                }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            )}
+                          </ListItem>
+                          <Divider variant="middle" />
+                        </Collapse>
+                      ))}
+                    </TransitionGroup>
+                  ) : (
+                    <Loading size={18} />
+                  )}
+                </List>
+                {padScreen ? (
+                  <div className="flex gap-x-3">
+                    <Button
+                      variant="contained"
+                      color="success"
+                      className="!text-base "
+                      fullWidth
+                      onClick={() => {
+                        setIsCheckingList(!isCheckingList);
+                      }}
+                    >
+                      {isCheckingList ? "返回" : "預覽清單"}
+                    </Button>
+                    <Button
+                      onClick={onSubmit}
+                      variant="contained"
+                      color="success"
+                      className="!text-base "
+                      fullWidth
+                    >
+                      儲存
+                    </Button>
                   </div>
-                </form>
-              </FormProvider>
+                ) : (
+                  <Button
+                    onClick={onSubmit}
+                    variant="contained"
+                    color="success"
+                    className="!text-base !h-12"
+                    fullWidth
+                  >
+                    儲存
+                  </Button>
+                )}
+              </div>
+              {/* </form>
+              </FormProvider> */}
             </div>
             <div
               className={`${
@@ -900,8 +855,7 @@ const TaskEditDialog = React.memo(
       control,
       handleSubmit,
       reset,
-      setValue,
-      formState: { errors, isDirty },
+      formState: { isDirty },
     } = methods;
     // deliverTaskInfo 傳進來的 {id: '7056078833492952896', constructionJobTask: {…}, estimatedSince: null, estimatedUntil: null, location: '', …}
     // 格式 {id: '', constructionJobTask:1 , estimatedSince: '', estimatedUntil: '', location: '', remarK:''}
@@ -979,7 +933,6 @@ const TaskEditDialog = React.memo(
                   <Controller
                     name="location"
                     control={control}
-                    defaultValue={""}
                     render={({ field }) => (
                       <TextField
                         variant="outlined"
@@ -998,7 +951,6 @@ const TaskEditDialog = React.memo(
                   <Controller
                     name="remark"
                     control={control}
-                    defaultValue={""}
                     render={({ field }) => (
                       <TextField
                         variant="outlined"
