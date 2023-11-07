@@ -26,13 +26,13 @@ const Header = ({ toggleSidebar }) => {
 	};
 
 	return (
-		<AppBar position="static" elevation={3} style={{ zIndex: 1024 }}>
-			<Toolbar className="justify-between text-primary-800 bg-white">
+		<AppBar position="static" elevation={3} style={{ zIndex: 1024 }} color="dark" className="opacity-90">
+			<Toolbar className="justify-between text-white !min-h-[56px]">
 				<NavLink to="/" className="flex items-center text-1xl select-none">
 					{/* Logo */}
 					<img src={logoIcon} alt="Logo" className="h-10 me-1" />
-					<span className="whitespace-nowrap text-primary-900 font-medium -translate-y-px">元融科技</span>
-					<span className="hidden md:block whitespace-nowrap text-primary-900 font-medium -translate-y-px">
+					<span className="whitespace-nowrap text-white font-medium -translate-y-px">元融科技</span>
+					<span className="hidden md:block whitespace-nowrap text-white font-medium -translate-y-px">
 						有限公司
 					</span>
 				</NavLink>

@@ -9,11 +9,11 @@ const CustomBreadcrumbs = () => {
 	const pathnames = location.pathname.split("/").filter((x) => x);
 
 	const nameMappings = [
-		{ name: "userinfo", display: "個人資料" },
+		{ name: "userinfo", display: "帳戶資訊" },
 		{ name: "sites", display: "案場" },
 		{ name: "constructionTypes", display: "工程類別" },
 		{ name: "constructionsummary", display: "施工清單" },
-		{ name: "users", display: "職員清單" },
+		{ name: "users", display: "人事管理" },
 		{ name: "dispatchList", display: "派工清單" },
 		{ name: "project", display: "專案管理" },
 		{ name: "setting", display: "設定" },
@@ -24,7 +24,7 @@ const CustomBreadcrumbs = () => {
 		<Breadcrumbs
 			aria-label="breadcrumb"
 			maxItems={3}
-			className={`pt-3 sm:pt-4 pb-2 sm:pb-0 px-5 !text-sm ${pathnames.length > 0 ? "" : "!pt-0"}`}>
+			className={`pt-3 sm:pt-4 pb-2 sm:pb-0 px-5 !text-sm ${pathnames.length > 0 ? "" : "!pt-0 !pb-0"}`}>
 			{pathnames.length > 0 && (
 				<Link component={NavLink} color="inherit" underline="hover" to="/">
 					首頁

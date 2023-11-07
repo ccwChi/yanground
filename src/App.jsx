@@ -4,7 +4,14 @@ import Header from "./components/Layout/Header";
 import Sidebar from "./components/Layout/Sidebar";
 import Tabbar from "./components/Tabbar/Tabbar";
 import CustomBreadcrumbs from "./components/Breadcrumbs/CustomBreadcrumbs";
-import { faUserGear, faHelmetSafety, faToolbox, faVest, faPersonDigging, faFileLines } from "@fortawesome/free-solid-svg-icons";
+import {
+	faUserGear,
+	faHelmetSafety,
+	faToolbox,
+	faVest,
+	faPersonDigging,
+	faFileLines,
+} from "@fortawesome/free-solid-svg-icons";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./utils/theme";
 import "./app.scss";
@@ -49,8 +56,12 @@ const App = () => {
 		},
 		{
 			icon: faUserGear,
-			text: "職員清單",
-			href: "users",
+			text: "HRM",
+			href: "#",
+			subMenuItems: [
+				{ text: "人事管理", href: "users" },
+				{ text: "帳戶資訊", href: "userinfo" },
+			],
 		},
 		// },
 		// {
