@@ -44,6 +44,25 @@ $z-index-a: 1040;
 	height: 100%;
 }
 
+@keyframes slideLeftRight {
+	0% {
+		transform: translateX(0);
+	}
+	50% {
+		transform: translateX(0.25rem);
+	}
+	100% {
+		transform: translateX(0);
+	}
+}
+.arrow-animation {
+	animation: none;
+}
+
+.aa_wrapper:hover .arrow-animation {
+	animation: slideLeftRight 1s linear infinite;
+}
+
 //****** MUI ******//
 .inputPadding {
 	input,

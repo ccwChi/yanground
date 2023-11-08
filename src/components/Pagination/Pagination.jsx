@@ -6,12 +6,21 @@ import TablePagination from "@mui/material/TablePagination";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 
-const Pagination = ({ totalElement, page, onPageChange, rowsPerPage, onRowsPerPageChange }) => {
+const Pagination = ({
+	totalElement,
+	page,
+	onPageChange,
+	rowsPerPage,
+	onRowsPerPageChange,
+	rowsPerPageOptions = [10, 25, 50],
+	classnames = "",
+}) => {
+	
 	return (
 		<div className="order-2">
 			<TablePagination
-				className="customPagination"
-				rowsPerPageOptions={[10, 25, 50]}
+				className={`customPagination ${classnames}`}
+				rowsPerPageOptions={rowsPerPageOptions}
 				component="div"
 				count={totalElement}
 				page={page}

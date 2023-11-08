@@ -4,7 +4,7 @@ import "./ErrorMessage.scss";
 
 const ErrorMessage = () => {
 	const error = useRouteError();
-	console.error('EM:' + error);
+	// console.error('EM:' + error);
 	const initialContent = `> <span>ERROR CODE</span>: "<i>${error.status} ${
 		error.statusText || error.message
 	}</i>"<br/> > <span>ERROR DESCRIPTION</span>: "<i>${error.data}</i>"<br/> > <span>HAVE A NICE DAY :-)</span>`;

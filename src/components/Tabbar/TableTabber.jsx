@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 
-const TableTabber = ({ tabGroup, setCat, classnames = "", onTabChange }) => {
-	const [value, setValue] = useState(0);
+const TableTabber = ({ tabGroup, cat, setCat, classnames = "", onTabChange }) => {
+	const navigate = useNavigate();
 
 	const handleChange = (event, newValue) => {
-		setValue(newValue);
-		setCat(tabGroup[newValue].f);
+		setCat(newValue);
+		navigate(`?cat=${newValue}`);
 
 		if (onTabChange) {
 			onTabChange(newValue);
@@ -16,7 +17,7 @@ const TableTabber = ({ tabGroup, setCat, classnames = "", onTabChange }) => {
 
 	return (
 		<Tabs
-			value={value}
+			value={cat}
 			onChange={handleChange}
 			className={classnames}
 			variant="scrollable"
@@ -25,7 +26,7 @@ const TableTabber = ({ tabGroup, setCat, classnames = "", onTabChange }) => {
 			aria-label="scrollable auto tabs example"
 			style={{ color: "#273057" }}>
 			{tabGroup.map((tab) => (
-				<Tab key={tab.f} label={tab.text} />
+				<Tab key={tab.f} label={tab.text} value={tab.f} />
 			))}
 		</Tabs>
 	);

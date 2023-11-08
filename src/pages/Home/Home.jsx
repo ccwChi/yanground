@@ -80,7 +80,7 @@ const Home = () => {
 						</div>
 						<div>目前成員數量</div>
 						<div>
-							<NavLink to="/users" className="text-white" title="Wallet">
+							<NavLink to="/users" className="text-white">
 								<strong className="text-2xl">{countNum.staffNum}</strong>
 								<ArrowForwardIcon />
 							</NavLink>
@@ -93,7 +93,7 @@ const Home = () => {
 						</div>
 						<div>部門數量</div>
 						<div>
-							<NavLink to="/department" className="text-white" title="Bank Account">
+							<NavLink to="/department" className="text-white">
 								<strong className="text-2xl">{countNum.depNum}</strong>
 								<ArrowForwardIcon />
 							</NavLink>

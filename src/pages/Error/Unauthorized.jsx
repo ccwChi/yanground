@@ -18,20 +18,6 @@ const Unauthorized = () => {
 					401
 				</h3>
 				<p className="text-sm">This page is meant to only be accessed by certain people.</p>
-				<div className="flex mt-6 gap-4">
-					<Button variant="contained" component={NavLink} to={"/"} className="!text-base !h-12 !rounded-full">
-						返回首頁
-					</Button>
-					<Button
-						variant="contained"
-						color="success"
-						className="!text-base !h-12 !rounded-full"
-						onClick={() => {
-							navigate(-1);
-						}}>
-						返回上一頁
-					</Button>
-				</div>
 			</div>
 			<div className={style.sun}></div>
 			<div className={style.clouds}>
