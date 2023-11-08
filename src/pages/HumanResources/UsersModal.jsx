@@ -16,7 +16,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { useForm, Controller, FormProvider } from "react-hook-form";
+import { useForm, Controller, FormProvider, authorityList } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getData } from "../../utils/api";
@@ -24,6 +24,8 @@ import { IOSSwitch } from "../../components/Switch/Switch";
 import { useNotification } from "../../hooks/useNotification";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import InputTitle from "../../components/Guideline/InputTitle";
+import TableTabber from "../../components/Tabbar/TableTabber";
 
 const EditModal = ({
   title,
@@ -34,6 +36,7 @@ const EditModal = ({
   authorityList,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [cat, setCat] = useState("1");
 
   // 檢查是否被汙染
   const [alertOpen, setAlertOpen] = useState(false);
@@ -45,7 +48,7 @@ const EditModal = ({
     nickname: yup.string().required("暱稱不得為空白"),
     nationalIdentityCardNumber: yup
       .mixed()
-      .test("is-national-id", "第一字為英文，後面九個數字", (value) => {
+      .test("is-national-id", "身份證字號格式為第一字為英文，後面九個數字", (value) => {
         if (!value) {
           return true;
         }
@@ -147,61 +150,86 @@ const EditModal = ({
     onClose();
   };
 
+  const tabGroup = [
+    { f: "1", text: "資料1/2" },
+    { f: "2", text: "資料2/2" },
+    { f: "3", text: "權限" },
+  ];
+
   return (
     <>
       <ModalTemplete
         title={title}
         show={!!deliverInfo.id && !!authorityList ? true : false}
         onClose={onCheckDirty}
-        maxWidth={padScreen ? 428 : "760px"}
+        maxWidth={"760px"}
       >
         <FormProvider {...methods}>
+          {/* TabBar */}
+          <div className="md:hidden mt-3 mb-5 flex-1 -m-3">
+            <TableTabber tabGroup={tabGroup} setCat={setCat} />
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)}>
             <div
-              className="flex flex-col gap-5  !overflow-y-auto borderx md:flex-wrap md:min-h-[520px] md:max-h-[540px]"
-              style={{ height: "70vh", scrollbarWidth: "thin" }}
+              // className="flex flex-col gap-5  !overflow-y-auto borderx md:flex-wrap md:min-h-[520px] md:max-h-[540px]"
+              className="flex-col relative columns-1 md:columns-3 md:!h-[520px] md:py-5 mx-3 h-fit gap-8"
+              style={{ maxHeight: "65vh", scrollbarWidth: "thin" }}
             >
-              <div className="flex flex-col gap-1.5 w-100 md:w-[320px] mt-5">
-                <span>員工編號</span>
-                <Controller
-                  name="empolyeeId"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      className="inputPadding"
-                      label="員工編號"
-                      placeholder="員工編號"
-                      fullWidth
-                      disabled
-                      {...field}
-                    />
-                  )}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5  w-100 md:w-[320px]">
-                <span>line名稱</span>
-                <Controller
-                  name="displayName"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      className="inputPadding"
-                      placeholder="line名稱"
-                      fullWidth
-                      {...field}
-                      disabled
-                    />
-                  )}
-                />
-              </div>
-              {/* 姓名 */}
-              <div className="flex gap-x-4  w-100 md:w-[320px]">
-                <div className="flex flex-col gap-1.5 ">
-                  <span>姓氏</span>
+              {/*  <div
+              className={`${
+                isCheckingList ? "absolute" : "hidden"
+              }  md:block md:w-[300px] md:static md:h-[69vh] h-[calc(68vh-46px)] right-0 left-0 top-0 bottom-0 z-10 border-2 overflow-y-scroll rounded-md bg-slate-50 mt-3`}
+            > */}
+              <div
+                className={`${
+                  cat === "1" ? "static" : "hidden"
+                } space-y-4 md:relative md:inline-block w-full overflow-y-auto max-h-[60vh]`}
+              >
+                {/* 員工編號 */}
+                <div className="w-full ">
+                  <InputTitle title={"員工編號"} required={false} />
+                  {/* <span>員工編號</span> */}
+                  <Controller
+                    name="empolyeeId"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        className="inputPadding"
+                        label="員工編號"
+                        placeholder="員工編號"
+                        fullWidth
+                        disabled
+                        {...field}
+                      />
+                    )}
+                  />
+                </div>
+                {/* line名稱 */}
+                <div className="w-full">
+                  <InputTitle title={"line名稱"} required={false} />
+                  <Controller
+                    name="displayName"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        className="inputPadding"
+                        placeholder="line名稱"
+                        fullWidth
+                        {...field}
+                        disabled
+                      />
+                    )}
+                  />
+                </div>
+                {/* 姓+名 */}
+
+                <div className="w-full">
+                  <InputTitle title={"姓氏"} required={false} />
                   <Controller
                     name="lastname"
                     control={control}
@@ -210,7 +238,7 @@ const EditModal = ({
                         variant="outlined"
                         size="small"
                         className="inputPadding"
-                        placeholder="請輸入姓氏"
+                        placeholder="請輸入姓"
                         fullWidth
                         {...field}
                       />
@@ -218,8 +246,8 @@ const EditModal = ({
                   />
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <span>名字</span>
+                <div className="w-full">
+                  <InputTitle title={"名字"} required={false} />
                   <Controller
                     name="firstname"
                     control={control}
@@ -228,18 +256,17 @@ const EditModal = ({
                         variant="outlined"
                         size="small"
                         className="inputPadding"
-                        placeholder="請輸入名字"
+                        placeholder="請輸入名"
                         fullWidth
                         {...field}
                       />
                     )}
                   />
                 </div>
-              </div>
-              {/* 暱稱性別 */}
-              <div className=" columns-2  w-100 md:w-[320px]">
-                <div className="flex flex-col gap-1.5">
-                  <span>暱稱</span>
+                {/* 暱稱+性別 */}
+
+                <div className="w-full">
+                  <InputTitle title={"暱稱 / 別名"} required={false} />
                   <Controller
                     name="nickname"
                     control={control}
@@ -263,154 +290,190 @@ const EditModal = ({
                     )}
                   />
                 </div>
-                <Controller
-                  name="gender"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControl>
-                      <span>性別</span>
-                      <RadioGroup
-                        row
-                        aria-labelledby="demo-row-radio-buttons-group-label"
-                        name="row-radio-buttons-group"
-                        className="mt-2 "
-                      >
-                        <FormControlLabel
-                          {...field}
-                          value="male"
-                          control={
-                            <Radio
-                              checked={field.value === "male"}
-                              size="small"
-                            />
-                          }
-                          label="男性"
-                        />
-                        <FormControlLabel
-                          {...field}
-                          value="female"
-                          control={
-                            <Radio
-                              checked={field.value === "female"}
-                              size="small"
-                            />
-                          }
-                          label="女性"
-                        />
-                      </RadioGroup>
-                    </FormControl>
-                  )}
-                />
               </div>
 
-              <div className="flex flex-col gap-1.5 w-100 md:w-[320px]">
-                <span>身份證字號</span>
-                <Controller
-                  name="nationalIdentityCardNumber"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      className="inputPadding"
-                      label={
-                        errors.nationalIdentityCardNumber && (
-                          <span className=" text-red-700 m-0">
-                            {errors.nationalIdentityCardNumber.message}
-                          </span>
-                        )
-                      }
-                      placeholder="身分證字號"
-                      fullWidth
-                      {...field}
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5 w-100 md:w-[320px] md:mt-5">
-                <span>生日</span>
-                <ControlledDatePicker name="birthDate" />
-              </div>
-
-              <div className="flex flex-col gap-1.5 w-100 md:w-[320px]">
-                <p>到職日：</p>
-                <ControlledDatePicker name="startedOn" />
-              </div>
-
-              <div className="flex flex-col gap-1.5 w-100 md:w-[320px]">
-                <span>部門</span>
-                <Controller
-                  name="department"
-                  control={control}
-                  //   defaultValue=""
-                  render={({ field: { value, onChange } }) => (
-                    <Select
-                      labelId="department-select-label"
-                      MenuProps={{
-                        PaperProps: {
-                          style: { maxHeight: "250px" },
-                        },
-                      }}
-                      value={value}
-                      onChange={onChange}
-                    >
-                      {departmentList?.map((depart) => (
-                        <MenuItem key={"select" + depart.id} value={depart.id}>
-                          {depart.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
-              </div>
-              <FormControl
-                component="fieldset"
-                variant="standard"
-                className="flex flex-col gap-1.5 w-100 md:w-[320px]"
+              <div
+                className={`${
+                  cat === "2" ? "static" : "hidden"
+                } space-y-4 md:relative md:inline-block w-full overflow-y-auto max-h-[60vh]`}
               >
-                <span>權限</span>
-                <Box className="w-full h-[150px]  overflow-y-auto  bg-slate-50 border-2 rounded-lg">
+                <div className="w-full">
+                  <InputTitle title={"性別"} required={false} />
                   <Controller
-                    name="authorities"
+                    name="gender"
                     control={control}
-                    render={() => (
-                      <FormGroup>
-                        {authorityList?.map((authority) => (
+                    render={({ field }) => (
+                      <FormControl>
+                        <RadioGroup
+                          row
+                          aria-labelledby="demo-row-radio-buttons-group-label"
+                          name="row-radio-buttons-group"
+                        >
                           <FormControlLabel
-                            className="justify-between !m-0 pl-3 pe-3 border-b-2 "
-                            key={authority.id}
-                            id={authority.id}
-                            {...register("authorities")}
+                            {...field}
+                            value="male"
                             control={
-                              <IOSSwitch
-                                sx={{ m: 1 }}
-                                value={authority.id}
-                                defaultChecked={deliverInfo?.authorities.some(
-                                  (existingAuthority) =>
-                                    existingAuthority.id === authority.id
-                                )}
+                              <Radio
+                                checked={field.value === "male"}
+                                size="small"
                               />
                             }
-                            label={authority.name}
-                            labelPlacement="start"
+                            label="男性"
                           />
-                        ))}
-                      </FormGroup>
+                          <FormControlLabel
+                            {...field}
+                            value="female"
+                            control={
+                              <Radio
+                                checked={field.value === "female"}
+                                size="small"
+                              />
+                            }
+                            label="女性"
+                          />
+                        </RadioGroup>
+                      </FormControl>
                     )}
                   />
-                </Box>
-              </FormControl>
+                </div>
+                {/* 身份證字號 */}
+                <div className="w-full ">
+                  <InputTitle title={"身份證字號"} required={false} />
+                  <Controller
+                    name="nationalIdentityCardNumber"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        className="inputPadding"
+                        label={
+                          errors.nationalIdentityCardNumber && (
+                            <span className=" text-red-700 m-0">
+                              {errors.nationalIdentityCardNumber.message}
+                            </span>
+                          )
+                        }
+                        placeholder="身分證字號"
+                        fullWidth
+                        {...field}
+                      />
+                    )}
+                  />
+                </div>
+
+                {/* 生日 */}
+                <div className="w-full ">
+                  <InputTitle title={"生日"} required={false} />
+                  <ControlledDatePicker name="birthDate" />
+                </div>
+                {/* 到職日 */}
+                <div className="w-full">
+                  <InputTitle title={"到職日"} required={false} />
+                  <ControlledDatePicker name="startedOn" />
+                </div>
+                {/* 部門 */}
+                {/* <div className=" gap-1.5 w-100 md:w-[320px]"> */}
+                <div className="w-full flex flex-col">
+                  <InputTitle title={"部門"} required={false} />
+                  <Controller
+                    name="department"
+                    control={control}
+                    //   defaultValue=""
+                    render={({ field: { value, onChange } }) => (
+                      <Select
+                        labelId="department-select-label"
+                        MenuProps={{
+                          PaperProps: {
+                            style: { maxHeight: "250px" },
+                          },
+                        }}
+                        value={value}
+                        onChange={onChange}
+                      >
+                        {departmentList?.map((depart) => (
+                          <MenuItem
+                            key={"select" + depart.id}
+                            value={depart.id}
+                          >
+                            {depart.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* 權限 */}
+              <div
+                className={`${
+                  cat === "3" ? "static" : "hidden"
+                } space-y-4  md:relative md:inline-block w-full max-h-[60vh]`}
+              >
+                <FormControl
+                  component="fieldset"
+                  variant="standard"
+                  className="w-full"
+                >
+                  {" "}
+                  <InputTitle title={"權限"} required={false} />
+                  <Box className="w-full  overflow-y-auto  border-gray-400 rounded-md  max-h-[50vh]">
+                    <Controller
+                      name="authorities"
+                      control={control}
+                      render={() => (
+                        <FormGroup>
+                          {authorityList?.map((authority) => (
+                            <FormControlLabel
+                              className="justify-between !m-0 border-b-[1px] border-gray-400 "
+                              key={authority.id}
+                              id={authority.id}
+                              {...register("authorities")}
+                              control={
+                                <IOSSwitch
+                                  sx={{ m: 1 }}
+                                  value={authority.id}
+                                  defaultChecked={deliverInfo?.authorities.some(
+                                    (existingAuthority) =>
+                                      existingAuthority.id === authority.id
+                                  )}
+                                />
+                              }
+                              label={authority.name}
+                              labelPlacement="start"
+                            />
+                          ))}
+                        </FormGroup>
+                      )}
+                    />
+                  </Box>
+                </FormControl>
+              </div>
             </div>
-            <Button
-              type="submit"
-              variant="contained"
-              color="success"
-              className="!text-base !mt-4 md:!mt-0"
-              fullWidth
-            >
-              儲存
-            </Button>
+            <div className="!mt-2 md:!mt-0">
+              <div className="  min-h-[2.2rem] md:hidden">
+                {errors.nickname && (
+                  <span className=" text-red-700 m-0">
+                    {errors.nickname.message}
+                  </span>
+                )}
+                {errors.nationalIdentityCardNumber && (
+                  <span className=" text-red-700 m-0">
+                    {errors.nationalIdentityCardNumber.message}
+                  </span>
+                )}
+              </div>
+              <Button
+                type="submit"
+                variant="contained"
+                color="success"
+                className="!text-base "
+                fullWidth
+              >
+                儲存
+              </Button>
+            </div>
           </form>
         </FormProvider>
       </ModalTemplete>
