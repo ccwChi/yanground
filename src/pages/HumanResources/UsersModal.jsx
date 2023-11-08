@@ -16,7 +16,12 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { useForm, Controller, FormProvider, authorityList } from "react-hook-form";
+import {
+  useForm,
+  Controller,
+  FormProvider,
+  authorityList,
+} from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getData } from "../../utils/api";
@@ -48,12 +53,16 @@ const EditModal = ({
     nickname: yup.string().required("暱稱不得為空白"),
     nationalIdentityCardNumber: yup
       .mixed()
-      .test("is-national-id", "身份證字號格式為第一字為英文，後面九個數字", (value) => {
-        if (!value) {
-          return true;
+      .test(
+        "is-national-id",
+        "身份證字號格式為第一字為英文，後面九個數字",
+        (value) => {
+          if (!value) {
+            return true;
+          }
+          return /^[A-Za-z]\d{9}$/.test(value);
         }
-        return /^[A-Za-z]\d{9}$/.test(value);
-      }),
+      ),
   });
 
   const onCheckDirty = () => {
@@ -172,19 +181,13 @@ const EditModal = ({
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <div
-              // className="flex flex-col gap-5  !overflow-y-auto borderx md:flex-wrap md:min-h-[520px] md:max-h-[540px]"
-              className="flex-col relative columns-1 md:columns-3 md:!h-[520px] md:py-5 mx-3 h-fit gap-8"
+              className="flex-col relative columns-1 md:columns-3 md:!min-h-[520px] md:!max-h-[52px] md:py-5 mx-3 h-fit gap-8"
               style={{ maxHeight: "65vh", scrollbarWidth: "thin" }}
             >
-              {/*  <div
-              className={`${
-                isCheckingList ? "absolute" : "hidden"
-              }  md:block md:w-[300px] md:static md:h-[69vh] h-[calc(68vh-46px)] right-0 left-0 top-0 bottom-0 z-10 border-2 overflow-y-scroll rounded-md bg-slate-50 mt-3`}
-            > */}
               <div
                 className={`${
                   cat === "1" ? "static" : "hidden"
-                } space-y-4 md:relative md:inline-block w-full overflow-y-auto max-h-[60vh]`}
+                } space-y-4 md:relative md:inline-block w-full overflow-y-auto  max-h-[60vh] md:h-auto md:max-h-fit`}
               >
                 {/* 員工編號 */}
                 <div className="w-full ">
@@ -295,7 +298,7 @@ const EditModal = ({
               <div
                 className={`${
                   cat === "2" ? "static" : "hidden"
-                } space-y-4 md:relative md:inline-block w-full overflow-y-auto max-h-[60vh]`}
+                } space-y-4 md:relative md:inline-block w-full overflow-y-auto  max-h-[60vh] md:h-auto md:max-h-fit`}
               >
                 <div className="w-full">
                   <InputTitle title={"性別"} required={false} />
@@ -409,7 +412,7 @@ const EditModal = ({
               <div
                 className={`${
                   cat === "3" ? "static" : "hidden"
-                } space-y-4  md:relative md:inline-block w-full max-h-[60vh]`}
+                } space-y-4 md:relative md:inline-block w-full overflow-y-auto max-h-[60vh] md:h-auto md:max-h-fit `}
               >
                 <FormControl
                   component="fieldset"
@@ -418,7 +421,7 @@ const EditModal = ({
                 >
                   {" "}
                   <InputTitle title={"權限"} required={false} />
-                  <Box className="w-full  overflow-y-auto  border-gray-400 rounded-md  max-h-[50vh]">
+                  <Box className="w-full  overflow-y-auto  border-gray-400 rounded-md">
                     <Controller
                       name="authorities"
                       control={control}
