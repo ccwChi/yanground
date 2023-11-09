@@ -6,14 +6,41 @@ import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
 import AddIcon from "@mui/icons-material/Add";
 import CommentIcon from "@mui/icons-material/Comment";
-import FolderCopyIcon from "@mui/icons-material/FolderCopy";
-import WorkHistoryIcon from "@mui/icons-material/WorkHistory";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
 import { getData, postBodyData, postData } from "../../utils/api";
 import { UpdatedModal, TaskModal } from "./SummaryModal";
 import { useNotification } from "../../hooks/useNotification";
+
+// 如果施工種類有新增需手動新增
+
+const constructionTypeList = [
+  {
+    label: "土木",
+    name: "CIVIL_CONSTRUCTION",
+    ordinal: 0,
+  },
+  {
+    label: "機電",
+    name: "MECHATRONICS_ENGINEERING",
+    ordinal: 1,
+  },
+  {
+    label: "測量",
+    name: "CONSTRUCTION_SURVEYING",
+    ordinal: 2,
+  },
+  {
+    label: "鋼構(組裝)",
+    name: "STEEL_FRAME_ASSEMBLING",
+    ordinal: 3,
+  },
+  {
+    label: "鋼構(製造)",
+    name: "STEEL_FRAME_MANUFACTURE",
+    ordinal: 4,
+  },
+];
 
 const ConstructionSummary = () => {
   const showNotification = useNotification();
@@ -22,6 +49,8 @@ const ConstructionSummary = () => {
   const [cat, setCat] = useState(null);
   // API List Data
   const [apiData, setApiData] = useState(null);
+  //const [constructionTypeList, setConstructionTypeList] = useState(null);
+  const [projectsList, setProjectsList] = useState(null);
   // isLoading 等待請求 api
   const [isLoading, setIsLoading] = useState(true);
   // Page 頁數設置
@@ -38,7 +67,7 @@ const ConstructionSummary = () => {
 
   // Tab 列表對應 api 搜尋參數
   const tabGroup = [
-    { f: "", text: "全部" },
+    // { f: "", text: "全部" },
     // { f: "inprogress", text: "進行中" },
     // { f: "unstarted", text: "尚未開始" },
     // { f: "end", text: "已結束" },
@@ -58,11 +87,24 @@ const ConstructionSummary = () => {
   ];
 
   // 對照 api table 所顯示 key
-  const columns = [
+  const columnsPC = [
+    { key: "name", label: "名稱" },
+    // { key: "rocYear", label: "年度" },
+    { key: ["project", "name"], label: "專案" },
+    { key: ["constructionJob", "typeName"], label: "類別" },
+    { key: ["constructionJob", "name"], label: "項目" },
+    { key: "since", label: "起始日期" },
+  ];
+
+  const columnsMobile = [
     { key: "id", label: "系統ID" },
     { key: "name", label: "名稱" },
+    { key: ["project", "name"], label: "專案" },
     { key: "rocYear", label: "年度" },
-    //{ key: `${constructionJob.name}`, label: "類別" },
+    { key: ["constructionJob", "typeName"], label: "類別" },
+    { key: ["constructionJob", "name"], label: "項目" },
+    { key: "since", label: "起始日期" },
+    { key: "until", label: "結束日期" },
   ];
 
   const actions = [
@@ -72,17 +114,48 @@ const ConstructionSummary = () => {
 
   // 取得列表資料
   useEffect(() => {
-    getApiList(apiUrl);
+    getApiList(apiUrl, constructionTypeList);
+    //getConstructionTypeList();
+    getProjecstList();
   }, [apiUrl]);
-  const getApiList = useCallback((url) => {
+
+  //取得清單資料
+  const getApiList = useCallback((url, typesList) => {
     setIsLoading(true);
     getData(url).then((result) => {
       setIsLoading(false);
       const data = result.result;
       //console.log(result.result.content);
-      setApiData(data);
+
+      // 将第一个数组中的 "constructionType" 映射到相应的 "name" 值
+      if (result.result.content.length > 0) {
+        const convertTypeData = result?.result?.content.map((item) => {
+          const constructionType = item.constructionJob.constructionType;
+          const correspondingName = typesList?.find(
+            (t) => t.name === constructionType
+          );
+          if (correspondingName) {
+            item.constructionJob.typeName = correspondingName.label;
+          }
+          // console.log(item)
+          return item;
+        });
+        const updateTask = { content: convertTypeData, ...data };
+        //console.log(updateTask);
+        setApiData(updateTask);
+      }
     });
   }, []);
+
+  const getProjecstList = () => {
+    setIsLoading(true);
+    getData("project").then((result) => {
+      setIsLoading(false);
+      const projectsList = result.result.content;
+      //console.log(projectsList);
+      setProjectsList(projectsList);
+    });
+  };
 
   // 傳遞給後端資料
   const sendDataToBackend = (fd, mode, otherData) => {
@@ -108,11 +181,11 @@ const ConstructionSummary = () => {
       postData(url, fd).then((result) => {
         if (result.status) {
           showNotification(message[0], true);
-          getApiList(apiUrl);
+          getApiList(apiUrl, constructionTypeList);
           onClose();
         } else if (result.result.response === 400) {
           //console.log(result.result);
-          showNotification("已有重複施工清單名稱", false);
+          showNotification(result.result.reason, false);
           //目前唯一會導致400的原因只有名稱重複，大概吧
         } else {
           showNotification("沒有修改權限", false);
@@ -125,12 +198,15 @@ const ConstructionSummary = () => {
         //console.log(result);
         if (result.status) {
           showNotification(message[0], true);
-          getApiList(apiUrl);
+          getApiList(apiUrl, constructionTypeList);
           onClose();
-        } else if (result.result.response !== 200) {
+        } else if (result.result.response === 400) {
           //console.log(result.result);
-          showNotification("權限不足", false);
-        }
+          showNotification(
+            "編輯施工清單工項執行們時拋出線程中斷異常：%s❗️",
+            false
+          );
+        } else showNotification("權限不足", false);
       });
     }
     // for (var pair of fd.entries()) {
@@ -175,6 +251,8 @@ const ConstructionSummary = () => {
           title="新增施工清單"
           sendDataToBackend={sendDataToBackend}
           onClose={onClose}
+          constructionTypeList={constructionTypeList}
+          projectsList={projectsList}
         />
       ),
     },
@@ -186,6 +264,8 @@ const ConstructionSummary = () => {
           deliverInfo={deliverInfo}
           sendDataToBackend={sendDataToBackend}
           onClose={onClose}
+          constructionTypeList={constructionTypeList}
+          projectsList={projectsList}
         />
       ),
     },
@@ -222,8 +302,8 @@ const ConstructionSummary = () => {
       <div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
         <RWDTable
           data={apiData?.content ? apiData.content : null}
-          columnsPC={columns}
-          columnsMobile={columns}
+          columnsPC={columnsPC}
+          columnsMobile={columnsMobile}
           actions={actions}
           cardTitleKey={"name"}
           tableMinWidth={540}
