@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import PageTitle from "../../components/Guideline/PageTitle";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 import RWDTable from "../../components/RWDTable/RWDTable";
@@ -11,16 +12,25 @@ import { UpdatedModal } from "./ProjectModal";
 import { useNotification } from "../../hooks/useNotification";
 
 const Project = () => {
+	const navigate = useNavigate();
 	const showNotification = useNotification();
+
+	// 解析網址取得參數
+	const location = useLocation();
+	const queryParams = new URLSearchParams(location.search);
 
 	// API List Data
 	const [apiData, setApiData] = useState(null);
 	// isLoading 等待請求 api
 	const [isLoading, setIsLoading] = useState(true);
 	// Page 頁數設置
-	const [page, setPage] = useState(0);
+	const [page, setPage] = useState(
+		queryParams.has("p") && !isNaN(+queryParams.get("p")) ? +queryParams.get("p") - 1 : 0
+	);
 	// rows per Page 多少筆等同於一頁
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [rowsPerPage, setRowsPerPage] = useState(
+		queryParams.has("s") && !isNaN(+queryParams.get("s")) ? +queryParams.get("s") : 10
+	);
 	// ApiUrl
 	const furl = "project";
 	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
@@ -68,8 +78,13 @@ const Project = () => {
 			setIsLoading(false);
 			const data = result.result;
 			setApiData(data);
+			if (page >= data.totalPages) {
+				setPage(0);
+				setRowsPerPage(10);
+				navigate(`?p=1&s=10`);
+			}
 		});
-	}, []);
+	}, [page]);
 
 	// 取得縣市資料
 	useEffect(() => {
@@ -113,12 +128,15 @@ const Project = () => {
 	// 設置頁數
 	const handleChangePage = useCallback((event, newPage) => {
 		setPage(newPage);
+		navigate(`?p=${newPage + 1}&s=${rowsPerPage}`);
 	}, []);
 
 	// 設置每頁顯示並返回第一頁
 	const handleChangeRowsPerPage = (event) => {
-		setRowsPerPage(parseInt(event.target.value, 10));
+		const targetValue = parseInt(event.target.value, 10);
+		setRowsPerPage(targetValue);
 		setPage(0);
+		navigate(`?p=1&s=${targetValue}`);
 	};
 
 	// 當活動按鈕點擊時開啟 modal 並進行動作
@@ -181,7 +199,7 @@ const Project = () => {
 			{/* Pagination */}
 			<Pagination
 				totalElement={apiData ? apiData.totalElements : 0}
-				page={page}
+				page={apiData && page < apiData.totalPages ? page : 0}
 				onPageChange={handleChangePage}
 				rowsPerPage={rowsPerPage}
 				onRowsPerPageChange={handleChangeRowsPerPage}

@@ -106,6 +106,7 @@ const App = () => {
 					if (d.displayName) {
 						delete d.statusMessage;
 						delete d.userId;
+						delete d.nationalIdentityCardNumber;
 						localStorage.setItem("userProfile", JSON.stringify(d));
 					}
 				}

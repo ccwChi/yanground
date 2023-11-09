@@ -193,7 +193,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 									</div>
 								</div>
 								{/* 部門 & 申請人 */}
-								<div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-0 mb-5 sm:mb-0">
+								<div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-5">
 									<div className="w-full">
 										<InputTitle title={"派工部門"} required={false} />
 										<Controller

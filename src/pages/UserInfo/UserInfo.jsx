@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import TableTabber from "../../components/Tabbar/TableTabber";
 import Loading from "../../components/Loader/Loading";
 import Avatar from "@mui/material/Avatar";
@@ -9,6 +9,8 @@ import PunchLogSection from "./PunchLogSection";
 import "./userInfo.scss";
 
 const UserInfo = () => {
+	const navigate = useNavigate();
+
 	// 解析網址取得參數
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);
@@ -32,9 +34,13 @@ const UserInfo = () => {
 	// isLoading 等待請求 API
 	const [isLoading, setIsLoading] = useState(true);
 	// Page 頁數設置
-	const [page, setPage] = useState(0);
-	// rows per Page 多少筆等同於一頁
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [page, setPage] = useState(
+		queryParams.has("p") && !isNaN(+queryParams.get("p")) ? +queryParams.get("p") - 1 : 0
+	);
+	// Rows per Page 多少筆等同於一頁
+	const [rowsPerPage, setRowsPerPage] = useState(
+		queryParams.has("s") && !isNaN(+queryParams.get("s")) ? +queryParams.get("s") : 10
+	);
 
 	// 取得用戶資料
 	useEffect(() => {
@@ -92,6 +98,11 @@ const UserInfo = () => {
 				setIsLoading(false);
 				const data = result.result;
 				setApiAttData(data);
+				if (page >= data.totalPages) {
+					setPage(0);
+					setRowsPerPage(10);
+					navigate(`?cat=${cat}&p=1&s=10`);
+				}
 			});
 		}
 	}, [userProfile, page, rowsPerPage]);
@@ -162,7 +173,8 @@ const UserInfo = () => {
 				) : (
 					<PunchLogSection
 						apiAttData={apiAttData}
-						page={page}
+						cat={cat}
+						page={apiAttData && page < apiAttData.totalPages ? page : 0}
 						rowsPerPage={rowsPerPage}
 						setPage={setPage}
 						setRowsPerPage={setRowsPerPage}
