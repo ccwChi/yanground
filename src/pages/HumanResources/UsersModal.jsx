@@ -15,6 +15,8 @@ import {
   Box,
   useTheme,
   useMediaQuery,
+  FormHelperText,
+  Backdrop,
 } from "@mui/material";
 import {
   useForm,
@@ -31,6 +33,7 @@ import AlertDialog from "../../components/Alert/AlertDialog";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import InputTitle from "../../components/Guideline/InputTitle";
 import TableTabber from "../../components/Tabbar/TableTabber";
+import Loading from "../../components/Loader/Loading";
 
 const EditModal = ({
   title,
@@ -50,12 +53,12 @@ const EditModal = ({
   const padScreen = useMediaQuery(theme.breakpoints.down("768"));
 
   const schema = yup.object().shape({
-    nickname: yup.string().required("暱稱不得為空白"),
+    nickname: yup.string().required("暱稱不得為空白!"),
     nationalIdentityCardNumber: yup
       .mixed()
       .test(
         "is-national-id",
-        "身份證字號格式為第一字為英文，後面九個數字",
+        "格式為第一字為英文 + 九個數字!",
         (value) => {
           if (!value) {
             return true;
@@ -201,10 +204,9 @@ const EditModal = ({
                         variant="outlined"
                         size="small"
                         className="inputPadding"
-                        label="員工編號"
                         placeholder="員工編號"
                         fullWidth
-                        disabled
+                        inputProps={{ readOnly: true }}
                         {...field}
                       />
                     )}
@@ -224,7 +226,7 @@ const EditModal = ({
                         placeholder="line名稱"
                         fullWidth
                         {...field}
-                        disabled
+                        inputProps={{ readOnly: true }}
                       />
                     )}
                   />
@@ -241,7 +243,7 @@ const EditModal = ({
                         variant="outlined"
                         size="small"
                         className="inputPadding"
-                        placeholder="請輸入姓"
+                        placeholder="請輸入姓氏"
                         fullWidth
                         {...field}
                       />
@@ -259,7 +261,7 @@ const EditModal = ({
                         variant="outlined"
                         size="small"
                         className="inputPadding"
-                        placeholder="請輸入名"
+                        placeholder="請輸入名字"
                         fullWidth
                         {...field}
                       />
@@ -279,26 +281,36 @@ const EditModal = ({
                         variant="outlined"
                         size="small"
                         className="inputPadding"
-                        label={
-                          errors.nickname && (
-                            <span className=" text-red-700 m-0">
-                              {errors.nickname.message}
-                            </span>
-                          )
-                        }
+                        // label={
+                        //   errors.nickname && (
+                        //     <span className=" text-red-700 m-0">
+                        //       {errors.nickname.message}
+                        //     </span>
+                        //   )
+                        // }
                         placeholder="請輸入暱稱"
                         fullWidth
                         {...field}
                       />
                     )}
                   />
+                  <FormHelperText
+                    className="!text-red-600 break-words  text-justify !mt-0 hidden md:block"
+                    sx={{ minHeight: "1.25rem" }}
+                  >
+                    {errors.nickname && (
+                      <span className=" text-red-700 m-0">
+                        {errors.nickname.message}
+                      </span>
+                    )}
+                  </FormHelperText>
                 </div>
               </div>
 
               <div
                 className={`${
                   cat === "2" ? "static" : "hidden"
-                } space-y-4 md:relative md:inline-block w-full overflow-y-auto  max-h-[60vh] md:h-auto md:max-h-fit`}
+                }  md:relative md:inline-block w-full overflow-y-auto  max-h-[60vh] md:h-auto md:max-h-fit`}
               >
                 <div className="w-full">
                   <InputTitle title={"性別"} required={false} />
@@ -340,7 +352,7 @@ const EditModal = ({
                   />
                 </div>
                 {/* 身份證字號 */}
-                <div className="w-full ">
+                <div className="w-full mt-4">
                   <InputTitle title={"身份證字號"} required={false} />
                   <Controller
                     name="nationalIdentityCardNumber"
@@ -350,34 +362,44 @@ const EditModal = ({
                         variant="outlined"
                         size="small"
                         className="inputPadding"
-                        label={
-                          errors.nationalIdentityCardNumber && (
-                            <span className=" text-red-700 m-0">
-                              {errors.nationalIdentityCardNumber.message}
-                            </span>
-                          )
-                        }
+                        // label={
+                        //   errors.nationalIdentityCardNumber && (
+                        //     <span className=" text-red-700 m-0">
+                        //       {errors.nationalIdentityCardNumber.message}
+                        //     </span>
+                        //   )
+                        // }
                         placeholder="身分證字號"
                         fullWidth
                         {...field}
                       />
                     )}
                   />
+                                    <FormHelperText
+                    className="!text-red-600 break-words text-justify !mt-0 hidden md:block"
+                    sx={{ minHeight: "1.25rem" }}
+                  >
+ {errors.nationalIdentityCardNumber && (        
+                  <span className={`text-red-700 m-0`}>
+                    {errors.nationalIdentityCardNumber.message}
+                  </span>
+                )}
+                  </FormHelperText>
                 </div>
 
                 {/* 生日 */}
-                <div className="w-full ">
+                <div className="w-full mt-4 md:mt-0">
                   <InputTitle title={"生日"} required={false} />
                   <ControlledDatePicker name="birthDate" />
                 </div>
                 {/* 到職日 */}
-                <div className="w-full">
+                <div className="w-full mt-4">
                   <InputTitle title={"到職日"} required={false} />
                   <ControlledDatePicker name="startedOn" />
                 </div>
                 {/* 部門 */}
                 {/* <div className=" gap-1.5 w-100 md:w-[320px]"> */}
-                <div className="w-full flex flex-col">
+                <div className="w-full flex flex-col mt-4">
                   <InputTitle title={"部門"} required={false} />
                   <Controller
                     name="department"
@@ -455,18 +477,24 @@ const EditModal = ({
               </div>
             </div>
             <div className="!mt-2 md:!mt-0">
-              <div className="  min-h-[2.2rem] md:hidden">
+              <div></div>
+
+              <FormHelperText
+                className="!text-red-600 break-words text-justify !mt-0 md:hidden"
+                sx={{ minHeight: "1.25rem" }}
+              >
                 {errors.nickname && (
-                  <span className=" text-red-700 m-0">
+                  <span className=" text-red-700 m-0 pl-5">
                     {errors.nickname.message}
+                    {errors.nationalIdentityCardNumber && <br />}
                   </span>
                 )}
-                {errors.nationalIdentityCardNumber && (
-                  <span className=" text-red-700 m-0">
-                    {errors.nationalIdentityCardNumber.message}
+                {errors.nationalIdentityCardNumber && (        
+                  <span className={`text-red-700 m-0 pl-5 `}>
+                    身份證字號{errors.nationalIdentityCardNumber.message}
                   </span>
                 )}
-              </div>
+              </FormHelperText>
               <Button
                 type="submit"
                 variant="contained"
@@ -480,6 +508,10 @@ const EditModal = ({
           </form>
         </FormProvider>
       </ModalTemplete>
+      {/* <Backdrop sx={{ color: "#fff", zIndex: 1050 }} open={!deliverInfo.id || !authorityList} onClick={onCheckDirty}> 
+    <Loading size={40} /> 
+   </Backdrop> */}
+
       <AlertDialog
         open={alertOpen}
         onClose={handleAlertClose}
