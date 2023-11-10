@@ -4,6 +4,8 @@ import PageTitle from "../../../components/Guideline/PageTitle";
 import RWDTable from "../../../components/RWDTable/RWDTable";
 import Pagination from "../../../components/Pagination/Pagination";
 import FloatingActionButton from "../../../components/FloatingActionButton/FloatingActionButton";
+import { LoadingFour } from "../../../components/Loader/Loading";
+import Backdrop from "@mui/material/Backdrop";
 import ArrowUpwardSharpIcon from "@mui/icons-material/ArrowUpwardSharp";
 import ArrowDownwardSharpIcon from "@mui/icons-material/ArrowDownwardSharp";
 import EditIcon from "@mui/icons-material/Edit";
@@ -36,6 +38,8 @@ const ConstructionType = () => {
 	const [deliverInfo, setDeliverInfo] = useState(null);
 	// ApiUrl 2
 	const apiUrl_ = `${apiUrl}/task?p=${page + 1}&s=${rowsPerPage}`;
+	// 傳遞稍後用 Flag
+	const [sendBackFlag, setSendBackFlag] = useState(false);
 
 	// 上方區塊功能按鈕清單
 	const btnGroup = [
@@ -95,6 +99,7 @@ const ConstructionType = () => {
 
 	// 傳遞給後端資料
 	const sendDataToBackend = (fd, mode, otherData) => {
+		setSendBackFlag(true);
 		let url = "constructionJobTask";
 		let message = [];
 		switch (mode) {
@@ -124,6 +129,7 @@ const ConstructionType = () => {
 			} else {
 				showNotification(result.result.reason ? result.result.reason : "權限不足", false);
 			}
+			setSendBackFlag(false);
 		});
 
 		// for (var pair of fd.entries()) {
@@ -150,8 +156,8 @@ const ConstructionType = () => {
 		if (dataMode === "create" || dataMode === "edit") {
 			setModalValue(dataMode);
 			if (dataValue) {
-				const data = apiData.find((item) => item.id === +dataValue);
-				setDeliverInfo(data);
+				// const data = apiData.find((item) => item.id === +dataValue);
+				setDeliverInfo(dataValue);
 			}
 		} else if (dataMode === "up" || dataMode === "down") {
 			sendDataToBackend("", dataMode, dataValue);
@@ -223,6 +229,11 @@ const ConstructionType = () => {
 
 			{/* Modal */}
 			{config && config.modalComponent}
+
+			{/* Backdrop */}
+			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
+				<LoadingFour />
+			</Backdrop>
 		</>
 	);
 };

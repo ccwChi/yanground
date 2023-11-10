@@ -4,6 +4,8 @@ import PageTitle from "../../components/Guideline/PageTitle";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
+import { LoadingFour } from "../../components/Loader/Loading";
+import Backdrop from "@mui/material/Backdrop";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -40,6 +42,8 @@ const Project = () => {
 	const [deliverInfo, setDeliverInfo] = useState(null);
 	// 縣市清單
 	const [cityList, setCityList] = useState(null);
+	// 傳遞稍後用 Flag
+	const [sendBackFlag, setSendBackFlag] = useState(false);
 
 	// 上方區塊功能按鈕清單
 	const btnGroup = [
@@ -72,19 +76,22 @@ const Project = () => {
 	useEffect(() => {
 		getApiList(apiUrl);
 	}, [apiUrl]);
-	const getApiList = useCallback((url) => {
-		setIsLoading(true);
-		getData(url).then((result) => {
-			setIsLoading(false);
-			const data = result.result;
-			setApiData(data);
-			if (page >= data.totalPages) {
-				setPage(0);
-				setRowsPerPage(10);
-				navigate(`?p=1&s=10`);
-			}
-		});
-	}, [page]);
+	const getApiList = useCallback(
+		(url) => {
+			setIsLoading(true);
+			getData(url).then((result) => {
+				setIsLoading(false);
+				const data = result.result;
+				setApiData(data);
+				if (page >= data.totalPages) {
+					setPage(0);
+					setRowsPerPage(10);
+					navigate(`?p=1&s=10`);
+				}
+			});
+		},
+		[page]
+	);
 
 	// 取得縣市資料
 	useEffect(() => {
@@ -96,6 +103,7 @@ const Project = () => {
 
 	// 傳遞給後端資料
 	const sendDataToBackend = (fd, mode, otherData) => {
+		setSendBackFlag(true);
 		let url = furl;
 		let message = [];
 		switch (mode) {
@@ -110,7 +118,6 @@ const Project = () => {
 				break;
 		}
 		postData(url, fd).then((result) => {
-			console.log(result);
 			if (result.status) {
 				showNotification(message[0], true);
 				getApiList(apiUrl);
@@ -118,6 +125,7 @@ const Project = () => {
 			} else {
 				showNotification(result.result.reason ? result.result.reason : "權限不足", false);
 			}
+			setSendBackFlag(false);
 		});
 
 		// for (var pair of fd.entries()) {
@@ -145,7 +153,10 @@ const Project = () => {
 		const dataMode = event.currentTarget.getAttribute("data-mode");
 		const dataValue = event.currentTarget.getAttribute("data-value");
 		setModalValue(dataMode);
-		setDeliverInfo(dataValue ? apiData.content.find((item) => item.id === dataValue) : "");
+		if (dataValue) {
+			setDeliverInfo(dataValue);
+		}
+		// setDeliverInfo(dataValue ? apiData.content.find((item) => item.id === dataValue) : "");
 	};
 
 	// 關閉 Modal 清除資料
@@ -210,6 +221,11 @@ const Project = () => {
 
 			{/* Modal */}
 			{config && config.modalComponent}
+
+			{/* Backdrop */}
+			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
+				<LoadingFour />
+			</Backdrop>
 		</>
 	);
 };

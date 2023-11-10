@@ -4,6 +4,8 @@ import PageTitle from "../../../components/Guideline/PageTitle";
 import RWDTable from "../../../components/RWDTable/RWDTable";
 import Pagination from "../../../components/Pagination/Pagination";
 import FloatingActionButton from "../../../components/FloatingActionButton/FloatingActionButton";
+import { LoadingFour } from "../../../components/Loader/Loading";
+import Backdrop from "@mui/material/Backdrop";
 import AddIcon from "@mui/icons-material/Add";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
@@ -34,6 +36,8 @@ const ConstructionType = () => {
 	const [deliverInfo, setDeliverInfo] = useState(null);
 	// ApiUrl 2
 	const apiUrl_ = `${apiUrl}/job?p=${page + 1}&s=${rowsPerPage}`;
+	// 傳遞稍後用 Flag
+	const [sendBackFlag, setSendBackFlag] = useState(false);
 
 	// 上方區塊功能按鈕清單
 	const btnGroup = [
@@ -91,6 +95,7 @@ const ConstructionType = () => {
 
 	// 傳遞給後端資料
 	const sendDataToBackend = (fd, mode, otherData) => {
+		setSendBackFlag(true);
 		let url = "constructionJob";
 		let message = [];
 		fd.append("constructionType", types[1]);
@@ -114,6 +119,7 @@ const ConstructionType = () => {
 			} else {
 				showNotification(result.result.reason ? result.result.reason : "權限不足", false);
 			}
+			setSendBackFlag(false);
 		});
 
 		// for (var pair of fd.entries()) {
@@ -140,11 +146,11 @@ const ConstructionType = () => {
 		setModalValue(dataMode);
 
 		if (dataValue) {
-			const data = apiData.find((item) => item.id === +dataValue);
 			if (dataMode === "goto") {
+				const data = apiData.find((item) => item.id === +dataValue);
 				navigate(`${data.name}+${data.id}`);
 			}
-			setDeliverInfo(data);
+			setDeliverInfo(dataValue);
 		}
 	};
 
@@ -212,6 +218,11 @@ const ConstructionType = () => {
 
 			{/* Modal */}
 			{config && config.modalComponent}
+
+			{/* Backdrop */}
+			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
+				<LoadingFour />
+			</Backdrop>
 		</>
 	);
 };

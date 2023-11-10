@@ -4,6 +4,8 @@ import PageTitle from "../../components/Guideline/PageTitle";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
+import { LoadingFour } from "../../components/Loader/Loading";
+import Backdrop from "@mui/material/Backdrop";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -52,6 +54,8 @@ const DispatchList = () => {
 	const [deliverInfo, setDeliverInfo] = useState(null);
 	// 部門清單
 	const [departmentList, setDepartmentList] = useState(null);
+	// 傳遞稍後用 Flag
+	const [sendBackFlag, setSendBackFlag] = useState(false);
 
 	// 上方區塊功能按鈕清單
 	const btnGroup = [
@@ -128,6 +132,7 @@ const DispatchList = () => {
 
 	// 傳遞給後端資料
 	const sendDataToBackend = (fd, mode, otherData) => {
+		setSendBackFlag(true);
 		let url = furl;
 		let message = [];
 		switch (mode) {
@@ -153,6 +158,7 @@ const DispatchList = () => {
 			} else {
 				showNotification(result.result.reason, false);
 			}
+			setSendBackFlag(false);
 		});
 
 		// for (var pair of fd.entries()) {
@@ -349,6 +355,11 @@ const DispatchList = () => {
 
 			{/* Modal */}
 			{config && config.modalComponent}
+
+			{/* Backdrop */}
+			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
+				<LoadingFour />
+			</Backdrop>
 		</>
 	);
 };

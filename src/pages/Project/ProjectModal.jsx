@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import ModalTemplete from "../../components/Modal/ModalTemplete";
 import InputTitle from "../../components/Guideline/InputTitle";
 import AlertDialog from "../../components/Alert/AlertDialog";
+import { LoadingTwo } from "../../components/Loader/Loading";
 import TextField from "@mui/material/TextField";
+import Backdrop from "@mui/material/Backdrop";
 import Button from "@mui/material/Button";
 import FormHelperText from "@mui/material/FormHelperText";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
@@ -35,18 +37,8 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 	const [initialized, setInitialized] = useState(true);
 	// 是否開啟地圖嵌套 Modal
 	const [mapDialog, setMapDialog] = useState(false);
-
-	// 初始預設 default 值
-	const defaultValues = {
-		name: deliverInfo ? deliverInfo.name : "",
-		businessRepresentative: deliverInfo ? deliverInfo.businessRepresentative.id : "",
-		administrativeDivision_: deliverInfo ? deliverInfo.administrativeDivision.administeredBy.id : "",
-		administrativeDivision: deliverInfo ? deliverInfo.administrativeDivision.id : "",
-		street: deliverInfo ? deliverInfo.street : "",
-		latitude: deliverInfo ? deliverInfo.latitude : "",
-		longitude: deliverInfo ? deliverInfo.longitude : "",
-		radius: deliverInfo ? deliverInfo.radius : "",
-	};
+	// Modal Data
+	const [apiData, setApiData] = useState(null);
 
 	// 使用 Yup 來定義表單驗證規則
 	const schema = yup.object().shape({
@@ -55,6 +47,18 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 		administrativeDivision_: yup.string().required("不可為空值！"),
 		administrativeDivision: yup.string().required("不可為空值！"),
 	});
+
+	// 初始預設 default 值
+	const defaultValues = {
+		name: apiData ? apiData.name : "",
+		businessRepresentative: apiData ? apiData.businessRepresentative.id : "",
+		administrativeDivision_: apiData ? apiData.administrativeDivision.administeredBy.id : "",
+		administrativeDivision: apiData ? apiData.administrativeDivision.id : "",
+		street: apiData ? apiData.street : "",
+		latitude: apiData ? apiData.latitude : "",
+		longitude: apiData ? apiData.longitude : "",
+		radius: apiData ? apiData.radius : "",
+	};
 
 	// 使用 useForm Hook 來管理表單狀態和驗證
 	const methods = useForm({
@@ -68,9 +72,25 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 		watch,
 		setValue,
 		getValues,
+		reset,
 		formState: { errors, isDirty },
 	} = methods;
 	const city = watch("administrativeDivision_");
+
+	// 取得 Modal 資料
+	useEffect(() => {
+		if (deliverInfo) {
+			getData(`project/${deliverInfo}`).then((result) => {
+				const data = result.result;
+				setApiData(data);
+			});
+		}
+	}, [deliverInfo]);
+	useEffect(() => {
+		if (apiData) {
+			reset(defaultValues);
+		}
+	}, [apiData]);
 
 	// 取得人員資料
 	useEffect(() => {
@@ -106,7 +126,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 		}
 
 		if (deliverInfo) {
-			sendDataToBackend(fd, "edit", deliverInfo.id);
+			sendDataToBackend(fd, "edit", deliverInfo);
 		} else {
 			sendDataToBackend(fd, "create");
 		}
@@ -132,7 +152,11 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 	return (
 		<>
 			{/* Modal */}
-			<ModalTemplete title={title} show={!!userList} maxWidth={"640px"} onClose={onCheckDirty}>
+			<ModalTemplete
+				title={title}
+				show={!!userList && (deliverInfo ? !!apiData : true)}
+				maxWidth={"640px"}
+				onClose={onCheckDirty}>
 				<FormProvider {...methods}>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div className="flex flex-col pt-4 gap-4">
@@ -381,7 +405,13 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 									</div>
 								</div>
 							</div>
-							<Button type="submit" variant="contained" color="success" className="!text-base !h-12" fullWidth>
+							<Button
+								type="submit"
+								variant="contained"
+								color="success"
+								className="!text-base !h-12"
+								disabled={deliverInfo && !distList}
+								fullWidth>
 								儲存
 							</Button>
 						</div>
@@ -410,6 +440,14 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 				disagreeText="取消"
 				agreeText="確定"
 			/>
+
+			{/* Backdrop */}
+			<Backdrop
+				sx={{ color: "#fff", zIndex: 1050 }}
+				open={!userList || (deliverInfo ? !apiData : false)}
+				onClick={onCheckDirty}>
+				<LoadingTwo />
+			</Backdrop>
 		</>
 	);
 });

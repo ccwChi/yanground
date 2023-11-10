@@ -1,29 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ModalTemplete from "../../../components/Modal/ModalTemplete";
 import InputTitle from "../../../components/Guideline/InputTitle";
 import AlertDialog from "../../../components/Alert/AlertDialog";
+import { LoadingTwo } from "../../../components/Loader/Loading";
 import TextField from "@mui/material/TextField";
+import Backdrop from "@mui/material/Backdrop";
 import Button from "@mui/material/Button";
 import FormHelperText from "@mui/material/FormHelperText";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { getData } from "../../../utils/api";
 
 const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }) => {
 	// Alert 開關
 	const [alertOpen, setAlertOpen] = useState(false);
-
-	// 初始預設 default 值
-	const defaultValues = {
-		name: deliverInfo ? deliverInfo.name : "",
-		explanation: deliverInfo ? deliverInfo.explanation : "",
-	};
+	// Modal Data
+	const [apiData, setApiData] = useState(null);
 
 	// 使用 Yup 來定義表單驗證規則
 	const schema = yup.object().shape({
 		name: yup.string().required("不可為空值！"),
 	});
+
+	// 初始預設 default 值
+	const defaultValues = {
+		name: apiData ? apiData.name : "",
+		explanation: apiData ? apiData.explanation : "",
+	};
 
 	// 使用 useForm Hook 來管理表單狀態和驗證
 	const methods = useForm({
@@ -35,7 +40,23 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 		control,
 		handleSubmit,
 		formState: { errors, isDirty },
+		reset,
 	} = methods;
+
+	// 取得 Modal 資料
+	useEffect(() => {
+		if (deliverInfo) {
+			getData(`constructionJobTask/${deliverInfo}`).then((result) => {
+				const data = result.result;
+				setApiData(data);
+			});
+		}
+	}, [deliverInfo]);
+	useEffect(() => {
+		if (apiData) {
+			reset(defaultValues);
+		}
+	}, [apiData]);
 
 	// 提交表單資料到後端並執行相關操作
 	const onSubmit = (data) => {
@@ -46,7 +67,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 		}
 
 		if (deliverInfo) {
-			sendDataToBackend(fd, "edit", deliverInfo.id);
+			sendDataToBackend(fd, "edit", deliverInfo);
 		} else {
 			sendDataToBackend(fd, "create");
 		}
@@ -72,7 +93,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 	return (
 		<>
 			{/* Modal */}
-			<ModalTemplete title={title} show={true} onClose={onCheckDirty}>
+			<ModalTemplete title={title} show={deliverInfo ? !!apiData : true} onClose={onCheckDirty}>
 				<FormProvider {...methods}>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div className="flex flex-col pt-4 gap-4">
@@ -135,6 +156,11 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 				disagreeText="取消"
 				agreeText="確定"
 			/>
+
+			{/* Backdrop */}
+			<Backdrop sx={{ color: "#fff", zIndex: 1050 }} open={deliverInfo ? !apiData : false} onClick={onCheckDirty}>
+				<LoadingTwo />
+			</Backdrop>
 		</>
 	);
 });

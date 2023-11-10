@@ -169,6 +169,230 @@
 	}
 }
 
+$rocket-width: 55px;
+$rocket-height: 100px;
+$rocket-margin: 1.25;
+
+.rocket {
+	--rocket-main: white;
+	--rocket-highlight: #e74c3c;
+	--rocket-glass: #9aecdb;
+	--rocket-smoke: #f1f2f6;
+	--rocket-fire: #f0932b;
+	--rocket-fire-highlight: #f1c40f;
+	position: relative;
+	width: $rocket-width;
+	height: $rocket-height;
+	animation: animloaderBack 1s linear infinite alternate;
+
+	@keyframes animloaderBack {
+		0%,
+		30%,
+		70% {
+			transform: translateY(0px);
+		}
+		20%,
+		40%,
+		100% {
+			transform: translateY(-5px);
+		}
+	}
+
+	.shadow {
+		position: absolute;
+		width: 50%;
+		height: 100%;
+		right: 0;
+		background: rgba(100, 100, 100, 0.1);
+		z-index: 1;
+	}
+
+	.shadow--full {
+		width: 100%;
+	}
+
+	&__body {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		z-index: 10;
+
+		&__window {
+			$window-width: $rocket-width * 0.45;
+			$window-frame: 3px;
+			position: absolute;
+			width: $window-width;
+			height: $window-width;
+			top: $window-width + ($window-width / 2) - ($window-frame);
+			left: ($rocket-width / 2) - ($window-width / 2);
+			border-radius: 50%;
+			background: var(--rocket-glass);
+			z-index: 1;
+			border: $window-frame solid var(--rocket-highlight);
+		}
+
+		&__inner {
+			position: relative;
+			width: $rocket-width;
+			height: $rocket-height * $rocket-margin;
+			border-radius: 80%;
+			background: var(--rocket-main);
+			overflow: hidden;
+
+			&:before,
+			&:after {
+				content: "";
+				position: absolute;
+				background: var(--rocket-highlight);
+				border-radius: 50%;
+			}
+
+			&:before {
+				$height: $rocket-height * 0.5;
+				width: 100%;
+				height: $height;
+				top: -$height * 0.6;
+			}
+
+			&:after {
+				$height: $rocket-height * 0.1;
+				width: 100%;
+				height: $height;
+				bottom: $height + ($height * $rocket-margin);
+			}
+		}
+	}
+
+	$wing-width: $rocket-width * 0.8;
+	$wing-height: $rocket-height * 0.2;
+	$wing-margin: -$wing-width + 15px;
+	$wing-angle: 50deg;
+
+	&__wing {
+		position: absolute;
+		background: var(--rocket-highlight);
+		bottom: -$wing-height + $wing-height;
+		z-index: 5;
+	}
+
+	&__wing--left {
+		left: $wing-margin;
+		width: $wing-width;
+		height: $wing-height;
+		border-radius: 100% 0 0 0;
+		transform: rotate(-$wing-angle);
+	}
+
+	&__wing--right {
+		right: $wing-margin;
+		width: $wing-width;
+		height: $wing-height;
+		border-radius: 0 100% 0 0;
+		transform: rotate($wing-angle);
+	}
+
+	$smoke-width: 50px;
+	$smoke-height: 10px;
+	$smoke-scale: 0.5;
+
+	&__smoke {
+		position: absolute;
+		width: $smoke-width;
+		height: $smoke-height;
+		bottom: $smoke-height - 5px;
+		opacity: 0;
+		z-index: 15;
+
+		&__inner {
+			position: relative;
+			margin: 30px 0 0 0;
+			width: 100%;
+			height: 100%;
+			background: var(--rocket-smoke);
+
+			div {
+				position: absolute;
+				border-radius: 50%;
+				width: 12px;
+				height: 12px;
+				left: -5px;
+				bottom: 0;
+				box-shadow: inset -2px -3px 0 0 var(--rocket-smoke);
+				background: #fff;
+				z-index: 10;
+			}
+
+			div:nth-child(1) {
+				transform: scale(1.5);
+				left: 10%;
+				bottom: 30%;
+				z-index: 9;
+			}
+
+			div:nth-child(2) {
+				transform: scale(2.5);
+				left: 50%;
+				bottom: 90%;
+				z-index: 8;
+			}
+
+			div:nth-child(3) {
+				transform: scale(1.1);
+				left: 84%;
+				bottom: 4.5%;
+				z-index: 7;
+			}
+		}
+	}
+
+	&__smoke--right {
+		right: -$smoke-width;
+	}
+
+	&__smoke--left {
+		left: -$smoke-width;
+		transform: rotateY(180deg);
+	}
+
+	$fire-size: $rocket-width / 4;
+	$fire-radius: 80% 0 55% 50% / 55% 0 80% 50%;
+
+	&__fire {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%) rotate(45deg);
+		width: 34px;
+		height: 34px;
+		top: 100%;
+		left: 27px;
+		background: radial-gradient(ellipse at center, #ffdf00 8%, rgba(249, 62, 0, 0.6) 24%, rgba(0, 0, 0, 0) 100%);
+		border-radius: 50% 50% 0;
+		background-repeat: no-repeat;
+		background-position: -44px -44px;
+		background-size: 100px 100px;
+		box-shadow: 4px 4px 12px 0px rgba(255, 61, 0, 0.5);
+		box-sizing: border-box;
+		animation: animloader 1s linear infinite alternate;
+	}
+	@keyframes animloader {
+		0% {
+			box-shadow: 4px 4px 12px 2px rgba(255, 61, 0, 0.75);
+			width: 34px;
+			height: 34px;
+			background-position: -44px -44px;
+			background-size: 100px 100px;
+		}
+		100% {
+			box-shadow: 2px 2px 8px 0px rgba(255, 61, 0, 0.5);
+			width: 30px;
+			height: 28px;
+			background-position: -36px -36px;
+			background-size: 80px 80px;
+		}
+	}
+}
+
 // 點點點
 .dotting {
 	display: inline-block;

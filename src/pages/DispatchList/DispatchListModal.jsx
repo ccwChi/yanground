@@ -77,6 +77,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 	} = methods;
 	const projectId = watch("project");
 
+	// 取得 Modal 資料
 	useEffect(() => {
 		if (deliverInfo) {
 			getData(`dispatchment/${deliverInfo}`).then((result) => {
@@ -85,7 +86,6 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 			});
 		}
 	}, [deliverInfo]);
-
 	useEffect(() => {
 		if (apiData) {
 			reset(defaultValues);
