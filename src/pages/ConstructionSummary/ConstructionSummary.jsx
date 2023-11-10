@@ -1,16 +1,19 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import PageTitle from "../../components/Guideline/PageTitle";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 import TableTabber from "../../components/Tabbar/TableTabber";
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
 import AddIcon from "@mui/icons-material/Add";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import CommentIcon from "@mui/icons-material/Comment";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import { getData, postBodyData, postData } from "../../utils/api";
 import { UpdatedModal, TaskModal } from "./SummaryModal";
 import { useNotification } from "../../hooks/useNotification";
+import { DispatchModal } from "./SummaryDispatchModal";
 
 // 如果施工種類有新增需手動新增
 
@@ -43,7 +46,12 @@ const constructionTypeList = [
 ];
 
 const ConstructionSummary = () => {
-  const showNotification = useNotification();
+	const navigate = useNavigate();
+	const showNotification = useNotification();
+
+	// 解析網址取得參數
+	const location = useLocation();
+	const queryParams = new URLSearchParams(location.search);
 
   // cat = Category 設置 tab 分類
   const [cat, setCat] = useState(null);
@@ -54,10 +62,13 @@ const ConstructionSummary = () => {
   // isLoading 等待請求 api
   const [isLoading, setIsLoading] = useState(true);
   // Page 頁數設置
-  const [page, setPage] = useState(0);
-  // rows per Page 多少筆等同於一頁
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  // ApiUrl
+	const [page, setPage] = useState(
+		queryParams.has("p") && !isNaN(+queryParams.get("p")) ? +queryParams.get("p") - 1 : 0
+	);
+	// rows per Page 多少筆等同於一頁
+	const [rowsPerPage, setRowsPerPage] = useState(
+		queryParams.has("s") && !isNaN(+queryParams.get("s")) ? +queryParams.get("s") : 10
+	);
   const furl = "constructionSummary";
   const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
   // ModalValue 控制開啟的是哪一個 Modal
@@ -66,12 +77,12 @@ const ConstructionSummary = () => {
   const [deliverInfo, setDeliverInfo] = useState(null);
 
   // Tab 列表對應 api 搜尋參數
-  const tabGroup = [
-    // { f: "", text: "全部" },
-    // { f: "inprogress", text: "進行中" },
-    // { f: "unstarted", text: "尚未開始" },
-    // { f: "end", text: "已結束" },
-  ];
+  // const tabGroup = [
+  //   { f: "", text: "全部" },
+  //   { f: "inprogress", text: "進行中" },
+  //   { f: "unstarted", text: "尚未開始" },
+  //   { f: "end", text: "已結束" },
+  // ];
 
   // 上方區塊功能按鈕清單
   const btnGroup = [
@@ -108,8 +119,9 @@ const ConstructionSummary = () => {
   ];
 
   const actions = [
-    { value: "edit", icon: <EditIcon />, title: "編輯清單名稱" },
-    { value: "task", icon: <CommentIcon />, title: "清單工項編輯" },
+    { value: "edit", icon: <EditIcon />, title: "施工清單 修改" },
+    { value: "task", icon: <CommentIcon />, title: "施工清單工項執行 編輯" },
+    // { value: "dispatch", icon: <GroupAddIcon />, title: "工項執行派工" },
   ];
 
   // 取得列表資料
@@ -125,8 +137,14 @@ const ConstructionSummary = () => {
     getData(url).then((result) => {
       setIsLoading(false);
       const data = result.result;
+      // setApiData(data);
+			if (page >= data.totalPages) {
+				setPage(0);
+				setRowsPerPage(10);
+				navigate(`?p=1&s=10`);
+			}
+		
       //console.log(result.result.content);
-
       // 将第一个数组中的 "constructionType" 映射到相应的 "name" 值
       if (result.result.content.length > 0) {
         const convertTypeData = result?.result?.content.map((item) => {
@@ -145,7 +163,7 @@ const ConstructionSummary = () => {
         setApiData(updateTask);
       }
     });
-  }, []);
+  }, [page]);
 
   const getProjecstList = () => {
     setIsLoading(true);
@@ -214,16 +232,22 @@ const ConstructionSummary = () => {
     // }
   };
 
-  // 設置頁數
-  const handleChangePage = useCallback((event, newPage) => {
-    setPage(newPage);
-  }, []);
+	// 設置頁數
+	const handleChangePage = useCallback(
+		(event, newPage) => {
+			setPage(newPage);
+			navigate(`?p=${newPage + 1}&s=${rowsPerPage}`);
+		},
+		[rowsPerPage]
+	);
 
-  // 設置每頁顯示並返回第一頁
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+	// 設置每頁顯示並返回第一頁
+	const handleChangeRowsPerPage = (event) => {
+		const targetValue = parseInt(event.target.value, 10);
+		setRowsPerPage(targetValue);
+		setPage(0);
+		navigate(`?p=1&s=${targetValue}`);
+	};
 
   // 當活動按鈕點擊時開啟 modal 並進行動作
   const handleActionClick = (event) => {
@@ -260,7 +284,7 @@ const ConstructionSummary = () => {
       modalValue: "edit",
       modalComponent: (
         <UpdatedModal
-          title="修改施工清單"
+          title="施工清單修改"
           deliverInfo={deliverInfo}
           sendDataToBackend={sendDataToBackend}
           onClose={onClose}
@@ -273,13 +297,24 @@ const ConstructionSummary = () => {
       modalValue: "task",
       modalComponent: (
         <TaskModal
-          title="施工清單工項執行"
+          title="施工清單工項執行編輯"
           deliverInfo={deliverInfo}
           sendDataToBackend={sendDataToBackend}
           onClose={onClose}
         />
       ),
     },
+    // {
+    //   modalValue: "dispatch",
+    //   modalComponent: (
+    //     <DispatchModal
+    //       title="工項執行派工"
+    //       deliverInfo={deliverInfo}
+    //       sendDataToBackend={sendDataToBackend}
+    //       onClose={onClose}
+    //     />
+    //   ),
+    // },
   ];
   const config = modalValue
     ? modalConfig.find((item) => item.modalValue === modalValue)
@@ -296,7 +331,7 @@ const ConstructionSummary = () => {
       />
 
       {/* TabBar */}
-      <TableTabber tabGroup={tabGroup} setCat={setCat} />
+      {/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}
 
       {/* Table */}
       <div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
@@ -306,7 +341,7 @@ const ConstructionSummary = () => {
           columnsMobile={columnsMobile}
           actions={actions}
           cardTitleKey={"name"}
-          tableMinWidth={540}
+          tableMinWidth={700}
           isLoading={isLoading}
           handleActionClick={handleActionClick}
         />
@@ -315,7 +350,7 @@ const ConstructionSummary = () => {
       {/* Pagination */}
       <Pagination
         totalElement={apiData ? apiData?.totalElements : 0}
-        page={page}
+        page={apiData && page < apiData.totalPages ? page : 0}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}

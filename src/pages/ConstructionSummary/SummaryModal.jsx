@@ -22,6 +22,7 @@ import {
   Card,
   CardContent,
   Typography,
+  Backdrop,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
@@ -57,21 +58,6 @@ const UpdatedModal = React.memo(
     const [isLoading, setIsLoading] = useState(false);
     const [constructionJobList, setConstructionJobList] = useState(null);
 
-    // 使用 Yup 來定義表單驗證規則
-    const schema = yup.object().shape({
-      name: yup.string().required("清單標題不可為空值！"),
-      rocYear: yup
-        .number("應為數字")
-        .required("不可為空值！")
-        .test("len", "格式應為民國年", (val) =>
-          /^[0-9]{3}$/.test(val.toString())
-        )
-        .typeError("應填寫民國年 ex: 112"),
-      type: yup.string().required("需選擇工程類別!"),
-      job: yup.number().required("需選擇工程項目!").typeError("需選擇工程項目!"),
-      project: yup.string().required("需選擇所屬專案！"),
-    });
-
     const defaultValues = {
       name: deliverInfo?.name ? deliverInfo.name : "",
       project: deliverInfo?.project ? deliverInfo.project.id : "",
@@ -87,6 +73,49 @@ const UpdatedModal = React.memo(
     };
     // 處理表單驗證錯誤時的回調函數
 
+    // 使用 Yup 來定義表單驗證規則
+    const schema = yup.object().shape({
+      name: yup.string().required("清單標題不可為空值！"),
+      rocYear: yup
+        .number("應為數字")
+        .required("不可為空值！")
+        .test("len", "格式應為民國年", (val) =>
+          /^[0-9]{3}$/.test(val.toString())
+        )
+        .typeError("應填寫民國年 ex: 112"),
+      type: yup.string().required("需選擇工程類別!"),
+      job: yup
+        .number()
+        .required("需選擇工程項目!")
+        .typeError("需選擇工程項目!"),
+      project: yup.string().required("需選擇所屬專案！"),
+      since: yup.date().nullable(),
+      until: yup
+        .date()
+        .nullable()
+        .test({
+          name: "custom-validation",
+          message: "完工日期不能早於施工日期",
+          test: function (until) {
+            const since = this.parent.since;
+
+            // 只有在 estimatedSince 和 estimatedUntil 都有值時才驗證
+            if (since && until) {
+              const formattedSince = new Date(since).toLocaleDateString(
+                "en-CA",
+                { timeZone: "Asia/Taipei" }
+              );
+              const formattedUntil = new Date(until).toLocaleDateString(
+                "en-CA",
+                { timeZone: "Asia/Taipei" }
+              );
+              return formattedUntil >= formattedSince;
+            }
+
+            return true; // 如果其中一個為空，則不驗證
+          },
+        }),
+    });
     const methods = useForm({
       defaultValues,
       resolver: yupResolver(schema),
@@ -416,9 +445,17 @@ const UpdatedModal = React.memo(
                     <div className="w-full">
                       <InputTitle title={"完工日期"} required={false} />
                       <ControlledDatePicker name="until" />
+                      <FormHelperText
+                        className="!text-red-600  break-words !text-right !mt-0"
+                        sx={{ minHeight: "1.25rem" }}
+                      >
+                        <span>{errors.until?.message}</span>
+                      </FormHelperText>
                     </div>
                   </div>
                 </div>
+              </div>
+              <div>
                 <Button
                   type="submit"
                   variant="contained"
@@ -432,7 +469,13 @@ const UpdatedModal = React.memo(
             </form>
           </FormProvider>
         </ModalTemplete>
-
+        <Backdrop
+          sx={{ color: "#fff", zIndex: 1050 }}
+          open={!constructionJobList}
+          onClick={onCheckDirty}
+        >
+          <Loading size={40} />
+        </Backdrop>
         {/* Alert */}
         <AlertDialog
           open={alertOpen}
@@ -457,9 +500,16 @@ const TaskModal = React.memo(
     const [deliverTaskInfo, setDeliverTaskInfo] = useState(null);
 
     const [isLoading, setIsLoading] = useState(false);
-    const [constructionTaskList, setConstructionTaskList] = useState(null);
 
+    // 會有 A.原已選擇task清單，B.原總task清單，然後過濾，最後呈現 C.過濾完task清單(顯示在下拉是選單)、D.已選擇task清單(呈現在下面跟右邊的面板)
+    //A.原已選擇task清單，從api取得已選擇的工項執行task清單, 還沒過濾之前
+    const [apiSelectedTask, setApiSelectedTask] = useState(null);
+    //B 在useEffect取得後直接做處理因此沒有另外儲存
+    //C.過濾完task清單
+    const [constructionTaskList, setConstructionTaskList] = useState(null);
+    //D.此施工清單已選擇的工項執行task清單，list呈現的部分
     const [selectedTasks, setSelectedTasks] = useState([]);
+
     const [selectedTask, setSelectedTask] = useState("");
 
     const theme = useTheme();
@@ -470,17 +520,25 @@ const TaskModal = React.memo(
     // 檢查是否被汙染
     const [isDirty, setIsDirty] = useState(false);
 
+    const getApiSelectedTask = useCallback((id) => {
+      const seledtedTaskUrl = `constructionSummary/${id}/tasks`;
+      getData(seledtedTaskUrl).then((result) => {
+        setApiSelectedTask(result.result);
+      });
+    }, []);
+
     //取得工程項目執行並設定已選擇及剩下能選擇的清單
     useEffect(() => {
       setIsLoading(true);
-      if (deliverInfo.constructionJob.id) {
+      if (!!apiSelectedTask) {
         const taskurl = `constructionJob/${deliverInfo.constructionJob.id}/task`;
         getData(taskurl).then((result) => {
           //這個result是用工程項目去找工項執行清單的結果
+          //console.log("取得總清單",result)
           setIsLoading(false);
           const data = result.result;
           const contains = [];
-          for (const t of deliverInfo.constructionSummaryJobTasks) {
+          for (const t of apiSelectedTask) {
             const matchTask = data.find(
               (d) => d.id === t.constructionJobTask.id
             );
@@ -489,13 +547,19 @@ const TaskModal = React.memo(
             }
           }
           const notMatchingTasks = data.filter((d) => {
-            return !deliverInfo.constructionSummaryJobTasks.some(
+            return !apiSelectedTask.some(
               (t) => t.constructionJobTask.id === d.id
             );
           });
           setSelectedTasks(contains);
           setConstructionTaskList(notMatchingTasks);
         });
+      }
+    }, [apiSelectedTask]);
+
+    useEffect(() => {
+      if (!!deliverInfo.id) {
+        getApiSelectedTask(deliverInfo.id);
       }
     }, [deliverInfo]);
 
@@ -519,7 +583,30 @@ const TaskModal = React.memo(
           ...selectedTasks,
         ];
 
-        setSelectedTasks(handleSeletedTask);
+        setSelectedTasks(
+          handleSeletedTask.sort((a, b) => {
+            // 先檢查 estimatedSince 是否为非空字符串
+            if (a.estimatedSince && !b.estimatedSince) {
+              return -1; // a 在前
+            } else if (!a.estimatedSince && b.estimatedSince) {
+              return 1; // b 在前
+            } else if (a.estimatedSince && b.estimatedSince) {
+              // estimatedSince 都非空，按日期排序
+              if (a.estimatedSince < b.estimatedSince) {
+                return -1;
+              } else if (a.estimatedSince > b.estimatedSince) {
+                return 1;
+              }
+            }
+            if (a.estimatedUntil < b.estimatedUntil) {
+              return -1;
+            } else if (a.estimatedUntil > b.estimatedUntil) {
+              return 1;
+            }
+
+            return 0; // a 和 b 相等
+          })
+        );
         setConstructionTaskList(
           constructionTaskList
             .filter((p) => p.id !== selectedTask)
@@ -543,6 +630,7 @@ const TaskModal = React.memo(
         setSelectedTasks(
           selectedTasks.filter((p) => p.constructionJobTask.id !== task)
         );
+        getApiSelectedTask(deliverInfo.id);
       },
       [selectedTasks, constructionTaskList]
     );
@@ -566,7 +654,31 @@ const TaskModal = React.memo(
       if (checkListIndex !== -1) {
         const updatedSelectedTasks = [...selectedTasks];
         updatedSelectedTasks[checkListIndex] = data;
-        setSelectedTasks(updatedSelectedTasks);
+        setSelectedTasks(
+          updatedSelectedTasks.sort((a, b) => {
+            // 先检查 estimatedSince 是否為空
+            if (a.estimatedSince && !b.estimatedSince) {
+              return -1; // a 在前
+            } else if (!a.estimatedSince && b.estimatedSince) {
+              return 1; // b 在前
+            } else if (a.estimatedSince && b.estimatedSince) {
+              // estimatedSince 都非空，按日期排序
+              if (a.estimatedSince < b.estimatedSince) {
+                return -1;
+              } else if (a.estimatedSince > b.estimatedSince) {
+                return 1;
+              }
+            }
+
+            if (a.estimatedUntil < b.estimatedUntil) {
+              return -1;
+            } else if (a.estimatedUntil > b.estimatedUntil) {
+              return 1;
+            }
+
+            return 0; // a 和 b 相等
+          })
+        );
       }
     };
 
@@ -618,6 +730,7 @@ const TaskModal = React.memo(
           onClose={onCheckDirty}
           maxWidth={padScreen ? "428px" : "660px"}
         >
+          {/* {console.log(deliverInfo)} */}
           <div className="flex gap-3 relative">
             <div className="w-[360px] bg-bue-500">
               {/* <FormProvider {...methods}>
@@ -803,7 +916,13 @@ const TaskModal = React.memo(
             </div>
           </div>
         </ModalTemplete>
-
+        <Backdrop
+          sx={{ color: "#fff", zIndex: 1050 }}
+          open={!constructionTaskList}
+          onClick={onCheckDirty}
+        >
+          <Loading size={40} />
+        </Backdrop>
         <TaskEditDialog
           deliverTaskInfo={deliverTaskInfo}
           sendDataToTaskEdit={sendDataToTaskEdit}
@@ -834,6 +953,46 @@ const TaskEditDialog = React.memo(
     const [alertOpen, setAlertOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+    const schema = yup.object().shape({
+      estimatedSince: yup.date().nullable(),
+      estimatedUntil: yup
+        .date()
+        .nullable()
+        .test({
+          name: "custom-validation",
+          message: "结束日期不能早於施工日期",
+          test: function (estimatedUntil) {
+            const estimatedSince = this.parent.estimatedSince;
+
+            // 只有在 estimatedSince 和 estimatedUntil 都有值時才驗證
+            // 下面的用意是如果從後端拿到日期為了載入日期選擇器，會轉成00:08:00 GMT+0800的時區，但如果本地端選擇的話會是00:00:00 GMT+0800，
+            // 會導致選同一天卻顯示結束比開始早而報錯。
+            if (estimatedSince && estimatedUntil) {
+              const formattedEstimatedSince = new Date(
+                estimatedSince
+              ).toLocaleDateString("en-CA", { timeZone: "Asia/Taipei" });
+              const formattedEstimatedUntil = new Date(
+                estimatedUntil
+              ).toLocaleDateString("en-CA", { timeZone: "Asia/Taipei" });
+              return formattedEstimatedUntil >= formattedEstimatedSince;
+            }
+            return true; // 如果其中一個為空，則不驗證
+          },
+        }),
+    });
+
+    const methods = useForm({
+      // defaultValues,
+      resolver: yupResolver(schema),
+    });
+    // 使用 useForm Hook 來管理表單狀態和驗證
+    const {
+      control,
+      handleSubmit,
+      reset,
+      formState: { errors, isDirty },
+    } = methods;
+
     // 檢查表單是否汙染
     const onCheckDirty = () => {
       if (isDirty) {
@@ -850,13 +1009,6 @@ const TaskEditDialog = React.memo(
       setAlertOpen(false);
     };
 
-    const methods = useForm();
-    const {
-      control,
-      handleSubmit,
-      reset,
-      formState: { isDirty },
-    } = methods;
     // deliverTaskInfo 傳進來的 {id: '7056078833492952896', constructionJobTask: {…}, estimatedSince: null, estimatedUntil: null, location: '', …}
     // 格式 {id: '', constructionJobTask:1 , estimatedSince: '', estimatedUntil: '', location: '', remarK:''}
 
@@ -880,7 +1032,12 @@ const TaskEditDialog = React.memo(
       }
     }, [deliverTaskInfo, reset]);
 
+    // useEffect(()=>{
+
+    // },[data.estimatedSince])
+
     const onSubmit = (data) => {
+      console.log("要送出的", data);
       const convertData = {
         id: deliverTaskInfo?.id ? deliverTaskInfo?.id : "",
         constructionJobTask: {
@@ -896,7 +1053,6 @@ const TaskEditDialog = React.memo(
         location: data?.location ? data.location : "",
         remark: data?.remark ? data.remark : "",
       };
-
       // 把convertData轉成=deliveryTaskInfo {id: '..896', constructionJobTask: {…}, estimatedSince: null, estimatedUntil: null, location: '', …}
       //console.log(convertData);
       sendDataToTaskEdit(convertData);
@@ -905,93 +1061,104 @@ const TaskEditDialog = React.memo(
 
     return (
       <>
-        <Dialog
-          fullScreen={phoneScreen}
-          open={isOpen}
-          onClose={onCheckDirty}
-          className=""
-        >
-          <DialogTitle id="responsive-dialog-title" className="mt-5 ">
-            <span className=" border-b-2 p-2">
-              {deliverTaskInfo?.constructionJobTask?.name}{" "}
-              <span className="text-sm mx-2">編輯</span>
-            </span>
-          </DialogTitle>
-          <DialogContent>
-            <FormProvider {...methods}>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="flex flex-col gap-1.5 mt-3">
-                  <span>預計施工日期</span>
-                  <ControlledDatePicker name="estimatedSince" />
-                </div>
-                <div className="flex flex-col gap-1.5 mt-3">
-                  <span>預計完工日期</span>
-                  <ControlledDatePicker name="estimatedUntil" />
-                </div>
-                <div className="flex flex-col gap-1.5 mt-3">
-                  <span>施工位置</span>
-                  <Controller
-                    name="location"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        className="inputPadding"
-                        placeholder="請輸入施工位置"
-                        //   inputProps={{ readOnly: true }}
-                        fullWidth
-                        {...field}
-                      />
-                    )}
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5 mt-3">
-                  <span>說明 / 備註</span>
-                  <Controller
-                    name="remark"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        className="inputPadding"
-                        placeholder="請輸入說明或備註"
-                        //   inputProps={{ readOnly: true }}
-                        fullWidth
-                        {...field}
-                      />
-                    )}
-                  />
-                </div>
+        {deliverTaskInfo && (
+          <Dialog
+            fullScreen={phoneScreen}
+            open={isOpen}
+            onClose={onCheckDirty}
+            className=""
+          >
+            <DialogTitle id="responsive-dialog-title" className="mt-5 ">
+              <span className=" border-b-2 p-2">
+                {deliverTaskInfo?.constructionJobTask?.name}{" "}
+                <span className="text-sm mx-2">編輯</span>
+              </span>
+            </DialogTitle>
+            <DialogContent>
+              <FormProvider {...methods}>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <div className="flex flex-col gap-1.5 mt-3">
+                    <InputTitle title={"預計施工日期"} required={false} />
+                    <ControlledDatePicker name="estimatedSince" />
+                  </div>
+                  <div className="flex flex-col gap-1.5 mt-3">
+                    <InputTitle title={"預計完工日期"} required={false} />
+                    <ControlledDatePicker name="estimatedUntil" />
+                  </div>
+                  <div className="flex flex-col gap-1.5 mt-3">
+                    <InputTitle title={"施工位置"} required={false} />
 
-                <div className="d-flex inline-flex w-full gap-2 mt-4">
-                  <Button
-                    variant="contained"
-                    color="success"
-                    className="!text-base !h-12 "
-                    fullWidth
-                    onClick={() => {
-                      onCheckDirty();
-                    }}
-                  >
-                    返回
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="success"
-                    className="!text-base !h-12 "
-                    fullWidth
-                  >
-                    儲存
-                  </Button>
-                </div>
-              </form>
-            </FormProvider>
-            {/* <DialogContentText></DialogContentText> */}
-          </DialogContent>
-        </Dialog>
+                    <Controller
+                      name="location"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          variant="outlined"
+                          size="small"
+                          className="inputPadding"
+                          placeholder="請輸入施工位置"
+                          //   inputProps={{ readOnly: true }}
+                          fullWidth
+                          {...field}
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5 mt-3">
+                    <InputTitle title={"說明 /備註"} required={false} />
+                    <Controller
+                      name="remark"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          variant="outlined"
+                          size="small"
+                          className="inputPadding"
+                          placeholder="請輸入說明或備註"
+                          //   inputProps={{ readOnly: true }}
+                          fullWidth
+                          {...field}
+                        />
+                      )}
+                    />
+                  </div>
+
+                  <div className="flex-col inline-flex w-full ">
+                    <FormHelperText
+                      className="!text-red-600 break-words !text-right !mt-0"
+                      sx={{ minHeight: "1.25rem" }}
+                    >
+                      <span>{errors.estimatedUntil?.message}</span>
+                    </FormHelperText>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="contained"
+                        color="success"
+                        className="!text-base !h-12 "
+                        fullWidth
+                        onClick={() => {
+                          onCheckDirty();
+                        }}
+                      >
+                        返回
+                      </Button>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        color="success"
+                        className="!text-base !h-12 "
+                        fullWidth
+                      >
+                        儲存
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+              </FormProvider>
+              {/* <DialogContentText></DialogContentText> */}
+            </DialogContent>
+          </Dialog>
+        )}
         {/* Alert */}
         <AlertDialog
           open={alertOpen}
@@ -1006,6 +1173,10 @@ const TaskEditDialog = React.memo(
     );
   }
 );
+
+// const TaskDispatchModal = React.memo() =>{
+
+// }
 
 export { UpdatedModal, TaskModal, TaskEditDialog };
 
