@@ -27,6 +27,15 @@ module.exports = {
 					800: "#273057",
 					900: "#11374A",
 				},
+				secondary: {
+					50: "#039E8E",
+				},
+				tertiary: {
+					50: "#F7941D",
+				},
+				quaternary: {
+					50: "#6262a7",
+				},
 			},
 			screens: {
 				sm: "576px",

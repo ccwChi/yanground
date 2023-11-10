@@ -6,12 +6,32 @@ import TablePagination from "@mui/material/TablePagination";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 
-const Pagination = ({ totalElement, page, onPageChange, rowsPerPage, onRowsPerPageChange }) => {
+const Pagination = ({
+	totalElement,
+	page,
+	onPageChange,
+	rowsPerPage,
+	onRowsPerPageChange,
+	rowsPerPageOptions = [10, 25, 50],
+	classnames = "",
+}) => {
+	// 計算 rowsPerPage 是否為預期之外數值，插入 rowsPerPageOptions 並排序
+	const calculateRowsPerPageOptions = (addedNumber) => {
+		const originalArray = rowsPerPageOptions;
+		let updatedRowsPerPageOptions = originalArray;
+
+		if (!originalArray.includes(addedNumber)) {
+			updatedRowsPerPageOptions = [...originalArray, addedNumber].sort((a, b) => a - b);
+		}
+
+		return updatedRowsPerPageOptions;
+	};
+
 	return (
 		<div className="order-2">
 			<TablePagination
-				className="customPagination"
-				rowsPerPageOptions={[10, 25, 50]}
+				className={`customPagination ${classnames}`}
+				rowsPerPageOptions={calculateRowsPerPageOptions(rowsPerPage)}
 				component="div"
 				count={totalElement}
 				page={page}

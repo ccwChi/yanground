@@ -4,7 +4,14 @@ import Header from "./components/Layout/Header";
 import Sidebar from "./components/Layout/Sidebar";
 import Tabbar from "./components/Tabbar/Tabbar";
 import CustomBreadcrumbs from "./components/Breadcrumbs/CustomBreadcrumbs";
-import { faUserGear, faHelmetSafety, faToolbox, faVest, faPersonDigging, faFileLines } from "@fortawesome/free-solid-svg-icons";
+import {
+	faUserGear,
+	faHelmetSafety,
+	faToolbox,
+	faVest,
+	faPersonDigging,
+	faFileLines,
+} from "@fortawesome/free-solid-svg-icons";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./utils/theme";
 import "./app.scss";
@@ -38,11 +45,6 @@ const App = () => {
 			href: "constructionsummary",
 		},
 		{
-			icon: faUserGear,
-			text: "職員清單",
-			href: "users",
-		},
-		{
 			icon: faToolbox,
 			text: "專案管理",
 			href: "project",
@@ -51,6 +53,15 @@ const App = () => {
 			icon: faPersonDigging,
 			text: "派工清單",
 			href: "dispatchList",
+		},
+		{
+			icon: faUserGear,
+			text: "HRM",
+			href: "#",
+			subMenuItems: [
+				{ text: "人事管理", href: "users" },
+				{ text: "帳戶資訊", href: "userinfo" },
+			],
 		},
 		// },
 		// {
@@ -65,7 +76,7 @@ const App = () => {
 	];
 
 	useEffect(() => {
-		initLine();
+		//initLine();
 	}, []);
 
 	// Liff 登入 Line
@@ -95,6 +106,7 @@ const App = () => {
 					if (d.displayName) {
 						delete d.statusMessage;
 						delete d.userId;
+						delete d.nationalIdentityCardNumber;
 						localStorage.setItem("userProfile", JSON.stringify(d));
 					}
 				}

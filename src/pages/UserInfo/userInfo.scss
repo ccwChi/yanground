@@ -1,0 +1,337 @@
+.userinfo_wrapper {
+	.left {
+		float: left;
+	}
+	.right {
+		text-align: right;
+		float: right;
+	}
+
+	// Headings
+	.h5 {
+		font-weight: bold;
+		margin-top: 0;
+	}
+	.h5 {
+		font-size: 18px;
+	}
+
+	// Animations
+	@keyframes bounce-clouds {
+		0% {
+			transform: translateX(0);
+		}
+		50% {
+			transform: translateY(10 + px);
+		}
+		100% {
+			transform: translateX(0);
+		}
+	}
+
+	// Header
+	.header {
+		color: #fff;
+		padding: 10px 20px 100px;
+		position: relative;
+		overflow: hidden;
+
+		.header-background-elements {
+			.header-circle {
+				background: #2a776f;
+				width: 100px;
+				height: 100px;
+				position: absolute;
+				border-radius: 50%;
+				z-index: 0;
+				left: -40px;
+				top: 70px;
+
+				&.circle-right {
+					top: -70px;
+					left: auto;
+					right: -30px;
+					width: 170px;
+					height: 170px;
+				}
+			}
+
+			.dashed-shape {
+				border: 1px dashed rgba(255, 255, 255, 0.4);
+				width: 240px;
+				height: 240px;
+				border-radius: 80px;
+				position: absolute;
+				transform: rotate(45deg);
+				left: calc(50% - 120px);
+				top: 85px;
+
+				&.shape-2 {
+					width: 160px;
+					height: 160px;
+					top: 140px;
+					border-radius: 40px;
+					left: calc(50% - 80px);
+				}
+				&.shape-3 {
+					width: 50px;
+					height: 50px;
+					top: 135px;
+					border-radius: 0;
+					left: calc(50% - 25px);
+				}
+			}
+
+			.clouds {
+				position: absolute;
+				left: 0;
+				bottom: 0;
+
+				.cloud-circle {
+					width: 150px;
+					height: 150px;
+					border-radius: 50%;
+					background: #fefefe;
+					position: absolute;
+					left: -20px;
+					bottom: -70px;
+					animation: bounce-clouds 10s infinite;
+
+					&.circle-2 {
+						width: 80px;
+						height: 80px;
+						left: 120px;
+						bottom: -40px;
+						animation: bounce-clouds 7s infinite;
+					}
+					&.circle-3 {
+						width: 60px;
+						height: 60px;
+						left: 180px;
+						bottom: -10px;
+						animation: bounce-clouds 6s infinite;
+					}
+					&.circle-4 {
+						width: 140px;
+						height: 140px;
+						left: 220px;
+						bottom: -80px;
+						animation: bounce-clouds 12s infinite;
+					}
+					&.circle-5 {
+						width: 80px;
+						height: 80px;
+						left: 340px;
+						bottom: -20px;
+						animation: bounce-clouds 10s infinite;
+					}
+					&.circle-6 {
+						width: 130px;
+						height: 130px;
+						left: 390px;
+						bottom: -40px;
+						animation: bounce-clouds 12s infinite;
+					}
+					&.circle-7 {
+						width: 125px;
+						height: 125px;
+						left: 470px;
+						bottom: -70px;
+						animation: bounce-clouds 8s infinite;
+					}
+					&.circle-8 {
+						width: 30px;
+						height: 30px;
+						left: 570px;
+						bottom: -40px;
+						animation: bounce-clouds 7s infinite;
+					}
+					&.circle-9 {
+						width: 60px;
+						height: 60px;
+						left: 570px;
+						bottom: -10px;
+						animation: bounce-clouds 6s infinite;
+					}
+					&.circle-10 {
+						width: 140px;
+						height: 140px;
+						left: 610px;
+						bottom: -80px;
+						animation: bounce-clouds 12s infinite;
+					}
+					&.circle-11 {
+						width: 80px;
+						height: 80px;
+						left: 720px;
+						bottom: -20px;
+						animation: bounce-clouds 10s infinite;
+					}
+					&.circle-12 {
+						width: 130px;
+						height: 130px;
+						left: 780px;
+						bottom: -40px;
+						animation: bounce-clouds 12s infinite;
+					}
+					&.circle-13 {
+						width: 80px;
+						height: 80px;
+						left: 890px;
+						bottom: -20px;
+						animation: bounce-clouds 10s infinite;
+					}
+					&.circle-14 {
+						width: 60px;
+						height: 60px;
+						left: 960px;
+						bottom: -20px;
+						animation: bounce-clouds 10s infinite;
+					}
+					&.circle-15 {
+						width: 150px;
+						height: 150px;
+						left: 1010px;
+						bottom: -60px;
+						animation: bounce-clouds 10s infinite;
+					}
+				}
+			}
+		}
+
+		.header-user-info {
+			z-index: 5;
+			position: relative;
+			text-align: center;
+			clear: both;
+
+			.user-picture {
+				width: 80px;
+				height: 80px;
+				border-radius: 50%;
+				overflow: hidden;
+				margin: 25px auto 10px;
+			}
+		}
+	}
+
+	// Profile
+	.profile-section {
+		.panel {
+			position: relative;
+			overflow: hidden;
+			margin: 15px 0 25px;
+			padding: 15px 10px;
+			border-radius: 2px;
+			box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+
+			&.panel-wallet {
+				box-shadow: none;
+				padding: 0;
+
+				&:after,
+				&:before {
+					content: "";
+					display: block;
+					float: left;
+					position: absolute;
+					width: 0px;
+					z-index: 10;
+					border: 15px solid transparent;
+					border-left: 0px;
+					border-top: 140px solid #039e8e;
+					border-bottom: 0;
+					left: calc(50% - 10px);
+				}
+				&:before {
+					left: auto;
+					right: calc(50% - 10px);
+					border: 15px solid transparent;
+					border-right: 0px;
+					border-top: 0;
+					border-bottom: 140px solid #6262a7;
+				}
+
+				.left,
+				.right {
+					width: calc(50% - 10px);
+					height: 140px;
+					z-index: 8;
+					border-radius: 5px 0 6px 5px;
+					padding: 15px;
+
+					div {
+						margin: 0 0 8px;
+
+						&:last-child svg {
+							float: right;
+							border: 1px dashed #fff;
+							border-radius: 50%;
+							display: block;
+							width: 20px;
+							height: 20px;
+							font-size: 10px;
+							text-align: center;
+							line-height: 20px;
+						}
+					}
+				}
+				.right {
+					border-radius: 2px 5px 5px 0;
+					text-align: left;
+				}
+			}
+		}
+	}
+
+	// range
+	.range {
+		border-radius: 10px;
+		height: 6px;
+		width: 100%;
+		display: block;
+		margin: 12.5px 0;
+		z-index: 5;
+		background: #e8e7e9;
+		position: relative;
+		padding: 0;
+		clear: both;
+		float: left;
+
+		.range-back {
+			height: 10px;
+			padding: 0;
+			z-index: 0;
+			display: block;
+			position: absolute;
+			float: right;
+			border-radius: 10px;
+			width: 0;
+			margin-top: -2px;
+			transition: 2s linear;
+		}
+		@for $i from 1 through 100 {
+			$percentage: #{$i} + "%";
+
+			&.range-#{$i} .range-back {
+				width: calc(#{$percentage} - 20px);
+				animation: grow-#{$i} 2s 1;
+			}
+
+			@keyframes grow-#{$i} {
+				0% {
+					width: 0;
+				}
+				100% {
+					width: calc(#{$percentage} - 20px);
+				}
+			}
+		}
+	}
+}
+
+@media (max-width: 575.98px) {
+	.userinfo_wrapper .profile-section {
+		background: linear-gradient(#fff, #e7e6e9);
+	}
+}

@@ -1,5 +1,5 @@
 @import "../src/assets/styles/custom";
-$nav-height: 64px;
+$nav-height: 56px;
 $z-index-c: 1020;
 $z-index-b: 1025;
 $z-index-a: 1040;
@@ -42,6 +42,25 @@ $z-index-a: 1040;
 	margin: 0 !important;
 	padding: 1rem 1.5rem;
 	height: 100%;
+}
+
+@keyframes slideLeftRight {
+	0% {
+		transform: translateX(0);
+	}
+	50% {
+		transform: translateX(0.25rem);
+	}
+	100% {
+		transform: translateX(0);
+	}
+}
+.arrow-animation {
+	animation: none;
+}
+
+.aa_wrapper:hover .arrow-animation {
+	animation: slideLeftRight 1s linear infinite;
 }
 
 //****** MUI ******//

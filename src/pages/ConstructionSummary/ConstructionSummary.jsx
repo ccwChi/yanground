@@ -5,12 +5,14 @@ import TableTabber from "../../components/Tabbar/TableTabber";
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
 import AddIcon from "@mui/icons-material/Add";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import CommentIcon from "@mui/icons-material/Comment";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import { getData, postBodyData, postData } from "../../utils/api";
 import { UpdatedModal, TaskModal } from "./SummaryModal";
 import { useNotification } from "../../hooks/useNotification";
+import { DispatchModal } from "./SummaryDispatchModal";
 
 // 如果施工種類有新增需手動新增
 
@@ -108,8 +110,9 @@ const ConstructionSummary = () => {
   ];
 
   const actions = [
-    { value: "edit", icon: <EditIcon />, title: "編輯清單名稱" },
-    { value: "task", icon: <CommentIcon />, title: "清單工項編輯" },
+    { value: "edit", icon: <EditIcon />, title: "施工清單 修改" },
+    { value: "task", icon: <CommentIcon />, title: "施工清單工項執行 編輯" },
+    // { value: "dispatch", icon: <GroupAddIcon />, title: "工項執行派工" },
   ];
 
   // 取得列表資料
@@ -260,7 +263,7 @@ const ConstructionSummary = () => {
       modalValue: "edit",
       modalComponent: (
         <UpdatedModal
-          title="修改施工清單"
+          title="施工清單修改"
           deliverInfo={deliverInfo}
           sendDataToBackend={sendDataToBackend}
           onClose={onClose}
@@ -273,13 +276,24 @@ const ConstructionSummary = () => {
       modalValue: "task",
       modalComponent: (
         <TaskModal
-          title="施工清單工項執行"
+          title="施工清單工項執行編輯"
           deliverInfo={deliverInfo}
           sendDataToBackend={sendDataToBackend}
           onClose={onClose}
         />
       ),
     },
+    // {
+    //   modalValue: "dispatch",
+    //   modalComponent: (
+    //     <DispatchModal
+    //       title="工項執行派工"
+    //       deliverInfo={deliverInfo}
+    //       sendDataToBackend={sendDataToBackend}
+    //       onClose={onClose}
+    //     />
+    //   ),
+    // },
   ];
   const config = modalValue
     ? modalConfig.find((item) => item.modalValue === modalValue)

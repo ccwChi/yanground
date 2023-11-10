@@ -193,7 +193,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 									</div>
 								</div>
 								{/* 部門 & 申請人 */}
-								<div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-0 mb-5 sm:mb-0">
+								<div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-5">
 									<div className="w-full">
 										<InputTitle title={"派工部門"} required={false} />
 										<Controller
@@ -484,19 +484,25 @@ const AddDispatcherModal = React.memo(({ title, deliverInfo, departmentList, sen
 					<span className="italic text-neutral-500 text-sm">(已選取 {selectedMembers.length} 名人員)</span>
 				</InputTitle>
 				<List className="overflow-y-auto border border-neutral-300 rounded !mb-2.5" sx={{ height: "22.5vh" }}>
-					<TransitionGroup>
-						{selectedMembers.map((member) => (
-							<Collapse key={member.member}>
-								<ListItem className="!py-1">
-									<ListItemText secondary={member.department + " / " + member.member} />
-									<IconButton aria-label="delete" title="Delete" onClick={() => handleRemoveMember(member.member)}>
-										<DeleteIcon />
-									</IconButton>
-								</ListItem>
-								<Divider variant="middle" />
-							</Collapse>
-						))}
-					</TransitionGroup>
+					{selectedMembers.length > 0 ? (
+						<TransitionGroup>
+							{selectedMembers.map((member) => (
+								<Collapse key={member.member}>
+									<ListItem className="!py-1">
+										<ListItemText secondary={member.department + " / " + member.member} />
+										<IconButton aria-label="delete" title="Delete" onClick={() => handleRemoveMember(member.member)}>
+											<DeleteIcon />
+										</IconButton>
+									</ListItem>
+									<Divider variant="middle" />
+								</Collapse>
+							))}
+						</TransitionGroup>
+					) : (
+						<div className="flex h-full items-center justify-center">
+							<span className="italic text-neutral-500 text-sm">(尚無資料)</span>
+						</div>
+					)}
 				</List>
 
 				<Button variant="contained" color="success" className="!text-base !h-12" fullWidth onClick={handleSave}>
