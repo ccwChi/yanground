@@ -53,7 +53,7 @@ table {
 			th {
 				padding: 12px !important;
 				border-bottom: none !important;
-				background-color: $bg-l-color-1 !important;
+				// background-color: $bg-l-color-1 !important;
 			}
 		}
 	}
@@ -63,7 +63,7 @@ table {
 			td {
 				padding: 8px 12px !important;
 				font-size: 1rem !important;
-				color: $text-color-1 !important;
+				// color: $text-color-1 !important;
 			}
 			&:first-of-type td button[data-mode="up"],
 			&:last-of-type td button[data-mode="down"] {

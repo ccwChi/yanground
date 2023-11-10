@@ -35,24 +35,20 @@ const App = () => {
 			href: "sites",
 		},
 		{
-			icon: faVest,
-			text: "工程類別",
-			href: "constructionTypes",
-		},
-		{
 			icon: faFileLines,
-			text: "施工清單",
-			href: "constructionsummary",
+			text: "基礎資料",
+			href: "#",
+			subMenuItems: [{ text: "工程類別", href: "constructionTypes" }],
 		},
 		{
 			icon: faToolbox,
-			text: "專案管理",
-			href: "project",
-		},
-		{
-			icon: faPersonDigging,
-			text: "派工清單",
-			href: "dispatchList",
+			text: "工作管理",
+			href: "#",
+			subMenuItems: [
+				{ text: "施工清單", href: "constructionsummary" },
+				{ text: "專案管理", href: "project" },
+				{ text: "派工清單", href: "dispatchList" },
+			],
 		},
 		{
 			icon: faUserGear,
@@ -65,6 +61,7 @@ const App = () => {
 		},
 		// },
 		// {
+		//  icon: faVest,
 		// 	icon: faPersonDigging,
 		// 	text: "範例",
 		// 	href: "#",
