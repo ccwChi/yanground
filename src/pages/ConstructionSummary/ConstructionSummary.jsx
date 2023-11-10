@@ -341,7 +341,7 @@ const ConstructionSummary = () => {
           columnsMobile={columnsMobile}
           actions={actions}
           cardTitleKey={"name"}
-          tableMinWidth={540}
+          tableMinWidth={700}
           isLoading={isLoading}
           handleActionClick={handleActionClick}
         />

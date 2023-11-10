@@ -195,14 +195,14 @@ const Users = () => {
     ? modalConfig.find((item) => item.modalValue === modalValue)
     : null;
 
-  return (
-    <>
-      {/* PageTitle */}
-      <PageTitle
-        title="職員清單"
-        //btnGroup={btnGroup}
-        handleActionClick={handleActionClick}
-      />
+	return (
+		<>
+			{/* PageTitle */}
+			<PageTitle
+				title="人事管理"
+				//btnGroup={btnGroup}
+				handleActionClick={handleActionClick}
+			/>
 
       {/* TabBar */}
       {/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}

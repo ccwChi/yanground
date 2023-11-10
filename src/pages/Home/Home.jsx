@@ -13,18 +13,18 @@ const Home = () => {
 	const [countNum, setCountNum] = useState({ staffNum: '-', depNum: '-' });
 	const userProfile = useLocalStorageValue("userProfile");
 
-	useEffect(() => {
-		let staffNum, depNum;
-		Promise.all([getData("user?p=1&s=1"), getData("department")])
-			.then(([userResult, departmentResult]) => {
-				staffNum = userResult.result.totalElements;
-				depNum = departmentResult.result.totalElements;
-				setCountNum({ staffNum, depNum });
-			})
-			.catch((error) => {
-				console.error("API Error:", error);
-			});
-	}, []);
+	// useEffect(() => {
+	// 	let staffNum, depNum;
+	// 	Promise.all([getData("user?p=1&s=1"), getData("department")])
+	// 		.then(([userResult, departmentResult]) => {
+	// 			staffNum = userResult.result.totalElements;
+	// 			depNum = departmentResult.result.totalElements;
+	// 			setCountNum({ staffNum, depNum });
+	// 		})
+	// 		.catch((error) => {
+	// 			console.error("API Error:", error);
+	// 		});
+	// }, []);
 
 	return (
 		<div className="home_wrapper flex flex-col flex-1">
@@ -73,7 +73,7 @@ const Home = () => {
 			</div>
 
 			<div className="profile-section flex-1 -mb-7 sm:-mb-4 w-full px-2.5 py-3.5">
-				<div className="panel panel-wallet">
+				{/* <div className="panel panel-wallet">
 					<div className="left bg-secondary-50 text-white">
 						<div>
 							<BadgeIcon />
@@ -99,7 +99,7 @@ const Home = () => {
 							</NavLink>
 						</div>
 					</div>
-				</div>
+				</div> */}
 
 				<NavLink to="/userinfo" className="panel bg-white flex !rounded-3xl">
 					<div className="left text-neutral-400">
