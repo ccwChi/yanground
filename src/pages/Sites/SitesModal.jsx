@@ -3,7 +3,7 @@ import ModalTemplete from "../../components/Modal/ModalTemplete";
 import InputTitle from "../../components/Guideline/InputTitle";
 import DatePicker from "../../components/DatePicker/DatePicker";
 import AlertDialog from "../../components/Alert/AlertDialog";
-import Loading from "../../components/Loader/Loading";
+import { Loading } from "../../components/Loader/Loading";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Select from "@mui/material/Select";

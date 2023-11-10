@@ -3,7 +3,9 @@ import ModalTemplete from "../../components/Modal/ModalTemplete";
 import InputTitle from "../../components/Guideline/InputTitle";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
+import { Loading, LoadingTwo } from "../../components/Loader/Loading";
 import TextField from "@mui/material/TextField";
+import Backdrop from "@mui/material/Backdrop";
 import Button from "@mui/material/Button";
 import Collapse from "@mui/material/Collapse";
 import Divider from "@mui/material/Divider";
@@ -41,15 +43,8 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 	const [userList, setUserList] = useState(null);
 	// 專案清單
 	const [projectList, setProjectList] = useState(null);
-
-	// 初始預設 default 值
-	const defaultValues = {
-		dispatchedOn: deliverInfo ? new Date(deliverInfo.dispatchedOn) : new Date(),
-		project: deliverInfo ? deliverInfo.project.id : "",
-		content: deliverInfo ? deliverInfo.content : "",
-		department: "業務部",
-		applicant: deliverInfo ? deliverInfo.applicant.id : "",
-	};
+	// Modal Data
+	const [apiData, setApiData] = useState(null);
 
 	// 使用 Yup 來定義表單驗證規則
 	const schema = yup.object().shape({
@@ -57,6 +52,15 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 		project: yup.string().required("不可為空值"),
 		applicant: yup.string().required("不可為空值"),
 	});
+
+	// 初始預設 default 值
+	const defaultValues = {
+		dispatchedOn: apiData ? new Date(apiData.dispatchedOn) : new Date(),
+		project: apiData ? apiData.project.id : "",
+		content: apiData && apiData?.content ? apiData.content : "",
+		department: "業務部",
+		applicant: apiData ? apiData.applicant.id : "",
+	};
 
 	// 使用 useForm Hook 來管理表單狀態和驗證
 	const methods = useForm({
@@ -68,9 +72,25 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 		control,
 		handleSubmit,
 		watch,
+		reset,
 		formState: { errors, isDirty },
 	} = methods;
 	const projectId = watch("project");
+
+	useEffect(() => {
+		if (deliverInfo) {
+			getData(`dispatchment/${deliverInfo}`).then((result) => {
+				const data = result.result;
+				setApiData(data);
+			});
+		}
+	}, [deliverInfo]);
+
+	useEffect(() => {
+		if (apiData) {
+			reset(defaultValues);
+		}
+	}, [apiData]);
 
 	// 取得專案資料
 	useEffect(() => {
@@ -96,7 +116,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 		}
 
 		if (deliverInfo) {
-			sendDataToBackend(fd, "edit", deliverInfo.id);
+			sendDataToBackend(fd, "edit", deliverInfo);
 		} else {
 			sendDataToBackend(fd, "create");
 		}
@@ -137,7 +157,11 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 	return (
 		<>
 			{/* Modal */}
-			<ModalTemplete title={title} show={!!projectList && !!userList} maxWidth={"640px"} onClose={onCheckDirty}>
+			<ModalTemplete
+				title={title}
+				show={!!projectList && !!userList && (deliverInfo ? !!apiData : true)}
+				maxWidth={"640px"}
+				onClose={onCheckDirty}>
 				<FormProvider {...methods}>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div className="flex flex-col pt-4 gap-4">
@@ -165,7 +189,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 													<MenuItem value="" disabled>
 														<span className="text-neutral-400 font-light">請選擇工程項目</span>
 													</MenuItem>
-													{projectList.map((project) => (
+													{projectList?.map((project) => (
 														<MenuItem key={project.id} value={project.id}>
 															{project.name}
 														</MenuItem>
@@ -227,7 +251,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 													<MenuItem value="" disabled>
 														<span className="text-neutral-400 font-light">請選擇申請人</span>
 													</MenuItem>
-													{userList.map((user) => (
+													{userList?.map((user) => (
 														<MenuItem key={user.id} value={user.id}>
 															{user.nickname}
 														</MenuItem>
@@ -252,8 +276,8 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 											<TextField
 												multiline
 												rows={3}
-												content="true"
 												fullWidth
+												placeholder="請輸入工程內容"
 												InputProps={{
 													inputProps: { maxLength: 300 },
 												}}
@@ -281,6 +305,14 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClos
 				disagreeText="取消"
 				agreeText="確定"
 			/>
+
+			{/* Backdrop */}
+			<Backdrop
+				sx={{ color: "#fff", zIndex: 1050 }}
+				open={!projectList || !userList || (deliverInfo ? !apiData : false)}
+				onClick={onCheckDirty}>
+				<LoadingTwo />
+			</Backdrop>
 		</>
 	);
 });
@@ -291,20 +323,26 @@ const AddDispatcherModal = React.memo(({ title, deliverInfo, departmentList, sen
 	// 人員清單
 	const [memberList, setMemberList] = useState(null);
 	// 已選清單
-	const [selectedMembers, setSelectedMembers] = useState([]);
+	const [selectedMembers, setSelectedMembers] = useState(null);
 	// Alert 開關
 	const [alertOpen, setAlertOpen] = useState(false);
 	// 是否為初始化時
 	const [initialized, setInitialized] = useState(true);
+	// 檢查 List 是否被汙染
+	const [isListDirty, setIsListDirty] = useState(false);
 
 	useEffect(() => {
 		if (deliverInfo) {
-			const initialSelectedMembers = deliverInfo.staffs.map((item) => ({
-				department: item.department.name,
-				member: item.displayName,
-				memberId: item.id,
-			}));
-			setSelectedMembers(initialSelectedMembers);
+			let data = {};
+			getData(`dispatchment/${deliverInfo}/staff`).then((result) => {
+				data = result.result;
+				const initialSelectedMembers = data.map((item) => ({
+					department: item.department.name,
+					member: item.displayName,
+					memberId: item.id,
+				}));
+				setSelectedMembers(initialSelectedMembers);
+			});
 		}
 	}, [deliverInfo]);
 
@@ -331,7 +369,6 @@ const AddDispatcherModal = React.memo(({ title, deliverInfo, departmentList, sen
 		handleSubmit,
 		setValue,
 		getValues,
-		reset,
 		formState: { errors, isDirty },
 	} = methods;
 	const dep_ = watch("department");
@@ -371,6 +408,7 @@ const AddDispatcherModal = React.memo(({ title, deliverInfo, departmentList, sen
 
 	// 移除派工人員暫存清單
 	const handleRemoveMember = (member) => {
+		if (!isDirty) setIsListDirty(true);
 		const updatedMembers = selectedMembers.filter((m) => m.member !== member);
 		setSelectedMembers(updatedMembers);
 	};
@@ -381,12 +419,12 @@ const AddDispatcherModal = React.memo(({ title, deliverInfo, departmentList, sen
 
 		const fd = new FormData();
 		fd.append("staffs", selectedMemberIds.join(","));
-		sendDataToBackend(fd, "awl", deliverInfo.id);
+		sendDataToBackend(fd, "awl", deliverInfo);
 	};
 
 	// 檢查表單是否汙染
 	const onCheckDirty = () => {
-		if (isDirty) {
+		if (isDirty || isListDirty) {
 			setAlertOpen(true);
 		} else {
 			onClose();
@@ -425,7 +463,7 @@ const AddDispatcherModal = React.memo(({ title, deliverInfo, departmentList, sen
 												<MenuItem value="" disabled>
 													<span className="text-neutral-400 font-light">請選擇部門</span>
 												</MenuItem>
-												{departmentList.map((dep) => (
+												{departmentList?.map((dep) => (
 													<MenuItem key={"select" + dep.id} value={dep.id}>
 														{dep.name}
 													</MenuItem>
@@ -469,7 +507,13 @@ const AddDispatcherModal = React.memo(({ title, deliverInfo, departmentList, sen
 									</FormHelperText>
 								</div>
 							</div>
-							<Button type="submit" variant="contained" color="purple" className="!text-base !h-12" fullWidth>
+							<Button
+								type="submit"
+								variant="contained"
+								color="purple"
+								className="!text-base !h-12"
+								disabled={!memberList && !initialized}
+								fullWidth>
 								新增人員
 							</Button>
 						</div>
@@ -481,26 +525,34 @@ const AddDispatcherModal = React.memo(({ title, deliverInfo, departmentList, sen
 				{/* ------------------------------------------------------ */}
 
 				<InputTitle title={"派工人員"} required={false}>
-					<span className="italic text-neutral-500 text-sm">(已選取 {selectedMembers.length} 名人員)</span>
+					<span className="italic text-neutral-500 text-sm">
+						(已選取 {selectedMembers ? selectedMembers.length : "-"} 名人員)
+					</span>
 				</InputTitle>
 				<List className="overflow-y-auto border border-neutral-300 rounded !mb-2.5" sx={{ height: "22.5vh" }}>
-					{selectedMembers.length > 0 ? (
-						<TransitionGroup>
-							{selectedMembers.map((member) => (
-								<Collapse key={member.member}>
-									<ListItem className="!py-1">
-										<ListItemText secondary={member.department + " / " + member.member} />
-										<IconButton aria-label="delete" title="Delete" onClick={() => handleRemoveMember(member.member)}>
-											<DeleteIcon />
-										</IconButton>
-									</ListItem>
-									<Divider variant="middle" />
-								</Collapse>
-							))}
-						</TransitionGroup>
+					{selectedMembers ? (
+						selectedMembers?.length > 0 ? (
+							<TransitionGroup>
+								{selectedMembers?.map((member) => (
+									<Collapse key={member.member}>
+										<ListItem className="!py-1">
+											<ListItemText secondary={member.department + " / " + member.member} />
+											<IconButton aria-label="delete" title="Delete" onClick={() => handleRemoveMember(member.member)}>
+												<DeleteIcon />
+											</IconButton>
+										</ListItem>
+										<Divider variant="middle" />
+									</Collapse>
+								))}
+							</TransitionGroup>
+						) : (
+							<div className="flex h-full items-center justify-center">
+								<span className="italic text-neutral-500 text-sm">(尚無資料)</span>
+							</div>
+						)
 					) : (
-						<div className="flex h-full items-center justify-center">
-							<span className="italic text-neutral-500 text-sm">(尚無資料)</span>
+						<div className="flex items-center justify-center h-full">
+							<Loading size={40} />
 						</div>
 					)}
 				</List>

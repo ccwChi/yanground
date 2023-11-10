@@ -101,19 +101,22 @@ const DispatchList = () => {
 	useEffect(() => {
 		getApiList(apiUrl);
 	}, [apiUrl]);
-	const getApiList = useCallback((url) => {
-		setIsLoading(true);
-		getData(url).then((result) => {
-			setIsLoading(false);
-			const data = result.result;
-			setApiData(data);
-			if (page >= data.totalPages) {
-				setPage(0);
-				setRowsPerPage(10);
-				navigate(`?p=1&s=10`);
-			}
-		});
-	}, [page]);
+	const getApiList = useCallback(
+		(url) => {
+			setIsLoading(true);
+			getData(url).then((result) => {
+				setIsLoading(false);
+				const data = result.result;
+				setApiData(data);
+				if (page >= data.totalPages) {
+					setPage(0);
+					setRowsPerPage(10);
+					navigate(`?p=1&s=10`);
+				}
+			});
+		},
+		[page]
+	);
 
 	// 取得縣市資料
 	useEffect(() => {
@@ -266,9 +269,10 @@ const DispatchList = () => {
 		setModalValue(dataMode);
 
 		if (dataValue) {
-			const mainData = apiData.content.find((item) => item.id === dataValue);
-			setDeliverInfo(mainData);
-			if (dataMode === "print") {
+			if (dataMode !== "print") {
+				setDeliverInfo(dataValue);
+			} else {
+				const mainData = apiData.content.find((item) => item.id === dataValue);
 				generateDocument(mainData);
 			}
 		}

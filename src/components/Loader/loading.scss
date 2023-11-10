@@ -1,0 +1,199 @@
+// 風車
+.pinwheel-container {
+	--size: 1;
+	width: 100px;
+	height: 100px;
+	margin: 30px auto;
+	position: relative;
+	animation: spin 1.5s infinite linear;
+
+	@keyframes spin {
+		from {
+			transform: rotate(0deg) scale(var(--size));
+		}
+
+		to {
+			transform: rotate(-360deg) scale(var(--size));
+		}
+	}
+
+	.pin-base {
+		width: 0;
+		height: 0;
+		border-top: 0px solid transparent;
+		border-bottom: 30px solid transparent;
+		border-left: 30px solid #7a7678;
+		position: absolute;
+		left: 50px;
+		top: 20px;
+	}
+
+	.pin-2 {
+		.pin-big-triangle {
+			border-bottom: 30px solid #ff6619;
+		}
+
+		.pin-base {
+			border-left: 30px solid #ff935d;
+		}
+	}
+
+	.pin-3 {
+		.pin-big-triangle {
+			border-bottom: 30px solid #00b2a6;
+		}
+
+		.pin-base {
+			border-left: 30px solid #6dd2cb;
+		}
+	}
+
+	.pin-1 {
+		.pin-big-triangle {
+			border-bottom: 30px solid #14cc57;
+		}
+
+		.pin-base {
+			border-left: 30px solid #70cc92;
+		}
+	}
+
+	.pin-4 {
+		.pin-big-triangle {
+			border-bottom: 30px solid #808485;
+		}
+
+		.pin-base {
+			border-left: 30px solid #acb1b2;
+		}
+	}
+
+	.pin-big-triangle {
+		width: 0;
+		height: 0;
+		border-left: 30px solid transparent;
+		border-right: 39px solid transparent;
+		border-bottom: 30px solid #7a7678;
+		position: absolute;
+		left: 50px;
+		top: 20px;
+	}
+
+	.pin-1,
+	.pin-2,
+	.pin-3,
+	.pin-4 {
+		position: relative;
+		left: 0;
+		top: 0;
+	}
+
+	.pin-2 {
+		left: 50px;
+		top: 50px;
+		transform: rotate(90deg);
+	}
+
+	.pin-3 {
+		top: 98px;
+		left: 2px;
+		transform: rotate(180deg);
+	}
+
+	.pin-4 {
+		left: -50px;
+		top: 49px;
+		transform: rotate(-90deg);
+	}
+
+	.pinwheel-center-circle {
+		background-color: #ffa40d;
+		width: 7px;
+		height: 7px;
+		border-radius: 127px;
+		position: absolute;
+		top: 47px;
+		left: 47px;
+	}
+
+	+ .pinwheel-stick {
+		margin: 0 auto;
+		margin-top: -80px;
+		width: 7px;
+		background-color: #ffa40d;
+	}
+}
+
+// 甜甜圈
+.doughnut-container {
+	display: flex;
+	height: 100vh;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	.doughnut-wrapper {
+		backface-visibility: hidden;
+		perspective: 1000px;
+		transform: translate3d(0, 0, 0);
+		animation: bounce 1s infinite forwards;
+	}
+	.doughnut-svg {
+		outline: 0.5rem solid transparent;
+		transform-origin: 50% 50%;
+		animation: roll 2s cubic-bezier(1, 0, 0.4, 1) infinite;
+	}
+	.doughnut-shadow {
+		width: 5rem;
+		height: 0.6rem;
+		margin: 0 auto;
+		background-color: #333;
+		border-radius: 100%;
+		opacity: 0.35;
+		animation: shadow 1s infinite;
+	}
+	@keyframes roll {
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+	@keyframes bounce {
+		50% {
+			transform: translate3d(0, -8%, 0);
+		}
+	}
+	@keyframes shadow {
+		50% {
+			opacity: 0.3;
+			transform: scale(0.9);
+		}
+	}
+}
+
+// 點點點
+.dotting {
+	display: inline-block;
+	margin-left: 0.2em;
+	padding-left: 0.2em;
+	padding-right: 0.2em;
+	width: calc(10px + 0.2em * 2.25);
+	min-height: 0.2em;
+	border-left: 0.2em solid currentColor;
+	border-right: 0.2em solid currentColor;
+	background-color: currentColor;
+	background-clip: content-box;
+	animation: dot 1s infinite step-start both;
+
+	@keyframes dot {
+		25% {
+			border-color: transparent;
+			background-color: transparent;
+		}
+		50% {
+			border-right-color: transparent;
+			background-color: transparent;
+		}
+		75% {
+			border-right-color: transparent;
+		}
+	}
+}

@@ -4,7 +4,7 @@ import ModalTemplete from "../../components/Modal/ModalTemplete";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 import { format } from "date-fns";
 import AlertDialog from "../../components/Alert/AlertDialog";
-import Loading from "../../components/Loader/Loading";
+import { Loading } from "../../components/Loader/Loading";
 import {
   TextField,
   Button,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import TableTabber from "../../components/Tabbar/TableTabber";
-import Loading from "../../components/Loader/Loading";
+import { LoadingTwo } from "../../components/Loader/Loading";
 import Avatar from "@mui/material/Avatar";
 import { getData } from "../../utils/api";
 import PersonalInfoSection from "./PersonalInfoSection";
@@ -168,7 +168,7 @@ const UserInfo = () => {
 					personalInfo ? (
 						<PersonalInfoSection userProfile={userProfile} personalInfo={personalInfo} />
 					) : (
-						<Loading />
+						<LoadingTwo textSize={"text-lg sm:text-xl"} />
 					)
 				) : (
 					<PunchLogSection

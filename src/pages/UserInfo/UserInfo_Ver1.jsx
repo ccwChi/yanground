@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PageTitle from "../../components/Guideline/PageTitle";
-import Loading from "../../components/Loader/Loading";
+import { LoadingTwo } from "../../components/Loader/Loading";
 import Avatar from "@mui/material/Avatar";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -117,7 +117,7 @@ const UserInfo = () => {
 					</div>
 				</div>
 			) : (
-				<Loading />
+				<LoadingTwo textSize={"text-lg sm:text-xl"} />
 			)}
 		</>
 	);
