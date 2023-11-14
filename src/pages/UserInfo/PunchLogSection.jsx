@@ -21,8 +21,12 @@ const getWorkingDaysInfo = () => {
 	let todayIsWorkingDay = false;
 	let todayWorkingDayNumber = 0;
 
+	let mouthDays = 0;
+
 	for (let day = 1; day <= daysInMonth; day++) {
 		const currentDate = new Date(currentYear, currentMonth, day);
+
+		mouthDays++;
 
 		if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
 			workingDays++;
@@ -39,7 +43,7 @@ const getWorkingDaysInfo = () => {
 	}
 
 	return {
-		totalWorkingDays: workingDays,
+		totalWorkingDays: mouthDays, //workingDays,
 		todayIsWorkingDay: todayIsWorkingDay,
 		todayWorkingDayNumber: todayWorkingDayNumber,
 	};

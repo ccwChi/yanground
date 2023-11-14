@@ -221,10 +221,9 @@
 
 		.panel {
 			position: relative;
-			overflow: hidden;
 			margin: 15px 0 25px;
 			padding: 15px 10px;
-			border-radius: 2px;
+			border-radius: 0.5rem;
 			box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 
 			&.panel-wallet {
@@ -284,5 +283,11 @@
 				}
 			}
 		}
+	}
+}
+
+@media (max-width: 575.98px) {
+	.home_wrapper .profile-section {
+		background: linear-gradient(#fff, #eee);
 	}
 }
