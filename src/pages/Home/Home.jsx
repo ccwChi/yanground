@@ -10,46 +10,104 @@ import Divider from "@mui/material/Divider";
 import PunchClockIcon from "@mui/icons-material/PunchClock";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 import { getData } from "../../utils/api";
+import constructionTypeList from "../../data/constructionTypes";
 import "./home.scss";
 import liff from "@line/liff";
 const LINE_ID = process.env.REACT_APP_LINEID;
 
 const Home = () => {
-	const [countNum, setCountNum] = useState({ staffNum: "-", depNum: "-" });
+	// const [countNum, setCountNum] = useState({ staffNum: "-", depNum: "-" });
+	const [constSummaryApiList, setConstSummaryApiList] = useState([]);
 	const userProfile = useLocalStorageValue("userProfile");
 
-	// useEffect(() => {
-	// 	let staffNum, depNum;
-	// 	Promise.all([getData("user?p=1&s=1"), getData("department")])
-	// 		.then(([userResult, departmentResult]) => {
-	// 			staffNum = userResult.result.totalElements;
-	// 			depNum = departmentResult.result.totalElements;
-	// 			setCountNum({ staffNum, depNum });
-	// 		})
-	// 		.catch((error) => {
-	// 			console.error("API Error:", error);
-	// 		});
-	// }, []);
-
 	useEffect(() => {
-		const initializeLiff = async () => {
-			try {
-				await liff.init({ liffId: LINE_ID });
-				if (liff.getContext().type.match(/utou/g) && liff.isInClient()) {
-					await liff.sendMessages([
-						{
-							type: "text",
-							text: "Hello,\nWorld!\nThis is a multi-line message.",
-						},
-					]);
-				}
-			} catch (error) {
-				console.error("Error sending message:", error);
-			}
-		};
+		// let staffNum, depNum;
+		// Promise.all([getData("user?p=1&s=1"), getData("department")])
+		// 	.then(([userResult, departmentResult]) => {
+		// 		staffNum = userResult.result.totalElements;
+		// 		depNum = departmentResult.result.totalElements;
+		// 		setCountNum({ staffNum, depNum });
+		// 	})
 
-		initializeLiff();
+		getData("timesheet").then((result) => {
+			const data = result.result;
+
+			const transformedData = data.map((item) => {
+				const { date, summaries } = item;
+
+				const projectMap = new Map();
+
+				summaries.forEach((summary) => {
+					const { project, constructionSummaryJobTasks } = summary;
+
+					if (!projectMap.has(project.name)) {
+						projectMap.set(project.name, {
+							name: project.name,
+							constructionSummaryJobTasks: [],
+						});
+					}
+
+					const existingProject = projectMap.get(project.name);
+
+					constructionSummaryJobTasks.forEach((task) => {
+						const dispatches = task.constructionSummaryJobTaskDispatches;
+
+						if (dispatches.some((dispatch) => dispatch.date === date)) {
+							const constructionJobTask =
+								getConstructionType(task.constructionJobTask.constructionJob.constructionType) +
+								"-" +
+								task.constructionJobTask.name;
+
+							const dispatchesForDate = dispatches
+								.filter((dispatch) => dispatch.date === date)
+								.map((dispatch) => dispatch.labourer.nickname)
+								.join(" ");
+
+							existingProject.constructionSummaryJobTasks.push({
+								constructionJobTask,
+								constructionSummaryJobTaskDispatches: dispatchesForDate,
+							});
+						}
+					});
+				});
+
+				return {
+					date,
+					summaries: Array.from(projectMap.values()).filter(
+						(project) => project.constructionSummaryJobTasks.length > 0
+					),
+				};
+			});
+
+			console.log(transformedData);
+			setConstSummaryApiList(transformedData);
+		});
 	}, []);
+
+	const getConstructionType = (constructionTypeName) => {
+		const type = constructionTypeList.find((type) => type.name === constructionTypeName);
+		return type ? type.label : "";
+	};
+
+	// useEffect(() => {
+	// 	const initializeLiff = async () => {
+	// 		try {
+	// 			await liff.init({ liffId: LINE_ID });
+	// 			if (liff.getContext().type.match(/utou/g) && liff.isInClient()) {
+	// 				await liff.sendMessages([
+	// 					{
+	// 						type: "text",
+	// 						text: "Hello,\nWorld!\nThis is a multi-line message.",
+	// 					},
+	// 				]);
+	// 			}
+	// 		} catch (error) {
+	// 			console.error("Error sending message:", error);
+	// 		}
+	// 	};
+
+	// 	initializeLiff();
+	// }, []);
 
 	return (
 		<div className="home_wrapper flex flex-col flex-1 overflow-hidden -mb-4">
@@ -127,49 +185,49 @@ const Home = () => {
 				</div> */}
 
 				<div className="grid grid-cols-1 gap-3 px-4 sm:flex-1 sm:overflow-hidden">
-					{/* 左部分 */}
 					<div className="flex flex-col shadow-md break-words panel border gap-3 bg-white overflow-hidden">
+						{/* 標題 */}
 						<div className="flex">
 							<div className="left text-neutral-400">
 								<AppRegistrationIcon className="mx-3" sx={{ fontSize: "50px" }} />
 							</div>
 							<div className="left">
 								<div>
-									<span className="h5 text-text">明日派工</span>
+									<span className="h5 text-text">派工</span>
 								</div>
-								<div className="text-neutral-400">Assignment for Tomorrow</div>
+								<div className="text-neutral-400">Assignment</div>
 							</div>
 						</div>
 						<Divider variant="middle" />
-						<div className="inline-flex flex-col px-4 gap-1.5 overflow-y-auto">
-							<p>
-								<span className="text-neutral-500 pe-2">日期：</span> 2023-11-15 週三
-							</p>
-							<p>
-								<span className="text-neutral-500 pe-2">案場：</span> 后里
-							</p>
-							<span className="text-neutral-500 pe-2">人員分配：</span>
-							<div className="flex items-start">
-								<Chip label="土木-測量放樣" color="primary" className="me-2" />
-								<span className="pt-[3px]">蔡和輝 阿早</span>
-							</div>
-							<div className="flex items-start">
-								<Chip label="土木-深度測量" color="primary" className="me-2" />
-								<span className="pt-[3px]">阿蕭 阿雄 陳俊融 汪亦珉</span>
-							</div>
-							<Divider variant="middle" className="!my-3" />
-							<p>
-								<span className="text-neutral-500 pe-2">案場：</span> 將軍（工廠）
-							</p>
-							<span className="text-neutral-500 pe-2">人員分配：</span>
-							<div className="flex items-start">
-								<Chip label="土木-大底澆置" color="primary" className="me-2" />
-								<span className="pt-[3px]">吳朝明 阿揚</span>
-							</div>
-							<div className="flex items-start">
-								<Chip label="機電-工項執行" color="primary" className="me-2" />
-								<span className="pt-[3px]">阿克 順伯</span>
-							</div>
+
+						{/* 主內容 */}
+						<div className="flex flex-col px-4 overflow-y-auto">
+							{constSummaryApiList?.map((summary, index) => (
+								<div className="flex flex-col gap-1.5" key={index}>
+									<p className="text-primary-500">
+										<span className="text-neutral-500 pe-2">日期：</span>{summary.date}
+									</p>
+									{summary.summaries.map((s) => (
+										<div className="inline-flex flex-col gap-1.5" key={s.name}>
+											<p className="pt-1 text-primary-500">
+												<span className="text-neutral-500 pe-2">案場：</span>
+												{s.name}
+											</p>
+											<span className="text-neutral-500 pe-2">人員分配：</span>
+											{s.constructionSummaryJobTasks.map((c) => (
+												<div className="flex flex-col sm:flex-row items-start">
+													{/* <Chip label={c.constructionJobTask} color="primary" className="me-2" /> */}
+													<span className="whitespace-nowrap text-sm text-neutral-400">
+														〔{c.constructionJobTask}〕
+													</span>
+													<span className="-mt-0.5">{c.constructionSummaryJobTaskDispatches}</span>
+												</div>
+											))}
+										</div>
+									))}
+									<Divider variant="middle" className="!my-3" />
+								</div>
+							))}
 						</div>
 					</div>
 				</div>
