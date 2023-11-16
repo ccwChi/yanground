@@ -19,7 +19,7 @@ const TableTabber = ({ tabGroup, cat, setCat, classnames = "", onTabChange }) =>
 		<Tabs
 			value={cat}
 			onChange={handleChange}
-			className={classnames}
+			className={`!bg-transparent ${classnames}`}
 			variant="scrollable"
 			scrollButtons
 			allowScrollButtonsMobile

@@ -136,6 +136,15 @@ const UserInfo = () => {
 						<div className="cloud-circle circle-13"></div>
 						<div className="cloud-circle circle-14"></div>
 						<div className="cloud-circle circle-15"></div>
+						<div className="cloud-circle circle-16"></div>
+						<div className="cloud-circle circle-17"></div>
+						<div className="cloud-circle circle-18"></div>
+						<div className="cloud-circle circle-19"></div>
+						<div className="cloud-circle circle-20"></div>
+						<div className="cloud-circle circle-21"></div>
+						<div className="cloud-circle circle-22"></div>
+						<div className="cloud-circle circle-23"></div>
+						<div className="cloud-circle circle-24"></div>
 					</div>
 				</div>
 

@@ -7,8 +7,10 @@ import BadgeIcon from "@mui/icons-material/Badge";
 import Chip from "@mui/material/Chip";
 import GroupsIcon from "@mui/icons-material/Groups";
 import Divider from "@mui/material/Divider";
+import Skeleton from "@mui/material/Skeleton";
 import PunchClockIcon from "@mui/icons-material/PunchClock";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+import CampaignIcon from "@mui/icons-material/Campaign";
 import { getData } from "../../utils/api";
 import constructionTypeList from "../../data/constructionTypes";
 import "./home.scss";
@@ -19,7 +21,9 @@ const Home = () => {
 	// const [countNum, setCountNum] = useState({ staffNum: "-", depNum: "-" });
 	const [constSummaryApiList, setConstSummaryApiList] = useState([]);
 	const accessToken = useLocalStorageValue("accessToken");
-	const userProfile = useLocalStorageValue("userProfile");
+	// const userProfile = useLocalStorageValue("userProfile");
+	// isLoading 等待請求 api
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		// let staffNum, depNum;
@@ -29,7 +33,7 @@ const Home = () => {
 		// 		depNum = departmentResult.result.totalElements;
 		// 		setCountNum({ staffNum, depNum });
 		// 	})
-		
+
 		if (accessToken) {
 			getData("timesheet").then((result) => {
 				const data = result.result;
@@ -83,6 +87,7 @@ const Home = () => {
 
 				console.log(transformedData);
 				setConstSummaryApiList(transformedData);
+				setIsLoading(false);
 			});
 		}
 	}, [accessToken]);
@@ -113,7 +118,7 @@ const Home = () => {
 	// }, []);
 
 	return (
-		<div className="home_wrapper flex flex-col flex-1 overflow-hidden -mb-4">
+		<div className="home_wrapper flex flex-col flex-1 overflow-hidden sm:mb-0 -mb-7">
 			<div className="header bg-secondary-50">
 				<div className="header-background-elements">
 					<div className="header-circle circle-left"></div>
@@ -141,24 +146,20 @@ const Home = () => {
 						<div className="cloud-circle circle-13"></div>
 						<div className="cloud-circle circle-14"></div>
 						<div className="cloud-circle circle-15"></div>
-					</div>
-				</div>
-
-				<div className="header-user-info">
-					<div className="user-picture">
-						<Avatar
-							alt={userProfile?.displayName}
-							src={userProfile?.pictureUrl}
-							sx={{ width: 80, height: 80, bgcolor: "#547db7" }}
-						/>
-					</div>
-					<div className="user-name">
-						<h5 className="h5">{userProfile ? `歡迎！ ${userProfile.nickname}` : "載入中..."}</h5>
+						<div className="cloud-circle circle-16"></div>
+						<div className="cloud-circle circle-17"></div>
+						<div className="cloud-circle circle-18"></div>
+						<div className="cloud-circle circle-19"></div>
+						<div className="cloud-circle circle-20"></div>
+						<div className="cloud-circle circle-21"></div>
+						<div className="cloud-circle circle-22"></div>
+						<div className="cloud-circle circle-23"></div>
+						<div className="cloud-circle circle-24"></div>
 					</div>
 				</div>
 			</div>
 
-			<div className="profile-section flex-1 -mb-7 sm:-mb-4 w-full px-2.5 pt-3.5 pb-12 sm:pb-3.5 flex flex-col overflow-y-auto sm:overflow-hidden">
+			<div className="profile-section flex-1 -mb-7 sm:-mb-4 w-full px-2.5 pt-3.5 pb-14 sm:pb-3.5 flex flex-col overflow-y-auto sm:overflow-hidden">
 				{/* <div className="panel panel-wallet">
 					<div className="left bg-secondary-50 text-white">
 						<div>
@@ -187,7 +188,7 @@ const Home = () => {
 					</div>
 				</div> */}
 
-				<div className="grid grid-cols-1 gap-3 px-4 sm:flex-1 sm:overflow-hidden">
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 sm:flex-1 sm:overflow-hidden pb-4">
 					<div className="flex flex-col shadow-md break-words panel border gap-3 bg-white overflow-hidden">
 						{/* 標題 */}
 						<div className="flex">
@@ -204,39 +205,76 @@ const Home = () => {
 						<Divider variant="middle" />
 
 						{/* 主內容 */}
-						<div className="flex flex-col px-4 overflow-y-auto">
-							{constSummaryApiList?.map((summary, index) => (
-								<div className="flex flex-col gap-1.5" key={index}>
-									<p className="text-primary-500">
-										<span className="text-neutral-500 pe-2">日期：</span>
-										{summary.date}
-									</p>
-									{summary.summaries.map((s) => (
-										<div className="inline-flex flex-col gap-1.5" key={s.name}>
-											<p className="pt-1 text-primary-500">
-												<span className="text-neutral-500 pe-2">案場：</span>
-												{s.name}
+						<div className="relative flex flex-col px-4 overflow-y-auto flex-1 min-h-[20px]">
+							{!isLoading ? (
+								constSummaryApiList && constSummaryApiList.length > 0 ? (
+									constSummaryApiList?.map((summary, index) => (
+										<div className="flex flex-col gap-1.5" key={index}>
+											<p className="text-primary-800">
+												<span className="text-neutral-500 pe-2">日期：</span>
+												{summary.date}
 											</p>
-											<span className="text-neutral-500 pe-2">人員分配：</span>
-											{s.constructionSummaryJobTasks.map((c) => (
-												<div className="flex flex-col sm:flex-row items-start">
-													{/* <Chip label={c.constructionJobTask} color="primary" className="me-2" /> */}
-													<span className="whitespace-nowrap text-sm text-neutral-400">
-														〔{c.constructionJobTask}〕
-													</span>
-													<span className="-mt-0.5">{c.constructionSummaryJobTaskDispatches}</span>
+											{summary.summaries.map((s) => (
+												<div className="inline-flex flex-col gap-1.5" key={s.name}>
+													<p className="pt-1 text-primary-800">
+														<span className="text-neutral-500 pe-2">案場：</span>
+														{s.name}
+													</p>
+													<span className="text-neutral-500 pe-2">人員分配：</span>
+													{s.constructionSummaryJobTasks.map((c) => (
+														<div className="flex flex-col sm:flex-row items-start" key={c.constructionJobTask}>
+															{/* <Chip label={c.constructionJobTask} color="primary" className="me-2" /> */}
+															<span className="whitespace-nowrap text-sm text-neutral-400">
+																〔{c.constructionJobTask}〕
+															</span>
+															<span className="ms-1.5 sm:ms-0 sm:-mt-0.5">
+																{c.constructionSummaryJobTaskDispatches}
+															</span>
+														</div>
+													))}
 												</div>
 											))}
+											{index !== constSummaryApiList.length - 1 && <Divider variant="middle" className="!my-3" />}
 										</div>
-									))}
-									<Divider variant="middle" className="!my-3" />
+									))
+								) : (
+									<div className="absolute inset-0 flex items-center justify-center">
+										<span className="italic text-neutral-500 text-sm">(七日內尚無派工資訊)</span>
+									</div>
+								)
+							) : (
+								<div className="flex flex-col gap-2.5">
+									<Skeleton variant="rounded" width={140} height={24} />
+									<Skeleton variant="rounded" width={100} height={24} />
+									<Skeleton variant="rounded" width={120} height={24} />
+									<Skeleton variant="rounded" width={"100%"} height={48} />
 								</div>
-							))}
+							)}
+						</div>
+					</div>
+					<div className="flex flex-col shadow-md break-words panel border gap-3 bg-white overflow-hidden">
+						{/* 標題 */}
+						<div className="flex">
+							<div className="left text-neutral-400">
+								<CampaignIcon className="mx-3" sx={{ fontSize: "50px" }} />
+							</div>
+							<div className="left">
+								<div>
+									<span className="h5 text-text">公告</span>
+								</div>
+								<div className="text-neutral-400">Announcement</div>
+							</div>
+						</div>
+						<Divider variant="middle" />
+
+						{/* 主內容 */}
+						<div className="flex flex-col items-center justify-center flex-1 px-4 overflow-y-auto">
+							<span className="italic text-neutral-500 text-sm">(尚無公告)</span>
 						</div>
 					</div>
 				</div>
 
-				<NavLink to="/userinfo" className="panel bg-white flex !rounded-3xl">
+				<NavLink to="/userinfo" className="panel bg-white flex mx-4">
 					<div className="left text-neutral-400">
 						<PunchClockIcon className="mx-3" sx={{ fontSize: "50px" }} />
 					</div>

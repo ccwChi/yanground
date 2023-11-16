@@ -52,8 +52,9 @@ table {
 		tr {
 			th {
 				padding: 12px !important;
+				color: $white-color !important;
 				border-bottom: none !important;
-				background-color: $bg-l-color-1 !important;
+				background-color: lighten($quaternary-color-1, 5%) !important;
 			}
 		}
 	}
@@ -92,5 +93,12 @@ table {
 	/* Handle on hover */
 	::-webkit-scrollbar-thumb:hover {
 		background: #555;
+	}
+}
+
+
+@media (max-width: 575.98px) {
+	body {
+		background-color: $bg-l-color-2;
 	}
 }

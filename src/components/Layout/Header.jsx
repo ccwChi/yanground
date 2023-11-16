@@ -13,7 +13,7 @@ import { faBars, faUser } from "@fortawesome/free-solid-svg-icons";
 import logoIcon from "../../assets/Logo.png";
 import liff from "@line/liff";
 
-const Header = ({ toggleSidebar }) => {
+const Header = ({ toggleSidebar, classnames = "" }) => {
 	const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
 	const userProfile = useLocalStorageValue("userProfile");
 
@@ -26,15 +26,15 @@ const Header = ({ toggleSidebar }) => {
 	};
 
 	return (
-		<AppBar position="static" elevation={3} style={{ zIndex: 1024 }} color="dark" className="opacity-90">
+		<AppBar
+			position="static"
+			elevation={3}
+			sx={{ zIndex: 1024 }}
+			className={`opacity-90 ${classnames}`}>
 			<Toolbar className="justify-between text-white !min-h-[56px]">
 				<NavLink to="/" className="flex items-center text-1xl select-none">
-					{/* Logo */}
 					<img src={logoIcon} alt="Logo" className="h-10 me-1" />
 					<span className="whitespace-nowrap text-white font-medium -translate-y-px">元融科技</span>
-					<span className="hidden md:block whitespace-nowrap text-white font-medium -translate-y-px">
-						有限公司
-					</span>
 				</NavLink>
 
 				<div className="flex gap-2">

@@ -1,3 +1,5 @@
+@import "../../assets/styles/custom";
+
 .userinfo_wrapper {
 	.left {
 		float: left;
@@ -32,7 +34,7 @@
 	// Header
 	.header {
 		color: #fff;
-		padding: 10px 20px 100px;
+		padding: 10px 20px 80px;
 		position: relative;
 		overflow: hidden;
 
@@ -91,7 +93,7 @@
 					width: 150px;
 					height: 150px;
 					border-radius: 50%;
-					background: #fefefe;
+					background: $bg-l-color-2;
 					position: absolute;
 					left: -20px;
 					bottom: -70px;
@@ -126,8 +128,8 @@
 						animation: bounce-clouds 10s infinite;
 					}
 					&.circle-6 {
-						width: 130px;
-						height: 130px;
+						width: 90px;
+						height: 90px;
 						left: 390px;
 						bottom: -40px;
 						animation: bounce-clouds 12s infinite;
@@ -168,8 +170,8 @@
 						animation: bounce-clouds 10s infinite;
 					}
 					&.circle-12 {
-						width: 130px;
-						height: 130px;
+						width: 120px;
+						height: 70px;
 						left: 780px;
 						bottom: -40px;
 						animation: bounce-clouds 12s infinite;
@@ -177,23 +179,87 @@
 					&.circle-13 {
 						width: 80px;
 						height: 80px;
-						left: 890px;
-						bottom: -20px;
-						animation: bounce-clouds 10s infinite;
+						left: 880px;
+						bottom: -40px;
+						animation: bounce-clouds 5s infinite;
 					}
 					&.circle-14 {
-						width: 60px;
-						height: 60px;
-						left: 960px;
+						width: 75px;
+						height: 75px;
+						left: 940px;
 						bottom: -20px;
-						animation: bounce-clouds 10s infinite;
+						animation: bounce-clouds 7s infinite;
 					}
 					&.circle-15 {
-						width: 150px;
-						height: 150px;
+						width: 120px;
+						height: 120px;
 						left: 1010px;
-						bottom: -60px;
-						animation: bounce-clouds 10s infinite;
+						bottom: -50px;
+						animation: bounce-clouds 11s infinite;
+					}
+					&.circle-16 {
+						width: 105px;
+						height: 105px;
+						left: 1120px;
+						bottom: -55px;
+						animation: bounce-clouds 8s infinite;
+					}
+					&.circle-17 {
+						width: 85px;
+						height: 85px;
+						left: 1200px;
+						bottom: -55px;
+						animation: bounce-clouds 8s infinite;
+					}
+					&.circle-18 {
+						//last
+						width: 240px;
+						height: 240px;
+						left: 1850px;
+						bottom: -70px;
+						animation: bounce-clouds 14s infinite;
+					}
+					&.circle-19 {
+						width: 60px;
+						height: 60px;
+						left: 1260px;
+						bottom: -20px;
+						animation: bounce-clouds 6s infinite;
+					}
+					&.circle-20 {
+						width: 120px;
+						height: 120px;
+						left: 1300px;
+						bottom: -40px;
+						animation: bounce-clouds 9s infinite;
+					}
+					&.circle-21 {
+						width: 70px;
+						height: 70px;
+						left: 1400px;
+						bottom: -15px;
+						animation: bounce-clouds 8s infinite;
+					}
+					&.circle-22 {
+						width: 120px;
+						height: 120px;
+						left: 1450px;
+						bottom: -70px;
+						animation: bounce-clouds 7s infinite;
+					}
+					&.circle-23 {
+						width: 200px;
+						height: 200px;
+						left: 1550px;
+						bottom: -120px;
+						animation: bounce-clouds 11s infinite;
+					}
+					&.circle-24 {
+						width: 160px;
+						height: 160px;
+						left: 1720px;
+						bottom: -100px;
+						animation: bounce-clouds 7s infinite;
 					}
 				}
 			}
@@ -210,19 +276,20 @@
 				height: 80px;
 				border-radius: 50%;
 				overflow: hidden;
-				margin: 25px auto 10px;
+				margin: 18px auto 10px;
 			}
 		}
 	}
 
 	// Profile
 	.profile-section {
+		background: $bg-l-color-2;
 		.panel {
 			position: relative;
 			overflow: hidden;
 			margin: 15px 0 25px;
 			padding: 15px 10px;
-			border-radius: 2px;
+			border-radius: 0.5rem;
 			box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 
 			&.panel-wallet {
@@ -327,11 +394,5 @@
 				}
 			}
 		}
-	}
-}
-
-@media (max-width: 575.98px) {
-	.userinfo_wrapper .profile-section {
-		background: linear-gradient(#fff, #e7e6e9);
 	}
 }

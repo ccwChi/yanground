@@ -94,42 +94,46 @@ const PunchLogSection = React.memo(({ apiAttData, cat, page, setPage, rowsPerPag
 					</div>
 				</div>
 			</div>
-			{!isLoading ? (
-				page >= apiAttData.totalPages ? (
-					<div className="flex-1 inline-flex items-center justify-center">
-						<span className="text-neutral-500 text-sm">( ヽ(#`Д´)ﾉ 頁數超出範圍，請返回第一頁)</span>
-					</div>
-				) : apiAttData?.content.length > 0 ? (
-					<List dense={true} className="overflow-y-auto flex-1 order-3 sm:order-1 sm:!pb-0 !pb-12">
-						{apiAttData?.content.map((data, index) => (
-							<ListItem key={index} className="h-9">
-								<ListItemText
-									primary={
-										// data.occurredAt.replace("T", " ").replace(/\+.*/, "") +
-										format(
-											new Date(data.occurredAt.replace("T", " ").replace(/\+.*/, "")),
-											"yyyy年MM月dd日 (EEEE) HH:mm:ss",
-											{
-												locale: zhTW,
-											}
-										) + " - 打卡"
-									}
-								/>
-							</ListItem>
-						))}
-					</List>
+			<div
+				className="mx-6 flex-1 overflow-hidden bg-white rounded-lg"
+				style={{ boxShadow: "0 5px 10px rgba(0, 0, 0, 0.1)" }}>
+				{!isLoading ? (
+					page >= apiAttData.totalPages ? (
+						<div className="flex-1 inline-flex items-center justify-center">
+							<span className="text-neutral-500 text-sm">( ヽ(#`Д´)ﾉ 頁數超出範圍，請返回第一頁)</span>
+						</div>
+					) : apiAttData?.content.length > 0 ? (
+						<List dense={true} className="h-full overflow-y-auto order-3 sm:order-1 !pt-0 sm:!pb-0 !pb-12">
+							{apiAttData?.content.map((data, index) => (
+								<ListItem key={index} className="h-9">
+									<ListItemText
+										primary={
+											// data.occurredAt.replace("T", " ").replace(/\+.*/, "") +
+											format(
+												new Date(data.occurredAt.replace("T", " ").replace(/\+.*/, "")),
+												"yyyy年MM月dd日 (EEEE) HH:mm:ss",
+												{
+													locale: zhTW,
+												}
+											) + " - 打卡"
+										}
+									/>
+								</ListItem>
+							))}
+						</List>
+					) : (
+						<div className="flex-1 inline-flex items-center justify-center">
+							<span className="text-neutral-500 text-sm">(尚無打卡紀錄，一片空空 ʅ（´◔౪◔）ʃ)</span>
+						</div>
+					)
 				) : (
-					<div className="flex-1 inline-flex items-center justify-center">
-						<span className="text-neutral-500 text-sm">(尚無打卡紀錄，一片空空 ʅ（´◔౪◔）ʃ)</span>
+					<div className="flex-1">
+						{Array.from({ length: SKELETONITEM }).map((_, index) => (
+							<Skeleton key={index} animation="wave" className="mx-4 !my-3" height={30} sx={{ transform: "none" }} />
+						))}
 					</div>
-				)
-			) : (
-				<div className="flex-1">
-					{Array.from({ length: SKELETONITEM }).map((_, index) => (
-						<Skeleton key={index} animation="wave" className="mx-4 !my-3" height={30} sx={{ transform: "none" }} />
-					))}
-				</div>
-			)}
+				)}
+			</div>
 
 			{/* Pagination */}
 			<Pagination
@@ -138,6 +142,7 @@ const PunchLogSection = React.memo(({ apiAttData, cat, page, setPage, rowsPerPag
 				onPageChange={handleChangePage}
 				rowsPerPage={rowsPerPage}
 				onRowsPerPageChange={handleChangeRowsPerPage}
+				classnames="!pt-4 !pb-6 sm:!py-0"
 			/>
 		</>
 	);

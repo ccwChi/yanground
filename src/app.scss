@@ -1,25 +1,24 @@
 @import "../src/assets/styles/custom";
-$nav-height: 56px;
 $z-index-c: 1020;
 $z-index-b: 1025;
 $z-index-a: 1040;
 
 .main_wrapper {
 	padding-bottom: 1rem;
-	width: 74%;
-	background-color: $white-color;
+	width: calc(100% - 250px);
+	background-color: $bg-l-color-2;
 }
 
 .sidebar_wrapper {
-	top: $nav-height;
-	left: 1rem;
+	top: 0;
+	left: 0;
 	right: 0;
 	bottom: 0;
 	width: 100%;
 	z-index: $z-index-c;
 	> div {
 		height: 100%;
-		width: 24%;
+		width: 250px;
 	}
 }
 
@@ -83,7 +82,7 @@ $z-index-a: 1040;
 
 .MuiIconButton-colorCustom {
 	color: $text-color-1 !important;
-	background-color: $bg-l-color !important;
+	background-color: $bg-l-color-2 !important;
 	&:not(:first-of-type) {
 		margin-left: 0.5rem;
 	}
@@ -160,7 +159,6 @@ $z-index-a: 1040;
 @media (max-width: 575.98px) {
 	.main_wrapper {
 		padding-bottom: 6rem;
-		background-color: $bg-l-color-1;
 	}
 	.sidebar_wrapper,
 	.bg_overlay {

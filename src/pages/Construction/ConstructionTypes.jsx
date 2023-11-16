@@ -17,6 +17,7 @@ const ConstructionTypes = () => {
 	// ApiUrl
 	const apiUrl = "constructionType";
 	// 螢幕大小判斷參數
+	const isLargeScreen = useMediaQuery("(max-width:1399.98px)");
 	const isSmallScreen = useMediaQuery("(max-width:575.98px)");
 	// Btn Img
 	const imageUrls = [
@@ -50,7 +51,7 @@ const ConstructionTypes = () => {
 					<Grid container spacing={2}>
 						{Array.from({ length: SKELETONITEM }).map((_, index) => (
 							<Grow in key={index} timeout={index * 250}>
-								<Grid item xs={isSmallScreen ? 6 : 4}>
+								<Grid item xs={isLargeScreen ? (isSmallScreen ? 6 : 4) : 3}>
 									<Skeleton
 										variant="rectangular"
 										className="rounded"
@@ -68,7 +69,7 @@ const ConstructionTypes = () => {
 					<Grid container spacing={2}>
 						{apiData?.map((item, index) => (
 							<Grow in key={item.ordinal} timeout={item.ordinal * 250}>
-								<Grid item xs={isSmallScreen ? 6 : 4}>
+								<Grid item xs={isLargeScreen ? (isSmallScreen ? 6 : 4) : 3}>
 									<Button
 										component={NavLink}
 										to={`/constructionTypes/${item.label}+${item.name}`}
@@ -77,6 +78,9 @@ const ConstructionTypes = () => {
 											aspectRatio: "5/3",
 											backgroundBlendMode: "multiply",
 											background: `linear-gradient(rgba(84, 125, 183, 0.75), rgba(3, 158, 142, 0.5)), url(${imageUrls[index]})`,
+											backgroundSize: "cover",
+											backgroundPosition: "center",
+											backgroundRepeat: "no-repeat",
 										}}
 										fullWidth>
 										<div className="flex flex-col items-center">
