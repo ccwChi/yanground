@@ -1,7 +1,8 @@
 {
-  "start_url": "",
-	"short_name": "元融科技",
 	"name": "元融科技有限公司",
+	"short_name": "元融科技",
+	"description": "規劃、設計、施工、維運一次完成，元融提升環境永續、致力於環境保護、節能減碳、低碳、循環經濟、節能減碳，保護地球、傳承下一代",
+	"start_url": "https://erp.yuanrong.goog1e.app/",
 	"icons": [
 		{
 			"src": "favicon.ico",
