@@ -12,38 +12,42 @@ import EditModal from "./UsersModal";
 import { useNotification } from "../../hooks/useNotification";
 
 const Users = () => {
-	const navigate = useNavigate();
-	const showNotification = useNotification();
+  const navigate = useNavigate();
+  const showNotification = useNotification();
 
-	// 解析網址取得參數
-	const location = useLocation();
-	const queryParams = new URLSearchParams(location.search);
+  // 解析網址取得參數
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
 
-	// cat = Category 設置 tab 分類，之後分類用
-	//const [cat, setCat] = useState(null);
-	// API List Data
-	const [apiData, setApiData] = useState(null);
-	// isLoading 等待請求 api
-	const [isLoading, setIsLoading] = useState(false);
-	// Page 頁數設置
-	const [page, setPage] = useState(
-		queryParams.has("p") && !isNaN(+queryParams.get("p")) ? +queryParams.get("p") - 1 : 0
-	);
-	// rows per Page 多少筆等同於一頁
-	const [rowsPerPage, setRowsPerPage] = useState(
-		queryParams.has("s") && !isNaN(+queryParams.get("s")) ? +queryParams.get("s") : 10
-	);
-	// ApiUrl
-	const furl = "user";
-	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
-	// 在主畫面先求得部門跟權限list再直接傳給面板
-	const [departmentList, setDepartmentList] = useState(null);
-	const [authorityList, setAuthorityList] = useState(null);
-	// ModalValue 控制開啟的是哪一個 Modal
-	const [modalValue, setModalValue] = useState(false);
-	// 傳送額外資訊給 Modal
-	const [deliverInfo, setDeliverInfo] = useState(null);
-	const { enqueueSnackbar } = useSnackbar();
+  // cat = Category 設置 tab 分類，之後分類用
+  //const [cat, setCat] = useState(null);
+  // API List Data
+  const [apiData, setApiData] = useState(null);
+  // isLoading 等待請求 api
+  const [isLoading, setIsLoading] = useState(false);
+  // Page 頁數設置
+  const [page, setPage] = useState(
+    queryParams.has("p") && !isNaN(+queryParams.get("p"))
+      ? +queryParams.get("p") - 1
+      : 0
+  );
+  // rows per Page 多少筆等同於一頁
+  const [rowsPerPage, setRowsPerPage] = useState(
+    queryParams.has("s") && !isNaN(+queryParams.get("s"))
+      ? +queryParams.get("s")
+      : 10
+  );
+  // ApiUrl
+  const furl = "user";
+  const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
+  // 在主畫面先求得部門跟權限list再直接傳給面板
+  const [departmentList, setDepartmentList] = useState(null);
+  const [authorityList, setAuthorityList] = useState(null);
+  // ModalValue 控制開啟的是哪一個 Modal
+  const [modalValue, setModalValue] = useState(false);
+  // 傳送額外資訊給 Modal
+  const [deliverInfo, setDeliverInfo] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
 
 	// Tab 列表對應 api 搜尋參數
 	// const tabGroup = [
@@ -87,22 +91,22 @@ const Users = () => {
 		getApiList(apiUrl);
 	}, [apiUrl]);
 
-	const getApiList = useCallback(
-		(url) => {
-			setIsLoading(true);
-			getData(url).then((result) => {
-				setIsLoading(false);
-				const data = result.result;
-				setApiData(data);
-				if (page >= data.totalPages) {
-					setPage(0);
-					setRowsPerPage(10);
-					navigate(`?p=1&s=10`);
-				}
-			});
-		},
-		[page]
-	);
+  const getApiList = useCallback(
+    (url) => {
+      setIsLoading(true);
+      getData(url).then((result) => {
+        setIsLoading(false);
+        const data = result.result;
+        setApiData(data);
+        if (page >= data.totalPages) {
+          setPage(0);
+          setRowsPerPage(10);
+          navigate(`?p=1&s=10`);
+        }
+      });
+    },
+    [page]
+  );
 
 	//取得部門清單跟權限清單
 	useEffect(() => {
@@ -122,57 +126,57 @@ const Users = () => {
 		});
 	}, []);
 
-	// 傳遞給後端資料
-	const sendDataToBackend = (fd, mode, otherData) => {
-		let url = "";
-		let message = [];
-		if (mode === "edit") {
-			url = "user" + "/" + otherData;
-			message = ["資料修改成功！"];
-		}
-		postData(url, fd).then((result) => {
-			if (result.status) {
-				enqueueSnackbar(message[0], {
-					variant: "success",
-					anchorOrigin: {
-						vertical: "bottom", // 垂直，可選：'top', 'bottom'
-						horizontal: "center", // 水平，可選：'left', 'center', 'right'
-					},
-					autoHideDuration: 3000,
-				});
-				getApiList(apiUrl);
-			} else {
-				enqueueSnackbar("發生錯誤，請洽詢資工部", {
-					variant: "error",
-					anchorOrigin: {
-						vertical: "bottom", // 垂直，可選：'top', 'bottom'
-						horizontal: "center", // 水平，可選：'left', 'center', 'right'
-					},
-					autoHideDuration: 3000,
-				});
-			}
-		});
-		// for (var pair of fd.entries()) {
-		//   console.log(pair);
-		// }
-	};
+  // 傳遞給後端資料
+  const sendDataToBackend = (fd, mode, otherData) => {
+    let url = "";
+    let message = [];
+    if (mode === "edit") {
+      url = "user" + "/" + otherData;
+      message = ["資料修改成功！"];
+    }
+    postData(url, fd).then((result) => {
+      if (result.status) {
+        enqueueSnackbar(message[0], {
+          variant: "success",
+          anchorOrigin: {
+            vertical: "bottom", // 垂直，可選：'top', 'bottom'
+            horizontal: "center", // 水平，可選：'left', 'center', 'right'
+          },
+          autoHideDuration: 3000,
+        });
+        getApiList(apiUrl);
+      } else {
+        enqueueSnackbar("發生錯誤，請洽詢資工部", {
+          variant: "error",
+          anchorOrigin: {
+            vertical: "bottom", // 垂直，可選：'top', 'bottom'
+            horizontal: "center", // 水平，可選：'left', 'center', 'right'
+          },
+          autoHideDuration: 3000,
+        });
+      }
+    });
+    // for (var pair of fd.entries()) {
+    //   console.log(pair);
+    // }
+  };
 
-	// 設置頁數
-	const handleChangePage = useCallback(
-		(event, newPage) => {
-			setPage(newPage);
-			navigate(`?p=${newPage + 1}&s=${rowsPerPage}`);
-		},
-		[rowsPerPage]
-	);
+  // 設置頁數
+  const handleChangePage = useCallback(
+    (event, newPage) => {
+      setPage(newPage);
+      navigate(`?p=${newPage + 1}&s=${rowsPerPage}`);
+    },
+    [rowsPerPage]
+  );
 
-	// 設置每頁顯示並返回第一頁
-	const handleChangeRowsPerPage = (event) => {
-		const targetValue = parseInt(event.target.value, 10);
-		setRowsPerPage(targetValue);
-		setPage(0);
-		navigate(`?p=1&s=${targetValue}`);
-	};
+  // 設置每頁顯示並返回第一頁
+  const handleChangeRowsPerPage = (event) => {
+    const targetValue = parseInt(event.target.value, 10);
+    setRowsPerPage(targetValue);
+    setPage(0);
+    navigate(`?p=1&s=${targetValue}`);
+  };
 
 	// 當活動按鈕點擊時開啟 modal 並進行動作
 	const handleActionClick = (event) => {
@@ -217,10 +221,14 @@ const Users = () => {
 	];
 	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
 
-	return (
-		<>
-			{/* PageTitle */}
-			<PageTitle title="人事管理" btnGroup={btnGroup} handleActionClick={handleActionClick} isLoading={!isLoading} />
+  return (
+    <>
+      {/* PageTitle */}
+      <PageTitle
+        title="人事管理"
+        //btnGroup={btnGroup}
+        handleActionClick={handleActionClick}
+      />
 
 			{/* TabBar */}
 			{/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}
