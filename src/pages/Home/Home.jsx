@@ -18,6 +18,7 @@ const LINE_ID = process.env.REACT_APP_LINEID;
 const Home = () => {
 	// const [countNum, setCountNum] = useState({ staffNum: "-", depNum: "-" });
 	const [constSummaryApiList, setConstSummaryApiList] = useState([]);
+	const accessToken = useLocalStorageValue("accessToken");
 	const userProfile = useLocalStorageValue("userProfile");
 
 	useEffect(() => {
@@ -28,61 +29,63 @@ const Home = () => {
 		// 		depNum = departmentResult.result.totalElements;
 		// 		setCountNum({ staffNum, depNum });
 		// 	})
+		
+		if (accessToken) {
+			getData("timesheet").then((result) => {
+				const data = result.result;
 
-		getData("timesheet").then((result) => {
-			const data = result.result;
+				const transformedData = data.map((item) => {
+					const { date, summaries } = item;
 
-			const transformedData = data.map((item) => {
-				const { date, summaries } = item;
+					const projectMap = new Map();
 
-				const projectMap = new Map();
+					summaries.forEach((summary) => {
+						const { project, constructionSummaryJobTasks } = summary;
 
-				summaries.forEach((summary) => {
-					const { project, constructionSummaryJobTasks } = summary;
-
-					if (!projectMap.has(project.name)) {
-						projectMap.set(project.name, {
-							name: project.name,
-							constructionSummaryJobTasks: [],
-						});
-					}
-
-					const existingProject = projectMap.get(project.name);
-
-					constructionSummaryJobTasks.forEach((task) => {
-						const dispatches = task.constructionSummaryJobTaskDispatches;
-
-						if (dispatches.some((dispatch) => dispatch.date === date)) {
-							const constructionJobTask =
-								getConstructionType(task.constructionJobTask.constructionJob.constructionType) +
-								"-" +
-								task.constructionJobTask.name;
-
-							const dispatchesForDate = dispatches
-								.filter((dispatch) => dispatch.date === date)
-								.map((dispatch) => dispatch.labourer.nickname)
-								.join(" ");
-
-							existingProject.constructionSummaryJobTasks.push({
-								constructionJobTask,
-								constructionSummaryJobTaskDispatches: dispatchesForDate,
+						if (!projectMap.has(project.name)) {
+							projectMap.set(project.name, {
+								name: project.name,
+								constructionSummaryJobTasks: [],
 							});
 						}
+
+						const existingProject = projectMap.get(project.name);
+
+						constructionSummaryJobTasks.forEach((task) => {
+							const dispatches = task.constructionSummaryJobTaskDispatches;
+
+							if (dispatches.some((dispatch) => dispatch.date === date)) {
+								const constructionJobTask =
+									getConstructionType(task.constructionJobTask.constructionJob.constructionType) +
+									"-" +
+									task.constructionJobTask.name;
+
+								const dispatchesForDate = dispatches
+									.filter((dispatch) => dispatch.date === date)
+									.map((dispatch) => dispatch.labourer.nickname)
+									.join(" ");
+
+								existingProject.constructionSummaryJobTasks.push({
+									constructionJobTask,
+									constructionSummaryJobTaskDispatches: dispatchesForDate,
+								});
+							}
+						});
 					});
+
+					return {
+						date,
+						summaries: Array.from(projectMap.values()).filter(
+							(project) => project.constructionSummaryJobTasks.length > 0
+						),
+					};
 				});
 
-				return {
-					date,
-					summaries: Array.from(projectMap.values()).filter(
-						(project) => project.constructionSummaryJobTasks.length > 0
-					),
-				};
+				console.log(transformedData);
+				setConstSummaryApiList(transformedData);
 			});
-
-			console.log(transformedData);
-			setConstSummaryApiList(transformedData);
-		});
-	}, []);
+		}
+	}, [accessToken]);
 
 	const getConstructionType = (constructionTypeName) => {
 		const type = constructionTypeList.find((type) => type.name === constructionTypeName);
@@ -205,7 +208,8 @@ const Home = () => {
 							{constSummaryApiList?.map((summary, index) => (
 								<div className="flex flex-col gap-1.5" key={index}>
 									<p className="text-primary-500">
-										<span className="text-neutral-500 pe-2">日期：</span>{summary.date}
+										<span className="text-neutral-500 pe-2">日期：</span>
+										{summary.date}
 									</p>
 									{summary.summaries.map((s) => (
 										<div className="inline-flex flex-col gap-1.5" key={s.name}>
