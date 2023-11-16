@@ -31,7 +31,7 @@ import { TransitionGroup } from "react-transition-group";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { getData } from "../../utils/api";
+import { deleteData, getData } from "../../utils/api";
 import { useNotification } from "../../hooks/useNotification";
 
 import Dialog from "@mui/material/Dialog";
@@ -493,7 +493,14 @@ const UpdatedModal = React.memo(
 
 // taskModal沒有使用react-form-hook
 const TaskModal = React.memo(
-  ({ title, deliverInfo, sendDataToBackend, onClose }) => {
+  ({
+    title,
+    deliverInfo,
+    sendDataToBackend,
+    onClose,
+    setNextModalOpen,
+    nextModalOpen,
+  }) => {
     // Alert 開關
     const [alertOpen, setAlertOpen] = useState(false);
     const [taskEditOpen, setTaskEditOpen] = useState(false);
@@ -512,6 +519,7 @@ const TaskModal = React.memo(
 
     const [selectedTask, setSelectedTask] = useState("");
 
+    const [clearDispatch, setClearDispatch] = useState([]);
     const theme = useTheme();
     const phoneScreen = useMediaQuery(theme.breakpoints.down("576"));
     const padScreen = useMediaQuery(theme.breakpoints.down("768"));
@@ -658,11 +666,10 @@ const TaskModal = React.memo(
           updatedSelectedTasks.sort((a, b) => {
             // 先检查 estimatedSince 是否為空
             if (a.estimatedSince && !b.estimatedSince) {
-              return -1; // a 在前
+              return -1;
             } else if (!a.estimatedSince && b.estimatedSince) {
-              return 1; // b 在前
+              return 1;
             } else if (a.estimatedSince && b.estimatedSince) {
-              // estimatedSince 都非空，按日期排序
               if (a.estimatedSince < b.estimatedSince) {
                 return -1;
               } else if (a.estimatedSince > b.estimatedSince) {
@@ -683,7 +690,8 @@ const TaskModal = React.memo(
     };
 
     // 提交表單資料到後端並執行相關操作
-    const onSubmit = () => {
+    const onSubmit = (modalName) => {
+      console.log(nextModalOpen);
       const convertData = [];
       for (var task of selectedTasks) {
         const tempTask = {
@@ -698,9 +706,46 @@ const TaskModal = React.memo(
           delete tempTask.id;
         }
         convertData.push(tempTask);
-        //console.log(convertData)
+        //console.log(convertData)//////////////////////////////////////////////////////////////////////////////////////
       }
-      sendDataToBackend(convertData, "task", deliverInfo.id);
+
+      try {
+        if (clearDispatch.length > 0) {
+          const matchingIds = clearDispatch
+            .map((id) => {
+              const matchingTask = deliverInfo.constructionSummaryJobTasks.find(
+                (task) => task.id === id
+              );
+              if (matchingTask) {
+                return matchingTask.constructionSummaryJobTaskDispatches.map(
+                  (dispatch) => dispatch.id
+                );
+              }
+              return [];
+            })
+            .flat();
+
+          matchingIds.forEach((deleteId) => {
+            const deleteUrl = `constructionSummaryJobTaskDispatch/${deleteId}`;
+            console.log(deleteUrl);
+            deleteData(deleteUrl).then((result) => {
+              if (result.status) {
+                // 刪除成功的處理邏輯
+              } else if (result.result.response !== 200) {
+                // 刪除失敗的處理邏輯
+              }
+            });
+          });
+        }
+      } catch (error) {
+        // 處理錯誤
+        console.error("Error:", error);
+      }
+      const otherData = {
+        deliverInfoId: deliverInfo.id,
+        nextModal: "dispatch",
+      };
+      sendDataToBackend(convertData, "task", otherData);
     };
 
     // 檢查表單是否汙染
@@ -750,7 +795,6 @@ const TaskModal = React.memo(
                     inputProps={{ readOnly: true }}
                   />
                 </div>
-
                 <div className="inline-flex gap-3">
                   <FormControl size="small" className="inputPadding" fullWidth>
                     {selectedTask === "" ? (
@@ -830,7 +874,7 @@ const TaskModal = React.memo(
                     <Button
                       variant="contained"
                       color="success"
-                      className="!text-base "
+                      className="!text-sm !h-10 !md:text-base"
                       fullWidth
                       onClick={() => {
                         setIsCheckingList(!isCheckingList);
@@ -842,22 +886,50 @@ const TaskModal = React.memo(
                       onClick={onSubmit}
                       variant="contained"
                       color="success"
-                      className="!text-base "
+                      className="!text-sm !h-10 !md:text-base"
                       fullWidth
                     >
                       儲存
                     </Button>
+                    <Button
+                      onClick={() => {
+                        // console.log("setNextModalOpendispatch");
+                        // setNextModalOpen("dispatch");
+                        onSubmit("dispatch");
+                      }}
+                      variant="contained"
+                      color="success"
+                      className="!text-sm !h-10 !md:text-base"
+                      fullWidth
+                    >
+                      儲存並派工
+                    </Button>
                   </div>
                 ) : (
-                  <Button
-                    onClick={onSubmit}
-                    variant="contained"
-                    color="success"
-                    className="!text-base !h-12"
-                    fullWidth
-                  >
-                    儲存
-                  </Button>
+                  <div className="flex gap-x-1">
+                    <Button
+                      onClick={onSubmit}
+                      variant="contained"
+                      color="success"
+                      className="!text-base !h-12"
+                      fullWidth
+                    >
+                      儲存
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        // console.log("setNextModalOpendispatch");
+                        // setNextModalOpen("dispatch");
+                        onSubmit("dispatch");
+                      }}
+                      variant="contained"
+                      color="success"
+                      className="!text-base !h-12"
+                      fullWidth
+                    >
+                      儲存並派工
+                    </Button>
+                  </div>
                 )}
               </div>
               {/* </form>
@@ -928,6 +1000,8 @@ const TaskModal = React.memo(
           sendDataToTaskEdit={sendDataToTaskEdit}
           onClose={onTaskEditClose}
           isOpen={taskEditOpen}
+          clearDispatch={clearDispatch}
+          setClearDispatch={setClearDispatch}
           phoneScreen={phoneScreen}
           aria-labelledby="responsive-dialog-title"
         />
@@ -947,10 +1021,19 @@ const TaskModal = React.memo(
 );
 
 const TaskEditDialog = React.memo(
-  ({ deliverTaskInfo, sendDataToTaskEdit, onClose, isOpen, phoneScreen }) => {
+  ({
+    deliverTaskInfo,
+    sendDataToTaskEdit,
+    onClose,
+    isOpen,
+    phoneScreen,
+    clearDispatch,
+    setClearDispatch,
+  }) => {
     // Alert 開關
     // 檢查是否被汙染
     const [alertOpen, setAlertOpen] = useState(false);
+    const [alertDateChangeOpen, setAlertDateChangeOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const schema = yup.object().shape({
@@ -1005,8 +1088,13 @@ const TaskEditDialog = React.memo(
     const handleAlertClose = (agree) => {
       if (agree) {
         onClose();
+        if (!clearDispatch.includes(deliverTaskInfo.id)) {
+          setClearDispatch([...clearDispatch, deliverTaskInfo.id]);
+          console.log([...clearDispatch, deliverTaskInfo.id]);
+        }
       }
       setAlertOpen(false);
+      setAlertDateChangeOpen(false);
     };
 
     // deliverTaskInfo 傳進來的 {id: '7056078833492952896', constructionJobTask: {…}, estimatedSince: null, estimatedUntil: null, location: '', …}
@@ -1037,7 +1125,7 @@ const TaskEditDialog = React.memo(
     // },[data.estimatedSince])
 
     const onSubmit = (data) => {
-      console.log("要送出的", data);
+      //console.log("要送出的", data);
       const convertData = {
         id: deliverTaskInfo?.id ? deliverTaskInfo?.id : "",
         constructionJobTask: {
@@ -1053,10 +1141,46 @@ const TaskEditDialog = React.memo(
         location: data?.location ? data.location : "",
         remark: data?.remark ? data.remark : "",
       };
+
+      if (!deliverTaskInfo.constructionSummaryJobTaskDispatches?.length) {
+        sendDataToTaskEdit(convertData);
+        onClose();
+        console.log("沒有派工");
+        console.log(
+          convertData.estimatedSince,
+          deliverTaskInfo.estimatedSince,
+          convertData.estimatedUntil,
+          deliverTaskInfo.estimatedUntil
+        );
+      } else {
+        if (
+          convertData.estimatedSince === deliverTaskInfo.estimatedSince &&
+          convertData.estimatedUntil === deliverTaskInfo.estimatedUntil
+        ) {
+          sendDataToTaskEdit(convertData);
+          onClose();
+          console.log("有派工，但日期沒變");
+          console.log(
+            convertData.estimatedSince,
+            deliverTaskInfo.estimatedSince,
+            convertData.estimatedUntil,
+            deliverTaskInfo.estimatedUntil
+          );
+        } else {
+          console.log("有派工，日期變");
+          console.log(
+            convertData.estimatedSince,
+            deliverTaskInfo.estimatedSince,
+            convertData.estimatedUntil,
+            deliverTaskInfo.estimatedUntil
+          );
+          setAlertDateChangeOpen(true);
+        }
+      }
+
       // 把convertData轉成=deliveryTaskInfo {id: '..896', constructionJobTask: {…}, estimatedSince: null, estimatedUntil: null, location: '', …}
       //console.log(convertData);
       sendDataToTaskEdit(convertData);
-      onClose();
     };
 
     return (
@@ -1068,6 +1192,7 @@ const TaskEditDialog = React.memo(
             onClose={onCheckDirty}
             className=""
           >
+            {console.log(deliverTaskInfo)}
             <DialogTitle id="responsive-dialog-title" className="mt-5 ">
               <span className=" border-b-2 p-2">
                 {deliverTaskInfo?.constructionJobTask?.name}{" "}
@@ -1166,6 +1291,35 @@ const TaskEditDialog = React.memo(
           icon={<ReportProblemIcon color="secondary" />}
           title="注意"
           content="您所做的變更尚未儲存。是否確定要關閉表單？"
+          disagreeText="取消"
+          agreeText="確定"
+        />
+        <AlertDialog
+          open={alertDateChangeOpen}
+          onClose={handleAlertClose}
+          icon={<ReportProblemIcon color="secondary" />}
+          title="注意"
+          content={
+            <span>
+              該項目已在特定日期派工，
+              <br />
+              <span>
+                更改日期將會刪除該項目內容所有已派工人員
+                <br />
+              </span>
+              {deliverTaskInfo?.constructionSummaryJobTaskDispatches?.length >
+                0 &&
+                deliverTaskInfo.constructionSummaryJobTaskDispatches
+                  ?.sort((a, b) => new Date(a.date) - new Date(b.date))
+                  .map((dispatch, index) => (
+                    <span key={index}>
+                      {dispatch.date} {dispatch.labourer.nickname}
+                      <br />
+                    </span>
+                  ))}
+              確定將再工項執行編輯畫面儲存後刪除
+            </span>
+          }
           disagreeText="取消"
           agreeText="確定"
         />

@@ -10,13 +10,12 @@ import EditModal from "./UsersModal";
 import { useNotification } from "../../hooks/useNotification";
 
 const Users = () => {
-	const navigate = useNavigate();
-	const showNotification = useNotification();
+  const navigate = useNavigate();
+  const showNotification = useNotification();
 
-	// 解析網址取得參數
-	const location = useLocation();
-	const queryParams = new URLSearchParams(location.search);
-
+  // 解析網址取得參數
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
 
   // cat = Category 設置 tab 分類，之後分類用
   //const [cat, setCat] = useState(null);
@@ -24,14 +23,18 @@ const Users = () => {
   const [apiData, setApiData] = useState(null);
   // isLoading 等待請求 api
   const [isLoading, setIsLoading] = useState(false);
-	// Page 頁數設置
-	const [page, setPage] = useState(
-		queryParams.has("p") && !isNaN(+queryParams.get("p")) ? +queryParams.get("p") - 1 : 0
-	);
-	// rows per Page 多少筆等同於一頁
-	const [rowsPerPage, setRowsPerPage] = useState(
-		queryParams.has("s") && !isNaN(+queryParams.get("s")) ? +queryParams.get("s") : 10
-	);
+  // Page 頁數設置
+  const [page, setPage] = useState(
+    queryParams.has("p") && !isNaN(+queryParams.get("p"))
+      ? +queryParams.get("p") - 1
+      : 0
+  );
+  // rows per Page 多少筆等同於一頁
+  const [rowsPerPage, setRowsPerPage] = useState(
+    queryParams.has("s") && !isNaN(+queryParams.get("s"))
+      ? +queryParams.get("s")
+      : 10
+  );
   // ApiUrl
   const furl = "user";
   const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
@@ -73,19 +76,22 @@ const Users = () => {
     getApiList(apiUrl);
   }, [apiUrl]);
 
-	const getApiList = useCallback((url) => {
-		setIsLoading(true);
-		getData(url).then((result) => {
-			setIsLoading(false);
-			const data = result.result;
-			setApiData(data);
-			if (page >= data.totalPages) {
-				setPage(0);
-				setRowsPerPage(10);
-				navigate(`?p=1&s=10`);
-			}
-		});
-	}, [page]);
+  const getApiList = useCallback(
+    (url) => {
+      setIsLoading(true);
+      getData(url).then((result) => {
+        setIsLoading(false);
+        const data = result.result;
+        setApiData(data);
+        if (page >= data.totalPages) {
+          setPage(0);
+          setRowsPerPage(10);
+          navigate(`?p=1&s=10`);
+        }
+      });
+    },
+    [page]
+  );
 
   //取得部門清單跟權限清單
   useEffect(() => {
@@ -107,7 +113,6 @@ const Users = () => {
 
   // 傳遞給後端資料
   const sendDataToBackend = (fd, mode, otherData) => {
-	
     let url = "";
     let message = [];
     if (mode === "edit") {
@@ -141,22 +146,22 @@ const Users = () => {
     // }
   };
 
-	// 設置頁數
-	const handleChangePage = useCallback(
-		(event, newPage) => {
-			setPage(newPage);
-			navigate(`?p=${newPage + 1}&s=${rowsPerPage}`);
-		},
-		[rowsPerPage]
-	);
+  // 設置頁數
+  const handleChangePage = useCallback(
+    (event, newPage) => {
+      setPage(newPage);
+      navigate(`?p=${newPage + 1}&s=${rowsPerPage}`);
+    },
+    [rowsPerPage]
+  );
 
-	// 設置每頁顯示並返回第一頁
-	const handleChangeRowsPerPage = (event) => {
-		const targetValue = parseInt(event.target.value, 10);
-		setRowsPerPage(targetValue);
-		setPage(0);
-		navigate(`?p=1&s=${targetValue}`);
-	};
+  // 設置每頁顯示並返回第一頁
+  const handleChangeRowsPerPage = (event) => {
+    const targetValue = parseInt(event.target.value, 10);
+    setRowsPerPage(targetValue);
+    setPage(0);
+    navigate(`?p=1&s=${targetValue}`);
+  };
 
   // 當活動按鈕點擊時開啟 modal 並進行動作
   const handleActionClick = (event) => {
@@ -195,14 +200,14 @@ const Users = () => {
     ? modalConfig.find((item) => item.modalValue === modalValue)
     : null;
 
-	return (
-		<>
-			{/* PageTitle */}
-			<PageTitle
-				title="人事管理"
-				//btnGroup={btnGroup}
-				handleActionClick={handleActionClick}
-			/>
+  return (
+    <>
+      {/* PageTitle */}
+      <PageTitle
+        title="人事管理"
+        //btnGroup={btnGroup}
+        handleActionClick={handleActionClick}
+      />
 
       {/* TabBar */}
       {/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}
