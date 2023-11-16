@@ -4,7 +4,7 @@ import ModalTemplete from "../../components/Modal/ModalTemplete";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 import { format } from "date-fns";
 import AlertDialog from "../../components/Alert/AlertDialog";
-import { Loading } from "../../components/Loader/Loading";
+import { Loading, LoadingThree } from "../../components/Loader/Loading";
 import {
   TextField,
   Button,
@@ -147,8 +147,6 @@ const UpdatedModal = React.memo(
       };
       delete convertData.type;
       const fd = new FormData();
-      // console.log(data);
-      // console.log(convertData);
       for (let key in convertData) {
         fd.append(key, convertData[key]);
       }
@@ -474,7 +472,7 @@ const UpdatedModal = React.memo(
           open={!constructionJobList}
           onClick={onCheckDirty}
         >
-          <Loading size={40} />
+          <LoadingThree size={40} />
         </Backdrop>
         {/* Alert */}
         <AlertDialog
@@ -690,8 +688,7 @@ const TaskModal = React.memo(
     };
 
     // 提交表單資料到後端並執行相關操作
-    const onSubmit = (modalName) => {
-      console.log(nextModalOpen);
+    const onSubmit = async (modalName) => {
       const convertData = [];
       for (var task of selectedTasks) {
         const tempTask = {
@@ -706,9 +703,8 @@ const TaskModal = React.memo(
           delete tempTask.id;
         }
         convertData.push(tempTask);
-        //console.log(convertData)//////////////////////////////////////////////////////////////////////////////////////
+        //console.log(convertData)
       }
-
       try {
         if (clearDispatch.length > 0) {
           const matchingIds = clearDispatch
@@ -725,26 +721,35 @@ const TaskModal = React.memo(
             })
             .flat();
 
-          matchingIds.forEach((deleteId) => {
+          const deletePromises = matchingIds.map((deleteId) => {
             const deleteUrl = `constructionSummaryJobTaskDispatch/${deleteId}`;
-            console.log(deleteUrl);
-            deleteData(deleteUrl).then((result) => {
-              if (result.status) {
-                // 刪除成功的處理邏輯
-              } else if (result.result.response !== 200) {
-                // 刪除失敗的處理邏輯
-              }
-            });
+            return deleteData(deleteUrl);
           });
+
+          // 使用Promise.all等待所有delete操作完成
+          const deleteResults = await Promise.all(deletePromises);
+
+          // 处理delete操作结果
+          deleteResults.forEach((result) => {
+            if (result.status) {
+              // 删除成功的处理逻辑
+            } else if (result.result.response !== 200) {
+              // 删除失败的处理逻辑
+            }
+          });
+          setClearDispatch(null);
         }
       } catch (error) {
-        // 處理錯誤
+        // 处理错误
         console.error("Error:", error);
       }
+
       const otherData = {
         deliverInfoId: deliverInfo.id,
         nextModal: "dispatch",
       };
+
+      // 等待delete操作完成后再执行sendDataToBackend
       sendDataToBackend(convertData, "task", otherData);
     };
 
@@ -775,7 +780,6 @@ const TaskModal = React.memo(
           onClose={onCheckDirty}
           maxWidth={padScreen ? "428px" : "660px"}
         >
-          {/* {console.log(deliverInfo)} */}
           <div className="flex gap-3 relative">
             <div className="w-[360px] bg-bue-500">
               {/* <FormProvider {...methods}>
@@ -993,7 +997,7 @@ const TaskModal = React.memo(
           open={!constructionTaskList}
           onClick={onCheckDirty}
         >
-          <Loading size={40} />
+          <LoadingThree size={40} />
         </Backdrop>
         <TaskEditDialog
           deliverTaskInfo={deliverTaskInfo}
@@ -1088,9 +1092,9 @@ const TaskEditDialog = React.memo(
     const handleAlertClose = (agree) => {
       if (agree) {
         onClose();
-        if (!clearDispatch.includes(deliverTaskInfo.id)) {
+        if (!clearDispatch || !clearDispatch?.includes(deliverTaskInfo.id)) {
           setClearDispatch([...clearDispatch, deliverTaskInfo.id]);
-          console.log([...clearDispatch, deliverTaskInfo.id]);
+          //console.log([...clearDispatch, deliverTaskInfo.id]);
         }
       }
       setAlertOpen(false);
@@ -1145,13 +1149,6 @@ const TaskEditDialog = React.memo(
       if (!deliverTaskInfo.constructionSummaryJobTaskDispatches?.length) {
         sendDataToTaskEdit(convertData);
         onClose();
-        console.log("沒有派工");
-        console.log(
-          convertData.estimatedSince,
-          deliverTaskInfo.estimatedSince,
-          convertData.estimatedUntil,
-          deliverTaskInfo.estimatedUntil
-        );
       } else {
         if (
           convertData.estimatedSince === deliverTaskInfo.estimatedSince &&
@@ -1159,21 +1156,7 @@ const TaskEditDialog = React.memo(
         ) {
           sendDataToTaskEdit(convertData);
           onClose();
-          console.log("有派工，但日期沒變");
-          console.log(
-            convertData.estimatedSince,
-            deliverTaskInfo.estimatedSince,
-            convertData.estimatedUntil,
-            deliverTaskInfo.estimatedUntil
-          );
         } else {
-          console.log("有派工，日期變");
-          console.log(
-            convertData.estimatedSince,
-            deliverTaskInfo.estimatedSince,
-            convertData.estimatedUntil,
-            deliverTaskInfo.estimatedUntil
-          );
           setAlertDateChangeOpen(true);
         }
       }
@@ -1192,7 +1175,6 @@ const TaskEditDialog = React.memo(
             onClose={onCheckDirty}
             className=""
           >
-            {console.log(deliverTaskInfo)}
             <DialogTitle id="responsive-dialog-title" className="mt-5 ">
               <span className=" border-b-2 p-2">
                 {deliverTaskInfo?.constructionJobTask?.name}{" "}

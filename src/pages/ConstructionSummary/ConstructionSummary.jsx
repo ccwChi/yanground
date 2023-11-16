@@ -15,6 +15,8 @@ import { UpdatedModal, TaskModal } from "./SummaryModal";
 import { useNotification } from "../../hooks/useNotification";
 import { DispatchModal } from "./SummaryDispatchModal";
 import constructionTypeList from "../../data/constructionTypes";
+import { LoadingFour } from "../../components/Loader/Loading";
+import Backdrop from "@mui/material/Backdrop";
 
 const ConstructionSummary = () => {
   const navigate = useNavigate();
@@ -23,7 +25,8 @@ const ConstructionSummary = () => {
   // 解析網址取得參數
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-
+  // 傳遞稍後用 Flag
+  const [sendBackFlag, setSendBackFlag] = useState(false);
   // cat = Category 設置 tab 分類
   const [cat, setCat] = useState(null);
   // API List Data
@@ -53,47 +56,47 @@ const ConstructionSummary = () => {
   // 如果要打開下一個面板
   const [nextModalOpen, setNextModalOpen] = useState(null);
 
-	// Tab 列表對應 api 搜尋參數
-	// const tabGroup = [
-	//   { f: "", text: "全部" },
-	//   { f: "inprogress", text: "進行中" },
-	//   { f: "unstarted", text: "尚未開始" },
-	//   { f: "end", text: "已結束" },
-	// ];
+  // Tab 列表對應 api 搜尋參數
+  // const tabGroup = [
+  //   { f: "", text: "全部" },
+  //   { f: "inprogress", text: "進行中" },
+  //   { f: "unstarted", text: "尚未開始" },
+  //   { f: "end", text: "已結束" },
+  // ];
 
-	// 上方區塊功能按鈕清單
-	const btnGroup = [
-		{
-			mode: "create",
-			icon: <AddCircleIcon fontSize="small" />,
-			text: "新增清單",
-			variant: "contained",
-			color: "primary",
-			fabVariant: "success",
-			fab: <AddIcon fontSize="large" />,
-		},
-	];
+  // 上方區塊功能按鈕清單
+  const btnGroup = [
+    {
+      mode: "create",
+      icon: <AddCircleIcon fontSize="small" />,
+      text: "新增清單",
+      variant: "contained",
+      color: "primary",
+      fabVariant: "success",
+      fab: <AddIcon fontSize="large" />,
+    },
+  ];
 
-	// 對照 api table 所顯示 key
-	const columnsPC = [
-		{ key: "name", label: "名稱" },
-		// { key: "rocYear", label: "年度" },
-		{ key: ["project", "name"], label: "專案" },
-		{ key: ["constructionJob", "typeName"], label: "類別" },
-		{ key: ["constructionJob", "name"], label: "項目" },
-		{ key: "since", label: "起始日期" },
-	];
+  // 對照 api table 所顯示 key
+  const columnsPC = [
+    { key: "name", label: "名稱" },
+    // { key: "rocYear", label: "年度" },
+    { key: ["project", "name"], label: "專案" },
+    { key: ["constructionJob", "typeName"], label: "類別" },
+    { key: ["constructionJob", "name"], label: "項目" },
+    { key: "since", label: "起始日期" },
+  ];
 
-	const columnsMobile = [
-		{ key: "id", label: "系統ID" },
-		{ key: "name", label: "名稱" },
-		{ key: ["project", "name"], label: "專案" },
-		{ key: "rocYear", label: "年度" },
-		{ key: ["constructionJob", "typeName"], label: "類別" },
-		{ key: ["constructionJob", "name"], label: "項目" },
-		{ key: "since", label: "起始日期" },
-		{ key: "until", label: "結束日期" },
-	];
+  const columnsMobile = [
+    { key: "id", label: "系統ID" },
+    { key: "name", label: "名稱" },
+    { key: ["project", "name"], label: "專案" },
+    { key: "rocYear", label: "年度" },
+    { key: ["constructionJob", "typeName"], label: "類別" },
+    { key: ["constructionJob", "name"], label: "項目" },
+    { key: "since", label: "起始日期" },
+    { key: "until", label: "結束日期" },
+  ];
 
   const actions = [
     { value: "edit", icon: <EditIcon />, title: "施工清單 修改" },
@@ -101,12 +104,12 @@ const ConstructionSummary = () => {
     { value: "dispatch", icon: <GroupAddIcon />, title: "工項執行派工" },
   ];
 
-	// 取得列表資料
-	useEffect(() => {
-		getApiList(apiUrl, constructionTypeList);
-		//getConstructionTypeList();
-		getProjecstList();
-	}, [apiUrl]);
+  // 取得列表資料
+  useEffect(() => {
+    getApiList(apiUrl, constructionTypeList);
+    //getConstructionTypeList();
+    getProjecstList();
+  }, [apiUrl]);
 
   //取得清單資料
   const getApiList = useCallback(
@@ -147,18 +150,19 @@ const ConstructionSummary = () => {
     [page]
   );
 
-	const getProjecstList = () => {
-		setIsLoading(true);
-		getData("project").then((result) => {
-			setIsLoading(false);
-			const projectsList = result.result.content;
-			//console.log(projectsList);
-			setProjectsList(projectsList);
-		});
-	};
+  const getProjecstList = () => {
+    setIsLoading(true);
+    getData("project").then((result) => {
+      setIsLoading(false);
+      const projectsList = result.result.content;
+      //console.log(projectsList);
+      setProjectsList(projectsList);
+    });
+  };
 
   // 傳遞給後端資料
   const sendDataToBackend = (fd, mode, otherData) => {
+    setSendBackFlag(true);
     let url = "";
     let message = [];
     switch (mode) {
@@ -192,6 +196,7 @@ const ConstructionSummary = () => {
           //目前測試需有資訊才能修改
           //console.log(result);
         }
+        setSendBackFlag(false);
       });
     } else if (mode === "task") {
       postBodyData(url, fd).then((result) => {
@@ -202,7 +207,7 @@ const ConstructionSummary = () => {
           onClose();
           if (!!otherData?.nextModal) {
             setModalValue(otherData?.nextModal);
-            setDeliverInfo(otherData?.deliverInfoId)
+            setDeliverInfo(otherData?.deliverInfoId);
           }
         } else if (result.result.response === 400) {
           //console.log(result.result);
@@ -210,7 +215,10 @@ const ConstructionSummary = () => {
             "編輯施工清單工項執行們時拋出線程中斷異常：%s❗️",
             false
           );
-        } else showNotification("權限不足", false);
+        } else {
+          showNotification("權限不足", false);
+        }
+        setSendBackFlag(false);
       });
     }
     // for (var pair of fd.entries()) {
@@ -242,15 +250,15 @@ const ConstructionSummary = () => {
     const dataValue = event.currentTarget.getAttribute("data-value"); //在table的component裡讀取該筆資料id
     setModalValue(dataMode);
     setDeliverInfo(
-      (dataValue ? apiData.content.find((item) => item.id === dataValue) : "")
+      dataValue ? apiData.content.find((item) => item.id === dataValue) : ""
     );
   };
 
-	// 關閉 Modal 清除資料
-	const onClose = () => {
-		setModalValue(false);
-		setDeliverInfo(null);
-	};
+  // 關閉 Modal 清除資料
+  const onClose = () => {
+    setModalValue(false);
+    setDeliverInfo(null);
+  };
 
   // modal 開啟參數與顯示標題
   const modalConfig = [
@@ -309,44 +317,57 @@ const ConstructionSummary = () => {
     ? modalConfig.find((item) => item.modalValue === modalValue)
     : null;
 
-	return (
-		<>
-			{/* PageTitle */}
-			<PageTitle title="施工清單" btnGroup={btnGroup} handleActionClick={handleActionClick} isLoading={!isLoading} />
+  return (
+    <>
+      {/* PageTitle */}
+      <PageTitle
+        title="施工清單"
+        btnGroup={btnGroup}
+        handleActionClick={handleActionClick}
+        isLoading={!isLoading}
+      />
 
-			{/* TabBar */}
-			{/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}
+      {/* TabBar */}
+      {/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}
 
-			{/* Table */}
-			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
-				<RWDTable
-					data={apiData?.content ? apiData.content : null}
-					columnsPC={columnsPC}
-					columnsMobile={columnsMobile}
-					actions={actions}
-					cardTitleKey={"name"}
-					tableMinWidth={700}
-					isLoading={isLoading}
-					handleActionClick={handleActionClick}
-				/>
-			</div>
+      {/* Table */}
+      <div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
+        <RWDTable
+          data={apiData?.content ? apiData.content : null}
+          columnsPC={columnsPC}
+          columnsMobile={columnsMobile}
+          actions={actions}
+          cardTitleKey={"name"}
+          tableMinWidth={700}
+          isLoading={isLoading}
+          handleActionClick={handleActionClick}
+        />
+      </div>
 
-			{/* Pagination */}
-			<Pagination
-				totalElement={apiData ? apiData?.totalElements : 0}
-				page={apiData && page < apiData.totalPages ? page : 0}
-				onPageChange={handleChangePage}
-				rowsPerPage={rowsPerPage}
-				onRowsPerPageChange={handleChangeRowsPerPage}
-			/>
+      {/* Pagination */}
+      <Pagination
+        totalElement={apiData ? apiData?.totalElements : 0}
+        page={apiData && page < apiData.totalPages ? page : 0}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
 
-			{/* Floating Action Button */}
-			<FloatingActionButton btnGroup={btnGroup} handleActionClick={handleActionClick} />
+      {/* Floating Action Button */}
+      <FloatingActionButton
+        btnGroup={btnGroup}
+        handleActionClick={handleActionClick}
+      />
 
-			{/* Modal */}
-			{config && config.modalComponent}
-		</>
-	);
+      {/* Modal */}
+      {config && config.modalComponent}
+
+      {/* Backdrop */}
+      <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
+        <LoadingFour />
+      </Backdrop>
+    </>
+  );
 };
 
 export default ConstructionSummary;
