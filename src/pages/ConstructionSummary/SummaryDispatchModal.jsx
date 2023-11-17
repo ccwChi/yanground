@@ -94,7 +94,7 @@ const DispatchModal = React.memo(({ deliverInfo, onClose }) => {
       setIsDispatchLoading(false);
     });
     //console.log("getTaskList");
-  }, []);
+  }, [activeCard]);
 
   // 檢查表單是否汙染
   const onCheckDirty = () => {
@@ -124,22 +124,18 @@ const DispatchModal = React.memo(({ deliverInfo, onClose }) => {
         postData(postUrl, params).then((result) => {
           //console.log(result);
           if (result.status) {
-            //handleSwitchState(e.target.checked, labourersId);
             showNotification("處理成功", true);
             getTaskList();
-            //setIsDispatchLoading(false);
           } else if (result.result.response !== 200) {
-            //console.log(result.result);
-            //handleSwitchState(e.target.checked, labourersId);
             showNotification(result.result.reason, false);
-            getTaskList();
-            //setIsDispatchLoading(false);
+            updateSwitchState();
+            setIsDispatchLoading(false);
           }
-          //handleSwitchState(e.target.checked, labourersId);
         });
       } catch (error) {
         // 處理錯誤
         console.error("Error:", error);
+        updateSwitchState();
         setIsDispatchLoading(false);
       }
     } else {
@@ -150,29 +146,23 @@ const DispatchModal = React.memo(({ deliverInfo, onClose }) => {
           activeCard.constructionSummaryJobTaskDispatches.filter(
             (item) => item.labourer.id === labourersId
           );
-        handleSwitchState(e.target.checked, labourersId);
         if (filteredObjects) {
           const deleteUrl = `constructionSummaryJobTaskDispatch/${filteredObjects[0].id}`;
-          // console.log(deleteUrl);
+          handleSwitchState(e.target.checked, labourersId);
           deleteData(deleteUrl).then((result) => {
-            // console.log(result);
             if (result.status) {
               showNotification("處理成功", true);
               getTaskList();
-              //setIsDispatchLoading(false);
             } else if (result.result.response !== 200) {
-              //console.log(result.result);
-              showNotification(result.result.reason, false);
-              //handleSwitchState(e.target.checked, labourersId);
-              getTaskList();
-              //setIsDispatchLoading(false);
+              updateSwitchState();
+              setIsDispatchLoading(false);
             }
-            //handleSwitchState(e.target.checked, labourersId);
           });
         }
       } catch (error) {
         // 處理錯誤
         console.error("Error:", error);
+        updateSwitchState();
         setIsDispatchLoading(false);
       }
     }
@@ -192,11 +182,14 @@ const DispatchModal = React.memo(({ deliverInfo, onClose }) => {
       };
       setSwitchStates(newState);
     }
-    //console.log(switchStates);
   };
 
   //當選了日期後，要設置日期有哪些人被派出，在switch上呈現
   useEffect(() => {
+    updateSwitchState();
+  }, [activeCard, selectedDate]);
+
+  const updateSwitchState = () => {
     if (selectedDate) {
       const updatedSwitchStates = {}; // 創建一個新的物件來儲存更新後的狀態
       departMemberList.forEach((member) => {
@@ -207,10 +200,9 @@ const DispatchModal = React.memo(({ deliverInfo, onClose }) => {
               item.labourer.id === member.id && item.date === selectedDate
           );
       });
-      //console.log(updatedSwitchStates);
       setSwitchStates(updatedSwitchStates); // 使用更新後的物件來設定狀態
     }
-  }, [activeCard, selectedDate]);
+  };
 
   // 點擊卡片的時候，會設定該卡片能選擇的日期，並預設日期為第一個可選擇日，以及派工所需的卡片ID
   const handleClickCard = (task) => {
@@ -321,7 +313,11 @@ const DispatchModal = React.memo(({ deliverInfo, onClose }) => {
               ) : (
                 <Card className=" shadow-sm !p-0 ">
                   <CardContent className="!p-2">
-                    <Typography variant="h6" component="div" className="pl-3 text-center">
+                    <Typography
+                      variant="h6"
+                      component="div"
+                      className="pl-3 text-center"
+                    >
                       <span>尚無資料</span>
                     </Typography>
                   </CardContent>
@@ -397,7 +393,11 @@ const DispatchModal = React.memo(({ deliverInfo, onClose }) => {
             ) : (
               <Card className=" shadow-sm !p-0">
                 <CardContent className="!p-2">
-                  <Typography variant="h6" component="div" className="pl-3 text-center">
+                  <Typography
+                    variant="h6"
+                    component="div"
+                    className="pl-3 text-center"
+                  >
                     <span>請選擇左側工項卡片</span>
                   </Typography>
                 </CardContent>
@@ -445,11 +445,15 @@ const DispatchModal = React.memo(({ deliverInfo, onClose }) => {
         activeCard={activeCard}
         onClose={() => setDispatchDialogOpen(false)}
         isOpen={dispatchDialogOpen}
-        phoneScreen={phoneScreen}
         dateList={dateList}
-        getTaskList={getTaskList}
         departMemberList={departMemberList}
         selectedDate={selectedDate}
+        setSelectedSwitch={setSelectedSwitch}
+        disabledSwitchId={disabledSwitchId}
+        clickSwitch={clickSwitch}
+        updateSwitchState={updateSwitchState}
+        isDispatchLoading={isDispatchLoading}
+        switchStates={switchStates}
       />
     </>
   );
@@ -460,133 +464,19 @@ const DispatchDialog = React.memo(
     activeCard,
     onClose,
     isOpen,
-    getTaskList,
     dateList,
-    phoneScreen,
     departMemberList,
     selectedDate,
     setSelectedDate,
+    disabledSwitchId,
+    clickSwitch,
+    updateSwitchState,
+    isDispatchLoading,
+    switchStates,
   }) => {
-    // Alert 開關
-    // 檢查是否被汙染
-    const [alertOpen, setAlertOpen] = useState(false);
-    const showNotification = useNotification();
-    const [isDispatchLoading, setIsDispatchLoading] = useState(false);
-    const [switchStates, setSwitchStates] = useState({});
-    // 檢查表單是否汙染
-    const [isDirty, setIsDirty] = useState(false);
-    const onCheckDirty = () => {
-      if (isDirty) {
-        setAlertOpen(true);
-      } else {
-        onClose();
-      }
-    };
-    // // Alert 回傳值進行最終結果 --- true: 關閉 modal / all: 關閉 Alert
-    const handleAlertClose = (agree) => {
-      if (agree) {
-        onClose();
-      }
-      setAlertOpen(false);
-    };
-
-    const postDispatchApi = (IsSelected, labourersId) => {
-      // 開關的開->派遣
-      const postUrl = `constructionSummaryJobTask/${activeCard.id}/dispatches`;
-      if (IsSelected) {
-        try {
-          const params = { labourers: labourersId, date: selectedDate };
-          postData(postUrl, params).then((result) => {
-            //console.log(result);
-            if (result.status) {
-              showNotification("處理成功", true);
-              getTaskList();
-              handleSwitchState(IsSelected, labourersId);
-            } else if (result.result.response === 400) {
-              //console.log(result.result);
-              showNotification(result.result.reason, false);
-              setIsDispatchLoading(false);
-              //目前唯一會導致400的原因只有名稱重複，大概吧
-            } else {
-              showNotification("需填日期", false);
-              setIsDispatchLoading(false);
-              //目前測試需有資訊才能修改
-              //console.log(result);
-            }
-          });
-        } catch (error) {
-          // 處理錯誤
-          console.error("Error:", error);
-          setIsDispatchLoading(false);
-        }
-      } else {
-        try {
-          // 開關的關->取消派遣
-          //filteredObjects: 刪除的時候，將constructionSummaryJobTaskDispatches中對應該員工ID的那個物件(編號)取出
-          const filteredObjects =
-            activeCard.constructionSummaryJobTaskDispatches.filter(
-              (item) => item.labourer.id === labourersId
-            );
-          if (filteredObjects) {
-            const deleteUrl = `constructionSummaryJobTaskDispatch/${filteredObjects[0].id}`;
-            // console.log(deleteUrl);
-            deleteData(deleteUrl).then((result) => {
-              // console.log(result);
-              if (result.status) {
-                showNotification("處理成功", true);
-                getTaskList();
-                setIsDispatchLoading(false);
-                handleSwitchState(IsSelected, labourersId);
-              } else if (result.result.response === 400) {
-                //console.log(result.result);
-                showNotification(result.result.reason, false);
-                setIsDispatchLoading(false);
-              } else {
-                showNotification("沒有修改權限", false);
-                setIsDispatchLoading(false);
-                //目前測試需有資訊才能修改
-                //console.log(result);
-              }
-            });
-          }
-        } catch (error) {
-          // 處理錯誤
-          console.error("Error:", error);
-          setIsDispatchLoading(false);
-        }
-      }
-    };
-
-    const handleDateChange = (event) => {
-      setSelectedDate(event.target.value);
-      //console.log(event.target.value);
-    };
-
-    const handleSwitchState = (checked, memberId) => {
-      const newState = {
-        ...switchStates,
-        [memberId]: checked,
-      };
-      setSwitchStates(newState);
-      setTimeout(() => {
-        setIsDispatchLoading(false);
-      }, 1000);
-    };
-
+    //當選了日期後，要設置日期有哪些人被派出，在switch上呈現
     useEffect(() => {
-      if (selectedDate) {
-        const updatedSwitchStates = {}; // 創建一個新的物件來儲存更新後的狀態
-        departMemberList.forEach((member) => {
-          updatedSwitchStates[member.id] =
-            activeCard &&
-            !!activeCard.constructionSummaryJobTaskDispatches.find(
-              (item) =>
-                item.labourer.id === member.id && item.date === selectedDate
-            );
-        });
-        //console.log(updatedSwitchStates);
-        setSwitchStates(updatedSwitchStates); // 使用更新後的物件來設定狀態
-      }
+      updateSwitchState();
     }, [activeCard, selectedDate]);
 
     return (
@@ -611,11 +501,10 @@ const DispatchDialog = React.memo(
                 <Select
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
-                  // defaultValue={''}
                   value={selectedDate}
                   fullWidth
                   onChange={(event) => {
-                    handleDateChange(event);
+                    setSelectedDate(event.target.value);
                   }}
                 >
                   {!!dateList &&
@@ -645,10 +534,12 @@ const DispatchDialog = React.memo(
                             <IOSSwitch
                               sx={{ m: 1 }}
                               checked={switchStates[member.id] || false}
-                              disabled={isDispatchLoading}
+                              disabled={
+                                isDispatchLoading &&
+                                disabledSwitchId === member.id
+                              }
                               onChange={(e) => {
-                                setIsDispatchLoading(true);
-                                postDispatchApi(e.target.checked, member.id);
+                                clickSwitch(e, member.id);
                               }}
                             />
                           </ListItem>
@@ -677,16 +568,6 @@ const DispatchDialog = React.memo(
             </Button>
           </Dialog>
         )}
-        {/* Alert */}
-        <AlertDialog
-          open={alertOpen}
-          onClose={handleAlertClose}
-          icon={<ReportProblemIcon color="secondary" />}
-          title="注意"
-          content="您所做的變更尚未儲存。是否確定要關閉表單？"
-          disagreeText="取消"
-          agreeText="確定"
-        />
       </>
     );
   }
