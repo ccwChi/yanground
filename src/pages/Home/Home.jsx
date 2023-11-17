@@ -24,7 +24,6 @@ const Home = () => {
 	// const userProfile = useLocalStorageValue("userProfile");
 	// isLoading 等待請求 api
 	const [isLoading, setIsLoading] = useState(true);
-
 	useEffect(() => {
 		// let staffNum, depNum;
 		// Promise.all([getData("user?p=1&s=1"), getData("department")])
@@ -85,7 +84,7 @@ const Home = () => {
 					};
 				});
 
-				console.log(transformedData);
+				// console.log(transformedData);
 				setConstSummaryApiList(transformedData);
 				setIsLoading(false);
 			});

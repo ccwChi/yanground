@@ -6,7 +6,6 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import Button from "@mui/material/Button";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faUser } from "@fortawesome/free-solid-svg-icons";
@@ -26,34 +25,27 @@ const Header = ({ toggleSidebar, classnames = "" }) => {
 	};
 
 	return (
-		<AppBar
-			position="static"
-			elevation={3}
-			sx={{ zIndex: 1024 }}
-			className={`opacity-90 ${classnames}`}>
+		<AppBar position="static" elevation={3} sx={{ zIndex: 1024 }} className={`opacity-90 ${classnames}`}>
 			<Toolbar className="justify-between text-white !min-h-[56px]">
 				<NavLink to="/" className="flex items-center text-1xl select-none">
 					<img src={logoIcon} alt="Logo" className="h-10 me-1" />
 					<span className="whitespace-nowrap text-white font-medium -translate-y-px">元融科技</span>
 				</NavLink>
 
-				<div className="flex gap-2">
+				<div className="flex gap-2 ml-4">
 					{/* Desktop Right */}
 					{userProfile && (
-						<div className="hidden md:flex ml-4">
-							<Button variant="text" color="inherit" onClick={handleMobileMenuOpen} sx={{ textTransform: "none" }}>
-								<FontAwesomeIcon icon={faUser} className="mr-2" />
-								{userProfile.displayName}
-							</Button>
+						<div className="flex lg:hidden">
+							<IconButton
+								variant="text"
+								color="inherit"
+								onClick={handleMobileMenuOpen}
+								className="aspect-square min-w-[40px]">
+								<FontAwesomeIcon icon={faUser} style={{ fontSize: "18px" }} />
+							</IconButton>
 							<Menu anchorEl={mobileMenuAnchor} open={Boolean(mobileMenuAnchor)} onClose={handleMobileMenuClose}>
-								<NavLink to="userinfo" className="text-text opacity-80">
-									<MenuItem>個人資料</MenuItem>
-								</NavLink>
 								<NavLink to="punch" className="text-text opacity-80">
 									<MenuItem>打卡</MenuItem>
-								</NavLink>
-								<NavLink to="setting" className="text-text opacity-80">
-									<MenuItem>設定</MenuItem>
 								</NavLink>
 								<a
 									href="/"
