@@ -65,7 +65,7 @@ const circleConfig = [
 
 const MapDialog = ({ open, handleClose, pos, r }) => {
 	const { setValue } = useFormContext();
-	const [position, setPosition] = useState(pos);
+	const [position, setPosition] = useState({ lat: 0, lng: 0 });
 	const [radius, setRadius] = useState(r);
 	const markerRef = useRef(null);
 
@@ -75,6 +75,8 @@ const MapDialog = ({ open, handleClose, pos, r }) => {
 				const { latitude, longitude } = location.coords;
 				setPosition({ lat: latitude, lng: longitude });
 			});
+		} else {
+			setPosition({ lat: pos.lat, lng: pos.lng });
 		}
 	}, [pos]);
 
@@ -144,34 +146,36 @@ const MapDialog = ({ open, handleClose, pos, r }) => {
 					</Typography>
 				</Toolbar>
 			</AppBar>
-			<MapContainer center={position} zoom={15} style={{ height: "100vh", height: "100dvh" }} doubleClickZoom={false}>
-				<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-				<Marker position={position} draggable={true} eventHandlers={eventHandlers} ref={markerRef} icon={customIcon}>
-					<Popup minWidth={90}>
-						<div className="flex flex-col gap-2">
-							<p className="!my-0 text-sm">當前座標：</p>
-							<span>
-								{position.lat.toFixed(FIXED)}, {position.lng.toFixed(FIXED)}
-							</span>
-							<p className="!my-0 text-sm">範圍半徑：</p>
-							<Slider
-								value={radius}
-								min={minRadius}
-								max={maxRadius}
-								step={50}
-								onChange={(event, newValue) => setRadius(newValue)}
-								valueLabelDisplay="auto"
-								valueLabelFormat={(value) => `${value} 公尺`}
-							/>
+			{position.lat !== 0 && position.lng !== 0 ? (
+				<MapContainer center={position} zoom={15} style={{ height: "100vh", height: "100dvh" }} doubleClickZoom={false}>
+					<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+					<Marker position={position} draggable={true} eventHandlers={eventHandlers} ref={markerRef} icon={customIcon}>
+						<Popup minWidth={90}>
+							<div className="flex flex-col gap-2">
+								<p className="!my-0 text-sm">當前座標：</p>
+								<span>
+									{position.lat.toFixed(FIXED)}, {position.lng.toFixed(FIXED)}
+								</span>
+								<p className="!my-0 text-sm">範圍半徑：</p>
+								<Slider
+									value={radius}
+									min={minRadius}
+									max={maxRadius}
+									step={50}
+									onChange={(event, newValue) => setRadius(newValue)}
+									valueLabelDisplay="auto"
+									valueLabelFormat={(value) => `${value} 公尺`}
+								/>
 
-							<Button variant="contained" color="success" className="!text-base !h-12" fullWidth onClick={handleSave}>
-								確定
-							</Button>
-						</div>
-					</Popup>
-				</Marker>
-				{renderCircles()}
-			</MapContainer>
+								<Button variant="contained" color="success" className="!text-base !h-12" fullWidth onClick={handleSave}>
+									確定
+								</Button>
+							</div>
+						</Popup>
+					</Marker>
+					{renderCircles()}
+				</MapContainer>
+			) : null}
 		</Dialog>
 	);
 };
