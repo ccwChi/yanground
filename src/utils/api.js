@@ -91,7 +91,38 @@ const postBodyData = async (url = "", bodyData, paramsData) => {
 		});
 };
 
-export { getData, postData, postBodyData };
+// POST
+const deleteData = async (url = "", formData) => {
+	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
+	const headers = {
+		Authorization: `Bearer ${accessToken}`,
+		"Content-Type": "application/json",
+	};
+	const params = new URLSearchParams(formData);
+	return await fetch(`${appUrl}/${url}?${params}`, {
+		method: "DELETE",
+		headers,
+	})
+		.then((response) => {
+			return response.json().then((res) => {
+				if (res.response === 200) return { status: true, result: res };
+				else {
+					return { status: false, result: res };
+				}
+			});
+			// return response.json();
+		})
+		.catch((error) => {
+			console.error("System Error：", error);
+			// throw error;
+			return { status: false, result: error.message };
+		});
+};
+
+
+
+
+export { getData, postData, postBodyData, deleteData };
 
 //****** How To Use ? ******//
 
