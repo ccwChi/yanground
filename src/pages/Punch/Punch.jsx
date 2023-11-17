@@ -60,7 +60,7 @@ const Map = () => {
 	};
 
 	return (
-		<div className="absolute top-14 inset-0 sm:inset-0">
+		<div className="absolute top-14 inset-0 lg:inset-0">
 			{selectedLocation ? (
 				<MapContainer
 					center={selectedLocation}

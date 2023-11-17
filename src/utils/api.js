@@ -91,7 +91,7 @@ const postBodyData = async (url = "", bodyData, paramsData) => {
 		});
 };
 
-// POST
+// POST - Delete ver
 const deleteData = async (url = "", formData) => {
 	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
 	const headers = {
@@ -118,9 +118,6 @@ const deleteData = async (url = "", formData) => {
 			return { status: false, result: error.message };
 		});
 };
-
-
-
 
 export { getData, postData, postBodyData, deleteData };
 
