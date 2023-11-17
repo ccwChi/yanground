@@ -11,6 +11,7 @@ import {
 	faVest,
 	faPersonDigging,
 	faFileLines,
+	faHouse,
 } from "@fortawesome/free-solid-svg-icons";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./utils/theme";
@@ -29,6 +30,7 @@ const App = () => {
 	// text => Display Text
 	// herf => URL
 	const menuItems = [
+		{ icon: faHouse, text: "主頁", href: "/" },
 		{
 			icon: faHelmetSafety,
 			text: "案場",
@@ -124,13 +126,14 @@ const App = () => {
 			<SnackbarProvider maxSnack={5}>
 				<div className="flex justify-end overflow-x-hidden">
 					<div className="relative flex flex-col w-screen min-w-screen">
-						{/* Header */}
-						<Header toggleSidebar={toggleSidebar} />
-
 						{/* Main Content */}
-						<div className="lg:container w-full mx-auto px-0 sm:px-4 flex-1 overflow-hidden py-0 sm:py-4 lg:py-6">
-							<div className="relative flex flex-col main_wrapper h-full float-right sm:rounded-lg overflow-hidden">
+						<div className="w-full flex-1 overflow-hidden">
+							<div className="relative flex flex-col main_wrapper h-full float-right overflow-hidden">
+								{/* Header */}
+								<Header toggleSidebar={toggleSidebar} classnames="lg:!hidden" />
+								{/* Breadcrumb */}
 								<CustomBreadcrumbs />
+								{/* Router */}
 								<Outlet />
 							</div>
 						</div>
@@ -141,12 +144,10 @@ const App = () => {
 
 					{/* SideBar */}
 					<div
-						className={`lg:absolute static lg:container mx-auto sidebar_wrapper pointer-events-none lg:bg-transparent bg-white py-4 lg:py-6 ${
+						className={`lg:absolute static sidebar_wrapper pointer-events-none lg:bg-transparent bg-white ${
 							!showSidebar ? "hide" : ""
 						}`}>
-						<div className={"flex flex-col overflow-y-auto pointer-events-auto lg:max-w-none max-w-sm"}>
-							<Sidebar menuItems={menuItems} closeSidebar={closeSidebar} />
-						</div>
+						<Sidebar menuItems={menuItems} closeSidebar={closeSidebar} />
 					</div>
 
 					{/* Tabbar */}

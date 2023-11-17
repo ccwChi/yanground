@@ -38,7 +38,7 @@ const Tabbar = () => {
 					</NavLink>
 				))}
 			</nav>
-			<div>_</div>
+			{/* <div>_</div> */}
 		</>
 	);
 };

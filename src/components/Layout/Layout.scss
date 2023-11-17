@@ -7,13 +7,6 @@
 	.item {
 		overflow: hidden;
 
-		svg {
-			color: $white-color;
-		}
-
-		&:not(:first-of-type) {
-			border-top: 1.5px solid $white-color;
-		}
 		&:target {
 			.subMenu {
 				max-height: 10em;
@@ -24,28 +17,13 @@
 			position: relative;
 			padding: 0 20px;
 			letter-spacing: 0.025em;
-			color: $white-color;
-			background-color: $primary-color-1;
-			&:before {
-				content: "";
-				position: absolute;
-				right: 15px;
-				bottom: -10px;
-				width: 0;
-				height: 0;
-				border-left: 8px solid transparent;
-				border-right: 8px solid transparent;
-				border-top: 10px solid $primary-color-1;
-				z-index: 9;
-			}
+			color: $text-color-1;
 		}
 		.subMenu {
-			background: $primary-color-4;
 			a {
 				position: relative;
-				padding: 12px 20px;
-				color: $white-color;
-				border-bottom: 1px solid $primary-color-3;
+				padding: 12px 20px 12px 36px;
+				color: $text-color-1;
 				&:before {
 					content: "";
 					opacity: 0;
@@ -62,34 +40,32 @@
 			}
 		}
 		.accordionLink {
+			border-radius: 12px;
+			transition: all 0.3s;
+			svg {
+				transition: all 0.3s;
+			}
 			&:hover {
-				background: $primary-color-3;
+				color: $white-color;
+				background: $primary-color-1;
+				svg {
+					color: $white-color;
+				}
 			}
 			&.active {
-				background: $primary-color-4;
-				background: -moz-linear-gradient(
-					top,
-					$primary-color-4 0%,
-					$primary-color-4 50%,
-					$primary-color-3 51%,
-					$primary-color-3 100%
-				);
-				background: -webkit-linear-gradient(
-					top,
-					$primary-color-4 0%,
-					$primary-color-4 50%,
-					$primary-color-3 51%,
-					$primary-color-3 100%
-				);
+				overflow: hidden;
+				color: $white-color;
 				background: linear-gradient(
 					to bottom,
-					$primary-color-4 0%,
-					$primary-color-4 50%,
-					$primary-color-3 51%,
-					$primary-color-3 100%
+					$primary-color-2 0%,
+					$primary-color-2 50%,
+					$primary-color-1 51%,
+					$primary-color-1 100%
 				);
-				border-bottom: 1px solid $primary-color-4;
-				transition: all 0.3s;
+				border-bottom: 1px solid $primary-color-2;
+				svg {
+					color: $white-color;
+				}
 				&::before,
 				&::after {
 					content: "";
@@ -114,73 +90,187 @@
 	}
 }
 
-@media (max-width: 1023.98px) {
-	.mainMenu {
-		margin: 0 1rem !important;
-		flex: 1;
-		border-radius: 0;
-		.item {
-			svg {
-				color: $text-color-1;
-			}
-			&:not(:first-of-type) {
-				border-top: none;
-			}
-			& .btn {
-				margin: 0.25rem 0;
-				color: inherit;
-				background: transparent;
-				border-radius: 12px;
-				overflow: hidden;
-				&::before {
-					border: none;
-				}
-				&.Mui-expanded + div {
-					padding-top: 0.5rem;
-					border-top: 2px solid $bg-d-color-2;
-				}
-			}
-			.subMenu {
-				color: inherit;
-				background: transparent;
-				a {
-					margin-left: 1rem;
-					color: inherit;
-					border: none;
-					border-radius: 8px;
-					overflow: hidden;
-				}
-			}
-			.accordionLink {
-				&:hover {
-					background: $bg-l-color-1;
-				}
-				&:active {
-					background: $bg-l-color-2;
-				}
-				&.active {
-					color: $white-color;
-					background: $bg-d-color-2;
-					border: none;
-					&::before,
-					&::after {
-						border: none;
-					}
-					svg {
-						color: $white-color;
-					}
-				}
-			}
-		}
-	}
-}
+// .mainMenu {
+// 	padding: 0 !important;
+// 	border-radius: 10px;
+// 	overflow-y: auto;
+// 	.item {
+// 		overflow: hidden;
 
-@media (max-width: 575.98px) {
-	.mainMenu {
-		.item {
-			.btn {
-				padding: 0 12px;
-			}
-		}
-	}
-}
+// 		svg {
+// 			color: $white-color;
+// 		}
+
+// 		&:not(:first-of-type) {
+// 			border-top: 1.5px solid $white-color;
+// 		}
+// 		&:target {
+// 			.subMenu {
+// 				max-height: 10em;
+// 			}
+// 		}
+
+// 		.btn {
+// 			position: relative;
+// 			padding: 0 20px;
+// 			letter-spacing: 0.025em;
+// 			color: $white-color;
+// 			background-color: $primary-color-1;
+// 			&:before {
+// 				content: "";
+// 				position: absolute;
+// 				right: 15px;
+// 				bottom: -10px;
+// 				width: 0;
+// 				height: 0;
+// 				border-left: 8px solid transparent;
+// 				border-right: 8px solid transparent;
+// 				border-top: 10px solid $primary-color-1;
+// 				z-index: 9;
+// 			}
+// 		}
+// 		.subMenu {
+// 			background: $primary-color-4;
+// 			a {
+// 				position: relative;
+// 				padding: 12px 20px;
+// 				color: $white-color;
+// 				border-bottom: 1px solid $primary-color-3;
+// 				&:before {
+// 					content: "";
+// 					opacity: 0;
+// 					transition: opacity 0.25s;
+// 				}
+// 				&:after {
+// 					content: "";
+// 					opacity: 0;
+// 					transition: opacity 0.25s;
+// 				}
+// 				&:last-child {
+// 					border: none;
+// 				}
+// 			}
+// 		}
+// 		.accordionLink {
+// 			&:hover {
+// 				background: $primary-color-3;
+// 			}
+// 			&.active {
+// 				background: $primary-color-4;
+// 				background: -moz-linear-gradient(
+// 					top,
+// 					$primary-color-4 0%,
+// 					$primary-color-4 50%,
+// 					$primary-color-3 51%,
+// 					$primary-color-3 100%
+// 				);
+// 				background: -webkit-linear-gradient(
+// 					top,
+// 					$primary-color-4 0%,
+// 					$primary-color-4 50%,
+// 					$primary-color-3 51%,
+// 					$primary-color-3 100%
+// 				);
+// 				background: linear-gradient(
+// 					to bottom,
+// 					$primary-color-4 0%,
+// 					$primary-color-4 50%,
+// 					$primary-color-3 51%,
+// 					$primary-color-3 100%
+// 				);
+// 				border-bottom: 1px solid $primary-color-4;
+// 				transition: all 0.3s;
+// 				&::before,
+// 				&::after {
+// 					content: "";
+// 					position: absolute;
+// 					top: 0;
+// 					opacity: 1;
+// 					width: 6px;
+// 					height: 0;
+// 					border-top: 24px solid transparent;
+// 					border-bottom: 24px solid transparent;
+// 				}
+// 				&:before {
+// 					left: 0;
+// 					border-left: 11px solid $secondary-color-1;
+// 				}
+// 				&:after {
+// 					right: 0;
+// 					border-right: 11px solid $secondary-color-1;
+// 				}
+// 			}
+// 		}
+// 	}
+// }
+
+// @media (max-width: 1023.98px) {
+// 	.mainMenu {
+// 		margin: 0 1rem !important;
+// 		flex: 1;
+// 		border-radius: 0;
+// 		.item {
+// 			svg {
+// 				color: $text-color-1;
+// 			}
+// 			&:not(:first-of-type) {
+// 				border-top: none;
+// 			}
+// 			& .btn {
+// 				margin: 0.25rem 0;
+// 				color: inherit;
+// 				background: transparent;
+// 				border-radius: 12px;
+// 				overflow: hidden;
+// 				&::before {
+// 					border: none;
+// 				}
+// 				&.Mui-expanded + div {
+// 					padding-top: 0.5rem;
+// 					border-top: 2px solid $bg-d-color-2;
+// 				}
+// 			}
+// 			.subMenu {
+// 				color: inherit;
+// 				background: transparent;
+// 				a {
+// 					margin-left: 1rem;
+// 					color: inherit;
+// 					border: none;
+// 					border-radius: 8px;
+// 					overflow: hidden;
+// 				}
+// 			}
+// 			.accordionLink {
+// 				&:hover {
+// 					background: $bg-l-color-1;
+// 				}
+// 				&:active {
+// 					background: $bg-l-color-2;
+// 				}
+// 				&.active {
+// 					color: $white-color;
+// 					background: $bg-d-color-2;
+// 					border: none;
+// 					&::before,
+// 					&::after {
+// 						border: none;
+// 					}
+// 					svg {
+// 						color: $white-color;
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// }
+
+// @media (max-width: 575.98px) {
+// 	.mainMenu {
+// 		.item {
+// 			.btn {
+// 				padding: 0 12px;
+// 			}
+// 		}
+// 	}
+// }

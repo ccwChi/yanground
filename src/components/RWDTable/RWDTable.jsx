@@ -199,8 +199,14 @@ const RWDTable = ({
 	return (
 		<TableContainer
 			component={Paper}
-			className="h-full"
-			sx={{ boxShadow: "none", borderTop: "2px solid rgb(230, 230, 230)" }}>
+			className="h-full mx-auto"
+			sx={{
+				boxShadow: "none",
+				borderTop: "2px solid rgb(230, 230, 230)",
+				width: "96%",
+				borderRadius: "0.5rem",
+				boxShadow: "0 5px 10px rgba(0, 0, 0, 0.1)",
+			}}>
 			<Table stickyHeader sx={{ minWidth: tableMinWidth }}>
 				<TableHead>
 					<TableRow>
@@ -241,7 +247,7 @@ const RWDTable = ({
 													key={"TableActionAction" + index}
 													title={action.title}
 													aria-label={action.value}
-													color="custom"
+													color="dark"
 													size="small"
 													data-mode={action.value}
 													data-value={item.id}
@@ -317,7 +323,8 @@ const RWDTable = ({
 													size="small"
 													data-mode={action.value}
 													data-value={item.id}
-													onClick={handleActionClick}>
+													onClick={handleActionClick}
+													sx={{ background: "pink" }}>
 													{action.icon}
 												</IconButton>
 											))}

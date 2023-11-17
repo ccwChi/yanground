@@ -60,15 +60,7 @@ const Map = () => {
 	};
 
 	return (
-		<div
-			style={{
-				position: "fixed",
-				top: "55px",
-				left: 0,
-				zIndex: "1025",
-				height: "100%",
-				width: "100%",
-			}}>
+		<div className="absolute top-14 inset-0 sm:inset-0">
 			{selectedLocation ? (
 				<MapContainer
 					center={selectedLocation}
