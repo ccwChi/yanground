@@ -34,7 +34,7 @@ const Header = ({ toggleSidebar, classnames = "" }) => {
 
 				<div className="flex gap-2 ml-4">
 					{/* Desktop Right */}
-					{userProfile && (
+					{/* {userProfile && (
 						<div className="flex lg:hidden">
 							<IconButton
 								variant="text"
@@ -58,7 +58,7 @@ const Header = ({ toggleSidebar, classnames = "" }) => {
 								</a>
 							</Menu>
 						</div>
-					)}
+					)} */}
 
 					{/* Mobile Right (Hamburger Menu) */}
 					<div className="flex lg:hidden items-center">
