@@ -66,6 +66,7 @@ const Pagination = ({
 							<KeyboardArrowLeftIcon />
 						</IconButton>
 						<IconButton
+							className="!me-3"
 							onClick={() => onPageChange(null, page + 1)}
 							disabled={page >= Math.ceil(totalElement / rowsPerPage) - 1}>
 							<KeyboardArrowRightIcon />
