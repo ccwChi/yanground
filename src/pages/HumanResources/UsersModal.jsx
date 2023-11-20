@@ -56,16 +56,13 @@ const EditModal = ({
     nickname: yup.string().required("暱稱不得為空白!"),
     nationalIdentityCardNumber: yup
       .mixed()
-      .test(
-        "is-national-id",
-        "格式為第一字為英文 + 九個數字!",
-        (value) => {
-          if (!value) {
-            return true;
-          }
-          return /^[A-Za-z]\d{9}$/.test(value);
+      .test("is-national-id", "格式為第一字為英文 + 九個數字!", (value) => {
+        if (!value) {
+          return true;
         }
-      ),
+        return /^[A-Za-z]\d{9}$/.test(value);
+      }),
+    department: yup.string().required("部門不得為空白!"),
   });
 
   const onCheckDirty = () => {
@@ -119,7 +116,9 @@ const EditModal = ({
         startedOn: deliverInfo?.startedOn
           ? new Date(deliverInfo.startedOn)
           : null,
-        department: deliverInfo?.department?.id,
+        department: deliverInfo?.department?.id
+          ? deliverInfo.department.id
+          : "",
         authorities:
           deliverInfo?.authorities.map((authority) => authority.id) || [],
       });
@@ -145,16 +144,18 @@ const EditModal = ({
     ) {
       delete convertData.nationalIdentityCardNumber;
     }
-
+    if (convertData?.department === null || convertData?.department === "") {
+      delete convertData.department;
+    }
     for (let key in convertData) {
       fd.append(key, convertData[key]);
     }
-
+    // console.log(convertData)
     // for (var pair of fd.entries()) {
     //   console.log(pair);
     // }
-    sendDataToBackend(fd, "edit", deliverInfo.id);
-    resetModal();
+    // sendDataToBackend(fd, "edit", deliverInfo.id);
+    // resetModal();
   };
 
   const resetModal = () => {
@@ -179,7 +180,7 @@ const EditModal = ({
         <FormProvider {...methods}>
           {/* TabBar */}
           <div className="md:hidden mt-3 mb-5 flex-1 -m-3">
-            <TableTabber tabGroup={tabGroup} setCat={setCat} />
+            <TableTabber tabGroup={tabGroup} setCat={setCat} cat={cat} />
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -375,15 +376,15 @@ const EditModal = ({
                       />
                     )}
                   />
-                                    <FormHelperText
+                  <FormHelperText
                     className="!text-red-600 break-words text-justify !mt-0 hidden md:block"
                     sx={{ minHeight: "1.25rem" }}
                   >
- {errors.nationalIdentityCardNumber && (        
-                  <span className={`text-red-700 m-0`}>
-                    {errors.nationalIdentityCardNumber.message}
-                  </span>
-                )}
+                    {errors.nationalIdentityCardNumber && (
+                      <span className={`text-red-700 m-0`}>
+                        {errors.nationalIdentityCardNumber.message}
+                      </span>
+                    )}
                   </FormHelperText>
                 </div>
 
@@ -400,7 +401,7 @@ const EditModal = ({
                 {/* 部門 */}
                 {/* <div className=" gap-1.5 w-100 md:w-[320px]"> */}
                 <div className="w-full flex flex-col mt-4">
-                  <InputTitle title={"部門"} required={false} />
+                  <InputTitle title={"部門"} required={true} />
                   <Controller
                     name="department"
                     control={control}
@@ -427,6 +428,16 @@ const EditModal = ({
                       </Select>
                     )}
                   />
+                  <FormHelperText
+                    className="!text-red-600 break-words text-justify !mt-0 hidden md:block"
+                    sx={{ minHeight: "1.25rem" }}
+                  >
+                    {errors.department && (
+                      <span className={`text-red-700 m-0`}>
+                        {errors.department.message}
+                      </span>
+                    )}
+                  </FormHelperText>
                 </div>
               </div>
 
@@ -486,12 +497,18 @@ const EditModal = ({
                 {errors.nickname && (
                   <span className=" text-red-700 m-0 pl-5">
                     {errors.nickname.message}
-                    {errors.nationalIdentityCardNumber && <br />}
+                    {(errors.nationalIdentityCardNumber || errors.department) && <br />}
                   </span>
                 )}
-                {errors.nationalIdentityCardNumber && (        
+                {errors.nationalIdentityCardNumber && (
                   <span className={`text-red-700 m-0 pl-5 `}>
                     身份證字號{errors.nationalIdentityCardNumber.message}
+                    {!!errors.department && <br />}
+                  </span>
+                )}
+                {errors.department && (
+                  <span className={`text-red-700 m-0 pl-5 `}>
+                    {errors.department.message}
                   </span>
                 )}
               </FormHelperText>
