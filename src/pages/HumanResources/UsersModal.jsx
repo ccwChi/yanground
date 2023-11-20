@@ -154,8 +154,8 @@ const EditModal = ({
     // for (var pair of fd.entries()) {
     //   console.log(pair);
     // }
-    // sendDataToBackend(fd, "edit", deliverInfo.id);
-    // resetModal();
+    sendDataToBackend(fd, "edit", deliverInfo.id);
+    resetModal();
   };
 
   const resetModal = () => {
