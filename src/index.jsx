@@ -17,6 +17,7 @@ import ErrorMessage from "./pages/Error/ErrorMessage";
 import ErrorPages from "./pages/Error/ErrorPages";
 import Forbidden from "./pages/Error/Forbidden";
 import Unauthorized from "./pages/Error/Unauthorized";
+import Explotion from "./pages/Error/Explotion";
 import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
@@ -83,6 +84,10 @@ const router = createBrowserRouter([
 			{
 				path: "/unauthorized",
 				element: <Unauthorized />,
+			},
+			{
+				path: "/OJrqiGtV/H0aAwx3b58FUg==",
+				element: <Explotion />,
 			},
 			{
 				path: "/404",
