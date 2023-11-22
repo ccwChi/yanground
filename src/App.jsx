@@ -82,7 +82,6 @@ const App = () => {
 
 	useEffect(() => {
 		if (!!accessToken) {
-			alert("_:" + accessToken);
 			setTimeout(() => {
 				getData().then((data) => {
 					if (data?.result) {

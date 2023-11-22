@@ -16,13 +16,12 @@ const getData = async (url = "") => {
 		.then((response) => {
 			if (!response.ok) {
 				const statusCode = response.status;
-				alert(url + " " + statusCode);
-				// console.error("HTTP Error: Status Code", statusCode);
-				// if (statusCode === 403) {
-				// 	window.location.href = "/forbidden";
-				// } else if (statusCode === 401) {
-				// 	window.location.href = "/unauthorized";
-				// }
+				console.error("HTTP Error: Status Code", statusCode);
+				if (statusCode === 403) {
+					window.location.href = "/forbidden";
+				} else if (statusCode === 401) {
+					window.location.href = "/unauthorized";
+				}
 			}
 			return response.json();
 		})

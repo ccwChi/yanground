@@ -34,7 +34,6 @@ const Home = () => {
 		// 	})
 
 		if (!!accessToken) {
-			alert("_timesheet:" + accessToken);
 			setTimeout(() => {
 				getData("timesheet").then((result) => {
 					const data = result.result;
