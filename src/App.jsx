@@ -24,6 +24,7 @@ const LINE_ID = process.env.REACT_APP_LINEID;
 const App = () => {
 	// 設置 RWD 時，SideBar 是否顯示
 	const [showSidebar, setShowSidebar] = useState(false);
+	const accessToken = useLocalStorageValue("accessToken");
 
 	// SideBar 顯示資料
 	// icon => FontAwesome Icon
@@ -78,6 +79,22 @@ const App = () => {
 		initLine();
 	}, []);
 
+	useEffect(() => {
+		if (accessToken) {
+			getData().then((data) => {
+				if (data?.result) {
+					let d = data.result;
+					if (d.displayName) {
+						delete d.statusMessage;
+						delete d.userId;
+						delete d.nationalIdentityCardNumber;
+						localStorage.setItem("userProfile", JSON.stringify(d));
+					}
+				}
+			});
+		}
+	}, [accessToken]);
+
 	// Liff 登入 Line
 	const initLine = () => {
 		liff.init(
@@ -98,18 +115,6 @@ const App = () => {
 		const accessToken = liff.getAccessToken();
 		if (accessToken) {
 			localStorage.setItem("accessToken", JSON.stringify(accessToken));
-			getData().then((data) => {
-				if (data?.result) {
-					// console.log(data);
-					let d = data.result;
-					if (d.displayName) {
-						delete d.statusMessage;
-						delete d.userId;
-						delete d.nationalIdentityCardNumber;
-						localStorage.setItem("userProfile", JSON.stringify(d));
-					}
-				}
-			});
 		}
 	};
 
