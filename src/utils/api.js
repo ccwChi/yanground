@@ -16,7 +16,7 @@ const getData = async (url = "") => {
 		.then((response) => {
 			if (!response.ok) {
 				const statusCode = response.status;
-				alert(url + ' ' + statusCode);
+				alert(url + " " + statusCode);
 				// console.error("HTTP Error: Status Code", statusCode);
 				// if (statusCode === 403) {
 				// 	window.location.href = "/forbidden";

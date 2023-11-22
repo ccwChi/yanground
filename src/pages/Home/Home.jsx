@@ -35,60 +35,62 @@ const Home = () => {
 
 		alert("_timesheet:" + accessToken);
 		if (!!accessToken) {
-			getData("timesheet").then((result) => {
-				const data = result.result;
+			setTimeout(() => {
+				getData("timesheet").then((result) => {
+					const data = result.result;
 
-				const transformedData = data.map((item) => {
-					const { date, summaries } = item;
+					const transformedData = data.map((item) => {
+						const { date, summaries } = item;
 
-					const projectMap = new Map();
+						const projectMap = new Map();
 
-					summaries.forEach((summary) => {
-						const { project, constructionSummaryJobTasks } = summary;
+						summaries.forEach((summary) => {
+							const { project, constructionSummaryJobTasks } = summary;
 
-						if (!projectMap.has(project.name)) {
-							projectMap.set(project.name, {
-								name: project.name,
-								constructionSummaryJobTasks: [],
-							});
-						}
-
-						const existingProject = projectMap.get(project.name);
-
-						constructionSummaryJobTasks.forEach((task) => {
-							const dispatches = task.constructionSummaryJobTaskDispatches;
-
-							if (dispatches.some((dispatch) => dispatch.date === date)) {
-								const constructionJobTask =
-									getConstructionType(task.constructionJobTask.constructionJob.constructionType) +
-									"-" +
-									task.constructionJobTask.name;
-
-								const dispatchesForDate = dispatches
-									.filter((dispatch) => dispatch.date === date)
-									.map((dispatch) => dispatch.labourer.nickname)
-									.join(" ");
-
-								existingProject.constructionSummaryJobTasks.push({
-									constructionJobTask,
-									constructionSummaryJobTaskDispatches: dispatchesForDate,
+							if (!projectMap.has(project.name)) {
+								projectMap.set(project.name, {
+									name: project.name,
+									constructionSummaryJobTasks: [],
 								});
 							}
+
+							const existingProject = projectMap.get(project.name);
+
+							constructionSummaryJobTasks.forEach((task) => {
+								const dispatches = task.constructionSummaryJobTaskDispatches;
+
+								if (dispatches.some((dispatch) => dispatch.date === date)) {
+									const constructionJobTask =
+										getConstructionType(task.constructionJobTask.constructionJob.constructionType) +
+										"-" +
+										task.constructionJobTask.name;
+
+									const dispatchesForDate = dispatches
+										.filter((dispatch) => dispatch.date === date)
+										.map((dispatch) => dispatch.labourer.nickname)
+										.join(" ");
+
+									existingProject.constructionSummaryJobTasks.push({
+										constructionJobTask,
+										constructionSummaryJobTaskDispatches: dispatchesForDate,
+									});
+								}
+							});
 						});
+
+						return {
+							date,
+							summaries: Array.from(projectMap.values()).filter(
+								(project) => project.constructionSummaryJobTasks.length > 0
+							),
+						};
 					});
 
-					return {
-						date,
-						summaries: Array.from(projectMap.values()).filter(
-							(project) => project.constructionSummaryJobTasks.length > 0
-						),
-					};
+					// console.log(transformedData);
+					setConstSummaryApiList(transformedData);
+					setIsLoading(false);
 				});
-
-				// console.log(transformedData);
-				setConstSummaryApiList(transformedData);
-				setIsLoading(false);
-			});
+			}, 3000);
 		}
 	}, [accessToken]);
 

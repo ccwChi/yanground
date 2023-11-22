@@ -81,19 +81,21 @@ const App = () => {
 	}, []);
 
 	useEffect(() => {
-		alert("_:" + accessToken);
 		if (!!accessToken) {
-			getData().then((data) => {
-				if (data?.result) {
-					let d = data.result;
-					if (d.displayName) {
-						delete d.statusMessage;
-						delete d.userId;
-						delete d.nationalIdentityCardNumber;
-						localStorage.setItem("userProfile", JSON.stringify(d));
+			alert("_:" + accessToken);
+			setTimeout(() => {
+				getData().then((data) => {
+					if (data?.result) {
+						let d = data.result;
+						if (d.displayName) {
+							delete d.statusMessage;
+							delete d.userId;
+							delete d.nationalIdentityCardNumber;
+							localStorage.setItem("userProfile", JSON.stringify(d));
+						}
 					}
-				}
-			});
+				});
+			}, 3000);
 		}
 	}, [accessToken]);
 
