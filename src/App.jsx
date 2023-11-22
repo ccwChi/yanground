@@ -16,6 +16,7 @@ import {
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./utils/theme";
 import "./app.scss";
+import useLocalStorageValue from "./hooks/useLocalStorageValue";
 import { getData } from "./utils/api";
 import liff from "@line/liff";
 import { SnackbarProvider } from "notistack";
