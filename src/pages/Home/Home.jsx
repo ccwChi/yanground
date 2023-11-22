@@ -33,7 +33,8 @@ const Home = () => {
 		// 		setCountNum({ staffNum, depNum });
 		// 	})
 
-		if (accessToken) {
+		alert("_timesheet:" + accessToken);
+		if (!!accessToken) {
 			getData("timesheet").then((result) => {
 				const data = result.result;
 

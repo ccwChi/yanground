@@ -81,7 +81,8 @@ const App = () => {
 	}, []);
 
 	useEffect(() => {
-		if (accessToken) {
+		alert("_:" + accessToken);
+		if (!!accessToken) {
 			getData().then((data) => {
 				if (data?.result) {
 					let d = data.result;
