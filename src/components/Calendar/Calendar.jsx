@@ -154,7 +154,7 @@ const Calendar = ({
 				eventColor="#F48A64" // "#ff97a9"
 				locale={zhTwLocale}
 				// 確定日名稱和周名稱是否可點擊
-				navLinks={true}
+				navLinks={!isTargetScreen}
 				{...otherProps}
 			/>
 		</>
