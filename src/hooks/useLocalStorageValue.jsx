@@ -27,5 +27,6 @@ const useLocalStorageValue = (key) => {
 
 export default useLocalStorageValue;
 
-// How to Use
+//****** How To Use ? ******//
+
 // const XXXXX(變數名稱) = useLocalStorageValue("LocalStorageKey");

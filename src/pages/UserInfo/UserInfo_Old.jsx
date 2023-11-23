@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import TableTabber from "../../components/Tabbar/TableTabber";
 import { LoadingTwo } from "../../components/Loader/Loading";
-// import Avatar from "@mui/material/Avatar";
-import Brightness2Icon from "@mui/icons-material/Brightness2";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
+import Avatar from "@mui/material/Avatar";
 import { getData } from "../../utils/api";
 import PersonalInfoSection from "./PersonalInfoSection";
-import PunchLogSection from "./PunchLogSection";
+import PunchLogSection from "./PunchLogSection_Old";
 import "./userInfo.scss";
 
 const UserInfo = () => {
+	const navigate = useNavigate();
+
 	// 解析網址取得參數
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);
@@ -33,6 +33,14 @@ const UserInfo = () => {
 	const [apiAttData, setApiAttData] = useState(null);
 	// isLoading 等待請求 API
 	const [isLoading, setIsLoading] = useState(true);
+	// Page 頁數設置
+	const [page, setPage] = useState(
+		queryParams.has("p") && !isNaN(+queryParams.get("p")) ? +queryParams.get("p") - 1 : 0
+	);
+	// Rows per Page 多少筆等同於一頁
+	const [rowsPerPage, setRowsPerPage] = useState(
+		queryParams.has("s") && !isNaN(+queryParams.get("s")) ? +queryParams.get("s") : 10
+	);
 
 	// 取得用戶資料
 	useEffect(() => {
@@ -47,11 +55,11 @@ const UserInfo = () => {
 			const parsedData = [
 				{
 					title: "姓氏",
-					content: userProfile.firstname,
+					content: userProfile.lastname,
 				},
 				{
 					title: "名字",
-					content: userProfile.lastname,
+					content: userProfile.firstname,
 				},
 				{
 					title: "暱稱",
@@ -59,7 +67,7 @@ const UserInfo = () => {
 				},
 				{
 					title: "性別",
-					content: userProfile.gender ? "女性" : userProfile.gender === false ? "男性" : "?",
+					content: userProfile.gender ? "男性" : userProfile.gender === false ? "女性" : "?",
 				},
 				// {
 				// 	title: "部門",
@@ -86,20 +94,18 @@ const UserInfo = () => {
 	useEffect(() => {
 		if (userProfile) {
 			setIsLoading(true);
-			getData(`user/${userProfile.id}/attendancies?p=1&s=5000`).then((result) => {
+			getData(`user/${userProfile.id}/attendancies?p=${page + 1}&s=${rowsPerPage}`).then((result) => {
 				setIsLoading(false);
-				const data = result.result.content;
+				const data = result.result;
 				setApiAttData(data);
+				if (page >= data.totalPages) {
+					setPage(0);
+					setRowsPerPage(10);
+					navigate(`?cat=${cat}&p=1&s=10`);
+				}
 			});
 		}
-	}, [userProfile]);
-
-	const isNight = () => {
-		const now = new Date();
-		const hour = now.getHours();
-		const isNightTime = hour >= 16 || hour < 6;
-		return isNightTime;
-	};
+	}, [userProfile, page, rowsPerPage]);
 
 	return (
 		<div className="userinfo_wrapper flex flex-col flex-1 sm:-mt-9 -mt-10 sm:-mb-4 -mb-7 overflow-hidden">
@@ -143,27 +149,30 @@ const UserInfo = () => {
 				</div>
 
 				<div className="header-user-info">
-					{/* <div className="user-picture">
+					<div className="user-picture">
 						<Avatar
 							alt={userProfile?.displayName}
 							src={userProfile?.pictureUrl}
 							sx={{ width: 80, height: 80, bgcolor: "#547db7" }}
 						/>
-					</div> */}
-					{isNight() ? (
-						<Brightness2Icon className="mt-2" fontSize="large" />
-					) : (
-						<Brightness7Icon className="mt-2" fontSize="large" />
-					)}
-					<div className="user-name pt-1">
+					</div>
+					<div className="user-name">
 						<h5 className="h5">{userProfile ? `歡迎！ ${userProfile.nickname}` : "載入中..."}</h5>
 					</div>
 				</div>
 			</div>
 
-			<TableTabber tabGroup={tabGroup} cat={cat} setCat={setCat} />
+			<TableTabber
+				tabGroup={tabGroup}
+				cat={cat}
+				setCat={setCat}
+				onTabChange={() => {
+					setPage(0);
+					setRowsPerPage(10);
+				}}
+			/>
 
-			<div className="relative profile-section flex flex-col flex-1 overflow-hidden sm:pb-3.5 pb-0">
+			<div className="profile-section flex flex-col flex-1 overflow-hidden sm:pb-3.5 pb-0">
 				{cat === "info" ? (
 					personalInfo ? (
 						<PersonalInfoSection userProfile={userProfile} personalInfo={personalInfo} />
@@ -171,7 +180,15 @@ const UserInfo = () => {
 						<LoadingTwo textSize={"text-lg sm:text-xl"} />
 					)
 				) : (
-					<PunchLogSection apiAttData={apiAttData} />
+					<PunchLogSection
+						apiAttData={apiAttData}
+						cat={cat}
+						page={apiAttData && page < apiAttData.totalPages ? page : 0}
+						rowsPerPage={rowsPerPage}
+						setPage={setPage}
+						setRowsPerPage={setRowsPerPage}
+						isLoading={isLoading}
+					/>
 				)}
 			</div>
 		</div>
