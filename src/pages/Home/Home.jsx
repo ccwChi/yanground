@@ -89,7 +89,7 @@ const Home = () => {
 					setConstSummaryApiList(transformedData);
 					setIsLoading(false);
 				});
-			}, 3000);
+			}, 1200);
 		}
 	}, [accessToken]);
 
