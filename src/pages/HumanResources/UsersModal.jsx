@@ -154,8 +154,8 @@ const EditModal = ({
     // for (var pair of fd.entries()) {
     //   console.log(pair);
     // }
-    // sendDataToBackend(fd, "edit", deliverInfo.id);
-    // resetModal();
+     sendDataToBackend(fd, "edit", deliverInfo.id);
+     resetModal();
   };
 
   const resetModal = () => {
@@ -445,7 +445,7 @@ const EditModal = ({
               <div
                 className={`${
                   cat === "3" ? "static" : "hidden"
-                } space-y-4 md:relative md:inline-block w-full overflow-y-auto max-h-[60vh] md:h-auto md:max-h-fit `}
+                } space-y-4 md:relative md:inline-block w-full max-h-[60vh] md:max-h-[460px] `}
               >
                 <FormControl
                   component="fieldset"
@@ -454,7 +454,7 @@ const EditModal = ({
                 >
                   {" "}
                   <InputTitle title={"權限"} required={false} />
-                  <Box className="w-full  overflow-y-auto  border-gray-400 rounded-md">
+                  <Box className="w-full  overflow-y-auto max-h-[60vh] md:max-h-[440px]   border-gray-400 rounded-md">
                     <Controller
                       name="authorities"
                       control={control}
@@ -497,7 +497,8 @@ const EditModal = ({
                 {errors.nickname && (
                   <span className=" text-red-700 m-0 pl-5">
                     {errors.nickname.message}
-                    {(errors.nationalIdentityCardNumber || errors.department) && <br />}
+                    {(errors.nationalIdentityCardNumber ||
+                      errors.department) && <br />}
                   </span>
                 )}
                 {errors.nationalIdentityCardNumber && (
