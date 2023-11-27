@@ -1,0 +1,86 @@
+@import "../../assets/styles/custom";
+
+.fc {
+	.fc-timegrid-slot-label {
+		font-size: 0.875rem !important;
+	}
+	.fc-more-popover .fc-popover-body {
+		max-height: 150px;
+		overflow-y: auto;
+	}
+	.fc-popover-title {
+		letter-spacing: 0.015em;
+		font-size: 0.825rem;
+	}
+	.fc-highlight {
+		background-color: rgb(255 196 196 / 30%);
+	}
+}
+.custom_calendar {
+	background-color: $white-color;
+	border-radius: 0.5rem;
+	overflow: hidden;
+	.fc-col-header-cell a {
+		font-weight: 700;
+		color: white;
+	}
+	.fc-scrollgrid-sync-inner {
+		font-size: 0.875rem;
+	}
+	.fc-daygrid-day-top {
+		justify-content: center;
+	}
+	.fc-daygrid-day-events {
+		font-size: 1rem;
+	}
+	&.fc-dayGridMonth-view,
+	&.fc-timeGridWeek-view,
+	&.fc-dayGridWeek-view,
+	&.fc-dayGridDay-view {
+		td,
+		th {
+			padding: 2px 6px !important;
+		}
+	}
+	&.fc-listMonth-view {
+		td {
+			font-size: 0.875rem !important;
+		}
+		.fc-list-event-graphic {
+			padding: 8px 0 !important;
+		}
+	}
+	tr {
+		padding: 4px 8px;
+		height: auto;
+	}
+	.fc-event-title {
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.fc-list-day-cushion {
+		border-radius: 0.5rem;
+	}
+}
+
+.punchlog_btngrpwrp {
+	button {
+		color: $secondary-color-1;
+		border-color: $secondary-color-1;
+		&:hover {
+			border-color: $secondary-color-1;
+		}
+		&.primary {
+			color: $white-color;
+			background-color: $secondary-color-1;
+		}
+	}
+}
+
+// @media (max-width: 575.98px) {
+// 	.fc {
+// 		.fc-toolbar-title {
+// 			font-size: 0.875rem;
+// 		}
+// 	}
+// }
