@@ -59,7 +59,7 @@ const UserInfo = () => {
 				},
 				{
 					title: "性別",
-					content: userProfile.gender ? "女性" : userProfile.gender === false ? "男性" : "?",
+					content: userProfile.gender === false ? "女性" : userProfile.gender === true ? "男性" : "?",
 				},
 				// {
 				// 	title: "部門",

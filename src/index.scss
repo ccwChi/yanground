@@ -96,9 +96,26 @@ table {
 	}
 }
 
-
 @media (max-width: 575.98px) {
 	body {
 		background-color: $bg-l-color-2;
+	}
+
+	table {
+		thead {
+			tr {
+				th {
+					padding: 6px 8px !important;
+				}
+			}
+		}
+		tbody {
+			tr {
+				td {
+					padding: 4px 8px !important;
+					font-size: 0.875rem !important;
+				}
+			}
+		}
 	}
 }

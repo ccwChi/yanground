@@ -1,4 +1,5 @@
 import React from "react";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
@@ -6,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
 function ModalTemplete({ title, show, onClose, maxWidth = 439, children }) {
+	const isSmallScreen = useMediaQuery("(max-width:575.98px)");
 	return (
 		<Modal
 			aria-labelledby="transition-modal-title"
@@ -23,7 +25,8 @@ function ModalTemplete({ title, show, onClose, maxWidth = 439, children }) {
 				sx={{
 					position: "absolute",
 					m: "0.5rem",
-					p: 4,
+					px: isSmallScreen ? 2.5 : 4,
+					py: 4,
 					top: "50%",
 					left: "calc(50% - 0.5rem)",
 					width: "calc(100% - 1rem)",
