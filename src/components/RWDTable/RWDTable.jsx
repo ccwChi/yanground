@@ -16,6 +16,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Skeleton from "@mui/material/Skeleton";
+import Tooltip from "@mui/material/Tooltip";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Empty from "./Empty";
 const SKELETONITEM = 6;
@@ -243,17 +244,17 @@ const RWDTable = ({
 									{actionSpec && (
 										<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
 											{actionSpec[1].map((action, index) => (
-												<IconButton
-													key={"TableActionAction" + index}
-													title={action.title}
-													aria-label={action.value}
-													color="dark"
-													size="small"
-													data-mode={action.value}
-													data-value={item.id}
-													onClick={handleActionClick}>
-													{action.icon}
-												</IconButton>
+												<Tooltip key={"TableActionAction" + index} title={action.title}>
+													<IconButton
+														aria-label={action.value}
+														color="dark"
+														size="small"
+														data-mode={action.value}
+														data-value={item.id}
+														onClick={handleActionClick}>
+														{action.icon}
+													</IconButton>
+												</Tooltip>
 											))}
 										</TableCell>
 									)}
@@ -315,18 +316,18 @@ const RWDTable = ({
 									{actions && (
 										<TableCell sx={{ textAlign: "center", verticalAlign: "middle" }}>
 											{actions.map((action, index) => (
-												<IconButton
-													key={"TableActionAction" + index}
-													title={action.title}
-													aria-label={action.value}
-													color="custom"
-													size="small"
-													data-mode={action.value}
-													data-value={item.id}
-													onClick={handleActionClick}
-													sx={{ background: "pink" }}>
-													{action.icon}
-												</IconButton>
+												<Tooltip key={"TableActionAction" + index} title={action.title}>
+													<IconButton
+														aria-label={action.value}
+														color="custom"
+														size="small"
+														data-mode={action.value}
+														data-value={item.id}
+														onClick={handleActionClick}
+														sx={{ background: "pink" }}>
+														{action.icon}
+													</IconButton>
+												</Tooltip>
 											))}
 										</TableCell>
 									)}

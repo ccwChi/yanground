@@ -126,7 +126,7 @@ $z-index-a: 1040;
 	}
 
 	.sidebar_wrapper {
-		transition: width 0.35s ease-in-out;
+		transition: width .15s ease-in;
 		z-index: $z-index-b;
 		&.hide {
 			width: 0;
@@ -146,7 +146,7 @@ $z-index-a: 1040;
 		z-index: $z-index-b;
 		background-color: rgba(0, 0, 0, 0);
 		backdrop-filter: blur(0);
-		transition: all 0.35s ease;
+		transition: all 0.15s ease;
 		pointer-events: none;
 		&.open {
 			background-color: rgba(0, 0, 0, 0.35);
