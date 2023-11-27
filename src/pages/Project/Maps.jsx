@@ -5,7 +5,6 @@ import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
 import MapsIcon from "../../assets/icons/Map_pin_icon.png";
 import { getData } from "../../utils/api";
 
-const FIXED = 5;
 const circleConfig = [
 	{ radius: 1000, fillColor: "#6299B6" },
 	{ radius: 950, fillColor: "#6299B6" },
@@ -88,7 +87,7 @@ const Maps = () => {
 					<div className="flex flex-col items-center gap-2">
 						<p className="!my-0 text-sm">座標</p>
 						<span>
-							{position.lat.toFixed(FIXED)}, {position.lng.toFixed(FIXED)}
+							{position.lat}, {position.lng}
 						</span>
 						<p className="!my-0 text-sm">範圍半徑</p>
 						<span>{radius} 公尺</span>

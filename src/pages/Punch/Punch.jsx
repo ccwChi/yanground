@@ -19,6 +19,23 @@ const Map = () => {
 	const userProfile = useLocalStorageValue("userProfile");
 
 	useEffect(() => {
+		// 在組件載入時執行的代碼
+		const currentUrl = window.location.href; // 取得當前網址
+
+		// 檢查網址中是否已經包含時間戳
+		if (currentUrl.includes("timestamp=")) {
+			// 如果已經包含，只需更新時間戳
+			const updatedUrl = currentUrl.replace(/timestamp=\d+/, `timestamp=${new Date().getTime()}`);
+			window.history.replaceState(null, null, updatedUrl);
+		} else {
+			// 如果沒有，添加新的時間戳
+			const timestamp = new Date().getTime();
+			const newUrl = `${currentUrl}${currentUrl.includes("?") ? "&" : "?"}timestamp=${timestamp}`;
+			window.history.replaceState(null, null, newUrl);
+		}
+	}, []);
+
+	useEffect(() => {
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition((position) => {
 				const { latitude, longitude } = position.coords;
@@ -42,8 +59,8 @@ const Map = () => {
 		setIsLoading(true);
 
 		const fd = new FormData();
-		fd.append("latitude", selectedLocation?.lat.toFixed(6));
-		fd.append("longitude", selectedLocation?.lng.toFixed(6));
+		fd.append("latitude", selectedLocation?.lat);
+		fd.append("longitude", selectedLocation?.lng);
 
 		postData("clockPunch", fd).then((result) => {
 			setIsLoading(false);

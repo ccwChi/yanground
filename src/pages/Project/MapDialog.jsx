@@ -17,7 +17,6 @@ const Transition = forwardRef(function Transition(props, ref) {
 	return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const FIXED = 5;
 const minRadius = 100;
 const maxRadius = 1000;
 const circleConfig = [
@@ -101,8 +100,8 @@ const MapDialog = ({ open, handleClose, pos, r }) => {
 	});
 
 	const handleSave = () => {
-		setValue("latitude", position.lat.toFixed(FIXED));
-		setValue("longitude", position.lng.toFixed(FIXED));
+		setValue("latitude", position.lat);
+		setValue("longitude", position.lng);
 		setValue("radius", radius);
 		handleClose();
 	};
@@ -154,7 +153,7 @@ const MapDialog = ({ open, handleClose, pos, r }) => {
 							<div className="flex flex-col gap-2">
 								<p className="!my-0 text-sm">當前座標：</p>
 								<span>
-									{position.lat.toFixed(FIXED)}, {position.lng.toFixed(FIXED)}
+									{position.lat}, {position.lng}
 								</span>
 								<p className="!my-0 text-sm">範圍半徑：</p>
 								<Slider

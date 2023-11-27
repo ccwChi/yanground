@@ -202,7 +202,6 @@ const RWDTable = ({
 			component={Paper}
 			className="h-full mx-auto"
 			sx={{
-				boxShadow: "none",
 				borderTop: "2px solid rgb(230, 230, 230)",
 				width: "96%",
 				borderRadius: "0.5rem",
