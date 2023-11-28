@@ -153,6 +153,7 @@ const Calendar = ({
 				viewClassNames={"custom_calendar"}
 				eventColor="#F48A64" // "#ff97a9"
 				locale={zhTwLocale}
+				timeZone="Asia/Taipei"
 				// 確定日名稱和周名稱是否可點擊
 				navLinks={!isTargetScreen}
 				{...otherProps}
