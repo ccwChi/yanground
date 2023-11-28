@@ -45,7 +45,6 @@ const Users = () => {
 	const [modalValue, setModalValue] = useState(false);
 	// 傳送額外資訊給 Modal
 	const [deliverInfo, setDeliverInfo] = useState(null);
-	const { enqueueSnackbar } = useSnackbar();
 
 	// Tab 列表對應 api 搜尋參數
 	// const tabGroup = [
