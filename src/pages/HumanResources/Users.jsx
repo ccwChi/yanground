@@ -6,9 +6,11 @@ import Pagination from "../../components/Pagination/Pagination";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 import EditIcon from "@mui/icons-material/Edit";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import ViewTimelineIcon from "@mui/icons-material/ViewTimeline";
 import { getData, postData } from "../../utils/api";
 import { useSnackbar } from "notistack";
 import EditModal from "./UsersModal";
+import AttconfModal from "./AttconfModal";
 import { useNotification } from "../../hooks/useNotification";
 
 const Users = () => {
@@ -80,7 +82,10 @@ const Users = () => {
 	];
 
 	// edit = 編輯名稱
-	const actions = [{ value: "edit", icon: <EditIcon /> }];
+	const actions = [
+		{ value: "edit", icon: <EditIcon />, title: "編輯個人資料" },
+		{ value: "attconf", icon: <ViewTimelineIcon />, title: "出勤時間確認" },
+	];
 
 	// 取得列表資料
 	useEffect(() => {
@@ -123,38 +128,39 @@ const Users = () => {
 	}, []);
 
 	// 傳遞給後端資料
-	const sendDataToBackend = (fd, mode, otherData) => {
-		let url = "";
+	const sendDataToBackend = (fd, mode, otherData, mdate = "") => {
+		let url = "user/";
 		let message = [];
-		if (mode === "edit") {
-			url = "user" + "/" + otherData;
-			message = ["資料修改成功！"];
+		switch (mode) {
+			case "edit":
+				url += otherData;
+				message = ["資料修改成功！"];
+				break;
+			case "attconf":
+				url += otherData + "/attendancies/" + mdate;
+				message = ["出勤時間確認成功！"];
+				break;
+			default:
+				break;
 		}
 		postData(url, fd).then((result) => {
 			if (result.status) {
-				enqueueSnackbar(message[0], {
-					variant: "success",
-					anchorOrigin: {
-						vertical: "bottom", // 垂直，可選：'top', 'bottom'
-						horizontal: "center", // 水平，可選：'left', 'center', 'right'
-					},
-					autoHideDuration: 3000,
-				});
-				getApiList(apiUrl);
+				showNotification(message[0], true);
+				if (mode === "edit") {
+					getApiList(apiUrl);
+				}
 			} else {
-				enqueueSnackbar("發生錯誤，請洽詢資工部", {
-					variant: "error",
-					anchorOrigin: {
-						vertical: "bottom", // 垂直，可選：'top', 'bottom'
-						horizontal: "center", // 水平，可選：'left', 'center', 'right'
-					},
-					autoHideDuration: 3000,
-				});
+				// showNotification("發生錯誤，請洽詢資工部", false);
+				if (mode === "edit") {
+					showNotification(result.result.reason ? result.result.reason : "發生錯誤，請洽詢資工部", false);
+				} else {
+					showNotification(
+						result.result.reason ? result.result.reason : "需上下班同時勾選不同的資料，不可缺一！",
+						false
+					);
+				}
 			}
 		});
-		// for (var pair of fd.entries()) {
-		//   console.log(pair);
-		// }
 	};
 
 	// 設置頁數
@@ -187,6 +193,9 @@ const Users = () => {
 					showNotification("激活失敗。", false);
 				}
 			});
+		} else if (dataMode === "attconf") {
+			setModalValue(dataMode);
+			setDeliverInfo(dataValue);
 		} else {
 			setModalValue(dataMode);
 			setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
@@ -211,6 +220,17 @@ const Users = () => {
 					onClose={onClose}
 					departmentList={departmentList}
 					authorityList={authorityList}
+				/>
+			),
+		},
+		{
+			modalValue: "attconf",
+			modalComponent: (
+				<AttconfModal
+					title="出勤時間確認"
+					deliverInfo={deliverInfo}
+					sendDataToBackend={sendDataToBackend}
+					onClose={onClose}
 				/>
 			),
 		},

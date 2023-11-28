@@ -47,11 +47,11 @@ const UserInfo = () => {
 			const parsedData = [
 				{
 					title: "姓氏",
-					content: userProfile.firstname,
+					content: userProfile.lastname,
 				},
 				{
 					title: "名字",
-					content: userProfile.lastname,
+					content: userProfile.firstname,
 				},
 				{
 					title: "暱稱",
