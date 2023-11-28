@@ -22,6 +22,7 @@ import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import ConstructionSummary from "./pages/ConstructionSummary/ConstructionSummary";
+import DispatchCalendar from "./pages/Calendar/DispatchCalendar";
 
 const router = createBrowserRouter([
 	{
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
 			{
 				path: "/forbidden",
 				element: <Forbidden />,
+			},
+			{
+				path: "/calendar",
+				element: <DispatchCalendar />,
 			},
 			{
 				path: "/unauthorized",
