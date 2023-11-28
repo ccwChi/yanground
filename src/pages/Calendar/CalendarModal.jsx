@@ -52,6 +52,8 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
+// const twoDayAgo = new Date();
+// twoDayAgo.setDate(tomorrow.getDate() - 2);
 
 const EventModal = React.memo(
   ({
@@ -234,6 +236,15 @@ const EventModal = React.memo(
       //   setAlertOpen(false);
       //   setAlertDateChangeOpen(false);
     };
+
+    // useEffect(() => {
+    //   if (deliverInfo) {
+    //     console.log(
+    //       "deliverInfo.date",
+    //       deliverInfo.date,
+    //     );
+    //   }
+    // }, [deliverInfo]);
 
     //僅提交工項執行的資料上傳
     const onSubmit = (data) => {
@@ -469,6 +480,15 @@ const EventModal = React.memo(
         setReGetCalendarApi(deliverInfo.date);
       });
     };
+
+    // ///////////////////////////////////////////////////////////////////////////下面處理新增工項執行的東西
+
+    const AddNewJobTask = () => {
+        
+    }
+
+
+
     return (
       <>
         {/* Modal */}
@@ -492,93 +512,94 @@ const EventModal = React.memo(
               <ArrowBackIcon color="primary" className="!w-5" />
             </button>
 
-            <div className="flex gap-10">
+            <div className="flex gap-5 ">
               {/* 左邊框 */}
               <div
-                className={`w-full md:block 
+                className={`w-full md:block border rounded-md bg-slate-100
                 ${currentDivIndex === 0 ? "block" : "hidden"} 
-                  h-[70vh] bg-slate-5 overflow-y-auto p-2`}
+                  h-[70vh] bg-slate-5 overflow-y-scroll p-2 mt-4`}
               >
                 {deliverInfo.summaries.map((summary, index) => (
                   <Accordion
-                    expanded={expanded === `panel${index}`}
-                    onChange={handleAccordionChange(`panel${index}`)}
-                    index={`panel${index}`}
-                    className=""
+                    //   expanded={expanded === `panel${index}`}
+                    //   onChange={handleAccordionChange(`panel${index}`)}
+                    // index={`panel${index}`}
+                    key={index}
                   >
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
-                      aria-controls={`panel${1}bh-content`}
-                      id={`panel${1}bh-header`}
+                      //   aria-controls={`panel${1}bh-content`}
+                      //   id={`panel${1}bh-header`}
+                      className="text-center relative"
                     >
-                      <div className="text-base text-center w-full mt-3 border rounded-md p-2 bg-blue-300">
-                        <span className="text-lg p-1 m-1 w-full rounded-md ">
-                          {summary.project.name +
-                            "-" +
-                            summary.constructionJob.name}
-                        </span>
-                      </div>
+                      <span className="text-lg p-1 m-1 w-full rounded-md ">
+                        {summary.project.name +
+                          "-" +
+                          summary.constructionJob.name}
+                      </span>
+                      <button
+                        className="absolute left-5 top-5 bg-green-600 text-slate-100 font-extrabold rounded-full  w-6 h-6 flex justify-center align-middle"
+                        onClick={() => {AddNewJobTask()}}
+                      >
+                        +
+                      </button>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <Typography>
-                        {summary.summaryJobTasks.map((summaryJobTask) => (
-                          //   jobTask?.constructionSummaryJobTaskDispatches.length === 0 ?
-                          <div key={summaryJobTask.id} className={`border-b-2`}>
-                            <div
-                              className={` rounded-md 
-                      ${
-                        activeJobTask === summaryJobTask.id &&
-                        "bg-slate-200 my-1 py-0.5"
-                      }
+                      {summary.summaryJobTasks.map((summaryJobTask) => (
+                        //   jobTask?.constructionSummaryJobTaskDispatches.length === 0 ?
+                        <div key={summaryJobTask.id} className={`border-b-2`}>
+                          <div
+                            className={` rounded-md  ${
+                              activeJobTask === summaryJobTask.id &&
+                              "bg-slate-200 my-1 py-0.5"
+                            }
                       `}
+                          >
+                            <div
+                              className={`m-1 p-1 text-center relative  `}
+                              onClick={() => {
+                                handleJobTaskEdit(summaryJobTask, summary.id);
+                              }}
                             >
-                              <div
-                                className={`m-1 p-1 text-center relative  `}
-                                onClick={() => {
-                                  handleJobTaskEdit(summaryJobTask, summary.id);
-                                }}
+                              <span
+                                className={`whitespace-nowrap text-base text-neutral-400 ${
+                                  activeJobTask === summaryJobTask.id
+                                    ? "text-neutral-600"
+                                    : "text-neutral-400"
+                                }`}
                               >
-                                <span
-                                  className={`whitespace-nowrap text-base text-neutral-400 ${
+                                {`[${summaryJobTask.constructionJobTask.name}]`}
+                              </span>
+                              <span className="cursor-pointer absolute right-0 top-0.5">
+                                <EditCalendarIcon
+                                  color={`${
                                     activeJobTask === summaryJobTask.id
-                                      ? "text-neutral-600"
-                                      : "text-neutral-400"
+                                      ? "success"
+                                      : "disabled"
                                   }`}
-                                >
-                                  {`[${summaryJobTask.constructionJobTask.name}]`}
-                                </span>
-                                <span className="cursor-pointer absolute right-0 top-0.5">
-                                  <EditCalendarIcon
-                                    color={`${
-                                      activeJobTask === summaryJobTask.id
-                                        ? "success"
-                                        : "disabled"
-                                    }`}
-                                  />
-                                </span>
-                              </div>
-                              <div className="m-1 text-center align-middle">
-                                {summaryJobTask
-                                  .constructionSummaryJobTaskDispatches.length >
-                                0
-                                  ? summaryJobTask.constructionSummaryJobTaskDispatches.map(
-                                      (dispatch, index) => (
-                                        // <div
-                                        //   key={dispatch.labourer.id}
-                                        //   className=" bg-amber-50"
-                                        // >
+                                />
+                              </span>
+                            </div>
+                            <div className="m-1 text-center align-middle">
+                              {summaryJobTask
+                                .constructionSummaryJobTaskDispatches.length > 0
+                                ? summaryJobTask.constructionSummaryJobTaskDispatches.map(
+                                    (dispatch, index) => (
+                                      // <div
+                                      //   key={dispatch.labourer.id}
+                                      //   className=" bg-amber-50"
+                                      // >
 
-                                        <span className="ms-1" key={index}>
-                                          {dispatch.labourer.nickname}
-                                        </span>
-                                      )
+                                      <span className="ms-1" key={index}>
+                                        {dispatch.labourer.nickname}
+                                      </span>
                                     )
-                                  : null}
-                              </div>
+                                  )
+                                : null}
                             </div>
                           </div>
-                        ))}
-                      </Typography>
+                        </div>
+                      ))}
                     </AccordionDetails>
                   </Accordion>
                 ))}
@@ -730,7 +751,7 @@ const EventModal = React.memo(
                   </div>
                 ) : (
                   <div className="mt-1">
-                    <div className="text-base text-center w-full mt-3 border rounded-md p-2 bg-blue-300">
+                    <div className="text-base text-center w-full mt-3 p-2  border-b-2">
                       <span className="text-lg p-1 m-1 w-full rounded-md ">
                         請選擇編輯項目
                       </span>

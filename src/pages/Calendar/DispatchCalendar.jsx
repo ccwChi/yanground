@@ -31,7 +31,6 @@ import { Backdrop, useMediaQuery } from "@mui/material";
 const today = new Date();
 
 const DispatchCalendar = () => {
-  
   const [isLoading, setIsLoading] = useState(true);
   const showNotification = useNotification();
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
@@ -354,10 +353,9 @@ const DispatchCalendar = () => {
             eventContent={(eventInfo) => (
               <CustomEventContent event={eventInfo.event} />
             )}
-            eventColor={'transparent'}
+            // eventColor={'transparent'}
             height="auto"
-            displayEventTime={false}
-            
+            displayEventTime={true}
           />
           {/* <FullCalendar
             // ref={calendarRef}
@@ -424,6 +422,7 @@ const CustomEventContent = ({ event }) => {
   // Customize event content here
   return (
     <div className="">
+      {/* {console.log(event)} */}
       {isTargetScreen ? (
         <div className="mt-1">
           <div className="text-base text-center w-full rounded-md p-2">
@@ -436,18 +435,12 @@ const CustomEventContent = ({ event }) => {
           {extendedProps.summaryJobTasks.map((summaryJobTask) => (
             //   jobTask?.constructionSummaryJobTaskDispatches.length === 0 ?
             <div key={summaryJobTask.id} className="">
-              <div
-                className={` rounded-md 
-
-              `}
-              >
-                <div className={`m-1 p-1 text-center relative  `}>
+              <div className={`rounded-md`}>
+                <div className={`m-1 p-1 text-center relative`}>
                   <span
                     className={`whitespace-nowrap text-base text-neutral-400 `}
                   >
-                    {"["}
-                    {summaryJobTask.constructionJobTask.name}
-                    {"]"}
+                    {`[${summaryJobTask.constructionJobTask.name}]`}
                   </span>
                   <span className="cursor-pointer absolute right-0 top-0.5"></span>
                 </div>
@@ -473,7 +466,9 @@ const CustomEventContent = ({ event }) => {
           ))}
         </div>
       ) : (
-        <strong>{event.title}</strong>
+        <p>
+          <strong>{event.title}</strong>
+        </p>
       )}
     </div>
   );
