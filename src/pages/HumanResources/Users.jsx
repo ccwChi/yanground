@@ -84,7 +84,7 @@ const Users = () => {
 	// edit = 編輯名稱
 	const actions = [
 		{ value: "edit", icon: <EditIcon />, title: "編輯個人資料" },
-		{ value: "attconf", icon: <ViewTimelineIcon />, title: "出勤時間確認" },
+		// { value: "attconf", icon: <ViewTimelineIcon />, title: "出勤時間確認" },
 	];
 
 	// 取得列表資料
@@ -223,17 +223,17 @@ const Users = () => {
 				/>
 			),
 		},
-		{
-			modalValue: "attconf",
-			modalComponent: (
-				<AttconfModal
-					title="出勤時間確認"
-					deliverInfo={deliverInfo}
-					sendDataToBackend={sendDataToBackend}
-					onClose={onClose}
-				/>
-			),
-		},
+		// {
+		// 	modalValue: "attconf",
+		// 	modalComponent: (
+		// 		<AttconfModal
+		// 			title="出勤時間確認"
+		// 			deliverInfo={deliverInfo}
+		// 			sendDataToBackend={sendDataToBackend}
+		// 			onClose={onClose}
+		// 		/>
+		// 	),
+		// },
 	];
 	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
 

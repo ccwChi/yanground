@@ -339,8 +339,8 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 								</div>
 								{/* 到職日 */}
 								<div className="w-full mt-4">
-									<InputTitle title={"到職日"} required={false} />
-									<ControlledDatePicker name="startedOn" />
+									<InputTitle title={"到職日"} />
+									<ControlledDatePicker name="startedOn"  />
 								</div>
 								{/* 部門 */}
 								{/* <div className=" gap-1.5 w-100 md:w-[320px]"> */}
