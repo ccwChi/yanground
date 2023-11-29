@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "../../components/Calendar/Calendar";
-import { parseISO } from "date-fns";
+import { parseISO, format } from 'date-fns';
+import { zhTW } from 'date-fns/locale';
+import { utcToZonedTime } from 'date-fns-tz';
 
 const PunchLogSection = React.memo(({ apiAttData }) => {
 	const [events, setEvents] = useState([]);
@@ -10,7 +12,7 @@ const PunchLogSection = React.memo(({ apiAttData }) => {
 			const formattedEvents = apiAttData.map((event) => ({
 				id: event.id,
 				title: "打卡",
-				date: parseISO(event.occurredAt),
+				date: format(utcToZonedTime(parseISO(event.occurredAt), 'Asia/Taipei'), 'yyyy-MM-dd HH:mm:ss', { locale: zhTW }),
 			}));
 
 			setEvents(formattedEvents);

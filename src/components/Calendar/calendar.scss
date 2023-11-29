@@ -77,10 +77,13 @@
 	}
 }
 
-// @media (max-width: 575.98px) {
-// 	.fc {
-// 		.fc-toolbar-title {
-// 			font-size: 0.875rem;
-// 		}
-// 	}
-// }
+@media (max-width: 575.98px) {
+	// .fc {
+	// 	.fc-toolbar-title {
+	// 		font-size: 0.875rem;
+	// 	}
+	// }
+	.custom_calendar.fc-listMonth-view .fc-scroller {
+		padding-bottom: 1.5rem;
+	}
+}

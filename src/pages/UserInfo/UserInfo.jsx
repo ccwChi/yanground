@@ -102,7 +102,7 @@ const UserInfo = () => {
 	};
 
 	return (
-		<div className="userinfo_wrapper flex flex-col flex-1 sm:-mt-9 -mt-10 sm:-mb-4 -mb-7 overflow-hidden">
+		<div className="userinfo_wrapper flex flex-col flex-1 sm:-mt-9 -mt-10 sm:-mb-4 -mb-8 overflow-hidden">
 			<div className="header bg-secondary-50">
 				<div className="header-background-elements">
 					<div className="header-circle circle-left"></div>
