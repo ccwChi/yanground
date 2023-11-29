@@ -36,7 +36,7 @@ import Checkbox from "@mui/material/Checkbox";
 import Autocomplete from "@mui/material/Autocomplete";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import { Button } from "@mui/base";
+import Button from "@mui/material/Button";
 import { async } from "q";
 
 //   {/* 下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單  */}
@@ -46,6 +46,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { TaskModal } from "./AddJobTask";
 //   {/* 下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion  */}
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -72,6 +73,7 @@ const EventModal = React.memo(
     const [constructionJobList, setConstructionJobList] = useState(null);
     const [isDispatchDirty, setIsDispatchDirty] = useState(false);
     const [jobTask, setJobTask] = useState(null);
+    const [addJobTask, setAddJobTask] = useState(null);
     const [taskSelectLabouerList, setTaskSelectLabouerList] = useState([]);
     const [dispatchForApi, setDispatchForApi] = useState([]);
     const [alertDateChangeOpen, setAlertDateChangeOpen] = useState(false);
@@ -86,8 +88,6 @@ const EventModal = React.memo(
     //用來做accordion用的
     const [expanded, setExpanded] = useState(false);
     const handleAccordionChange = (panel) => (event, isExpanded) => {
-      console.log("panel", panel);
-      console.log("panel", isExpanded);
       setExpanded(isExpanded ? panel : false);
     };
 
@@ -177,6 +177,7 @@ const EventModal = React.memo(
               : []
           )
           .filter(Boolean); // 移除 undefined
+        setAddJobTask(null);
         setJobTask(updateJobTask[0]);
         forTaskSelectLabouerList(updateJobTask[0]);
         // console.log(
@@ -198,6 +199,7 @@ const EventModal = React.memo(
       } else {
         onClose();
         setActiveJobTask("");
+        setJobTask(null);
         setCurrentDivIndex(0);
         setIsDispatchDirty(false);
         reset();
@@ -210,6 +212,7 @@ const EventModal = React.memo(
         setIsDispatchDirty(false);
         setCurrentDivIndex(0);
         setActiveJobTask("");
+        setJobTask(null);
         onClose();
       }
       setAlertOpen(false);
@@ -226,7 +229,6 @@ const EventModal = React.memo(
       //         )
       //       );
       //       PostBodyData(postBodyJobTaskUrl, changeDateDeleteDispatch[1]);
-      //       console.log([postBodyJobTaskUrl, changeDateDeleteDispatch[1]]);
       //       setReGetCalendarApi(deliverInfo.date);
       //     //   setTaskSelectLabouerList([]);
       //     //   setDispatchForApi([]);
@@ -239,7 +241,6 @@ const EventModal = React.memo(
 
     // useEffect(() => {
     //   if (deliverInfo) {
-    //     console.log(
     //       "deliverInfo.date",
     //       deliverInfo.date,
     //     );
@@ -250,7 +251,6 @@ const EventModal = React.memo(
     const onSubmit = (data) => {
       setSendBackFlag(true);
 
-      //   console.log("要送出的", data);
       const convertData = [
         {
           id: jobTask?.id ? jobTask?.id : "",
@@ -268,7 +268,6 @@ const EventModal = React.memo(
       PostBodyData(postBodyJobTaskUrl, convertData);
       //   if (jobTask.constructionSummaryJobTaskDispatches.length === 0) {
       //     PostBodyData(postBodyJobTaskUrl, convertData);
-      //     console.log("改日期，沒派過人", convertData);
       //   } else {
       //     if (
       //       convertData[0].estimatedSince === jobTask.estimatedSince &&
@@ -350,15 +349,15 @@ const EventModal = React.memo(
         );
 
         setDispatchForApi(beSeleted);
-        console.log("DispatchForApi", beSeleted);
+        //console.log("DispatchForApi", beSeleted);
       } else {
         setDispatchForApi([]);
-        console.log("DispatchForApi", []);
+        //console.log("DispatchForApi", []);
       }
-      console.log("taskSelectLabouerList", [
-        ...notSelected,
-        ...selectedPersonnel,
-      ]);
+      // console.log("taskSelectLabouerList", [
+      //   ...notSelected,
+      //   ...selectedPersonnel,
+      // ]);
     };
     // useEffect(() => {
     //   console.log(activeJobTask);
@@ -370,6 +369,7 @@ const EventModal = React.memo(
       setActiveJobTask(selectedJobTask.id);
       setDispatchForApi([]);
       setIsLoading(true);
+      setAddJobTask(null);
       setJobTask(jobTask);
       //過濾下拉式選單用的派工清單
       forTaskSelectLabouerList(jobTask);
@@ -381,20 +381,18 @@ const EventModal = React.memo(
       setIsDispatchDirty(true);
       setDispatchForApi(value);
       //   console.log("event", event);
-      console.log("value", value);
+      // console.log("value", value);
     };
 
     /////////////////////////////////////////////////////////點擊派工提交
     const handleDispatchOnly = async () => {
       setSendBackFlag(true);
-      //   console.log("日期date:", deliverInfo.date);
-      //   console.log("專案執行id:", jobTask.id);
-      console.log("目前選單裡面的人:", taskSelectLabouerList);
-      //   console.log("目前人員dispatchForApi", dispatchForApi);
+      //console.log("目前選單裡面的人:", taskSelectLabouerList);
+
       const newIncrease = dispatchForApi
         .filter((item) => item && !item.hasOwnProperty("dispatchId"))
         .map((item) => item.id);
-      console.log("要新增的人(列id):", newIncrease);
+      //console.log("要新增的人(列id):", newIncrease);
       const removeWithPatchId = taskSelectLabouerList
         .filter((item) => item && item.hasOwnProperty("dispatchId"))
         .filter(
@@ -412,11 +410,11 @@ const EventModal = React.memo(
       for (let key in disPatchData) {
         fd.append(key, disPatchData[key]);
       }
-      console.log(
-        "案送出後的刪除清單taskSelectLabouerList",
-        taskSelectLabouerList
-      );
-      console.log("案送出後的刪除清單removeWithPatchId", removeWithPatchId);
+      // console.log(
+      //   "案送出後的刪除清單taskSelectLabouerList",
+      //   taskSelectLabouerList
+      // );
+      // console.log("案送出後的刪除清單removeWithPatchId", removeWithPatchId);
       //用promise all等api都打完了再來發送日期給月曆主頁面，
       //讓月曆主頁面因為useEffect日期而重打api並重設今天的deliveryInfo
       try {
@@ -470,7 +468,6 @@ const EventModal = React.memo(
         // console.log("convertData", convertData, "result", result);
         if (result.status) {
           showNotification("更改工項執行成功", true);
-          //   onClose();
         } else {
           showNotification(
             result?.result?.reason ? result.result.reason : "錯誤",
@@ -483,11 +480,16 @@ const EventModal = React.memo(
 
     // ///////////////////////////////////////////////////////////////////////////下面處理新增工項執行的東西
 
-    const AddNewJobTask = () => {
-        
-    }
-
-
+    const AddNewJobTask = (e, summary) => {
+      e.stopPropagation();
+      setAddJobTask(null);
+      setActiveJobTask("");
+      console.log("AddNewJobTask", summary);
+      setJobTask(null);
+      setTimeout(() => {
+        setAddJobTask(summary);
+      }, 500);
+    };
 
     return (
       <>
@@ -539,7 +541,9 @@ const EventModal = React.memo(
                       </span>
                       <button
                         className="absolute left-5 top-5 bg-green-600 text-slate-100 font-extrabold rounded-full  w-6 h-6 flex justify-center align-middle"
-                        onClick={() => {AddNewJobTask()}}
+                        onClick={(e) => {
+                          AddNewJobTask(e, summary);
+                        }}
                       >
                         +
                       </button>
@@ -609,12 +613,12 @@ const EventModal = React.memo(
               <div
                 className={`w-full ${
                   currentDivIndex === 1 ? "block" : "hidden"
-                } md:block h-[70vh] bg-slate-5 overflow-y-auto p-2 flex-col`}
+                } md:block h-[70vh] bg-slate-5 overflow-y-scroll mt-4 flex-col pe-2`}
               >
                 {jobTask ? (
                   <div className="mt-1">
                     {/* 最上面的編輯頁面小div */}
-                    <div className="text-base text-center w-full mt-3 border rounded-md p-2 bg-slate-200">
+                    <div className="text-base text-center w-full border rounded-md p-2 bg-slate-200">
                       <span
                         className="text-lg p-1 m-1 w-full rounded-md "
                         onClick={() => console.log(dispatchForApi)}
@@ -671,10 +675,12 @@ const EventModal = React.memo(
                         renderInput={(params) => <TextField {...params} />}
                       />
                     </div>
-                    <div className="w-full mt-2 flex justify-end">
+                    <div className="w-full -mt-2 mb-3 flex justify-end">
                       <Button
                         variant="contained"
-                        className="!text-base !h-8 !bg-green-600 !rounded-md !text-white px-2"
+                        color="success"
+                        className="!mb-2 !ease-in-out !duration-300"
+                        style={{ transform: "translateY(1rem)" }}
                         onClick={handleDispatchOnly}
                       >
                         僅修改人員/儲存
@@ -737,11 +743,13 @@ const EventModal = React.memo(
                             <span>{errors.estimatedUntil?.message}</span>
                           </FormHelperText>
                         </div>
-                        <div className="w-full mt-2 flex justify-end">
+                        <div className="w-full -mt-2 flex justify-end">
                           <Button
                             type="submit"
+                            color="success"
                             variant="contained"
-                            className="!text-base !h-8 !bg-green-600 !rounded-md !text-white px-2"
+                            className="!mb-2 !ease-in-out !duration-300"
+                            style={{ transform: "translateY(1rem)" }}
                           >
                             僅修改工項執行內容
                           </Button>
@@ -749,6 +757,13 @@ const EventModal = React.memo(
                       </form>
                     </FormProvider>
                   </div>
+                ) : addJobTask ? (
+                  <>
+                    <TaskModal
+                      apiSelectedTask={addJobTask?.summaryJobTasks}
+                      deliverInfo={addJobTask}
+                    />
+                  </>
                 ) : (
                   <div className="mt-1">
                     <div className="text-base text-center w-full mt-3 p-2  border-b-2">

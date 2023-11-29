@@ -172,7 +172,7 @@ const DispatchCalendar = () => {
         });
       };
       const transformedData = transformData(data);
-      console.log(transformedData);
+      // console.log(transformedData);
       // console.log(transformedData);
 
       const events = transformedData.flatMap((item) => {
@@ -199,7 +199,7 @@ const DispatchCalendar = () => {
       }
       setReGetCalendarApi(null);
       setIsEventModalOpen(true);
-      console.log("events", events);
+      // console.log("events", events);
       setEvents(events);
       setIsLoading(false);
     });
