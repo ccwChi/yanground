@@ -4,14 +4,46 @@ import PageTitle from "../../components/Guideline/PageTitle";
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
+import InputTitle from "../../components/Guideline/InputTitle";
+
+import { useForm, Controller } from "react-hook-form";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import MenuItem from "@mui/material/MenuItem";
+import TextField from "@mui/material/TextField";
+import Select from "@mui/material/Select";
+import RadioGroup from "@mui/material/RadioGroup";
+import Radio from "@mui/material/Radio";
+import Slider from "@mui/material/Slider";
+import Checkbox from "@mui/material/Checkbox";
+
 import EditIcon from "@mui/icons-material/Edit";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ViewTimelineIcon from "@mui/icons-material/ViewTimeline";
+import TuneIcon from "@mui/icons-material/Tune";
 import { getData, postData } from "../../utils/api";
-import { useSnackbar } from "notistack";
 import EditModal from "./UsersModal";
 import AttconfModal from "./AttconfModal";
 import { useNotification } from "../../hooks/useNotification";
+
+const ITEM_HEIGHT = 36;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+	PaperProps: {
+		style: {
+			maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+			Width: 250,
+		},
+	},
+};
+
+const defaultValue = {
+	name: "",
+	department: "",
+	gender: "",
+	age: [18, 65],
+	permissions: [],
+	startDate: null,
+};
 
 const Users = () => {
 	const navigate = useNavigate();
@@ -45,6 +77,32 @@ const Users = () => {
 	const [modalValue, setModalValue] = useState(false);
 	// 傳送額外資訊給 Modal
 	const [deliverInfo, setDeliverInfo] = useState(null);
+	// SearchDialog Switch
+	const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+	// 搜尋篩選清單
+	const [filters, setFilters] = useState(defaultValue);
+
+	// 預設搜尋篩選內容
+	const defaultValues = {
+		name: filters.name,
+		department: filters.department,
+		gender: filters.gender,
+		age: filters.age,
+		permissions: filters.permissions,
+		startDate: filters.startDate,
+	};
+
+	// 使用 useForm Hook 來管理表單狀態和驗證
+	const methods = useForm({
+		defaultValues,
+	});
+	const {
+		control,
+		reset,
+		watch,
+		formState: { isDirty },
+		handleSubmit,
+	} = methods;
 
 	// Tab 列表對應 api 搜尋參數
 	// const tabGroup = [
@@ -62,6 +120,15 @@ const Users = () => {
 			color: "primary",
 			fabVariant: "success",
 			fab: <AutoFixHighIcon fontSize="large" />,
+		},
+		{
+			mode: "filter",
+			icon: null, // 設為 null 就可以避免 PC 出現
+			text: "篩選",
+			variant: "contained",
+			color: "secondary",
+			fabVariant: "secondary",
+			fab: <TuneIcon fontSize="large" />,
 		},
 	];
 
@@ -195,6 +262,8 @@ const Users = () => {
 		} else if (dataMode === "attconf") {
 			setModalValue(dataMode);
 			setDeliverInfo(dataValue);
+		} else if (dataMode === "filter") {
+			handleOpenSearch();
 		} else {
 			setModalValue(dataMode);
 			setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
@@ -236,10 +305,151 @@ const Users = () => {
 	];
 	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
 
+	// 開啟 SearchDialog
+	const handleOpenSearch = () => {
+		setSearchDialogOpen(true);
+	};
+	// 關閉 SearchDialog
+	const handleCloseSearch = () => {
+		reset(defaultValues);
+		setSearchDialogOpen(false);
+	};
+	// 恢復為上一次搜尋狀態
+	const handleCoverDialog = () => {
+		reset(defaultValues);
+	};
+	// 重置 SearchDialog
+	const handleClearSearch = () => {
+		reset(defaultValue);
+		setFilters(defaultValue);
+		setSearchDialogOpen(false);
+	};
+	// 搜尋送出
+	const onSubmit = (data) => {
+		reset(data);
+		setFilters(data);
+		setSearchDialogOpen(false);
+		console.log(data);
+	};
+
 	return (
 		<>
 			{/* PageTitle */}
-			<PageTitle title="人事管理" btnGroup={btnGroup} handleActionClick={handleActionClick} />
+			<PageTitle
+				title="人事管理"
+				btnGroup={btnGroup}
+				handleActionClick={handleActionClick}
+				searchMode={true}
+				// 下面參數前提都是 searchMode = true
+				searchDialogOpen={searchDialogOpen}
+				handleOpenDialog={handleOpenSearch}
+				handleCloseDialog={handleCloseSearch}
+				handleCoverDialog={handleCoverDialog}
+				handleConfirmDialog={handleSubmit(onSubmit)}
+				handleClearDialog={handleClearSearch}
+				haveValue={filters === defaultValue}
+				isDirty={isDirty}>
+				<form className="flex flex-col gap-2">
+					<div className="inline-flex items-center">
+						<InputTitle title={"Line 名稱"} classnames="whitespace-nowrap min-w-[80px]" pb={false} required={false} />
+						<Controller
+							name="name"
+							control={control}
+							render={({ field }) => (
+								<TextField className="inputPadding" placeholder="請輸入 Line 名稱" fullWidth {...field} />
+							)}
+						/>
+					</div>
+					<div className="inline-flex items-center">
+						<InputTitle title={"部門名稱"} classnames="whitespace-nowrap min-w-[80px]" pb={false} required={false} />
+						<Controller
+							name="department"
+							control={control}
+							render={({ field }) => (
+								<Select
+									className="inputPadding"
+									displayEmpty
+									MenuProps={MenuProps}
+									fullWidth
+									disabled={!departmentList}
+									{...field}>
+									<MenuItem value="" disabled>
+										<span className="text-neutral-400 font-light">請選擇部門</span>
+									</MenuItem>
+									{departmentList?.map((dep) => (
+										<MenuItem key={"select" + dep.id} value={dep.id}>
+											{dep.name}
+										</MenuItem>
+									))}
+								</Select>
+							)}
+						/>
+					</div>
+					<div className="inline-flex items-center justify-between">
+						<InputTitle title={"性別"} classnames="whitespace-nowrap pb-1" pb={false} required={false} />
+						<Controller
+							name="gender"
+							control={control}
+							render={({ field }) => (
+								<RadioGroup className="inputPadding" row label="性別" {...field}>
+									<FormControlLabel value={""} control={<Radio color="secondary" size="small" />} label="全部" />
+									<FormControlLabel value={"female"} control={<Radio color="secondary" size="small" />} label="女性" />
+									<FormControlLabel value={"male"} control={<Radio color="secondary" size="small" />} label="男性" />
+								</RadioGroup>
+							)}
+						/>
+					</div>
+					<InputTitle title={"年齡"} classnames="whitespace-nowrap min-w-[80px]" pb={false} required={false} />
+					<Controller
+						name="age"
+						control={control}
+						render={({ field }) => (
+							<div className="px-3.5 sm:px-5">
+								<Slider
+									label="年齡"
+									value={field.value}
+									onChange={(event, value) => field.onChange(value)}
+									valueLabelDisplay="auto"
+									min={12}
+									max={80}
+									color="secondary"
+								/>
+							</div>
+						)}
+					/>
+					<InputTitle title={"權限"} classnames="whitespace-nowrap min-w-[80px]" pb={false} required={false} />
+					<Controller
+						name="permissions"
+						control={control}
+						render={({ field }) => (
+							<Select
+								className="inputPadding pe-3"
+								multiple
+								displayEmpty
+								MenuProps={MenuProps}
+								renderValue={(selected) => {
+									if (selected.length === 0) {
+										return <span className="text-neutral-400 font-light">請選擇權限</span>;
+									}
+
+									const roleNames = selected.map((roleId) => {
+										const role = authorityList?.find((r) => r.id === roleId);
+										return role ? role.name : null;
+									});
+									return roleNames.join(", ");
+								}}
+								{...field}>
+								{authorityList?.map((auth) => (
+									<MenuItem key={auth.id} value={auth.id}>
+										<Checkbox checked={watch("permissions").indexOf(auth.id) > -1} />
+										{auth.name}
+									</MenuItem>
+								))}
+							</Select>
+						)}
+					/>
+				</form>
+			</PageTitle>
 
 			{/* TabBar */}
 			{/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}

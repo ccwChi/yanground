@@ -1,16 +1,46 @@
 import React from "react";
+import Search from "../Search/Search";
 import Button from "@mui/material/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuoteLeft } from "@fortawesome/free-solid-svg-icons";
 
-const PageTitle = ({ title, btnGroup, handleActionClick, isLoading = true, children }) => {
+const PageTitle = ({
+	title,
+	btnGroup,
+	handleActionClick,
+	isLoading = true,
+	children,
+	searchMode = false,
+	// 下面參數前提都是 searchMode = true
+	searchDialogOpen,
+	handleOpenDialog,
+	handleCloseDialog,
+	handleCoverDialog,
+	handleClearDialog,
+	handleConfirmDialog,
+	haveValue,
+	isDirty,
+}) => {
 	return (
 		<div
 			className={"relative hidden sm:flex justify-between text-primary-800 mb-3"}
 			style={{ padding: "0.5rem 2rem 1.5rem" }}>
-			<div className="inline-flex items-center gap-2">
+			<div className="inline-flex items-center gap-2 pe-2">
 				<FontAwesomeIcon icon={faQuoteLeft} style={{ fontSize: "1.875rem" }} />
 				<span className="font-bold text-2xl leading-10">{title}</span>
+				{searchMode && (
+					<Search
+						open={searchDialogOpen}
+						handleOpenDialog={handleOpenDialog}
+						handleCloseDialog={handleCloseDialog}
+						handleCoverDialog={handleCoverDialog}
+						handleClearDialog={handleClearDialog}
+						handleConfirmDialog={handleConfirmDialog}
+						haveValue={haveValue}
+						isDirty={isDirty}>
+						{children}
+					</Search>
+				)}
 				<svg
 					className="absolute start-0 bottom-0"
 					xmlns="http://www.w3.org/2000/svg"
@@ -25,23 +55,25 @@ const PageTitle = ({ title, btnGroup, handleActionClick, isLoading = true, child
 			</div>
 			<div className="inline-flex gap-2">
 				{btnGroup &&
-					btnGroup.map((btn) => (
-						<Button
-							key={btn.text}
-							variant={btn.variant}
-							color={btn.color}
-							className="gap-1.5 !ease-in-out !duration-300"
-							style={{ transform: "translateY(1rem)" }}
-							sx={{ fontSize: "1rem" }}
-							data-mode={btn.mode}
-							onClick={handleActionClick}
-							disabled={!isLoading}>
-							{/* <FontAwesomeIcon icon={btn.icon} className="pe-2" /> */}
-							{btn.icon}
-							{btn.text}
-						</Button>
-					))}
-				{children}
+					btnGroup.map(
+						(btn) =>
+							btn.icon && (
+								<Button
+									key={btn.text}
+									variant={btn.variant}
+									color={btn.color}
+									className="gap-1.5 !ease-in-out !duration-300"
+									style={{ transform: "translateY(1rem)" }}
+									sx={{ fontSize: "1rem" }}
+									data-mode={btn.mode}
+									onClick={handleActionClick}
+									disabled={!isLoading}>
+									{/* <FontAwesomeIcon icon={btn.icon} className="pe-2" /> */}
+									{btn.icon}
+									{btn.text}
+								</Button>
+							)
+					)}
 			</div>
 		</div>
 	);

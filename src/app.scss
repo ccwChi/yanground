@@ -169,7 +169,8 @@ $z-index-a: 1040;
 	.inputPadding {
 		input,
 		.MuiSelect-select,
-		textarea {
+		textarea,
+		.MuiFormControlLabel-label {
 			font-size: 0.875rem !important;
 		}
 	}
