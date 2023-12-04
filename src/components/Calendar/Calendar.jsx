@@ -22,64 +22,64 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import "./calendar.scss";
 
 const Calendar = ({
-	data,
-	viewOptions = ["dayGridMonth", "timeGridWeek", "listMonth"],
-	_dayMaxEvents = 2,
-	...otherProps
+  data,
+  viewOptions = ["dayGridMonth", "timeGridWeek", "listMonth"],
+  _dayMaxEvents = 2,
+  ...otherProps
 }) => {
-	const isTargetScreen = useMediaQuery("(max-width:991.98px)");
-	const calendarRef = useRef(null);
-	const [activeButton, setActiveButton] = useState("");
-	const [calendarTitle, setCalendarTitle] = useState("");
+  const isTargetScreen = useMediaQuery("(max-width:991.98px)");
+  const calendarRef = useRef(null);
+  const [activeButton, setActiveButton] = useState("");
+  const [calendarTitle, setCalendarTitle] = useState("");
 
-	useEffect(() => {
-		const newView = isTargetScreen ? "listMonth" : "dayGridMonth";
-		calendarRef.current.getApi().changeView(newView);
-		setActiveButton(newView);
-	}, [isTargetScreen]);
+  useEffect(() => {
+    const newView = isTargetScreen ? "listMonth" : "dayGridMonth";
+    calendarRef.current.getApi().changeView(newView);
+    setActiveButton(newView);
+  }, [isTargetScreen]);
 
-	const handleViewChange = (view) => {
-		calendarRef.current.getApi().changeView(view);
-		setActiveButton(view);
-	};
+  const handleViewChange = (view) => {
+    calendarRef.current.getApi().changeView(view);
+    setActiveButton(view);
+  };
 
-	const getTitleForView = (view) => {
-		switch (view) {
-			case "dayGridMonth":
-				return "月";
-			case "dayGridWeek":
-				return "週";
-			case "timeGridWeek":
-				return "週 (時)";
-			case "dayGridDay":
-				return "日";
-			case "timeGridDay":
-				return "日 (時)";
-			case "listMonth":
-				return "列表";
-			default:
-				return null;
-		}
-	};
+  const getTitleForView = (view) => {
+    switch (view) {
+      case "dayGridMonth":
+        return "月";
+      case "dayGridWeek":
+        return "週";
+      case "timeGridWeek":
+        return "週 (時)";
+      case "dayGridDay":
+        return "日";
+      case "timeGridDay":
+        return "日 (時)";
+      case "listMonth":
+        return "列表";
+      default:
+        return null;
+    }
+  };
 
-	const getIconForView = (view) => {
-		switch (view) {
-			case "dayGridMonth":
-				return <CalendarTodayIcon fontSize="small" />;
-			case "dayGridWeek":
-				return <CalendarViewWeekIcon fontSize="small" />;
-			case "timeGridWeek":
-				return <AccessTimeIcon fontSize="small" />;
-			case "dayGridDay":
-				return <EventNoteIcon fontSize="small" />;
-			case "timeGridDay":
-				return <AvTimerIcon fontSize="small" />;
-			case "listMonth":
-				return <ListAltIcon fontSize="small" />;
-			default:
-				return null;
-		}
-	};
+  const getIconForView = (view) => {
+    switch (view) {
+      case "dayGridMonth":
+        return <CalendarTodayIcon fontSize="small" />;
+      case "dayGridWeek":
+        return <CalendarViewWeekIcon fontSize="small" />;
+      case "timeGridWeek":
+        return <AccessTimeIcon fontSize="small" />;
+      case "dayGridDay":
+        return <EventNoteIcon fontSize="small" />;
+      case "timeGridDay":
+        return <AvTimerIcon fontSize="small" />;
+      case "listMonth":
+        return <ListAltIcon fontSize="small" />;
+      default:
+        return null;
+    }
+  };
 
 	return (
 		<>

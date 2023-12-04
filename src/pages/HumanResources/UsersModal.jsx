@@ -99,31 +99,39 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 		}
 	}, [deliverInfo, reset]);
 
-	const onSubmit = (data) => {
-		const fd = new FormData();
-		const convertData = {
-			...data,
-			startedOn: data?.startedOn ? format(data.startedOn, "yyyy-MM-dd") : "",
-			birthDate: data?.birthDate ? format(data.birthDate, "yyyy-MM-dd") : "",
-			gender: data.gender === "male" ? true : data.gender === "female" ? false : "",
-			nationalIdentityCardNumber: data?.nationalIdentityCardNumber ? data.nationalIdentityCardNumber.toUpperCase() : "",
-		};
-		if (convertData?.nationalIdentityCardNumber === null || convertData?.nationalIdentityCardNumber === "") {
-			delete convertData.nationalIdentityCardNumber;
-		}
-		if (convertData?.department === null || convertData?.department === "") {
-			delete convertData.department;
-		}
-		for (let key in convertData) {
-			fd.append(key, convertData[key]);
-		}
-		// console.log(convertData)
-		// for (var pair of fd.entries()) {
-		//   console.log(pair);
-		// }
-		sendDataToBackend(fd, "edit", deliverInfo.id);
-		resetModal();
-	};
+  const onSubmit = (data) => {
+    const fd = new FormData();
+    const convertData = {
+      ...data,
+      startedOn: data?.startedOn ? format(data.startedOn, "yyyy-MM-dd") : "",
+      birthDate: data?.birthDate ? format(data.birthDate, "yyyy-MM-dd") : "",
+      gender:
+        data.gender === "male" ? true : data.gender === "female" ? false : "",
+      nationalIdentityCardNumber: data?.nationalIdentityCardNumber
+        ? data.nationalIdentityCardNumber.toUpperCase()
+        : "",
+    };
+    if (
+      convertData?.nationalIdentityCardNumber === null ||
+      convertData?.nationalIdentityCardNumber === ""
+    ) {
+      delete convertData.nationalIdentityCardNumber;
+    }
+    if (convertData?.department === null || convertData?.department === "") {
+      delete convertData.department;
+    }
+    for (let key in convertData) {
+      fd.append(key, convertData[key]);
+    }
+    // console.log(convertData)
+    // for (var pair of fd.entries()) {
+    //   console.log(pair);
+    // }
+     sendDataToBackend(fd, "edit", deliverInfo.id);
+     resetModal();
+     sendDataToBackend(fd, "edit", deliverInfo.id);
+     resetModal();
+  };
 
 	const resetModal = () => {
 		reset();
