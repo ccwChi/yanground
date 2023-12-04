@@ -146,7 +146,12 @@ const MapDialog = ({ open, handleClose, pos, r }) => {
 				</Toolbar>
 			</AppBar>
 			{position.lat !== 0 && position.lng !== 0 ? (
-				<MapContainer center={position} zoom={15} style={{ height: "100vh", height: "100dvh" }} doubleClickZoom={false}>
+				<MapContainer
+					center={position}
+					zoom={15}
+					style={{ height: "100vh", height: "100dvh" }}
+					doubleClickZoom={false}
+					attributionControl={false}>
 					<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 					<Marker position={position} draggable={true} eventHandlers={eventHandlers} ref={markerRef} icon={customIcon}>
 						<Popup minWidth={90}>

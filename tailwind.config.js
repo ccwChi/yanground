@@ -3,10 +3,6 @@ module.exports = {
 	content: ["./src/**/*.{js,jsx,ts,tsx}"],
 	theme: {
 		extend: {
-			fontFamily: {
-				// font-notoSerif
-				notoSerif: ['"Noto Serif SC"', "cursive"],
-			},
 			spacing: {
 				13: "3.125rem",
 			},

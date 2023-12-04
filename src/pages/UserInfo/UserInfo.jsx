@@ -171,7 +171,11 @@ const UserInfo = () => {
 						<LoadingTwo textSize={"text-lg sm:text-xl"} />
 					)
 				) : (
-					<PunchLogSection apiAttData={apiAttData} />
+					apiAttData ? (
+						<PunchLogSection isLoading={isLoading} apiAttData={apiAttData} />
+					) : (
+						<LoadingTwo textSize={"text-lg sm:text-xl"} />
+					)
 				)}
 			</div>
 		</div>

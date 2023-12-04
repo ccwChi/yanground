@@ -121,30 +121,35 @@ const Users = () => {
 			fabVariant: "success",
 			fab: <AutoFixHighIcon fontSize="large" />,
 		},
-		{
-			mode: "filter",
-			icon: null, // 設為 null 就可以避免 PC 出現
-			text: "篩選",
-			variant: "contained",
-			color: "secondary",
-			fabVariant: "secondary",
-			fab: <TuneIcon fontSize="large" />,
-		},
+		// {
+		// 	mode: "filter",
+		// 	icon: null, // 設為 null 就可以避免 PC 出現
+		// 	text: "篩選",
+		// 	variant: "contained",
+		// 	color: "secondary",
+		// 	fabVariant: "secondary",
+		// 	fab: <TuneIcon fontSize="large" />,
+		// },
 	];
 
 	// 對照 api table 所顯示 key
 	const columnsPC = [
-		{ key: "pictureUrl", label: "頭像", size: "15%" },
-		{ key: "displayName", label: "line名稱", size: "25%" },
-		{ key: "nickname", label: "暱稱", size: "25%" },
-		{ key: ["department", "name"], label: "部門", size: "18%" },
+		{ key: "pictureUrl", label: "", size: "120px" },
+		{ key: "displayName", label: "line名稱", size: "16%", align: "left" },
+		{ key: "nickname", label: "暱稱", size: "14%" },
+		{ key: "gender", label: "性別", size: "10%" },
+		{ key: ["department", "name"], label: "部門", size: "14%" },
+		{ key: "startedOn", label: "到職日", size: "16%" },
 	];
-	// 對照 api table 所顯示 key
 	const columnsMobile = [
 		{ key: "displayName", label: "line名稱" },
+		{ key: "lastname", label: "姓氏" },
+		{ key: "firstname", label: "名字" },
 		{ key: "nickname", label: "暱稱" },
 		{ key: ["department", "name"], label: "部門" },
 		{ key: "gender", label: "性別" },
+		{ key: "startedOn", label: "到職日" },
+		{ key: "birthDate", label: "生日" },
 	];
 
 	// edit = 編輯名稱
@@ -165,6 +170,7 @@ const Users = () => {
 				setIsLoading(false);
 				const data = result.result;
 				setApiData(data);
+
 				if (page >= data.totalPages) {
 					setPage(0);
 					setRowsPerPage(10);
@@ -339,7 +345,7 @@ const Users = () => {
 				title="人事管理"
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
-				searchMode={true}
+				// searchMode
 				// 下面參數前提都是 searchMode = true
 				searchDialogOpen={searchDialogOpen}
 				handleOpenDialog={handleOpenSearch}
@@ -462,7 +468,7 @@ const Users = () => {
 					columnsMobile={columnsMobile}
 					actions={actions}
 					cardTitleKey={"displayName"}
-					tableMinWidth={540}
+					tableMinWidth={800}
 					isLoading={isLoading}
 					handleActionClick={handleActionClick}
 				/>

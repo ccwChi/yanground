@@ -50,6 +50,7 @@
 	&.fc-listMonth-view {
 		td {
 			font-size: 0.875rem !important;
+			padding: 8px 12px !important;
 		}
 		.fc-list-event-graphic {
 			padding: 8px 0 !important;
@@ -88,7 +89,9 @@
 	// 		font-size: 0.875rem;
 	// 	}
 	// }
-	.custom_calendar.fc-listMonth-view .fc-scroller {
-		padding-bottom: 1.5rem;
+	.custom_calendar.fc-listMonth-view {
+		.fc-scroller {
+			padding-bottom: 1.5rem;
+		}
 	}
 }

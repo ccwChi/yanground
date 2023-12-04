@@ -131,6 +131,8 @@ const Calendar = ({
 				plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
 				initialView={isTargetScreen ? "listMonth" : "dayGridMonth"}
 				headerToolbar={false}
+				// // 設為星期一開始
+				// firstDay={1}
 				datesSet={(dateInfo) => {
 					setCalendarTitle(dateInfo.view.title);
 				}}

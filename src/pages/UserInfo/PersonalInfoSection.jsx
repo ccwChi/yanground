@@ -8,7 +8,7 @@ import Diversity3Icon from "@mui/icons-material/Diversity3";
 
 const PersonalInfoSection = React.memo(({ userProfile, personalInfo }) => {
 	return (
-		<div className="sm:pb-0 pb-8">
+		<div className="py-3 px-4 overflow-y-auto">
 			<div className="panel panel-wallet">
 				<div className="left bg-secondary-50 text-white">
 					<div>

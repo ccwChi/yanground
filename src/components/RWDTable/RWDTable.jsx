@@ -221,7 +221,7 @@ const RWDTable = ({
 									<TableCell
 										key={"TableTitleKey" + column.key}
 										width={column.size}
-										sx={{ textAlign: "center", verticalAlign: "middle" }}>
+										sx={{ textAlign: column.align ? column.align : "center", verticalAlign: "middle" }}>
 										{column.label}
 									</TableCell>
 								)
@@ -262,7 +262,7 @@ const RWDTable = ({
 											column.key !== "id" && (
 												<TableCell
 													key={"TableTitleList" + column.key + index}
-													sx={{ textAlign: "center", verticalAlign: "middle" }}>
+													sx={{ textAlign: column.align ? column.align : "center", verticalAlign: "middle" }}>
 													{(() => {
 														switch (column.key) {
 															case "pictureUrl":
