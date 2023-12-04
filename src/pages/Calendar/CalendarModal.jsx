@@ -21,7 +21,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { deleteData, getData, postBodyData, postData } from "../../utils/api";
 import { useNotification } from "../../hooks/useNotification";
-
+import AddIcon from "@mui/icons-material/Add";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -47,30 +47,20 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TaskModal } from "./AddJobTask";
+
 //   {/* 下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion  */}
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
-// const twoDayAgo = new Date();
-// twoDayAgo.setDate(tomorrow.getDate() - 2);
 
 const EventModal = React.memo(
-  ({
-    title,
-    sendDataToBackend,
-    deliverInfo,
-    setReGetCalendarApi,
-    onClose,
-    departMemberList,
-    isOpen,
-  }) => {
+  ({ deliverInfo, setReGetCalendarApi, onClose, departMemberList, isOpen }) => {
     // Alert 開關
     const [alertOpen, setAlertOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [sendBackFlag, setSendBackFlag] = useState(false);
-    const [constructionJobList, setConstructionJobList] = useState(null);
     const [isDispatchDirty, setIsDispatchDirty] = useState(false);
     const [jobTask, setJobTask] = useState(null);
     const [addJobTask, setAddJobTask] = useState(null);
@@ -79,6 +69,10 @@ const EventModal = React.memo(
     const [alertDateChangeOpen, setAlertDateChangeOpen] = useState(false);
 
     const [activeJobTask, setActiveJobTask] = useState("");
+
+    //點擊刪除工項執行垃圾桶跳出警告框
+    const [alertDeleteJobTaskOpen, setAlertDeleteJobTaskOpen] = useState(false);
+    const [deleteJobTaskId, setDeleteJobTaskId] = useState(true);
 
     //把送出工項執行的url設為全域變數，有些postbody會再奇怪的地方執行
     const postBodyJobTaskUrl = `constructionSummary/${jobTask?.summaryId}/tasks`;
@@ -180,12 +174,7 @@ const EventModal = React.memo(
         setAddJobTask(null);
         setJobTask(updateJobTask[0]);
         forTaskSelectLabouerList(updateJobTask[0]);
-        // console.log(
-        //   "原本得jobTask",
-        //   jobTask,
-        //   "重新取得deliferyInfor之後的forTaskSelectLabouerList",
-        //   updateJobTask[0]
-        // );
+
         setSendBackFlag(false);
         setIsDispatchDirty(false);
         reset();
@@ -198,6 +187,7 @@ const EventModal = React.memo(
         setAlertOpen(true);
       } else {
         onClose();
+        setAddJobTask(null);
         setActiveJobTask("");
         setJobTask(null);
         setCurrentDivIndex(0);
@@ -212,40 +202,13 @@ const EventModal = React.memo(
         setIsDispatchDirty(false);
         setCurrentDivIndex(0);
         setActiveJobTask("");
+        setAddJobTask(null);
         setJobTask(null);
         onClose();
       }
       setAlertOpen(false);
       setAlertDateChangeOpen(false);
     };
-    // 下面對於 日期改變警告要刪掉全部派工的視窗 做處理
-    const handleDateChangeAlertClose = async (agree) => {
-      //   if (agree) {
-      //     console.log(changeDateDeleteDispatch);
-      //     if (changeDateDeleteDispatch) {
-      //       await Promise.all(
-      //         changeDateDeleteDispatch[0].map((deleteId) =>
-      //           deleteDataPromise(deleteId)
-      //         )
-      //       );
-      //       PostBodyData(postBodyJobTaskUrl, changeDateDeleteDispatch[1]);
-      //       setReGetCalendarApi(deliverInfo.date);
-      //     //   setTaskSelectLabouerList([]);
-      //     //   setDispatchForApi([]);
-      //       setChangeDateDeleteDispatch(null);
-      //     }
-      //   }
-      //   setAlertOpen(false);
-      //   setAlertDateChangeOpen(false);
-    };
-
-    // useEffect(() => {
-    //   if (deliverInfo) {
-    //       "deliverInfo.date",
-    //       deliverInfo.date,
-    //     );
-    //   }
-    // }, [deliverInfo]);
 
     //僅提交工項執行的資料上傳
     const onSubmit = (data) => {
@@ -266,39 +229,6 @@ const EventModal = React.memo(
         },
       ];
       PostBodyData(postBodyJobTaskUrl, convertData);
-      //   if (jobTask.constructionSummaryJobTaskDispatches.length === 0) {
-      //     PostBodyData(postBodyJobTaskUrl, convertData);
-      //   } else {
-      //     if (
-      //       convertData[0].estimatedSince === jobTask.estimatedSince &&
-      //       convertData[0].estimatedUntil === jobTask.estimatedUntil
-      //     ) {
-      //       console.log(
-      //         "有派人但沒改日期",
-      //         "convertData",
-      //         convertData,
-      //         "jobTask",
-      //         jobTask
-      //       );
-      //       PostBodyData(postBodyJobTaskUrl, convertData);
-      //     } else {
-      //       console.log(
-      //         "有派人且改日期",
-      //         "convertData",
-      //         convertData,
-      //         "jobTask",
-      //         jobTask
-      //       );
-      //       setAlertDateChangeOpen(true);
-      //       const deleteDispatch =
-      //         jobTask?.constructionSummaryJobTaskDispatches?.length > 0 &&
-      //         jobTask.constructionSummaryJobTaskDispatches.map(
-      //           (dispatch) => dispatch.id
-      //         );
-      //       setChangeDateDeleteDispatch([deleteDispatch, convertData]);
-      //       //   PostBodyData(postBodyJobTaskUrl, convertData);
-      //     }
-      //   }
       setReGetCalendarApi(deliverInfo.date);
     };
 
@@ -325,7 +255,7 @@ const EventModal = React.memo(
       //全部可選的人 中只選出 該天已被選的人 => 要設置狀態
       //最終結果是選哪個執行，選單只有該執行已派人的人+完全沒被派過的人
       let selectedPersonnel = [];
-      if (selectedJobTask.constructionSummaryJobTaskDispatches.length > 0) {
+      if (selectedJobTask?.constructionSummaryJobTaskDispatches?.length > 0) {
         selectedPersonnel = departMemberList.filter((person) => {
           return selectedJobTask.constructionSummaryJobTaskDispatches.some(
             (dispatch) => {
@@ -340,7 +270,7 @@ const EventModal = React.memo(
         });
       }
       setTaskSelectLabouerList([...notSelected, ...selectedPersonnel]);
-      if (selectedJobTask.constructionSummaryJobTaskDispatches.length > 0) {
+      if (selectedJobTask?.constructionSummaryJobTaskDispatches?.length > 0) {
         const beSeleted = [...notSelected, ...selectedPersonnel].filter(
           (labourer) =>
             selectedJobTask.constructionSummaryJobTaskDispatches.some(
@@ -354,15 +284,8 @@ const EventModal = React.memo(
         setDispatchForApi([]);
         //console.log("DispatchForApi", []);
       }
-      // console.log("taskSelectLabouerList", [
-      //   ...notSelected,
-      //   ...selectedPersonnel,
-      // ]);
     };
-    // useEffect(() => {
-    //   console.log(activeJobTask);
-    // }, [activeJobTask]);
-    //點擊某項工項執行
+
     const handleJobTaskEdit = (selectedJobTask, summaryId) => {
       const jobTask = { ...selectedJobTask, summaryId };
       console.log("jobTask", jobTask);
@@ -381,7 +304,6 @@ const EventModal = React.memo(
       setIsDispatchDirty(true);
       setDispatchForApi(value);
       //   console.log("event", event);
-      // console.log("value", value);
     };
 
     /////////////////////////////////////////////////////////點擊派工提交
@@ -410,11 +332,7 @@ const EventModal = React.memo(
       for (let key in disPatchData) {
         fd.append(key, disPatchData[key]);
       }
-      // console.log(
-      //   "案送出後的刪除清單taskSelectLabouerList",
-      //   taskSelectLabouerList
-      // );
-      // console.log("案送出後的刪除清單removeWithPatchId", removeWithPatchId);
+
       //用promise all等api都打完了再來發送日期給月曆主頁面，
       //讓月曆主頁面因為useEffect日期而重打api並重設今天的deliveryInfo
       try {
@@ -484,11 +402,41 @@ const EventModal = React.memo(
       e.stopPropagation();
       setAddJobTask(null);
       setActiveJobTask("");
-      console.log("AddNewJobTask", summary);
+      setCurrentDivIndex(1);
+      // console.log("AddNewJobTask", summary);
       setJobTask(null);
       setTimeout(() => {
         setAddJobTask(summary);
       }, 500);
+    };
+
+    const DeleteSummaryJobTask = (summaryJobTaskId) => {
+      setAlertDeleteJobTaskOpen(true);
+      setDeleteJobTaskId(summaryJobTaskId);
+    };
+
+    const handleAlertDeleteJobTaskOpen = async (agree) => {
+      if (agree) {
+        DeteleSummary();
+      }
+      setAlertDeleteJobTaskOpen(false);
+    };
+
+    const DeteleSummary = () => {
+      setSendBackFlag(true);
+      const deleteUrl = `constructionSummaryJobTask/${deleteJobTaskId}`;
+      deleteData(deleteUrl).then((result) => {
+        if (result.status) {
+          showNotification("刪除派工更改成功", true);
+          setReGetCalendarApi(deliverInfo.date);
+        } else if (result.result.response !== 200) {
+          showNotification(
+            result?.result?.reason ? result?.result?.reason : "刪除錯誤",
+            false
+          );
+        }
+        setSendBackFlag(false);
+      });
     };
 
     return (
@@ -534,19 +482,20 @@ const EventModal = React.memo(
                       //   id={`panel${1}bh-header`}
                       className="text-center relative"
                     >
-                      <span className="text-lg p-1 m-1 w-full rounded-md ">
-                        {summary.project.name +
-                          "-" +
-                          summary.constructionJob.name}
+                      <span className="text-lg p-1 m-1 w-full rounded-md ps-10 text-left">
+                        {summary.project.name + "-" + summary.name}
                       </span>
-                      <button
-                        className="absolute left-5 top-5 bg-green-600 text-slate-100 font-extrabold rounded-full  w-6 h-6 flex justify-center align-middle"
+                      <Button
+                        variant="contained"
+                        color="success"
+                        className="!ease-in-out !duration-300 !h-[24px] !p-0 !min-w-[24px] !absolute !left-4 !top-1 !text-xl !leading-none"
+                        sx={{ transform: "translate(4px, 1rem)" }}
                         onClick={(e) => {
                           AddNewJobTask(e, summary);
                         }}
                       >
-                        +
-                      </button>
+                        <AddIcon />
+                      </Button>
                     </AccordionSummary>
                     <AccordionDetails>
                       {summary.summaryJobTasks.map((summaryJobTask) => (
@@ -555,12 +504,11 @@ const EventModal = React.memo(
                           <div
                             className={` rounded-md  ${
                               activeJobTask === summaryJobTask.id &&
-                              "bg-slate-200 my-1 py-0.5"
-                            }
-                      `}
+                              "bg-slate-200 my-1 py-0.5 pl-2"
+                            }`}
                           >
                             <div
-                              className={`m-1 p-1 text-center relative  `}
+                              className={`m-1 p-1 relative  `}
                               onClick={() => {
                                 handleJobTaskEdit(summaryJobTask, summary.id);
                               }}
@@ -582,24 +530,32 @@ const EventModal = React.memo(
                                       : "disabled"
                                   }`}
                                 />
+                                {/* <DeleteIcon
+                                  className="ml-1"
+                                  color="disabled"
+                                  onClick={() => {
+                                    DeleteSummaryJobTask(summaryJobTask.id);
+                                    console.log(
+                                      "DeleteSummaryJobTaskId",
+                                      summaryJobTask.id
+                                    );
+                                  }}
+                                /> */}
                               </span>
                             </div>
-                            <div className="m-1 text-center align-middle">
-                              {summaryJobTask
-                                .constructionSummaryJobTaskDispatches.length > 0
-                                ? summaryJobTask.constructionSummaryJobTaskDispatches.map(
-                                    (dispatch, index) => (
-                                      // <div
-                                      //   key={dispatch.labourer.id}
-                                      //   className=" bg-amber-50"
-                                      // >
+                            <div className="m-1 align-middle">
+                              {summaryJobTask.constructionSummaryJobTaskDispatches.map(
+                                (dispatch, index) => (
+                                  // <div
+                                  //   key={dispatch.labourer.id}
+                                  //   className=" bg-amber-50"
+                                  // >
 
-                                      <span className="ms-1" key={index}>
-                                        {dispatch.labourer.nickname}
-                                      </span>
-                                    )
-                                  )
-                                : null}
+                                  <span className="ms-1" key={index}>
+                                    {dispatch.labourer.nickname}
+                                  </span>
+                                )
+                              )}
                             </div>
                           </div>
                         </div>
@@ -618,21 +574,23 @@ const EventModal = React.memo(
                 {jobTask ? (
                   <div className="mt-1">
                     {/* 最上面的編輯頁面小div */}
-                    <div className="text-base text-center w-full border rounded-md p-2 bg-slate-200">
+
+                    <div className="w-full flex justify-center my-2">
                       <span
-                        className="text-lg p-1 m-1 w-full rounded-md "
-                        onClick={() => console.log(dispatchForApi)}
+                        className="font-bold text-lg px-4 border-b-2"
+                        onClick={() => {
+                          console.log(deliverInfo);
+                        }}
                       >
-                        編輯頁面{" "}
-                        <span className="w-full text-center">
-                          {!!jobTask && (
-                            <span className="text">
-                              - {jobTask?.constructionJobTask?.name}
-                            </span>
-                          )}
-                        </span>
-                      </span>
+                        {!!jobTask && (
+                          <span className="text">
+                            {jobTask?.constructionJobTask?.name}
+                          </span>
+                        )}{" "}
+                        - 編輯
+                      </span>{" "}
                     </div>
+
                     {/* 派工div */}
                     <div className="mt-2">
                       <InputTitle
@@ -761,7 +719,9 @@ const EventModal = React.memo(
                   <>
                     <TaskModal
                       apiSelectedTask={addJobTask?.summaryJobTasks}
-                      deliverInfo={addJobTask}
+                      setAddJobTask={setAddJobTask}
+                      deliverInfo={{ ...addJobTask, date: deliverInfo.date }}
+                      setReGetCalendarApi={setReGetCalendarApi}
                     />
                   </>
                 ) : (
@@ -794,7 +754,17 @@ const EventModal = React.memo(
           disagreeText="取消"
           agreeText="確定"
         />
+        {/* 點選垃圾桶刪除工項執行選項 */}
         <AlertDialog
+          open={alertDeleteJobTaskOpen}
+          onClose={handleAlertDeleteJobTaskOpen}
+          icon={<ReportProblemIcon color="secondary" />}
+          title="注意"
+          content="您點選刪除工項執行，確定刪除？"
+          disagreeText="取消"
+          agreeText="確定"
+        />
+        {/* <AlertDialog
           open={alertDateChangeOpen}
           onClose={handleDateChangeAlertClose}
           icon={<ReportProblemIcon color="secondary" />}
@@ -821,7 +791,7 @@ const EventModal = React.memo(
           }
           disagreeText="取消"
           agreeText="確定"
-        />
+        /> */}
         {/* Backdrop */}
         <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
           <LoadingFour />
