@@ -40,7 +40,6 @@ const Home = () => {
 
 					const transformedData = data.map((item) => {
 						const { date, summaries } = item;
-
 						const projectMap = new Map();
 
 						summaries.forEach((summary) => {
@@ -223,7 +222,9 @@ const Home = () => {
 													</p>
 													<span className="text-neutral-500 pe-2">人員分配：</span>
 													{s.constructionSummaryJobTasks.map((c) => (
-														<div className="flex flex-col sm:flex-row items-start" key={c.constructionJobTask}>
+														<div
+															className="flex flex-col sm:flex-row items-start"
+															key={summary.date + s.name + c.constructionJobTask}>
 															{/* <Chip label={c.constructionJobTask} color="primary" className="me-2" /> */}
 															<span className="whitespace-nowrap text-sm text-neutral-400">
 																〔{c.constructionJobTask}〕
