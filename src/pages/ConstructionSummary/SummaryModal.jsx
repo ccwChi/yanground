@@ -541,9 +541,13 @@ const TaskModal = React.memo(
         getData(taskurl).then((result) => {
           //這個result是用工程項目去找工項執行清單的結果
           //console.log("取得總清單",result)
+          
           setIsLoading(false);
           const data = result.result;
           const contains = [];
+          console.log("apiSelectedTask",apiSelectedTask)
+          console.log("apigetData",data)
+          console.log("deliverInfo",deliverInfo)
           for (const t of apiSelectedTask) {
             const matchTask = data.find(
               (d) => d.id === t.constructionJobTask.id
@@ -561,6 +565,7 @@ const TaskModal = React.memo(
           setConstructionTaskList(notMatchingTasks);
         });
       }
+      console.log("apiSelectedTask",apiSelectedTask)
     }, [apiSelectedTask]);
 
     useEffect(() => {
