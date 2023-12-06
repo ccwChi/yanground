@@ -11,8 +11,15 @@ import { EventModal } from "./CalendarModal";
 import { useNotification } from "../../hooks/useNotification";
 import { LoadingThree } from "../../components/Loader/Loading";
 import Calendar from "../../components/Calendar/Calendar";
-import { Backdrop, Tooltip, useMediaQuery } from "@mui/material";
+import {
+  Backdrop,
+  Tooltip,
+  tooltipClasses,
+  useMediaQuery,
+} from "@mui/material";
 import { UpdatedModal } from "./NewSummaryModal";
+import styled from "@emotion/styled";
+import { Button } from "@mui/base";
 
 const today = new Date();
 //明天
@@ -514,8 +521,6 @@ const CustomEventContent = ({ event }) => {
               : `${selectedColor?.fortw} text-white`
           } `}
         >
-          {/* {console.log(extendedProps)} */}
-
           <Tooltip
             describeChild={true}
             className="z-[3000]"
@@ -528,25 +533,34 @@ const CustomEventContent = ({ event }) => {
               },
             }}
             placement="right-start"
-            title={extendedProps.summaryJobTasks.map((summaryJobTask) => (
-              <div key={summaryJobTask.id} className="">
-                {summaryJobTask.constructionSummaryJobTaskDispatches.length >
-                  0 &&
-                  summaryJobTask.constructionSummaryJobTaskDispatches.map(
-                    (dispatch, index) => (
-                      <span className="text-lg px-2" key={index}>
-                        {dispatch.labourer.nickname}
-                        <br />
-                      </span>
-                    )
-                  )}
-              </div>
-            ))}
+            title={<ToolTipTitle extendedProps={extendedProps} />}
           >
-            {event.title}-{extendedProps.name}
+            <span>
+              {event.title}-{extendedProps.name}
+            </span>
           </Tooltip>
         </p>
       )}
     </div>
+  );
+};
+
+const ToolTipTitle = (extendedProps) => {
+  return (
+    <React.Fragment>
+      {extendedProps.summaryJobTasks.map((summaryJobTask) => (
+        <div key={summaryJobTask.id} className="">
+          {summaryJobTask.constructionSummaryJobTaskDispatches.length > 0 &&
+            summaryJobTask.constructionSummaryJobTaskDispatches.map(
+              (dispatch, index) => (
+                <span className="text-lg px-2" key={index}>
+                  {dispatch.labourer.nickname}
+                  <br />
+                </span>
+              )
+            )}
+        </div>
+      ))}
+    </React.Fragment>
   );
 };
