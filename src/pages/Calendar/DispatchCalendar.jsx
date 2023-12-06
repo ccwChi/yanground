@@ -401,9 +401,9 @@ const DispatchCalendar = () => {
           handleEventClick(e.event.startStr);
         }}
         // editable={true}
-        eventContent={(eventInfo) => (
-          <CustomEventContent event={eventInfo.event} />
-        )}
+        eventContent={(eventInfo) => {
+          return <CustomEventContent event={eventInfo.event} />;
+        }}
         eventColor={isTargetScreen ? "transparent" : "#F48A64"}
         // height="auto"
         displayEventTime={false} // 整天
@@ -533,21 +533,20 @@ const CustomEventContent = ({ event }) => {
               },
             }}
             placement="right-start"
-            title={ <React.Fragment>
-              {extendedProps.summaryJobTasks.map((summaryJobTask) => (
-                <div key={summaryJobTask.id} className="">
-                  {summaryJobTask.constructionSummaryJobTaskDispatches.length > 0 &&
-                    summaryJobTask.constructionSummaryJobTaskDispatches.map(
-                      (dispatch, index) => (
-                        <span className="text-lg px-2" key={index}>
-                          {dispatch.labourer.nickname}
-                          <br />
-                        </span>
-                      )
-                    )}
-                </div>
-              ))}
-            </React.Fragment>}
+            title={extendedProps.summaryJobTasks.map((summaryJobTask) => (
+              <div key={summaryJobTask.id} className="">
+                {summaryJobTask.constructionSummaryJobTaskDispatches.length >
+                  0 &&
+                  summaryJobTask.constructionSummaryJobTaskDispatches.map(
+                    (dispatch, index) => (
+                      <span className="text-lg px-2" key={index}>
+                        {dispatch.labourer.nickname}
+                        <br />
+                      </span>
+                    )
+                  )}
+              </div>
+            ))}
           >
             <span>
               {event.title}-{extendedProps.name}
