@@ -533,7 +533,21 @@ const CustomEventContent = ({ event }) => {
               },
             }}
             placement="right-start"
-            title={<ToolTipTitle extendedProps={extendedProps} />}
+            title={ <React.Fragment>
+              {extendedProps.summaryJobTasks.map((summaryJobTask) => (
+                <div key={summaryJobTask.id} className="">
+                  {summaryJobTask.constructionSummaryJobTaskDispatches.length > 0 &&
+                    summaryJobTask.constructionSummaryJobTaskDispatches.map(
+                      (dispatch, index) => (
+                        <span className="text-lg px-2" key={index}>
+                          {dispatch.labourer.nickname}
+                          <br />
+                        </span>
+                      )
+                    )}
+                </div>
+              ))}
+            </React.Fragment>}
           >
             <span>
               {event.title}-{extendedProps.name}
@@ -542,25 +556,5 @@ const CustomEventContent = ({ event }) => {
         </p>
       )}
     </div>
-  );
-};
-
-const ToolTipTitle = (extendedProps) => {
-  return (
-    <React.Fragment>
-      {extendedProps.summaryJobTasks.map((summaryJobTask) => (
-        <div key={summaryJobTask.id} className="">
-          {summaryJobTask.constructionSummaryJobTaskDispatches.length > 0 &&
-            summaryJobTask.constructionSummaryJobTaskDispatches.map(
-              (dispatch, index) => (
-                <span className="text-lg px-2" key={index}>
-                  {dispatch.labourer.nickname}
-                  <br />
-                </span>
-              )
-            )}
-        </div>
-      ))}
-    </React.Fragment>
   );
 };

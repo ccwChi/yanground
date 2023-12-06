@@ -267,7 +267,7 @@ const EventModal = React.memo(
 
     const handleJobTaskEdit = (selectedJobTask, summaryId) => {
       const jobTask = { ...selectedJobTask, summaryId };
-      console.log("jobTask", jobTask);
+      // console.log("jobTask", jobTask);
       setActiveJobTask(selectedJobTask.id);
       setDispatchForApi([]);
       setIsLoading(true);
