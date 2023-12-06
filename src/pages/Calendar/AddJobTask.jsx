@@ -7,9 +7,9 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
   FormHelperText,
   Backdrop,
+  CircularProgress,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -21,14 +21,20 @@ import {
 } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { deleteData, getData, postBodyData } from "../../utils/api";
+import { getData, postBodyData } from "../../utils/api";
 
 import InputTitle from "../../components/Guideline/InputTitle";
 import { useNotification } from "../../hooks/useNotification";
 import { LoadingFour } from "../../components/Loader/Loading";
 
 const TaskModal = React.memo(
-  ({ deliverInfo, setReGetCalendarApi, setAddJobTask }) => {
+  ({
+    deliverInfo,
+    setReGetCalendarApi,
+    setAddJobTask,
+    jobTaskDirty,
+    setJobTaskDirty,
+  }) => {
     // Alert 開關
 
     const [isLoading, setIsLoading] = useState(false);
@@ -47,9 +53,6 @@ const TaskModal = React.memo(
     const [selectedTask, setSelectedTask] = useState("");
 
     const [sendBackFlag, setSendBackFlag] = useState(false);
-
-    // 檢查是否被汙染
-    const [isDirty, setIsDirty] = useState(false);
 
     const showNotification = useNotification();
 
@@ -106,7 +109,6 @@ const TaskModal = React.memo(
     const {
       control,
       handleSubmit,
-      reset,
       setValue,
       formState: { errors },
     } = methods;
@@ -114,7 +116,7 @@ const TaskModal = React.memo(
       control,
       name: "fields",
     });
-
+    // 檢查表單是否汙染
 
     //取得工程項目執行並設定已選擇及剩下能選擇的清單
     useEffect(() => {
@@ -162,7 +164,7 @@ const TaskModal = React.memo(
 
     // 選擇新增移除御三家
     const handleAddTask = useCallback(() => {
-      if (!isDirty) setIsDirty(true);
+      if (!jobTaskDirty) setJobTaskDirty(true);
       // 當選擇並記錄id,
       if (selectedTask) {
         const newAddSeletedTask = [
@@ -245,7 +247,7 @@ const TaskModal = React.memo(
     // 選擇新增移除御三家
     const handleRemoveTask = useCallback(
       (taskId, index) => {
-        if (!isDirty) setIsDirty(true);
+        if (!jobTaskDirty) setJobTaskDirty(true);
         // console.log("selectedTasks", selectedTasks);
         // console.log("constructionTaskList", constructionTaskList);
         const selectedTask = selectedTasks.find(
@@ -316,121 +318,21 @@ const TaskModal = React.memo(
 
     return (
       <>
-        <div className="">
-          <div className="w-full flex justify-center my-2">
-            <span
-              className="font-bold text-lg px-4 border-b-2"
-              onClick={() => {
-                console.log(deliverInfo);
-              }}
-            >
-              {deliverInfo.name} - 新增工項執行
-            </span>{" "}
-          </div>
-          <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              {onlyNewSelected.map((task, index) => (
-                <div key={index} className="border p-2 mb-2 rounded-md">
-                  <div className="flex justify-between">
-                    {task.constructionJobTask?.name}
-                    <DeleteIcon
-                      color="primary"
-                      onClick={() => {
-                        handleRemoveTask(task.constructionJobTask?.id, index);
-                      }}
-                    />
-                  </div>
-                  <div className="hidden">
-                    {/* 這個直接用來儲存constructionJobTask作為送api的資料之一 */}
-                    <Controller
-                      name={`fields[${index}].constructionJobTask`}
-                      defaultValue={task.constructionJobTask?.id}
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          variant="outlined"
-                          size="small"
-                          className="inputPadding"
-                          //   inputProps={{ readOnly: true }}
-                          fullWidth
-                          {...field}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="mt-3">
-                    <InputTitle
-                      title={`預計施工日期 - 完工日期`}
-                      required={false}
-                    />
-                    <div className="flex gap-3">
-                      <ControlledDatePicker
-                        name={`fields[${index}].estimatedSince`}
-                      />
-
-                      {/* <InputTitle title={"預計完工日期"} required={false} /> */}
-                      <ControlledDatePicker
-                        name={`fields[${index}].estimatedUntil`}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col  mt-3">
-                    <InputTitle title={"施工位置"} required={false} />
-
-                    <Controller
-                      name={`fields[${index}].location`}
-                      defaultValue={""}
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          variant="outlined"
-                          size="small"
-                          className="inputPadding"
-                          placeholder="請輸入施工位置"
-                          //   inputProps={{ readOnly: true }}
-                          fullWidth
-                          {...field}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="flex flex-col mt-3">
-                    <InputTitle title={"說明 /備註"} required={false} />
-                    <Controller
-                      name={`fields[${index}].remark`}
-                      defaultValue={""}
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          variant="outlined"
-                          size="small"
-                          className="inputPadding"
-                          placeholder="請輸入說明或備註"
-                          //   inputProps={{ readOnly: true }}
-                          fullWidth
-                          {...field}
-                        />
-                      )}
-                    />
-                  </div>
-
-                  <div className="flex-col inline-flex w-full ">
-                    <FormHelperText
-                      className="!text-red-600 break-words !text-right !mt-0"
-                      sx={{ minHeight: "1.25rem" }}
-                    >
-                      <span>
-                        {errors.fields?.[index]?.estimatedUntil?.message}
-                      </span>
-                    </FormHelperText>
-                  </div>
-                </div>
-              ))}
-
-              <div className="inline-flex gap-3 my-2 w-full">
-                <FormControl size="small" className="inputPadding" fullWidth>
-                  {selectedTask === "" ? (
+        <div className="w-full flex justify-center my-2">
+          <span className="font-bold text-lg px-4 border-b-2">
+            {deliverInfo.name} - 新增工項執行
+          </span>{" "}
+        </div>
+        <FormProvider {...methods}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="relative">
+              <div className="inline-flex gap-3  w-full ">
+                <FormControl
+                  size="small"
+                  className="inputPadding relative"
+                  fullWidth
+                >
+                  {/* {selectedTask === "" ? (
                     <InputLabel
                       id="task-select-label"
                       disableAnimation
@@ -438,20 +340,37 @@ const TaskModal = React.memo(
                       focused={false}
                     >
                       請選擇工項執行
+                      {!isLoading && (
+                        <span className="ps-6  translate-y-3">
+                          <CircularProgress color="primary" size={20} />
+                        </span>
+                      )}
                     </InputLabel>
-                  ) : null}
+                  ) : null} */}
                   <Select
+                    disabled={isLoading}
                     labelId="task-select-label"
                     value={selectedTask}
                     onChange={handleTaskChange}
+                    displayEmpty
                     //MenuProps={MenuProps}
                   >
+                    <MenuItem value="" disabled>
+                      <span className="text-neutral-400 font-light">
+                        請選擇工項執行
+                      </span>
+                    </MenuItem>
                     {constructionTaskList?.map((task) => (
                       <MenuItem key={"select" + task.id} value={task.id}>
                         {task.name}
                       </MenuItem>
                     ))}
                   </Select>
+                  {isLoading && (
+                    <span className="absolute flex items-center right-10 top-0 bottom-0">
+                      <CircularProgress color="primary" size={20} />
+                    </span>
+                  )}
                 </FormControl>
 
                 <Button
@@ -464,19 +383,122 @@ const TaskModal = React.memo(
                   新增
                 </Button>
               </div>
-              <div className="w-full my-2">
+
+              <div className="flex-1 my-2">
+                {onlyNewSelected.map((task, index) => (
+                  <div key={index} className="border p-2 mb-2 rounded-md">
+                    <div className="flex justify-between">
+                      {task.constructionJobTask?.name}
+                      <DeleteIcon
+                        color="secondary"
+                        onClick={() => {
+                          handleRemoveTask(task.constructionJobTask?.id, index);
+                        }}
+                      />
+                    </div>
+                    <div className="hidden">
+                      {/* 這個直接用來儲存constructionJobTask作為送api的資料之一 */}
+                      <Controller
+                        name={`fields[${index}].constructionJobTask`}
+                        defaultValue={task.constructionJobTask?.id}
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            variant="outlined"
+                            size="small"
+                            className="inputPadding"
+                            //   inputProps={{ readOnly: true }}
+                            fullWidth
+                            {...field}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="mt-3">
+                      <InputTitle
+                        title={`預計施工日期 - 完工日期`}
+                        required={false}
+                      />
+                      <div className="flex gap-3">
+                        <ControlledDatePicker
+                          name={`fields[${index}].estimatedSince`}
+                        />
+
+                        {/* <InputTitle title={"預計完工日期"} required={false} /> */}
+                        <ControlledDatePicker
+                          name={`fields[${index}].estimatedUntil`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col  mt-3">
+                      <InputTitle title={"施工位置"} required={false} />
+
+                      <Controller
+                        name={`fields[${index}].location`}
+                        defaultValue={""}
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            variant="outlined"
+                            size="small"
+                            className="inputPadding"
+                            placeholder="請輸入施工位置"
+                            //   inputProps={{ readOnly: true }}
+                            fullWidth
+                            {...field}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="flex flex-col mt-3">
+                      <InputTitle title={"說明 /備註"} required={false} />
+                      <Controller
+                        name={`fields[${index}].remark`}
+                        defaultValue={""}
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            variant="outlined"
+                            size="small"
+                            className="inputPadding"
+                            placeholder="請輸入說明或備註"
+                            //   inputProps={{ readOnly: true }}
+                            fullWidth
+                            {...field}
+                          />
+                        )}
+                      />
+                    </div>
+
+                    <div className="flex-col inline-flex w-full ">
+                      <FormHelperText
+                        className="!text-red-600 break-words !text-right !mt-0"
+                        sx={{ minHeight: "1.25rem" }}
+                      >
+                        <span>
+                          {errors.fields?.[index]?.estimatedUntil?.message}
+                        </span>
+                      </FormHelperText>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="w-full sticky bg-white  bottom-0 py-2">
                 <Button
                   type="submit"
                   variant="contained"
                   color="success"
-                  className="!mb-2 !ease-in-out !duration-300 !w-full"
+                  className="!ease-in-out !duration-300 !w-full"
                 >
                   儲存提交
                 </Button>
               </div>
-            </form>
-          </FormProvider>
-        </div>
+            </div>
+          </form>
+        </FormProvider>
+
         <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
           <LoadingFour />
         </Backdrop>

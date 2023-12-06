@@ -19,6 +19,7 @@ const CustomBreadcrumbs = () => {
 		{ name: "setting", display: "設定" },
 		{ name: "punch", display: "打卡" },
 		{ name: "maps", display: "地圖" },
+		{ name: "dispatchcalendar", display: "派工行事曆" },
 	];
 
 	return (

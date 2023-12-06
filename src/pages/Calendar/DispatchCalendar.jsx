@@ -1,29 +1,17 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 // import "./calendar.css";
 import constructionTypeList from "../../data/constructionTypes";
 
 import PageTitle from "../../components/Guideline/PageTitle";
-import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
-import TableTabber from "../../components/Tabbar/TableTabber";
-import RWDTable from "../../components/RWDTable/RWDTable";
-import Pagination from "../../components/Pagination/Pagination";
 import AddIcon from "@mui/icons-material/Add";
-import FolderCopyIcon from "@mui/icons-material/FolderCopy";
-import WorkHistoryIcon from "@mui/icons-material/WorkHistory";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import EditIcon from "@mui/icons-material/Edit";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
 import { getData, postData } from "../../utils/api";
 import { EventModal } from "./CalendarModal";
 import { useNotification } from "../../hooks/useNotification";
-import {
-  Loading,
-  LoadingFour,
-  LoadingThree,
-} from "../../components/Loader/Loading";
+import { LoadingThree } from "../../components/Loader/Loading";
 import Calendar from "../../components/Calendar/Calendar";
-import { Backdrop, useMediaQuery } from "@mui/material";
+import { Backdrop, Tooltip, useMediaQuery } from "@mui/material";
 import { UpdatedModal } from "./NewSummaryModal";
 
 const today = new Date();
@@ -46,26 +34,26 @@ const DispatchCalendar = () => {
   const [isLoading, setIsLoading] = useState(true);
   const showNotification = useNotification();
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
-  // API List Data
-  const [apiData, setApiData] = useState(null);
-  const [constSummaryApiList, setConstSummaryApiList] = useState(null);
   const [departMemberList, setDepartMemberList] = useState(null);
+
+  // 儲存整理完的(七天)派工人員清單 + 全部施工清單過濾之後的全部，events會用這個下去做日期分類
+  const [constSummaryApiList, setConstSummaryApiList] = useState(null);
   const [events, setEvents] = useState([]);
+
+  // 在上面全域指派了幾天前幾天後，並儲存那些天數的陣列
   const [dateList, setDateList] = useState([]);
-  const [filterSummaryList, setFilterSummaryList] = useState(null);
+
+  // 新增施工清單的按鈕，要傳遞求得的全部專案新增面板
   const [projectsList, setProjectsList] = useState(null);
 
   // 用日期改變作為重打api的依據，為了在面板修改派工後可以重取api並將對應的日期資料傳給面板
   const [reGetCalendarApi, setReGetCalendarApi] = useState(today);
 
-  //
+  // 儲存api求得的施工清單總攬
   const [constructionSummaryList, setConstructionSummaryList] = useState(null);
-  // isLoading 等待請求 api
 
   const [sendBackFlag, setSendBackFlag] = useState(false);
-  // ApiUrl
-  // const furl = "site";
-  // const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
+
   // ModalValue 控制開啟的是哪一個 Modal
   const [modalValue, setModalValue] = useState(false);
   // 傳送額外資訊給 Modal
@@ -187,11 +175,6 @@ const DispatchCalendar = () => {
       };
 
       const transformedData = transformData(data);
-      // console.log("transformedData 轉換過的七天", transformedData);
-      // console.log(
-      //   "ConstructionSummaryList 全部summary的清單總攬",
-      //   constructionSummaryList
-      // );
 
       const dateSummariesMap = dateList.map((date) => {
         const existingData = transformedData.find((data) => data.date === date);
@@ -219,9 +202,7 @@ const DispatchCalendar = () => {
         }
       });
 
-      // console.log(dateSummariesMap);
-      //////////////////////////////////////////////////////////////////////
-      // console.log("dateSummariesMap", dateSummariesMap);
+      // 將整理完的資料轉換成日立所需要用的event格式
       const events = dateSummariesMap.flatMap((item) => {
         return item.summaries.map((summary) => {
           return {
@@ -261,10 +242,6 @@ const DispatchCalendar = () => {
       setDepartMemberList(filterList);
     });
   }, []);
-
-  // useEffect(() => {
-  //   console.log("events", events);
-  // }, [events]);
 
   const getConstructionSummaryList = useCallback(() => {
     const summaryList = `constructionSummary?p=1&s=5000`;
@@ -362,9 +339,7 @@ const DispatchCalendar = () => {
   };
 
   const getProjecstList = () => {
-    setIsLoading(true);
     getData("project").then((result) => {
-      setIsLoading(false);
       const projectsList = result.result.content;
       //console.log(projectsList);
       setProjectsList(projectsList);
@@ -374,11 +349,7 @@ const DispatchCalendar = () => {
   const handleActionClick = (event) => {
     event.stopPropagation();
     const dataMode = event.currentTarget.getAttribute("data-mode"); //在table的component裡讀取該選擇 如edit create
-    // const dataValue = event.currentTarget.getAttribute("data-value"); //在table的component裡讀取該筆資料id
     setModalValue(dataMode);
-    // setDeliverInfo(
-    //   dataValue ? apiData.content.find((item) => item.id === dataValue) : ""
-    // );
   };
 
   const modalConfig = [
@@ -410,33 +381,30 @@ const DispatchCalendar = () => {
         handleActionClick={handleActionClick}
         isLoading={!isLoading}
       />
-      {/* {console.log("constSummaryApiList", constSummaryApiList)} */}
-      {/* <div className="flex justify-center p-5 w-full h-full overflow-y-auto "> */}
-      {/* <div className="relative flex flex-col flex-1 overflow-y-auto "> */}
-      <div className="relative profile-section flex flex-col flex-1 overflow-hidden sm:pb-3.5 pb-0">
-        <Calendar
-          data={events}
-          viewOptions={["dayGridMonth", "dayGridWeek"]}
-          _dayMaxEvents={3}
-          dateClick={(e) => {
-            handleDayClick(e.dateStr);
-            // console.log("day.e", e);
-          }}
-          eventClick={(e) => {
-            handleEventClick(e.event.startStr);
-          }}
-          editable={true}
-          eventContent={(eventInfo) => (
-            <CustomEventContent event={eventInfo.event} />
-          )}
-          eventColor={isTargetScreen ? "transparent" : "#F48A64"}
-          // height="auto"
-          displayEventTime={false} // 整天
-          eventBorderColor={"transparent"}
-          eventBackgroundColor={"transparent"}
-          eventOrder={""}
-        />
-      </div>
+
+      <Calendar
+        data={events}
+        viewOptions={["dayGridMonth", "dayGridWeek"]}
+        _dayMaxEvents={3}
+        dateClick={(e) => {
+          handleDayClick(e.dateStr);
+          // console.log("day.e", e);
+        }}
+        eventClick={(e) => {
+          handleEventClick(e.event.startStr);
+        }}
+        // editable={true}
+        eventContent={(eventInfo) => (
+          <CustomEventContent event={eventInfo.event} />
+        )}
+        eventColor={isTargetScreen ? "transparent" : "#F48A64"}
+        // height="auto"
+        displayEventTime={false} // 整天
+        eventBorderColor={"transparent"}
+        eventBackgroundColor={"transparent"}
+        eventOrder={""}
+      />
+
       {/* </div> */}
       <Backdrop
         sx={{ color: "#fff", zIndex: 1050 }}
@@ -488,23 +456,36 @@ const CustomEventContent = ({ event }) => {
   // console.log(selectedColor);
   return (
     <div className="">
-      {/* {console.log(event)} */}
+      {/* {console.log(extendedProps)} */}
       {isTargetScreen ? (
         <div className="mt-1">
-          <div className="text-base text-center w-full rounded-md p-2">
-            <span className="text-lg  w-full rounded-md">
+          <div
+            className={`text-center w-full text-lg ${
+              extendedProps.hasOwnProperty("dispatch") && "text-sm m-0 p-0"
+            }`}
+          >
+            <span
+              className=" w-full rounded-md"
+              onClick={() => {
+                console.log(extendedProps);
+              }}
+            >
               {extendedProps.project.name +
                 "-" +
                 extendedProps.constructionJob.name}
             </span>
           </div>
-          {extendedProps.summaryJobTasks.map((summaryJobTask) => (
-            //   jobTask?.constructionSummaryJobTaskDispatches.length === 0 ?
-            <div key={summaryJobTask.id} className="">
-              <div className={`rounded-md`}>
+
+          {!extendedProps.hasOwnProperty("dispatch") &&
+            extendedProps.summaryJobTasks.map((summaryJobTask) => (
+              //   jobTask?.constructionSummaryJobTaskDispatches.length === 0 ?
+              <div key={summaryJobTask.id} className="">
                 <div className={`m-1 p-1 text-center relative`}>
                   <span
-                    className={`whitespace-nowrap text-base text-neutral-400 `}
+                    className={`whitespace-nowrap text-base text-neutral-400 ${
+                      extendedProps.hasOwnProperty("dispatch") &&
+                      "text-sm m-0 p-0"
+                    }`}
                   >
                     {`[${summaryJobTask.constructionJobTask.name}]`}
                   </span>
@@ -523,22 +504,49 @@ const CustomEventContent = ({ event }) => {
                     : null}
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       ) : (
         <p
-          className={`px-2 text-ellipsis overflow-hidden text-white  rounded-sm  ${
+          className={`px-2 text-ellipsis overflow-hidden rounded-sm  cursor-pointer ${
             extendedProps?.dispatch
               ? " bg-gray-200 text-gray-500"
-              : selectedColor?.fortw
+              : `${selectedColor?.fortw} text-white`
           } `}
         >
-          {event.title}-{extendedProps.name}
+          {/* {console.log(extendedProps)} */}
+
+          <Tooltip
+            describeChild={true}
+            className="z-[3000]"
+            componentsProps={{
+              tooltip: {
+                sx: {
+                  padding: "0",
+                  zIndex: "3000",
+                },
+              },
+            }}
+            placement="right-start"
+            title={extendedProps.summaryJobTasks.map((summaryJobTask) => (
+              <div key={summaryJobTask.id} className="">
+                {summaryJobTask.constructionSummaryJobTaskDispatches.length >
+                  0 &&
+                  summaryJobTask.constructionSummaryJobTaskDispatches.map(
+                    (dispatch, index) => (
+                      <span className="text-lg px-2" key={index}>
+                        {dispatch.labourer.nickname}
+                        <br />
+                      </span>
+                    )
+                  )}
+              </div>
+            ))}
+          >
+            {event.title}-{extendedProps.name}
+          </Tooltip>
         </p>
       )}
     </div>
   );
 };
-// ${selectedColor?.fortw || ""}
-//#008b8b

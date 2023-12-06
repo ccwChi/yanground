@@ -83,7 +83,7 @@ const router = createBrowserRouter([
 				element: <Forbidden />,
 			},
 			{
-				path: "/calendar",
+				path: "/dispatchcalendar",
 				element: <DispatchCalendar />,
 			},
 			{

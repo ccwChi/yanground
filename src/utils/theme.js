@@ -87,6 +87,13 @@ const theme = createTheme({
 				},
 			},
 		},
+		MuiPopper: { 
+			styleOverrides: { 
+			 root: { 
+			  zIndex: '10000 !important', 
+			 }, 
+			}, 
+		   },
 	},
 });
 

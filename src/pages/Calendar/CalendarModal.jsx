@@ -1,54 +1,38 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import ModalTemplete from "../../components/Modal/ModalTemplete";
 
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 import { format } from "date-fns";
 import AlertDialog from "../../components/Alert/AlertDialog";
-import {
-  Loading,
-  LoadingFour,
-  LoadingThree,
-} from "../../components/Loader/Loading";
+import { LoadingFour, LoadingThree } from "../../components/Loader/Loading";
 import { TextField, FormHelperText, Backdrop } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import Edit from "@mui/icons-material/Edit";
+// import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import EditCalendarIcon from "@mui/icons-material/EditCalendar";
-import { TransitionGroup } from "react-transition-group";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { deleteData, getData, postBodyData, postData } from "../../utils/api";
+import { deleteData, postBodyData, postData } from "../../utils/api";
 import { useNotification } from "../../hooks/useNotification";
 import AddIcon from "@mui/icons-material/Add";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
 import InputTitle from "../../components/Guideline/InputTitle";
-import { dispatch } from "@liff/native-bridge";
 
-//   {/* 下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單  */}
-
+//  下面用來測下單選單
 import Checkbox from "@mui/material/Checkbox";
 import Autocomplete from "@mui/material/Autocomplete";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import Button from "@mui/material/Button";
-import { async } from "q";
+import CircularProgress from "@mui/material/CircularProgress";
 
-//   {/* 下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單下面用來測下單選單  */}
-//   {/* 下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion  */}
+//   下面用來做accordion
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
-import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TaskModal } from "./AddJobTask";
 
-//   {/* 下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion下面用來測accordion  */}
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
@@ -66,7 +50,6 @@ const EventModal = React.memo(
     const [addJobTask, setAddJobTask] = useState(null);
     const [taskSelectLabouerList, setTaskSelectLabouerList] = useState([]);
     const [dispatchForApi, setDispatchForApi] = useState([]);
-    const [alertDateChangeOpen, setAlertDateChangeOpen] = useState(false);
 
     const [activeJobTask, setActiveJobTask] = useState("");
 
@@ -79,11 +62,9 @@ const EventModal = React.memo(
 
     //手機板的編輯狀態換div用
     const [currentDivIndex, setCurrentDivIndex] = useState(0);
-    //用來做accordion用的
-    const [expanded, setExpanded] = useState(false);
-    const handleAccordionChange = (panel) => (event, isExpanded) => {
-      setExpanded(isExpanded ? panel : false);
-    };
+
+    // 新增工項執行專用的汙染狀態
+    const [jobTaskDirty, setJobTaskDirty] = useState(false);
 
     const showNotification = useNotification();
 
@@ -174,7 +155,6 @@ const EventModal = React.memo(
         setAddJobTask(null);
         setJobTask(updateJobTask[0]);
         forTaskSelectLabouerList(updateJobTask[0]);
-
         setSendBackFlag(false);
         setIsDispatchDirty(false);
         reset();
@@ -183,31 +163,29 @@ const EventModal = React.memo(
 
     // 檢查表單是否汙染
     const onCheckDirty = () => {
-      if (isDirty || isDispatchDirty) {
+      if (isDirty || jobTaskDirty) {
         setAlertOpen(true);
       } else {
-        onClose();
-        setAddJobTask(null);
-        setActiveJobTask("");
-        setJobTask(null);
-        setCurrentDivIndex(0);
-        setIsDispatchDirty(false);
-        reset();
+        handleClose();
       }
     };
     // 下面僅關閉汙染警告視窗
     const handleAlertClose = async (agree) => {
       if (agree) {
-        reset();
-        setIsDispatchDirty(false);
-        setCurrentDivIndex(0);
-        setActiveJobTask("");
-        setAddJobTask(null);
-        setJobTask(null);
-        onClose();
+        handleClose();
       }
       setAlertOpen(false);
-      setAlertDateChangeOpen(false);
+    };
+
+    const handleClose = () => {
+      reset();
+      setIsDispatchDirty(false);
+      setCurrentDivIndex(0);
+      setJobTaskDirty(false);
+      setActiveJobTask("");
+      setAddJobTask(null);
+      setJobTask(null);
+      onClose();
     };
 
     //僅提交工項執行的資料上傳
@@ -284,6 +262,7 @@ const EventModal = React.memo(
         setDispatchForApi([]);
         //console.log("DispatchForApi", []);
       }
+      setIsLoading(false);
     };
 
     const handleJobTaskEdit = (selectedJobTask, summaryId) => {
@@ -299,14 +278,14 @@ const EventModal = React.memo(
       setCurrentDivIndex(1);
     };
 
-    //派工人員的選擇，點選下拉是選單觸發
+    // 派工人員的選擇，點選下拉是選單觸發
     const handleChange = (event, value) => {
       setIsDispatchDirty(true);
       setDispatchForApi(value);
       //   console.log("event", event);
     };
 
-    /////////////////////////////////////////////////////////點擊派工提交
+    // 點擊派工提交
     const handleDispatchOnly = async () => {
       setSendBackFlag(true);
       //console.log("目前選單裡面的人:", taskSelectLabouerList);
@@ -396,7 +375,7 @@ const EventModal = React.memo(
       });
     };
 
-    // ///////////////////////////////////////////////////////////////////////////下面處理新增工項執行的東西
+    // 下面到return中間處理新增工項執行的東西
 
     const AddNewJobTask = (e, summary) => {
       e.stopPropagation();
@@ -408,11 +387,6 @@ const EventModal = React.memo(
       setTimeout(() => {
         setAddJobTask(summary);
       }, 500);
-    };
-
-    const DeleteSummaryJobTask = (summaryJobTaskId) => {
-      setAlertDeleteJobTaskOpen(true);
-      setDeleteJobTaskId(summaryJobTaskId);
     };
 
     const handleAlertDeleteJobTaskOpen = async (agree) => {
@@ -448,7 +422,7 @@ const EventModal = React.memo(
             show={isOpen}
             maxWidth={"700px"}
             onClose={onCheckDirty}
-            className="!border-none"
+            className="!border-none "
           >
             <button
               variant="contained"
@@ -470,49 +444,37 @@ const EventModal = React.memo(
                   h-[70vh] bg-slate-5 overflow-y-scroll p-2 mt-4`}
               >
                 {deliverInfo.summaries.map((summary, index) => (
-                  <Accordion
-                    //   expanded={expanded === `panel${index}`}
-                    //   onChange={handleAccordionChange(`panel${index}`)}
-                    // index={`panel${index}`}
-                    key={index}
-                  >
+                  <Accordion key={index}>
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
-                      //   aria-controls={`panel${1}bh-content`}
-                      //   id={`panel${1}bh-header`}
-                      className="text-center relative"
+                      className={`relative !min-h-[50px] !flex !align-center`}
+                      sx={{
+                        borderBottom: "1.5px solid rgb(209, 213, 219)",
+                        borderLeft: 0,
+                        borderRight: 0,
+                        borderTop: 0,
+                      }}
+                      // onClick={() => {
+                      //   console.log(summary);
+                      // }}
                     >
-                      <span className="text-lg p-1 m-1 w-full rounded-md ps-10 text-left">
+                      <span className="text-lg w-full ps-2 text-left flex items-center h-full">
                         {summary.project.name + "-" + summary.name}
                       </span>
-                      <Button
-                        variant="contained"
-                        color="success"
-                        className="!ease-in-out !duration-300 !h-[24px] !p-0 !min-w-[24px] !absolute !left-4 !top-1 !text-xl !leading-none"
-                        sx={{ transform: "translate(4px, 1rem)" }}
-                        onClick={(e) => {
-                          AddNewJobTask(e, summary);
-                        }}
-                      >
-                        <AddIcon />
-                      </Button>
                     </AccordionSummary>
                     <AccordionDetails>
                       {summary.summaryJobTasks.map((summaryJobTask) => (
-                        //   jobTask?.constructionSummaryJobTaskDispatches.length === 0 ?
                         <div key={summaryJobTask.id} className={`border-b-2`}>
                           <div
                             className={` rounded-md  ${
                               activeJobTask === summaryJobTask.id &&
-                              "bg-slate-200 my-1 py-0.5 pl-2"
+                              "bg-slate-200 my-1 py-0.5"
                             }`}
+                            onClick={() => {
+                              handleJobTaskEdit(summaryJobTask, summary.id);
+                            }}
                           >
-                            <div
-                              className={`m-1 p-1 relative  `}
-                              onClick={() => {
-                                handleJobTaskEdit(summaryJobTask, summary.id);
-                              }}
-                            >
+                            <div className={`m-1 p-1 relative  `}>
                               <span
                                 className={`whitespace-nowrap text-base text-neutral-400 ${
                                   activeJobTask === summaryJobTask.id
@@ -522,7 +484,7 @@ const EventModal = React.memo(
                               >
                                 {`[${summaryJobTask.constructionJobTask.name}]`}
                               </span>
-                              <span className="cursor-pointer absolute right-0 top-0.5">
+                              <span className="cursor-pointer absolute right-0.5 top-0.5">
                                 <EditCalendarIcon
                                   color={`${
                                     activeJobTask === summaryJobTask.id
@@ -546,11 +508,6 @@ const EventModal = React.memo(
                             <div className="m-1 align-middle">
                               {summaryJobTask.constructionSummaryJobTaskDispatches.map(
                                 (dispatch, index) => (
-                                  // <div
-                                  //   key={dispatch.labourer.id}
-                                  //   className=" bg-amber-50"
-                                  // >
-
                                   <span className="ms-1" key={index}>
                                     {dispatch.labourer.nickname}
                                   </span>
@@ -560,6 +517,20 @@ const EventModal = React.memo(
                           </div>
                         </div>
                       ))}
+                      <div className="w-full h-12 relative">
+                        <Button
+                          variant="contained"
+                          color="inherit"
+                          className="!ease-in-out !duration-300 absolute top-3 right-0"
+                          // sx={{ transform: "translate(4px, 1rem)" }}
+                          onClick={(e) => {
+                            AddNewJobTask(e, summary);
+                          }}
+                        >
+                          <AddIcon />
+                          新增工項執行
+                        </Button>
+                      </div>
                     </AccordionDetails>
                   </Accordion>
                 ))}
@@ -573,14 +544,12 @@ const EventModal = React.memo(
               >
                 {jobTask ? (
                   <div className="mt-1">
-                    {/* 最上面的編輯頁面小div */}
-
                     <div className="w-full flex justify-center my-2">
                       <span
                         className="font-bold text-lg px-4 border-b-2"
-                        onClick={() => {
-                          console.log(deliverInfo);
-                        }}
+                        // onClick={() => {
+                        //   console.log(deliverInfo);
+                        // }}
                       >
                         {!!jobTask && (
                           <span className="text">
@@ -619,17 +588,20 @@ const EventModal = React.memo(
                           props,
                           taskSelectLabouerList,
                           { selected }
-                        ) => (
-                          <li {...props}>
-                            <Checkbox
-                              icon={icon}
-                              checkedIcon={checkedIcon}
-                              // style={{ margin: 0 }}
-                              checked={selected}
-                            />
-                            {taskSelectLabouerList.nickname}
-                          </li>
-                        )}
+                        ) =>
+                          isLoading ? (
+                            <CircularProgress color="inherit" size={20} />
+                          ) : (
+                            <li {...props}>
+                              <Checkbox
+                                icon={icon}
+                                checkedIcon={checkedIcon}
+                                checked={selected}
+                              />
+                              {taskSelectLabouerList.nickname}
+                            </li>
+                          )
+                        }
                         renderInput={(params) => <TextField {...params} />}
                       />
                     </div>
@@ -644,6 +616,7 @@ const EventModal = React.memo(
                         僅修改人員/儲存
                       </Button>
                     </div>
+                    <hr className="mt-5 bg-slate-800" />
                     {/* 清單div */}
                     <FormProvider {...methods}>
                       <form onSubmit={handleSubmit(onSubmit)}>
@@ -667,7 +640,6 @@ const EventModal = React.memo(
                                 size="small"
                                 className="inputPadding"
                                 placeholder="請輸入施工位置"
-                                //   inputProps={{ readOnly: true }}
                                 fullWidth
                                 {...field}
                               />
@@ -685,7 +657,6 @@ const EventModal = React.memo(
                                 size="small"
                                 className="inputPadding"
                                 placeholder="請輸入說明或備註"
-                                //   inputProps={{ readOnly: true }}
                                 fullWidth
                                 {...field}
                               />
@@ -716,14 +687,18 @@ const EventModal = React.memo(
                     </FormProvider>
                   </div>
                 ) : addJobTask ? (
-                  <>
+                  <div className="flex-col">
                     <TaskModal
                       apiSelectedTask={addJobTask?.summaryJobTasks}
                       setAddJobTask={setAddJobTask}
                       deliverInfo={{ ...addJobTask, date: deliverInfo.date }}
                       setReGetCalendarApi={setReGetCalendarApi}
+                      isLoading={isLoading}
+                      setIsLoading={setIsLoading}
+                      jobTaskDirty={jobTaskDirty}
+                      setJobTaskDirty={setJobTaskDirty}
                     />
-                  </>
+                  </div>
                 ) : (
                   <div className="mt-1">
                     <div className="text-base text-center w-full mt-3 p-2  border-b-2">
@@ -764,34 +739,6 @@ const EventModal = React.memo(
           disagreeText="取消"
           agreeText="確定"
         />
-        {/* <AlertDialog
-          open={alertDateChangeOpen}
-          onClose={handleDateChangeAlertClose}
-          icon={<ReportProblemIcon color="secondary" />}
-          title="注意"
-          content={
-            <span>
-              該項目已在特定日期派工，
-              <br />
-              <span>
-                更改日期將會刪除該項目內容所有已派工人員
-                <br />
-              </span>
-              {jobTask?.constructionSummaryJobTaskDispatches?.length > 0 &&
-                jobTask.constructionSummaryJobTaskDispatches
-                  //   ?.sort((a, b) => new Date(a.date) - new Date(b.date))
-                  .map((dispatch, index) => (
-                    <span key={index}>
-                      {dispatch.date} {dispatch.labourer.nickname}
-                      <br />
-                    </span>
-                  ))}
-              確定將再工項執行編輯畫面儲存後刪除
-            </span>
-          }
-          disagreeText="取消"
-          agreeText="確定"
-        /> */}
         {/* Backdrop */}
         <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
           <LoadingFour />
