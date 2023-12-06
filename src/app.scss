@@ -36,11 +36,22 @@ $z-index-a: 1040;
 .leaflet-popup-content {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
 	justify-content: center;
 	margin: 0 !important;
 	padding: 1rem 1.225rem;
 	height: 100%;
+}
+
+.custom_punch_popup {
+	.leaflet-popup-content {
+		gap: 1rem;
+		width: 100vw !important;
+		max-width: 20rem;
+	}
+	.leaflet-popup-content-wrapper,
+	.leaflet-popup-tip {
+		background-color: $white-color;
+	}
 }
 
 @keyframes slideLeftRight {
@@ -118,6 +129,11 @@ $z-index-a: 1040;
 
 //****** MUI END ******//
 
+.custom_Licon {
+	box-shadow: rgba(0, 0, 0, 0.2) 0px 19px 38px, rgba(0, 0, 0, 0.15) 0px 15px 12px, rgba(0, 0, 0, 0.25) 0px 2px 4px,
+		rgba(0, 0, 0, 0.28) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
 //****** RWD ******//
 
 @media (max-width: 1023.98px) {
@@ -126,7 +142,7 @@ $z-index-a: 1040;
 	}
 
 	.sidebar_wrapper {
-		transition: width .15s ease-in;
+		transition: width 0.15s ease-in;
 		z-index: $z-index-b;
 		&.hide {
 			width: 0;
