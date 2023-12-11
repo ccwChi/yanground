@@ -37,7 +37,7 @@ const RWDTable = ({
 
 	if (isSmallScreen) {
 		return (
-			<div className="flex flex-col gap-3 pt-1 pb-[40%]">
+			<div className="flex flex-col gap-3 pt-1 pb-[30%]">
 				{!isLoading ? (
 					data && data.length > 0 ? (
 						data.map((item, rowIndex) => (

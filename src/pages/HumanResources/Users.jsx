@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PageTitle from "../../components/Guideline/PageTitle";
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
-import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
+// import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
+import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
 import InputTitle from "../../components/Guideline/InputTitle";
 
 import { useForm, Controller } from "react-hook-form";
@@ -19,11 +20,14 @@ import Checkbox from "@mui/material/Checkbox";
 import EditIcon from "@mui/icons-material/Edit";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ViewTimelineIcon from "@mui/icons-material/ViewTimeline";
+import PunchClockIcon from "@mui/icons-material/PunchClock";
 import TuneIcon from "@mui/icons-material/Tune";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { getData, postData } from "../../utils/api";
 import EditModal from "./UsersModal";
 import AttconfModal from "./AttconfModal";
 import { useNotification } from "../../hooks/useNotification";
+import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 
 const ITEM_HEIGHT = 36;
 const ITEM_PADDING_TOP = 8;
@@ -119,7 +123,16 @@ const Users = () => {
 			variant: "contained",
 			color: "primary",
 			fabVariant: "success",
-			fab: <AutoFixHighIcon fontSize="large" />,
+			fab: <AutoFixHighIcon />,
+		},
+		{
+			mode: "viewpunch",
+			icon: <ExitToAppIcon fontSize="small" />,
+			text: "打卡與考勤",
+			variant: "contained",
+			color: "secondary",
+			// fabVariant: "success",
+			fab: <ExitToAppIcon />,
 		},
 		// {
 		// 	mode: "filter",
@@ -128,7 +141,7 @@ const Users = () => {
 		// 	variant: "contained",
 		// 	color: "secondary",
 		// 	fabVariant: "secondary",
-		// 	fab: <TuneIcon fontSize="large" />,
+		// 	fab: <TuneIcon />,
 		// },
 	];
 
@@ -155,6 +168,7 @@ const Users = () => {
 	// edit = 編輯名稱
 	const actions = [
 		{ value: "edit", icon: <EditIcon />, title: "編輯個人資料" },
+		{ value: "viewpunch", icon: <PunchClockIcon />, title: "打卡與考勤" },
 		// { value: "attconf", icon: <ViewTimelineIcon />, title: "出勤時間確認" },
 	];
 
@@ -270,6 +284,12 @@ const Users = () => {
 			setDeliverInfo(dataValue);
 		} else if (dataMode === "filter") {
 			handleOpenSearch();
+		} else if (dataMode === "viewpunch") {
+			navigate(
+				`attendance_calendar?user=${dataValue || ""}&dep=${
+					apiData.content.find((item) => item.id === dataValue)?.department.id || ""
+				}&mode=clockPunch`
+			);
 		} else {
 			setModalValue(dataMode);
 			setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
@@ -345,6 +365,7 @@ const Users = () => {
 				title="人事管理"
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
+				isLoading={!isLoading}
 				// searchMode
 				// 下面參數前提都是 searchMode = true
 				searchDialogOpen={searchDialogOpen}
@@ -484,7 +505,8 @@ const Users = () => {
 			/>
 
 			{/* Floating Action Button */}
-			<FloatingActionButton btnGroup={btnGroup} handleActionClick={handleActionClick} />
+			{/* <FloatingActionButton btnGroup={btnGroup} handleActionClick={handleActionClick} /> */}
+			<MultipleFAB btnGroup={btnGroup} handleActionClick={handleActionClick} />
 
 			{/* Modal */}
 			{config && config.modalComponent}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { useLocation, useNavigate } from "react-router-dom";
 import TableTabber from "../../components/Tabbar/TableTabber";
 import { LoadingTwo } from "../../components/Loader/Loading";
@@ -14,6 +15,7 @@ const UserInfo = () => {
 	// 解析網址取得參數
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);
+	const isSmallScreen = useMediaQuery("(max-width:575.98px)");
 
 	// Tab 列表對應 api 搜尋參數
 	const tabGroup = [
@@ -86,7 +88,7 @@ const UserInfo = () => {
 	useEffect(() => {
 		if (userProfile) {
 			setIsLoading(true);
-			getData(`user/${userProfile.id}/attendancies?p=1&s=5000`).then((result) => {
+			getData(`clockPunch?p=1&s=5000`).then((result) => {
 				setIsLoading(false);
 				const data = result.result.content;
 				setApiAttData(data);
@@ -163,20 +165,26 @@ const UserInfo = () => {
 
 			<TableTabber tabGroup={tabGroup} cat={cat} setCat={setCat} />
 
-			<div className="relative profile-section flex flex-col flex-1 overflow-hidden sm:pb-3.5 pb-0">
-				{cat === "info" ? (
-					personalInfo ? (
-						<PersonalInfoSection userProfile={userProfile} personalInfo={personalInfo} />
-					) : (
-						<LoadingTwo textSize={"text-lg sm:text-xl"} />
-					)
-				) : (
-					apiAttData ? (
-						<PunchLogSection isLoading={isLoading} apiAttData={apiAttData} />
-					) : (
-						<LoadingTwo textSize={"text-lg sm:text-xl"} />
-					)
-				)}
+			<div className="relative profile-section flex flex-col flex-1 overflow-hidden">
+				{(() => {
+					switch (cat) {
+						case "info":
+							return personalInfo ? (
+								<PersonalInfoSection userProfile={userProfile} personalInfo={personalInfo} />
+							) : (
+								<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
+							);
+						case "punchlog":
+							return apiAttData ? (
+								<PunchLogSection isLoading={isLoading} apiAttData={apiAttData} />
+							) : (
+								<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
+							);
+						default: {
+							return null;
+						}
+					}
+				})()}
 			</div>
 		</div>
 	);

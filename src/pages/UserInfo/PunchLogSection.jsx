@@ -11,7 +11,7 @@ const PunchLogSection = React.memo(({ apiAttData }) => {
 		if (apiAttData) {
 			const formattedEvents = apiAttData.map((event) => ({
 				id: event.id,
-				title: "打卡",
+				title: event.clockIn ? "上班" : event.clockIn === false ? "下班" : "上/下班",
 				date: format(utcToZonedTime(parseISO(event.occurredAt), 'Asia/Taipei'), 'yyyy-MM-dd HH:mm:ss', { locale: zhTW }),
 			}));
 

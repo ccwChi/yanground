@@ -159,7 +159,7 @@ const Home = () => {
 				</div>
 			</div>
 
-			<div className="profile-section flex-1 -mb-7 sm:-mb-4 w-full px-2.5 pt-3.5 pb-14 sm:pb-3.5 flex flex-col overflow-y-auto sm:overflow-hidden">
+			<div className="profile-section flex-1 -mb-7 sm:-mb-4 w-full px-2.5 pt-3.5 pb-24 sm:pb-3.5 flex flex-col overflow-y-auto sm:overflow-hidden">
 				{/* <div className="panel panel-wallet">
 					<div className="left bg-secondary-50 text-white">
 						<div>

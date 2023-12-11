@@ -2,7 +2,7 @@
 const appUrl = process.env.REACT_APP_URL;
 
 // GET
-const getData = async (url = "") => {
+const getData = async (url = "", customParam = false, forbiddenFunc, unauthorizedFunc) => {
 	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
 	const headers = {
 		Authorization: `Bearer ${accessToken}`,
@@ -18,9 +18,17 @@ const getData = async (url = "") => {
 				const statusCode = response.status;
 				console.error("HTTP Error: Status Code", statusCode);
 				if (statusCode === 403) {
-					window.location.href = "/forbidden";
+					if (customParam) {
+						forbiddenFunc();
+					} else {
+						window.location.href = "/forbidden";
+					}
 				} else if (statusCode === 401) {
-					window.location.href = "/unauthorized";
+					if (customParam) {
+						unauthorizedFunc();
+					} else {
+						window.location.href = "/unauthorized";
+					}
 				}
 			}
 			return response.json();

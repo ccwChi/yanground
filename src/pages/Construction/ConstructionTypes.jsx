@@ -46,7 +46,7 @@ const ConstructionTypes = () => {
 			{/* PageTitle */}
 			<PageTitle title="工程類別" />
 
-			<div className="flex flex-wrap px-4 md:px-8 py-4 gap-6 overflow-y-auto">
+			<div className="flex flex-wrap px-4 md:px-8 pt-4 sm:pb-4 pb-10 gap-6 overflow-y-auto">
 				{isLoading ? (
 					<Grid container spacing={2}>
 						{Array.from({ length: SKELETONITEM }).map((_, index) => (

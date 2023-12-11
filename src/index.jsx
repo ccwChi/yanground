@@ -7,10 +7,13 @@ import Sites from "./pages/Sites/Sites";
 import ConstructionTypes from "./pages/Construction/ConstructionTypes";
 import ConstructionType from "./pages/Construction/Types/ConstructionType";
 import ConstructionJob from "./pages/Construction/Jobs/ConstructionJob";
+import ConstructionSummary from "./pages/ConstructionSummary/ConstructionSummary";
+import DispatchCalendar from "./pages/Calendar/DispatchCalendar";
 import Project from "./pages/Project/Project";
 import Maps from "./pages/Project/Maps";
 import DispatchList from "./pages/DispatchList/DispatchList";
 import Users from "./pages/HumanResources/Users";
+import UsersAttendanceCalendar from "./pages/HumanResources/AttendanceCalendar";
 import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
 import ErrorMessage from "./pages/Error/ErrorMessage";
@@ -21,8 +24,6 @@ import Explotion from "./pages/Error/Explotion";
 import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
-import ConstructionSummary from "./pages/ConstructionSummary/ConstructionSummary";
-import DispatchCalendar from "./pages/Calendar/DispatchCalendar";
 
 const router = createBrowserRouter([
 	{
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
 			{
 				path: "/users",
 				element: <Users />,
+			},
+			{
+				path: "/users/attendance_calendar",
+				element: <UsersAttendanceCalendar />,
 			},
 			{
 				path: "/punch",

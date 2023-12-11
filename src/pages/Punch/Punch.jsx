@@ -29,7 +29,7 @@ const LocationMarker = () => {
 	// 需要把 Marker 的 icon 弄出來，不然會顯示錯誤圖片
 	let iconSize = 54;
 	const customIcon = new L.Icon({
-		iconUrl: userProfile ? userProfile.pictureUrl : profileIcon, // 替換成你的圖示路徑
+		iconUrl: userProfile ? (userProfile.pictureUrl ? userProfile.pictureUrl : profileIcon) : profileIcon, // 替換成你的圖示路徑
 		iconSize: [iconSize, iconSize], // 圖示尺寸
 		iconAnchor: [iconSize / 2, iconSize], // 圖示錨點
 		popupAnchor: [0, -iconSize], // 彈出視窗位置

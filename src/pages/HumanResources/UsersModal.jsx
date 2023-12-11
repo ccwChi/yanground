@@ -129,8 +129,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
     // }
      sendDataToBackend(fd, "edit", deliverInfo.id);
      resetModal();
-     sendDataToBackend(fd, "edit", deliverInfo.id);
-     resetModal();
   };
 
 	const resetModal = () => {

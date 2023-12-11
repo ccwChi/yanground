@@ -20,13 +20,14 @@ const CustomBreadcrumbs = () => {
 		{ name: "punch", display: "打卡" },
 		{ name: "maps", display: "地圖" },
 		{ name: "dispatchcalendar", display: "派工行事曆" },
+		{ name: "attendance_calendar", display: "打卡與考勤" },
 	];
 
 	return (
 		<Breadcrumbs
 			aria-label="breadcrumb"
 			maxItems={3}
-			className={`pt-3 sm:pt-4 pb-2 sm:pb-0 px-5 !text-sm ${pathnames.length > 0 ? "" : "!pt-0 !pb-0"}`}>
+			className={`pt-2 sm:pt-3 pb-2 sm:pb-0 px-5 !text-sm ${pathnames.length > 0 ? "" : "!pt-0 !pb-0"}`}>
 			{pathnames.length > 0 && (
 				<Link component={NavLink} color="inherit" underline="hover" to="/">
 					首頁
