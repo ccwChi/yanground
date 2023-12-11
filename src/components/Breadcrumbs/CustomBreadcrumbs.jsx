@@ -40,7 +40,7 @@ const CustomBreadcrumbs = React.memo(() => {
 			if (isLast) setDisplayText(fullName);
 		});
 
-		const title = fullName.length > 0 ? fullName.join(" - ") + " | YuanRong Tech" : "YuanRong Tech";
+		const title = fullName.length > 0 ? fullName.join(" - ") + " | 元融科技" : "元融科技";
 		document.title = title;
 	}, [location]);
 
@@ -49,15 +49,10 @@ const CustomBreadcrumbs = React.memo(() => {
 			aria-label="breadcrumb"
 			maxItems={3}
 			className={`pt-2 sm:pt-3 pb-2 sm:pb-0 px-5 !text-sm ${pathnames.length > 0 ? "" : "!pt-0 !pb-0"}`}>
-			{pathnames.length > 0 ? (
+			{pathnames.length > 0 && (
 				<Link component={NavLink} color="inherit" underline="hover" to="/">
 					首頁
 				</Link>
-			) : (
-				(() => {
-					document.title = "YuanRong Tech";
-					return null;
-				})()
 			)}
 			{pathnames.map((name, index) => {
 				const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
