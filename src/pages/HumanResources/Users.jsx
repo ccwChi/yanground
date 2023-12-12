@@ -1,34 +1,38 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import PageTitle from "../../components/Guideline/PageTitle";
-import RWDTable from "../../components/RWDTable/RWDTable";
-import Pagination from "../../components/Pagination/Pagination";
-// import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
-import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
-import InputTitle from "../../components/Guideline/InputTitle";
-
 import { useForm, Controller } from "react-hook-form";
+
+// Component
+import RWDTable from "../../components/RWDTable/RWDTable";
+import PageTitle from "../../components/Guideline/PageTitle";
+import Pagination from "../../components/Pagination/Pagination";
+import InputTitle from "../../components/Guideline/InputTitle";
+import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
+// import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
+
+// Mui
 import FormControlLabel from "@mui/material/FormControlLabel";
-import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
-import RadioGroup from "@mui/material/RadioGroup";
+import MenuItem from "@mui/material/MenuItem";
 import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
 import Slider from "@mui/material/Slider";
 import Checkbox from "@mui/material/Checkbox";
-
 import EditIcon from "@mui/icons-material/Edit";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ViewTimelineIcon from "@mui/icons-material/ViewTimeline";
 import PunchClockIcon from "@mui/icons-material/PunchClock";
 import TuneIcon from "@mui/icons-material/Tune";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+
+// Custom
 import { getData, postData } from "../../utils/api";
 import EditModal from "./UsersModal";
 import AttconfModal from "./AttconfModal";
 import { useNotification } from "../../hooks/useNotification";
-import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 
+// MenuItem 選單樣式調整
 const ITEM_HEIGHT = 36;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -40,6 +44,7 @@ const MenuProps = {
 	},
 };
 
+// 篩選 default 值
 const defaultValue = {
 	name: "",
 	department: "",
@@ -74,7 +79,7 @@ const Users = () => {
 	// ApiUrl
 	const furl = "user";
 	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
-	// 在主畫面先求得部門跟權限list再直接傳給面板
+	// 在主畫面先求得部門跟權限 list 再直接傳給面板
 	const [departmentList, setDepartmentList] = useState(null);
 	const [authorityList, setAuthorityList] = useState(null);
 	// ModalValue 控制開啟的是哪一個 Modal
@@ -176,7 +181,6 @@ const Users = () => {
 	useEffect(() => {
 		getApiList(apiUrl);
 	}, [apiUrl]);
-
 	const getApiList = useCallback(
 		(url) => {
 			setIsLoading(true);
@@ -279,9 +283,9 @@ const Users = () => {
 					showNotification("激活失敗。", false);
 				}
 			});
-		} else if (dataMode === "attconf") {
-			setModalValue(dataMode);
-			setDeliverInfo(dataValue);
+		// } else if (dataMode === "attconf") {
+		// 	setModalValue(dataMode);
+		// 	setDeliverInfo(dataValue);
 		} else if (dataMode === "filter") {
 			handleOpenSearch();
 		} else if (dataMode === "viewpunch") {
@@ -292,7 +296,8 @@ const Users = () => {
 			);
 		} else {
 			setModalValue(dataMode);
-			setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
+			setDeliverInfo(dataValue);
+			// setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
 		}
 	};
 

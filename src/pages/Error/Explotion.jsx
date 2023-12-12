@@ -3,11 +3,13 @@ import "leaflet/dist/leaflet.css";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import { postData } from "../../utils/api";
+import style from "./explotion.module.scss";
 
 const Explotion = () => {
 	const [punchState, setPunchState] = useState(1);
-	const [punchTime, setPunchTime] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
+	const [punchTime, setPunchTime] = useState("");
+	const [punchIO, setPunchIO] = useState(null);
 
 	const getRandomCoordinate = () => {
 		const coordinates = [
@@ -33,7 +35,9 @@ const Explotion = () => {
 		};
 	};
 
-	const handleSubmitPunch = async () => {
+	// 提交打卡按鈕
+	const handleSubmitPunch = async (e, direction) => {
+		e.stopPropagation();
 		setIsLoading(true);
 
 		const randomCoordinate = getRandomCoordinate();
@@ -41,44 +45,51 @@ const Explotion = () => {
 		const fd = new FormData();
 		fd.append("latitude", randomCoordinate.latitude);
 		fd.append("longitude", randomCoordinate.longitude);
+		fd.append("clockIn", direction);
 
 		postData("clockPunch", fd).then((result) => {
 			setIsLoading(false);
 			if (result.status) {
-				const data = result.result;
+				const data = result.result.result;
 				setPunchState(2);
 
-				const dateTime = data.result.occurred;
-				setPunchTime(dateTime.split("T"));
+				const dateTime = data.occurredAt;
+				setPunchTime(dateTime.replace("+08", "").split("T"));
+				setPunchIO(data.clockIn ? "CLOCK IN" : data.clockIn === false ? "CLOCK OUT" : "IN/OUT");
 			} else {
 				setPunchState(3);
 			}
 		});
 	};
 
+	const handlePIButtonClick = (e) => {
+		handleSubmitPunch(e, true);
+	};
+	const handlePOButtonClick = (e) => {
+		handleSubmitPunch(e, false);
+	};
+
 	return (
-		<div className="absolute inset-0 flex flex-col justify-center items-center bg-neutral-200">
+		<div className="absolute inset-0 flex flex-col justify-center items-center bg-[#1d1e22]">
 			{punchState === 1 ? (
 				isLoading ? (
 					<CircularProgress color="inherit" size={60} />
 				) : (
-					<Button
-						variant="contained"
-						className="!text-3xl tracking-widest !p-3 !bg-rose-300"
-						onClick={(event) => {
-							event.stopPropagation();
-							handleSubmitPunch();
-						}}>
-						<p className="text-3xl !m-0">?</p>
-					</Button>
+					<div className="flex items-center justify-center flex-wrap">
+						<button onClick={handlePIButtonClick} className={`${style.neon_button} ${style.neon_button__1}`}>
+							PLAY
+						</button>
+						<button onClick={handlePOButtonClick} className={`${style.neon_button} ${style.neon_button__2}`}>
+							EXIT
+						</button>
+					</div>
 				)
 			) : punchState === 2 ? (
 				<>
-					<p className="text-4xl !mt-0 !mb-2">🎉</p>
-					<p className="text-2xl font-bold tracking-wide !mt-0 !mb-1">打卡成功啦</p>
+					<p className="text-white text-2xl font-bold tracking-wide !mt-0 !mb-1">{punchIO} SUCCESS！</p>
 					{punchTime.map((time, index) => (
 						<React.Fragment key={index}>
-							<p className="text-lg font-bold tracking-wide leading-tight !my-0">{time}</p>
+							<p className="text-white text-lg font-bold tracking-wide leading-tight !my-0">{time}</p>
 						</React.Fragment>
 					))}
 				</>
