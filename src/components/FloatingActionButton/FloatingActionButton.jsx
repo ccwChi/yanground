@@ -3,7 +3,7 @@ import Fab from "@mui/material/Fab";
 
 const FloatingActionButton = ({ btnGroup, handleActionClick }) => {
 	return (
-		<div className="absolute right-4 bottom-28 sm:hidden flex flex-col-reverse gap-3">
+		<div className="absolute right-4 bottom-24 sm:hidden flex flex-col-reverse gap-3">
 			{btnGroup.map((btn) => (
 				<Fab
 					key={btn.text}

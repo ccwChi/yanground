@@ -49,8 +49,16 @@ const AttendanceCalendar = () => {
 			views: ["year", "month", "day"],
 			formatOne: "yyyy 年 MM 月 dd 日",
 			formatTwo: "yyyy-MM-dd",
+			formatThree: "yyyy/MM/dd",
 		},
-		{ id: 2, text: "依據年, 月進行搜尋", views: ["month", "year"], formatOne: "yyyy 年 MM 月", formatTwo: "yyyy-MM" },
+		{
+			id: 2,
+			text: "依據年, 月進行搜尋",
+			views: ["month", "year"],
+			formatOne: "yyyy 年 MM 月",
+			formatTwo: "yyyy-MM",
+			formatThree: "yyyy/MM",
+		},
 		// { id: 3, text: "依據年份進行搜尋", views: ["year"], formatOne: "yyyy 年", formatTwo: "yyyy" },
 	];
 	const dataCAList = [
@@ -95,20 +103,22 @@ const AttendanceCalendar = () => {
 	useEffect(() => {
 		if (userValue && depValue) {
 			setIsLoading(true);
-			getData(`user/${userValue}/attendancies?s=5000&p=1`).then((result) => {
-				setIsLoading(false);
-				const data = result.result.content;
-				const formattedEvents = data.map((event) => ({
-					id: event.id,
-					title: "打卡",
-					date: format(utcToZonedTime(parseISO(event.occurredAt), "Asia/Taipei"), "yyyy-MM-dd HH:mm:ss", {
-						locale: zhTW,
-					}),
-				}));
-				setApiData(formattedEvents);
-			});
+			getData(`user/${userValue}/clockPunch/${format(dates, dateConList[dateCondition - 1].formatThree)}`).then(
+				(result) => {
+					setIsLoading(false);
+					const data = result.result.content;
+					const formattedEvents = data.map((event) => ({
+						id: event.id,
+						title: event.clockIn ? "上班" : event.clockIn === false ? "下班" : "上/下班",
+						date: format(utcToZonedTime(parseISO(event.occurredAt), "Asia/Taipei"), "yyyy-MM-dd HH:mm:ss", {
+							locale: zhTW,
+						}),
+					}));
+					setApiData(formattedEvents);
+				}
+			);
 		}
-	}, [userValue]);
+	}, [userValue, dates, dateCondition]);
 
 	// 開啟 SearchDialog
 	const handleOpenSearch = () => {
@@ -279,13 +289,26 @@ const AttendanceCalendar = () => {
 							setDates={setDates}
 							views={selectedDateCon.views}
 							format={selectedDateCon.formatOne}
+							minDate={new Date("2023-11")}
 						/>
 					</div>
 				</div>
 			</PageTitle>
 
 			{/* Calendar */}
-			<Calendar data={apiData} initialDate={dates && format(dates, selectedDateCon.formatTwo)} />
+			<Calendar
+				data={apiData}
+				initialDate={dates && format(dates, selectedDateCon.formatTwo)}
+				defaultViews={dateCondition === 1 ? "dayGridDay" : "dayGridMonth"}
+				viewOptions={
+					dateCondition === 1
+						? ["dayGridDay", "timeGridDay", "listMonth"]
+						: ["dayGridMonth", "timeGridWeek", "listMonth"]
+				}
+				goto={format(dates, selectedDateCon.formatTwo)}
+				navLinks={false}
+				pnlive={false}
+			/>
 
 			{/* Floating Action Button */}
 			<FloatingActionButton btnGroup={btnGroup} handleActionClick={handleOpenSearch} />

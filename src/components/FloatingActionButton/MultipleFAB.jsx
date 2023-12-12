@@ -10,9 +10,17 @@ const MultipleFAB = ({ btnGroup, handleActionClick }) => {
 		<SpeedDial
 			ariaLabel="FAB templete"
 			className="sm:!hidden !flex"
-			sx={{ position: "absolute", bottom: 6.5 * 16, right: 16, zIndex: 1024 }}
+			sx={{ position: "absolute", bottom: 6 * 16, right: 16, zIndex: 1024 }}
 			// icon={<AddIcon fontSize="large"  />}
-			icon={<SpeedDialIcon icon={<AddIcon fontSize="large" />} sx={{ height: "auto" }} />}>
+			icon={<SpeedDialIcon icon={<AddIcon fontSize="large" />} sx={{ height: "auto" }} />}
+			FabProps={{
+				sx: {
+					bgcolor: "success.main",
+					"&:hover": {
+						bgcolor: "success.main",
+					},
+				},
+			}}>
 			{btnGroup.map((btn) => (
 				<SpeedDialAction
 					key={btn.text}
