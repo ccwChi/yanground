@@ -22,7 +22,7 @@ import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import ConstructionSummary from "./pages/ConstructionSummary/ConstructionSummary";
-import DispatchCalendar from "./pages/Calendar/DispatchCalendar";
+import DispatchCalendar from "./pages/DispatchCalendar/DispatchCalendar";
 
 const router = createBrowserRouter([
 	{

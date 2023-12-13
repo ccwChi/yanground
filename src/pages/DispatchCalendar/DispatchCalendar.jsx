@@ -14,7 +14,6 @@ import Calendar from "../../components/Calendar/Calendar";
 import {
   Backdrop,
   Tooltip,
-  tooltipClasses,
   useMediaQuery,
 } from "@mui/material";
 import { UpdatedModal } from "./NewSummaryModal";

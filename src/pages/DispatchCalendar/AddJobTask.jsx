@@ -315,11 +315,16 @@ const TaskModal = React.memo(
         setAddJobTask(null);
       });
     };
-
+    // console.log(deliverInfo);
     return (
       <>
         <div className="w-full flex justify-center my-2">
-          <span className="font-bold text-lg px-4 border-b-2">
+          <span
+            className="font-bold text-lg px-4 border-b-2"
+            onClick={() => {
+              console.log(deliverInfo);
+            }}
+          >
             {deliverInfo.name} - 新增工項執行
           </span>{" "}
         </div>
@@ -332,21 +337,6 @@ const TaskModal = React.memo(
                   className="inputPadding relative"
                   fullWidth
                 >
-                  {/* {selectedTask === "" ? (
-                    <InputLabel
-                      id="task-select-label"
-                      disableAnimation
-                      shrink={false}
-                      focused={false}
-                    >
-                      請選擇工項執行
-                      {!isLoading && (
-                        <span className="ps-6  translate-y-3">
-                          <CircularProgress color="primary" size={20} />
-                        </span>
-                      )}
-                    </InputLabel>
-                  ) : null} */}
                   <Select
                     disabled={isLoading}
                     labelId="task-select-label"

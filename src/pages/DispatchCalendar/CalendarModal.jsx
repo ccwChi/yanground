@@ -561,7 +561,7 @@ const EventModal = React.memo(
                     </div>
 
                     {/* 派工div */}
-                    <div className="mt-2">
+                    <div className="mt-2 relative">
                       <InputTitle
                         title={`選擇 ${deliverInfo.date} 派工人員`}
                         required={false}
@@ -749,3 +749,5 @@ const EventModal = React.memo(
 );
 
 export { EventModal };
+
+

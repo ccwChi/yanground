@@ -23,6 +23,7 @@ const ControlledDatePicker = ({
           <MobileDatePicker
             slotProps={{ textField: { size: "small" } }}
             className="inputPadding"
+            closeOnSelect={true}
             format={format}
             dayOfWeekFormatter={(_day, weekday) => {
               console.log(); // AVOID BUG
