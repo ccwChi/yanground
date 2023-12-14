@@ -17,6 +17,7 @@ const nameMappings = [
 	{ name: "maps", display: "地圖" },
 	{ name: "dispatchcalendar", display: "派工行事曆" },
 	{ name: "attendance_calendar", display: "打卡與考勤" },
+	{ name: "forbidden", display: "403" },
 ];
 
 const CustomBreadcrumbs = React.memo(() => {

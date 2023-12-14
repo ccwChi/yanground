@@ -199,7 +199,7 @@ const Users = () => {
 		[page]
 	);
 
-	//取得部門清單跟權限清單
+	// 取得部門清單跟權限清單
 	useEffect(() => {
 		setIsLoading(true);
 		const departurl = "department";
