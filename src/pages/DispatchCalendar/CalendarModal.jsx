@@ -40,7 +40,14 @@ const today = new Date();
 today.setDate(today.getDate() + 1);
 
 const EventModal = React.memo(
-  ({ deliverInfo, setReGetCalendarApi, onClose, departMemberList, isOpen }) => {
+  ({
+    deliverInfo,
+    setReGetCalendarData,
+    setReGetSummaryListData,
+    onClose,
+    departMemberList,
+    isOpen,
+  }) => {
     // Alert 開關
     const [alertOpen, setAlertOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -258,7 +265,6 @@ const EventModal = React.memo(
         },
       ];
       PostBodyData(postBodyJobTaskUrl, convertData);
-      setReGetCalendarApi(deliverInfo.date);
     };
 
     //該天全部專案有被選的人
@@ -382,7 +388,7 @@ const EventModal = React.memo(
             removeWithPatchId.map((deleteId) => deleteDataPromise(deleteId))
           ),
         ]);
-        setReGetCalendarApi(deliverInfo.date);
+        setReGetCalendarData(deliverInfo.date);
       } catch (error) {
         console.error("Error:", error);
       }
@@ -428,7 +434,8 @@ const EventModal = React.memo(
         // console.log("convertData", convertData, "result", result);
         if (result.status) {
           showNotification("更改工項執行成功", true);
-          setReGetCalendarApi(deliverInfo.date);
+          console.log(deliverInfo.date)
+          setReGetSummaryListData(deliverInfo.date);
         } else {
           showNotification(
             result?.result?.reason ? result.result.reason : "錯誤",
@@ -465,7 +472,7 @@ const EventModal = React.memo(
       deleteData(deleteUrl).then((result) => {
         if (result.status) {
           showNotification("刪除派工更改成功", true);
-          setReGetCalendarApi(deliverInfo.date);
+          setReGetCalendarData(deliverInfo.date);
         } else if (result.result.response !== 200) {
           showNotification(
             result?.result?.reason ? result?.result?.reason : "刪除錯誤",
@@ -845,7 +852,7 @@ const EventModal = React.memo(
                       apiSelectedTask={addJobTask?.summaryJobTasks}
                       setAddJobTask={setAddJobTask}
                       deliverInfo={{ ...addJobTask, date: deliverInfo.date }}
-                      setReGetCalendarApi={setReGetCalendarApi}
+                      setReGetSummaryListData={setReGetSummaryListData}
                       isLoading={isLoading}
                       setIsLoading={setIsLoading}
                       isEditableDate={isEditableDate}

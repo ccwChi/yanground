@@ -50,7 +50,8 @@ const DispatchCalendar = () => {
   const [projectsList, setProjectsList] = useState(null);
 
   // 用日期改變作為重打api的依據，為了在面板修改派工後可以重取api並將對應的日期資料傳給面板
-  const [reGetCalendarApi, setReGetCalendarApi] = useState(today);
+  const [reGetCalendarData, setReGetCalendarData] = useState(today); // 派工用這個重取資料
+  const [reGetSummaryListData, setReGetSummaryListData] = useState(today); // 修改工項執行用這個重取資料
 
   // 儲存api求得的施工清單總攬
   const [constructionSummaryList, setConstructionSummaryList] = useState(null);
@@ -83,6 +84,7 @@ const DispatchCalendar = () => {
   // 當面板傳了日期回來時會更新
   useEffect(() => {
     if (dateList && constructionSummaryList) {
+      // console.log("要getCalendarData();");
       getCalendarData();
     }
   }, [dateList, constructionSummaryList]);
@@ -90,16 +92,14 @@ const DispatchCalendar = () => {
   useEffect(() => {
     getDepartMemberList("11");
     getProjecstList();
+    // getConstructionSummaryList();
   }, []);
 
   // 不把它合併到上面的原因是因為如果七天派工沒有人員變動，卻改了工項執行，他只重打timesheet是不會更新資料的
   useEffect(() => {
-    if (!!reGetCalendarApi) {
-      setTimeout(() => {
-        getConstructionSummaryList();
-      }, 300);
-    } else getConstructionSummaryList();
-  }, [reGetCalendarApi]);
+    getConstructionSummaryList();
+    // console.log("getConstructionSummaryList();");
+  }, [reGetSummaryListData]);
 
   useEffect(() => {
     setDateList(dates);
@@ -273,7 +273,8 @@ const DispatchCalendar = () => {
       setConstSummaryApiList(filterTransformedData);
 
       const oneDayTotal = filterTransformedData.filter(
-        (list) => list.date === reGetCalendarApi
+        (list) =>
+          list.date === reGetCalendarData || list.date === reGetSummaryListData
       );
       // console.log("取道ondayTota之前的,reGetCalendarApi", reGetCalendarApi);
       if (oneDayTotal.length > 0) {
@@ -281,7 +282,9 @@ const DispatchCalendar = () => {
         setDeliverInfo(oneDayTotal[0]);
       }
       // console.log("沒取道onda yTotal,");
-      setReGetCalendarApi(null);
+
+      setReGetCalendarData(null);
+      setReGetSummaryListData(null);
       setIsEventModalOpen(true);
       // console.log("events",events);
       setEvents(events);
@@ -478,7 +481,8 @@ const DispatchCalendar = () => {
         constructionTypeList={constructionTypeList}
         // projectsList={projectsList}
         isOpen={isEventModalOpen}
-        setReGetCalendarApi={setReGetCalendarApi}
+        setReGetCalendarData={setReGetCalendarData}
+        setReGetSummaryListData={setReGetSummaryListData}
         constructionSummaryList={constructionSummaryList}
       />
       {/* Modal */}
@@ -495,7 +499,7 @@ const CustomEventContent = ({ event }) => {
   const noDispatched = extendedProps.hasOwnProperty("dispatch");
   // Customize event content here
   // console.log("CustomEventContent", event);
-  const targetId = extendedProps?.id[18];
+  const targetId = extendedProps?.id[17];
   // console.log(targetId);
   const selectedColor = calendarColorList.find((item) => item.id === targetId);
   // console.log(selectedColor);

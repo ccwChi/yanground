@@ -30,10 +30,11 @@ import { LoadingFour } from "../../components/Loader/Loading";
 const TaskModal = React.memo(
   ({
     deliverInfo,
-    setReGetCalendarApi,
+    setReGetSummaryListData,
     setAddJobTask,
     jobTaskDirty,
     setJobTaskDirty,
+    
   }) => {
     // Alert 開關
 
@@ -120,7 +121,6 @@ const TaskModal = React.memo(
       name: "fields",
     });
     // 檢查表單是否汙染
-
 
     //取得工程項目執行並設定已選擇及剩下能選擇的清單
     useEffect(() => {
@@ -305,7 +305,7 @@ const TaskModal = React.memo(
         //console.log(result);
         if (result.status) {
           showNotification("資料上傳成功", true);
-          setReGetCalendarApi(deliverInfo.date);
+          setReGetSummaryListData(deliverInfo.date);
         } else if (result.result.response === 400) {
           //console.log(result.result);
           showNotification(
@@ -323,9 +323,7 @@ const TaskModal = React.memo(
     return (
       <>
         <div className="w-full flex justify-center my-2">
-          <span
-            className="font-bold text-lg px-4 border-b-2"
-          >
+          <span className="font-bold text-lg px-4 border-b-2">
             {deliverInfo.name} - 新增工項執行
           </span>{" "}
         </div>
