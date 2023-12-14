@@ -54,6 +54,9 @@ const TaskModal = React.memo(
 
     const [sendBackFlag, setSendBackFlag] = useState(false);
 
+    const summarySince = new Date(deliverInfo?.since);
+    const summaryUntil = new Date(deliverInfo?.until);
+
     const showNotification = useNotification();
 
     const getApiSelectedTask = useCallback((id) => {
@@ -109,7 +112,7 @@ const TaskModal = React.memo(
     const {
       control,
       handleSubmit,
-      setValue,
+      watch,
       formState: { errors },
     } = methods;
     const { fields, remove, append } = useFieldArray({
@@ -117,6 +120,7 @@ const TaskModal = React.memo(
       name: "fields",
     });
     // 檢查表單是否汙染
+
 
     //取得工程項目執行並設定已選擇及剩下能選擇的清單
     useEffect(() => {
@@ -281,7 +285,7 @@ const TaskModal = React.memo(
       setSendBackFlag(true);
       const convertData = [];
       for (var task of data.fields) {
-        console.log(task);
+        // console.log(task);
         const tempTask = {
           constructionJobTask: task.constructionJobTask,
           estimatedSince: task.estimatedSince
@@ -294,7 +298,7 @@ const TaskModal = React.memo(
           remark: task?.remark ? task.remark : "",
         };
         convertData.push(tempTask);
-        console.log(convertData);
+        // console.log(convertData);
       }
       const url = `constructionSummary/${deliverInfo.id}/tasks`;
       postBodyData(url, convertData).then((result) => {
@@ -321,9 +325,6 @@ const TaskModal = React.memo(
         <div className="w-full flex justify-center my-2">
           <span
             className="font-bold text-lg px-4 border-b-2"
-            onClick={() => {
-              console.log(deliverInfo);
-            }}
           >
             {deliverInfo.name} - 新增工項執行
           </span>{" "}
@@ -412,11 +413,15 @@ const TaskModal = React.memo(
                       <div className="flex gap-3">
                         <ControlledDatePicker
                           name={`fields[${index}].estimatedSince`}
+                          minDate={summarySince}
+                          maxDate={summaryUntil}
                         />
 
                         {/* <InputTitle title={"預計完工日期"} required={false} /> */}
                         <ControlledDatePicker
                           name={`fields[${index}].estimatedUntil`}
+                          minDate={summarySince}
+                          maxDate={summaryUntil}
                         />
                       </div>
                     </div>

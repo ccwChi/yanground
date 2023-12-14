@@ -11,25 +11,22 @@ import { EventModal } from "./CalendarModal";
 import { useNotification } from "../../hooks/useNotification";
 import { LoadingThree } from "../../components/Loader/Loading";
 import Calendar from "../../components/Calendar/Calendar";
-import {
-  Backdrop,
-  Tooltip,
-  useMediaQuery,
-} from "@mui/material";
+import { Backdrop, Tooltip, useMediaQuery } from "@mui/material";
 import { UpdatedModal } from "./NewSummaryModal";
 import styled from "@emotion/styled";
 import { Button } from "@mui/base";
+import { calendarColorList } from "../../data/calendarColorList";
 
 const today = new Date();
 //明天
 const twoDaysLater = new Date(today);
 twoDaysLater.setDate(today.getDate() + 1);
 //五天前
-const threeDaysBefore = new Date(today);
-threeDaysBefore.setDate(today.getDate() - 5);
+const fiveDaysBefore = new Date(today);
+fiveDaysBefore.setDate(today.getDate() - 5);
 // 生成日期區間
 const dates = [];
-let currentDateIterator = new Date(threeDaysBefore);
+let currentDateIterator = new Date(fiveDaysBefore);
 while (currentDateIterator <= twoDaysLater) {
   dates.push(currentDateIterator.toISOString().slice(0, 10));
   currentDateIterator.setDate(currentDateIterator.getDate() + 1);
@@ -65,12 +62,16 @@ const DispatchCalendar = () => {
   // 傳送額外資訊給 Modal
   const [deliverInfo, setDeliverInfo] = useState(null);
 
+  // transDate這邊會輸出成可以比大小的格式 Mon Dec 11 2023 08:00:00 GMT+0800 (台北標準時間)
+  // console.log(transDate);
+  // console.log(new Date(transDate));
   // 上方區塊功能按鈕清單
+
   const btnGroup = [
     {
       mode: "create",
       icon: <AddCircleIcon fontSize="small" />,
-      text: "新增清單",
+      text: "新增施工清單",
       variant: "contained",
       color: "primary",
       fabVariant: "success",
@@ -82,26 +83,49 @@ const DispatchCalendar = () => {
   // 當面板傳了日期回來時會更新
   useEffect(() => {
     if (dateList && constructionSummaryList) {
-      // console.log("calendar有打七天派工api", reGetCalendarApi);
       getCalendarData();
     }
-  }, [reGetCalendarApi, dateList, constructionSummaryList]);
+  }, [dateList, constructionSummaryList]);
 
   useEffect(() => {
     getDepartMemberList("11");
-    getConstructionSummaryList();
     getProjecstList();
   }, []);
 
+  // 不把它合併到上面的原因是因為如果七天派工沒有人員變動，卻改了工項執行，他只重打timesheet是不會更新資料的
+  useEffect(() => {
+    if (!!reGetCalendarApi) {
+      setTimeout(() => {
+        getConstructionSummaryList();
+      }, 300);
+    } else getConstructionSummaryList();
+  }, [reGetCalendarApi]);
+
   useEffect(() => {
     setDateList(dates);
-  }, []); // 空数组表示仅在组件挂载时执行一次
+  }, []);
+
+  const SummaryDatePeriod = (since, until) => {
+    let summaryDates = [];
+    if (!!since && !!until) {
+      let sinceDate = new Date(since);
+      while (sinceDate <= new Date(until)) {
+        summaryDates.push(sinceDate.toISOString().slice(0, 10));
+        sinceDate.setDate(sinceDate.getDate() + 1);
+      }
+    }
+    return summaryDates;
+  };
 
   const getCalendarData = () => {
     getData("timesheet").then((result) => {
       const data = result.result;
-
+      // console.log(
+      //   "執行取getCalendarData，constructionSummaryList",
+      //   constructionSummaryList
+      // );
       // 下面只對取得的data做轉換
+      // console.log(data);
       const transformData = (data) => {
         return data.map((item) => {
           //第一層是date, summaries
@@ -114,6 +138,8 @@ const DispatchCalendar = () => {
               name,
               project,
               constructionSummaryJobTasks,
+              since,
+              until,
             } = summary;
             //從constructionSummaryJobTasks打開的第三層是下列五個屬性
             const simplifiedTasks = constructionSummaryJobTasks.map((task) => {
@@ -170,6 +196,8 @@ const DispatchCalendar = () => {
                 name: project.name,
               },
               summaryJobTasks: simplifiedTasks,
+              since,
+              until,
             };
           });
 
@@ -181,7 +209,7 @@ const DispatchCalendar = () => {
       };
 
       const transformedData = transformData(data);
-
+      // console.log("transformedData",transformedData)
       const dateSummariesMap = dateList.map((date) => {
         const existingData = transformedData.find((data) => data.date === date);
 
@@ -208,8 +236,22 @@ const DispatchCalendar = () => {
         }
       });
 
+      // console.log("dateSummariesMap",dateSummariesMap)
+
+      // 如果專案日起始日期-完工日期包含月曆上的該日期，才會保留，剩下的過濾丟掉
+      const filterTransformedData = dateSummariesMap
+        .map((oneday) => {
+          return {
+            date: oneday.date,
+            summaries: oneday?.summaries?.filter((sum) =>
+              SummaryDatePeriod(sum.since, sum.until).includes(oneday.date)
+            ),
+          };
+        })
+        .filter((oneday) => oneday.summaries.length > 0);
+
       // 將整理完的資料轉換成日立所需要用的event格式
-      const events = dateSummariesMap.flatMap((item) => {
+      const events = filterTransformedData.flatMap((item) => {
         return item.summaries.map((summary) => {
           return {
             title: summary.project.name,
@@ -219,12 +261,21 @@ const DispatchCalendar = () => {
         });
       });
 
-      //這個就是取得7天派工的整理精華+ 全部清單清空派工人員
-      setConstSummaryApiList(dateSummariesMap);
+      // const filteredEvents = events.filter((event) => {
+      //   return SummaryDatePeriod(
+      //     event.extendedProps.since,
+      //     event.extendedProps.until
+      //   ).includes(event.start);
+      // });
+      // console.log(filteredEvents)
 
-      const oneDayTotal = dateSummariesMap.filter(
+      //這個就是取得7天派工的整理精華+ 全部清單清空派工人員
+      setConstSummaryApiList(filterTransformedData);
+
+      const oneDayTotal = filterTransformedData.filter(
         (list) => list.date === reGetCalendarApi
       );
+      // console.log("取道ondayTota之前的,reGetCalendarApi", reGetCalendarApi);
       if (oneDayTotal.length > 0) {
         // console.log("有取道ondayTotal,", oneDayTotal[0]);
         setDeliverInfo(oneDayTotal[0]);
@@ -438,121 +489,113 @@ const DispatchCalendar = () => {
 
 export default DispatchCalendar;
 
-const colorList = [
-  { id: "0", color: "#f03355", fortw: "bg-[#f03355]" },
-  { id: "1", color: "#514b82", fortw: "bg-[#514b82]" },
-  { id: "2", color: "#547db7", fortw: "bg-[#547db7]" },
-  { id: "3", color: "#3a9fc0", fortw: "bg-[#3a9fc0]" },
-  { id: "4", color: "#25b09b", fortw: "bg-[#25b09b]" },
-  { id: "5", color: "#44882d", fortw: "bg-[#44882d]" },
-  { id: "6", color: "#f7941d", fortw: "bg-[#f7941d]" },
-  { id: "7", color: "#ff6347", fortw: "bg-[#ff6347]" },
-  { id: "8", color: "#708090", fortw: "bg-[#708090]" },
-  { id: "9", color: "#d2691e", fortw: "bg-[#d2691e]" },
-];
-
 const CustomEventContent = ({ event }) => {
   const isTargetScreen = useMediaQuery("(max-width:991.98px)");
   const extendedProps = event._def.extendedProps;
+  const noDispatched = extendedProps.hasOwnProperty("dispatch");
   // Customize event content here
   // console.log("CustomEventContent", event);
   const targetId = extendedProps?.id[18];
   // console.log(targetId);
-  const selectedColor = colorList.find((item) => item.id === targetId);
+  const selectedColor = calendarColorList.find((item) => item.id === targetId);
   // console.log(selectedColor);
-  return (
-    <div className="">
-      {/* {console.log(extendedProps)} */}
-      {isTargetScreen ? (
-        <div className="mt-1">
-          <div
-            className={`text-center w-full text-lg ${
-              extendedProps.hasOwnProperty("dispatch") && "text-sm m-0 p-0"
-            }`}
-          >
-            <span
-              className=" w-full rounded-md"
-              onClick={() => {
-                console.log(extendedProps);
-              }}
-            >
-              {extendedProps.project.name +
-                "-" +
-                extendedProps.constructionJob.name}
-            </span>
-          </div>
 
-          {!extendedProps.hasOwnProperty("dispatch") &&
-            extendedProps.summaryJobTasks.map((summaryJobTask) => (
-              //   jobTask?.constructionSummaryJobTaskDispatches.length === 0 ?
-              <div key={summaryJobTask.id} className="">
-                <div className={`m-1 p-1 text-center relative`}>
-                  <span
-                    className={`whitespace-nowrap text-base text-neutral-400 ${
-                      extendedProps.hasOwnProperty("dispatch") &&
-                      "text-sm m-0 p-0"
-                    }`}
-                  >
-                    {`[${summaryJobTask.constructionJobTask.name}]`}
-                  </span>
-                  <span className="cursor-pointer absolute right-0 top-0.5"></span>
+  return (
+    <>
+      <div>
+        {isTargetScreen ? (
+          <div className="mt-1">
+            <div
+              className={`text-center w-full text-lg ${
+                noDispatched && "text-sm m-0 p-0"
+              }`}
+            >
+              <span
+                className=" w-full rounded-md"
+                // onClick={() => {
+                //   console.log(extendedProps);
+                // }}
+              >
+                {extendedProps.project.name +
+                  "-" +
+                  extendedProps.constructionJob.name}
+              </span>
+            </div>
+
+            {!noDispatched &&
+              extendedProps.summaryJobTasks.map((summaryJobTask) => (
+                //   jobTask?.constructionSummaryJobTaskDispatches.length === 0 ?
+                <div key={summaryJobTask.id} className="">
+                  <div className={`m-1 p-1 text-center relative`}>
+                    <span
+                      className={`whitespace-nowrap text-base text-neutral-400 ${
+                        noDispatched && "text-sm m-0 p-0"
+                      }`}
+                    >
+                      {`[${summaryJobTask.constructionJobTask.name}]`}
+                    </span>
+                    <span className="cursor-pointer absolute right-0 top-0.5"></span>
+                  </div>
+                  <div className="m-1 text-center align-middle">
+                    {summaryJobTask.constructionSummaryJobTaskDispatches
+                      .length > 0
+                      ? summaryJobTask.constructionSummaryJobTaskDispatches.map(
+                          (dispatch, index) => (
+                            <span className="ms-1" key={"0" + index}>
+                              {dispatch.labourer.nickname}
+                            </span>
+                          )
+                        )
+                      : null}
+                  </div>
                 </div>
-                <div className="m-1 text-center align-middle">
-                  {summaryJobTask.constructionSummaryJobTaskDispatches.length >
-                  0
-                    ? summaryJobTask.constructionSummaryJobTaskDispatches.map(
+              ))}
+          </div>
+        ) : (
+          // 在PC螢幕上，如果有dispatch:none這個屬性(我額外添加的，代表沒有被派工，顏色不同)
+          <p
+            className={`px-2 text-ellipsis overflow-hidden rounded-sm  cursor-pointer ${
+              extendedProps?.dispatch
+                ? " bg-gray-200 text-gray-500"
+                : `${selectedColor?.fortw} text-white`
+            } `}
+          >
+            <Tooltip
+              describeChild={true}
+              className="z-[3000]"
+              componentsProps={{
+                tooltip: {
+                  sx: {
+                    padding: "0",
+                    zIndex: "3000",
+                  },
+                },
+              }}
+              placement="right-start"
+              title={extendedProps.summaryJobTasks.map(
+                (summaryJobTask, index) => (
+                  <div key={index + summaryJobTask.id} className="">
+                    {summaryJobTask.constructionSummaryJobTaskDispatches
+                      .length > 0 &&
+                      summaryJobTask.constructionSummaryJobTaskDispatches.map(
                         (dispatch, index) => (
-                          <span className="ms-1" key={index}>
+                          <span className="text-lg px-2 " key={index}>
                             {dispatch.labourer.nickname}
+                            <br />
                           </span>
                         )
-                      )
-                    : null}
-                </div>
-              </div>
-            ))}
-        </div>
-      ) : (
-        <p
-          className={`px-2 text-ellipsis overflow-hidden rounded-sm  cursor-pointer ${
-            extendedProps?.dispatch
-              ? " bg-gray-200 text-gray-500"
-              : `${selectedColor?.fortw} text-white`
-          } `}
-        >
-          <Tooltip
-            describeChild={true}
-            className="z-[3000]"
-            componentsProps={{
-              tooltip: {
-                sx: {
-                  padding: "0",
-                  zIndex: "3000",
-                },
-              },
-            }}
-            placement="right-start"
-            title={extendedProps.summaryJobTasks.map((summaryJobTask) => (
-              <div key={summaryJobTask.id} className="">
-                {summaryJobTask.constructionSummaryJobTaskDispatches.length >
-                  0 &&
-                  summaryJobTask.constructionSummaryJobTaskDispatches.map(
-                    (dispatch, index) => (
-                      <span className="text-lg px-2" key={index}>
-                        {dispatch.labourer.nickname}
-                        <br />
-                      </span>
-                    )
-                  )}
-              </div>
-            ))}
-          >
-            <span>
-              {event.title}-{extendedProps.name}
-            </span>
-          </Tooltip>
-        </p>
-      )}
-    </div>
+                      )}
+                  </div>
+                )
+              )}
+            >
+              <span>
+                {event.title}-{extendedProps.name}
+              </span>
+            </Tooltip>
+          </p>
+        )}
+      </div>
+    </>
   );
 };

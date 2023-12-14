@@ -748,7 +748,8 @@ const EditJobTaskDiv = React.memo(
     const [taskEditOpen, setTaskEditOpen] = useState(false);
     const [deliverTaskInfo, setDeliverTaskInfo] = useState(null);
 
-    const [clearDispatch, setClearDispatch] = useState(null);
+    const summarySince = new Date(deliverInfo?.since);
+    const summaryUntil = new Date(deliverInfo?.until);
 
     const theme = useTheme();
     const padScreen = useMediaQuery(theme.breakpoints.down("768"));
@@ -1171,6 +1172,8 @@ const EditJobTaskDiv = React.memo(
           sendDataToTaskEdit={sendDataToTaskEdit}
           onClose={onTaskEditClose}
           isOpen={taskEditOpen}
+          summarySince={summarySince}
+          summaryUntil={summaryUntil}
         />
       </>
     );
@@ -1179,7 +1182,15 @@ const EditJobTaskDiv = React.memo(
 
 // step-2.5 用來新增編輯工項執行的日期、地點備註用的 dialog
 const TaskEditDialog = React.memo(
-  ({ deliverTaskInfo, sendDataToTaskEdit, onClose, isOpen, setIsLoading }) => {
+  ({
+    deliverTaskInfo,
+    sendDataToTaskEdit,
+    onClose,
+    isOpen,
+    setIsLoading,
+    summarySince,
+    summaryUntil,
+  }) => {
     // Alert 開關
     // 檢查是否被汙染
     const [alertOpen, setAlertOpen] = useState(false);
@@ -1323,13 +1334,18 @@ const TaskEditDialog = React.memo(
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="flex flex-col gap-1.5 mt-3">
                     <InputTitle title={"預計施工日期"} required={false} />
-                    <ControlledDatePicker name="estimatedSince" />
+                    <ControlledDatePicker
+                      name="estimatedSince"
+                      minDate={summarySince}
+                      maxDate={summaryUntil}
+                    />
                   </div>
                   <div className="flex flex-col gap-1.5 mt-3">
                     <InputTitle title={"預計完工日期"} required={false} />
                     <ControlledDatePicker
                       name="estimatedUntil"
-                      minDate={estimatedSince}
+                      minDate={!!estimatedSince ? estimatedSince : summarySince}
+                      maxDate={summaryUntil}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 mt-3">
@@ -1638,7 +1654,7 @@ const EditDispatchDiv = React.memo(
       }
     };
 
-    function generateDateRange(estimatedSince, estimatedUntil) {
+    const generateDateRange = (estimatedSince, estimatedUntil) => {
       if (estimatedSince && estimatedUntil) {
         // 如果都有值，使用日期區間的方法生成日期陣列
         const startDate = new Date(estimatedSince);
@@ -1662,10 +1678,9 @@ const EditDispatchDiv = React.memo(
           dateArray.push(null);
           dateArray.push(estimatedUntil);
         }
-
         return dateArray;
       }
-    }
+    };
 
     return (
       <>
@@ -1725,14 +1740,15 @@ const EditDispatchDiv = React.memo(
                       <span className="overflow-x-auto pe-5">
                         說明: {task?.remark ? task.remark : ""}
                       </span>
-                      <Divider sx={{ margin: "6px" }} />
+                      <span className="bg-gray-300 w-full h-[0.1px] inline-block m-0 text-xs"></span>
+                      {/* <hr className="m-1"/> */}
                       {generateDateRange(
                         task.estimatedSince,
                         task.estimatedUntil
                       ).map((date) => (
                         <React.Fragment key={date}>
                           <span className=" w-full ">
-                            <p>{date}:</p>
+                            <span>{date ? date + ": " : ""}</span>
 
                             <span className="">
                               {task?.constructionSummaryJobTaskDispatches
@@ -1744,6 +1760,7 @@ const EditDispatchDiv = React.memo(
                                   )
                                   .join(", ")}
                             </span>
+                            <br />
                           </span>
                         </React.Fragment>
                       ))}
