@@ -541,7 +541,7 @@ const TaskModal = React.memo(
         getData(taskurl).then((result) => {
           //這個result是用工程項目去找工項執行清單的結果
           //console.log("取得總清單",result)
-          
+
           setIsLoading(false);
           const data = result.result;
           const contains = [];

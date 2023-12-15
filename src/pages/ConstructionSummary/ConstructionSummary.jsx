@@ -157,10 +157,9 @@ const ConstructionSummary = () => {
   const getProjecstList = () => {
     setIsLoading(true);
     getData("project").then((result) => {
-      setIsLoading(false);
       const projectsList = result.result.content;
-      //console.log(projectsList);
       setProjectsList(projectsList);
+      setIsLoading(false);
     });
   };
   const getDepartMemberList = useCallback((id) => {

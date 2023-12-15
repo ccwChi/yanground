@@ -13,8 +13,6 @@ import { LoadingThree } from "../../components/Loader/Loading";
 import Calendar from "../../components/Calendar/Calendar";
 import { Backdrop, Tooltip, useMediaQuery } from "@mui/material";
 import { UpdatedModal } from "./NewSummaryModal";
-import styled from "@emotion/styled";
-import { Button } from "@mui/base";
 import { calendarColorList } from "../../data/calendarColorList";
 
 const today = new Date();
@@ -63,9 +61,6 @@ const DispatchCalendar = () => {
   // 傳送額外資訊給 Modal
   const [deliverInfo, setDeliverInfo] = useState(null);
 
-  // transDate這邊會輸出成可以比大小的格式 Mon Dec 11 2023 08:00:00 GMT+0800 (台北標準時間)
-  // console.log(transDate);
-  // console.log(new Date(transDate));
   // 上方區塊功能按鈕清單
 
   const btnGroup = [
@@ -80,25 +75,20 @@ const DispatchCalendar = () => {
     },
   ];
 
-  // const calendarRef = useRef(null);
   // 當面板傳了日期回來時會更新
   useEffect(() => {
     if (dateList && constructionSummaryList) {
-      // console.log("要getCalendarData();");
       getCalendarData();
     }
-  }, [dateList, constructionSummaryList]);
+  }, [dateList, constructionSummaryList, reGetCalendarData]);
 
   useEffect(() => {
     getDepartMemberList("11");
     getProjecstList();
-    // getConstructionSummaryList();
   }, []);
 
-  // 不把它合併到上面的原因是因為如果七天派工沒有人員變動，卻改了工項執行，他只重打timesheet是不會更新資料的
   useEffect(() => {
     getConstructionSummaryList();
-    // console.log("getConstructionSummaryList();");
   }, [reGetSummaryListData]);
 
   useEffect(() => {
@@ -120,12 +110,6 @@ const DispatchCalendar = () => {
   const getCalendarData = () => {
     getData("timesheet").then((result) => {
       const data = result.result;
-      // console.log(
-      //   "執行取getCalendarData，constructionSummaryList",
-      //   constructionSummaryList
-      // );
-      // 下面只對取得的data做轉換
-      // console.log(data);
       const transformData = (data) => {
         return data.map((item) => {
           //第一層是date, summaries
@@ -167,8 +151,6 @@ const DispatchCalendar = () => {
                     date,
                   };
                 });
-
-              // if (simplifiedDispatches.length > 0) {
               return {
                 id,
                 constructionJobTask: {
@@ -195,7 +177,26 @@ const DispatchCalendar = () => {
                 id: project.id,
                 name: project.name,
               },
-              summaryJobTasks: simplifiedTasks,
+              summaryJobTasks: simplifiedTasks.sort((a, b) => {
+                if (a.estimatedSince && !b.estimatedSince) {
+                  return -1;
+                } else if (!a.estimatedSince && b.estimatedSince) {
+                  return 1;
+                } else if (a.estimatedSince && b.estimatedSince) {
+                  if (a.estimatedSince < b.estimatedSince) {
+                    return -1;
+                  } else if (a.estimatedSince > b.estimatedSince) {
+                    return 1;
+                  }
+                }
+                if (a.estimatedUntil < b.estimatedUntil) {
+                  return -1;
+                } else if (a.estimatedUntil > b.estimatedUntil) {
+                  return 1;
+                }
+
+                return 0; // a 和 b 相等
+              }),
               since,
               until,
             };
@@ -207,9 +208,7 @@ const DispatchCalendar = () => {
           };
         });
       };
-
       const transformedData = transformData(data);
-      // console.log("transformedData",transformedData)
       const dateSummariesMap = dateList.map((date) => {
         const existingData = transformedData.find((data) => data.date === date);
 
@@ -236,9 +235,6 @@ const DispatchCalendar = () => {
         }
       });
 
-      // console.log("dateSummariesMap",dateSummariesMap)
-
-      // 如果專案日起始日期-完工日期包含月曆上的該日期，才會保留，剩下的過濾丟掉
       const filterTransformedData = dateSummariesMap
         .map((oneday) => {
           return {
@@ -250,24 +246,15 @@ const DispatchCalendar = () => {
         })
         .filter((oneday) => oneday.summaries.length > 0);
 
-      // 將整理完的資料轉換成日立所需要用的event格式
       const events = filterTransformedData.flatMap((item) => {
         return item.summaries.map((summary) => {
           return {
             title: summary.project.name,
             start: item.date,
             extendedProps: summary,
-          }; //, summaries: summary
+          };
         });
       });
-
-      // const filteredEvents = events.filter((event) => {
-      //   return SummaryDatePeriod(
-      //     event.extendedProps.since,
-      //     event.extendedProps.until
-      //   ).includes(event.start);
-      // });
-      // console.log(filteredEvents)
 
       //這個就是取得7天派工的整理精華+ 全部清單清空派工人員
       setConstSummaryApiList(filterTransformedData);
@@ -276,17 +263,13 @@ const DispatchCalendar = () => {
         (list) =>
           list.date === reGetCalendarData || list.date === reGetSummaryListData
       );
-      // console.log("取道ondayTota之前的,reGetCalendarApi", reGetCalendarApi);
       if (oneDayTotal.length > 0) {
-        // console.log("有取道ondayTotal,", oneDayTotal[0]);
         setDeliverInfo(oneDayTotal[0]);
       }
-      // console.log("沒取道onda yTotal,");
 
       setReGetCalendarData(null);
       setReGetSummaryListData(null);
       setIsEventModalOpen(true);
-      // console.log("events",events);
       setEvents(events);
       setIsLoading(false);
     });
@@ -306,7 +289,6 @@ const DispatchCalendar = () => {
   const getConstructionSummaryList = useCallback(() => {
     const summaryList = `constructionSummary?p=1&s=5000`;
     getData(summaryList).then((result) => {
-      // console.log(result.result.content);
       const filterList = result.result.content.map((data) => {
         const {
           id,
@@ -329,7 +311,24 @@ const DispatchCalendar = () => {
           name,
           project,
           summaryJobTasks: modifiedSummaryJobTasks
-            ? modifiedSummaryJobTasks
+            ? modifiedSummaryJobTasks.sort((a, b) => {
+                if (a.estimatedSince && !b.estimatedSince) {
+                } else if (!a.estimatedSince && b.estimatedSince) {
+                  return 1;
+                } else if (a.estimatedSince && b.estimatedSince) {
+                  if (a.estimatedSince < b.estimatedSince) {
+                    return -1;
+                  } else if (a.estimatedSince > b.estimatedSince) {
+                    return 1;
+                  }
+                }
+                if (a.estimatedUntil < b.estimatedUntil) {
+                  return -1;
+                } else if (a.estimatedUntil > b.estimatedUntil) {
+                  return 1;
+                }
+                return 0;
+              })
             : [],
           since,
           until,
@@ -371,12 +370,10 @@ const DispatchCalendar = () => {
           getConstructionSummaryList();
           onClose();
         } else if (result.result.response !== 200) {
-          //console.log(result.result);
           showNotification(
             result?.result?.reason ? result.result.reason : "錯誤",
             false
           );
-          //目前唯一會導致400的原因只有名稱重複，大概吧
         }
         setSendBackFlag(false);
       });
@@ -448,29 +445,20 @@ const DispatchCalendar = () => {
         _dayMaxEvents={3}
         dateClick={(e) => {
           handleDayClick(e.dateStr);
-          // console.log("day.e", e);
         }}
         eventClick={(e) => {
           handleEventClick(e.event.startStr);
         }}
-        // editable={true}
         eventContent={(eventInfo) => {
           return <CustomEventContent event={eventInfo.event} />;
         }}
         eventColor={isTargetScreen ? "transparent" : "#F48A64"}
-        // height="auto"
         displayEventTime={false} // 整天
         eventBorderColor={"transparent"}
         eventBackgroundColor={"transparent"}
         eventOrder={""}
       />
-
-      {/* </div> */}
-      <Backdrop
-        sx={{ color: "#fff", zIndex: 1050 }}
-        open={isLoading}
-        // onClick={onCheckDirty}
-      >
+      <Backdrop sx={{ color: "#fff", zIndex: 1050 }} open={isLoading}>
         <LoadingThree size={40} />
       </Backdrop>
       <EventModal
@@ -479,11 +467,12 @@ const DispatchCalendar = () => {
         departMemberList={departMemberList}
         onClose={onClose}
         constructionTypeList={constructionTypeList}
-        // projectsList={projectsList}
         isOpen={isEventModalOpen}
         setReGetCalendarData={setReGetCalendarData}
         setReGetSummaryListData={setReGetSummaryListData}
         constructionSummaryList={constructionSummaryList}
+        sendBackFlag={sendBackFlag}
+        setSendBackFlag={setSendBackFlag}
       />
       {/* Modal */}
       {config && config.modalComponent}
@@ -497,12 +486,8 @@ const CustomEventContent = ({ event }) => {
   const isTargetScreen = useMediaQuery("(max-width:991.98px)");
   const extendedProps = event._def.extendedProps;
   const noDispatched = extendedProps.hasOwnProperty("dispatch");
-  // Customize event content here
-  // console.log("CustomEventContent", event);
   const targetId = extendedProps?.id[17];
-  // console.log(targetId);
   const selectedColor = calendarColorList.find((item) => item.id === targetId);
-  // console.log(selectedColor);
 
   return (
     <>
@@ -514,21 +499,14 @@ const CustomEventContent = ({ event }) => {
                 noDispatched && "text-sm m-0 p-0"
               }`}
             >
-              <span
-                className=" w-full rounded-md"
-                // onClick={() => {
-                //   console.log(extendedProps);
-                // }}
-              >
+              <span className=" w-full rounded-md">
                 {extendedProps.project.name +
                   "-" +
                   extendedProps.constructionJob.name}
               </span>
             </div>
-
             {!noDispatched &&
               extendedProps.summaryJobTasks.map((summaryJobTask) => (
-                //   jobTask?.constructionSummaryJobTaskDispatches.length === 0 ?
                 <div key={summaryJobTask.id} className="">
                   <div className={`m-1 p-1 text-center relative`}>
                     <span

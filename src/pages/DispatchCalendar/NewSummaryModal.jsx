@@ -37,7 +37,6 @@ const UpdatedModal = React.memo(
     constructionTypeList,
     projectsList,
   }) => {
-    // Alert 開關
     const [alertOpen, setAlertOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [constructionJobList, setConstructionJobList] = useState(null);
@@ -82,7 +81,6 @@ const UpdatedModal = React.memo(
           message: "完工日期不能早於施工日期",
           test: function (until) {
             const since = this.parent.since;
-
             // 只有在 estimatedSince 和 estimatedUntil 都有值時才驗證
             if (since && until) {
               const formattedSince = new Date(since).toLocaleDateString(
@@ -95,7 +93,6 @@ const UpdatedModal = React.memo(
               );
               return formattedUntil >= formattedSince;
             }
-
             return true; // 如果其中一個為空，則不驗證
           },
         }),
@@ -104,7 +101,7 @@ const UpdatedModal = React.memo(
       defaultValues,
       resolver: yupResolver(schema),
     });
-    // 使用 useForm Hook 來管理表單狀態和驗證
+
     const {
       control,
       handleSubmit,
@@ -153,7 +150,6 @@ const UpdatedModal = React.memo(
       }
     };
 
-    // Alert 回傳值進行最終結果 --- true: 關閉 modal / all: 關閉 Alert
     const handleAlertClose = (agree) => {
       if (agree) {
         onClose();

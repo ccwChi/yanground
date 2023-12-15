@@ -34,7 +34,6 @@ const TaskModal = React.memo(
     setAddJobTask,
     jobTaskDirty,
     setJobTaskDirty,
-    
   }) => {
     // Alert 開關
 
@@ -113,10 +112,9 @@ const TaskModal = React.memo(
     const {
       control,
       handleSubmit,
-      watch,
       formState: { errors },
     } = methods;
-    const { fields, remove, append } = useFieldArray({
+    const { remove } = useFieldArray({
       control,
       name: "fields",
     });
@@ -145,13 +143,10 @@ const TaskModal = React.memo(
               (t) => t.constructionJobTask.id === d.id
             );
           });
-          //   console.log("contains=selectedTask",contains)
-          //   console.log("notMatchingTasks=ConstructionTaskList=options",notMatchingTasks)
           setSelectedTasks(contains);
           setConstructionTaskList(notMatchingTasks);
         });
       }
-      //   console.log("apiSelectedTask", apiSelectedTask);
     }, [apiSelectedTask]);
 
     useEffect(() => {
@@ -189,8 +184,7 @@ const TaskModal = React.memo(
           },
           ...selectedTasks,
         ];
-        // console.log("handleSeletedTask",handleSeletedTask)
-        // console.log("newAddSeletedTask", newAddSeletedTask);
+
         setOnlyNewSelected(
           newAddSeletedTask.sort((a, b) => {
             // 先檢查 estimatedSince 是否为非空字符串
@@ -238,7 +232,7 @@ const TaskModal = React.memo(
             return 0; // a 和 b 相等
           })
         );
-        // console.log("selectedTasks", handleSeletedTask);
+
         setConstructionTaskList(
           constructionTaskList
             .filter((p) => p.id !== selectedTask)
@@ -252,8 +246,6 @@ const TaskModal = React.memo(
     const handleRemoveTask = useCallback(
       (taskId, index) => {
         if (!jobTaskDirty) setJobTaskDirty(true);
-        // console.log("selectedTasks", selectedTasks);
-        // console.log("constructionTaskList", constructionTaskList);
         const selectedTask = selectedTasks.find(
           (task) => task.constructionJobTask.id === taskId
         );
@@ -264,14 +256,10 @@ const TaskModal = React.memo(
           ];
           setConstructionTaskList(updatedConstructionTaskList);
         }
-        // console.log("forConstructionTaskList", updatedConstructionTaskList);
-
         const forSelectedTasks = selectedTasks.filter(
           (p) => p.constructionJobTask.id !== taskId
         );
         setSelectedTasks(forSelectedTasks);
-        // console.log("forSelectedTasks要顯示的卡片含全部", forSelectedTasks);
-
         const forOnlyNewSelected = onlyNewSelected.filter(
           (p) => p.constructionJobTask.id !== taskId
         );
@@ -285,7 +273,6 @@ const TaskModal = React.memo(
       setSendBackFlag(true);
       const convertData = [];
       for (var task of data.fields) {
-        // console.log(task);
         const tempTask = {
           constructionJobTask: task.constructionJobTask,
           estimatedSince: task.estimatedSince
@@ -298,16 +285,13 @@ const TaskModal = React.memo(
           remark: task?.remark ? task.remark : "",
         };
         convertData.push(tempTask);
-        // console.log(convertData);
       }
       const url = `constructionSummary/${deliverInfo.id}/tasks`;
       postBodyData(url, convertData).then((result) => {
-        //console.log(result);
         if (result.status) {
           showNotification("資料上傳成功", true);
           setReGetSummaryListData(deliverInfo.date);
         } else if (result.result.response === 400) {
-          //console.log(result.result);
           showNotification(
             result?.result?.reason ? result?.result?.reason : "錯誤",
             false
@@ -319,7 +303,6 @@ const TaskModal = React.memo(
         setAddJobTask(null);
       });
     };
-    // console.log(deliverInfo);
     return (
       <>
         <div className="w-full flex justify-center my-2">
@@ -396,7 +379,6 @@ const TaskModal = React.memo(
                             variant="outlined"
                             size="small"
                             className="inputPadding"
-                            //   inputProps={{ readOnly: true }}
                             fullWidth
                             {...field}
                           />
@@ -414,8 +396,6 @@ const TaskModal = React.memo(
                           minDate={summarySince}
                           maxDate={summaryUntil}
                         />
-
-                        {/* <InputTitle title={"預計完工日期"} required={false} /> */}
                         <ControlledDatePicker
                           name={`fields[${index}].estimatedUntil`}
                           minDate={summarySince}
@@ -437,7 +417,6 @@ const TaskModal = React.memo(
                             size="small"
                             className="inputPadding"
                             placeholder="請輸入施工位置"
-                            //   inputProps={{ readOnly: true }}
                             fullWidth
                             {...field}
                           />
@@ -456,7 +435,6 @@ const TaskModal = React.memo(
                             size="small"
                             className="inputPadding"
                             placeholder="請輸入說明或備註"
-                            //   inputProps={{ readOnly: true }}
                             fullWidth
                             {...field}
                           />

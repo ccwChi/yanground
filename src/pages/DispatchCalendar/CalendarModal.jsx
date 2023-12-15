@@ -42,6 +42,8 @@ today.setDate(today.getDate() + 1);
 const EventModal = React.memo(
   ({
     deliverInfo,
+    sendBackFlag,
+    setSendBackFlag,
     setReGetCalendarData,
     setReGetSummaryListData,
     onClose,
@@ -51,7 +53,7 @@ const EventModal = React.memo(
     // Alert 開關
     const [alertOpen, setAlertOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [sendBackFlag, setSendBackFlag] = useState(false);
+    // const [sendBackFlag, setSendBackFlag] = useState(false);
     const [isDispatchDirty, setIsDispatchDirty] = useState(false);
     const [jobTask, setJobTask] = useState(null);
     const [addJobTask, setAddJobTask] = useState(null);
@@ -167,7 +169,6 @@ const EventModal = React.memo(
       defaultValues,
       resolver: yupResolver(schema),
     });
-    // 使用 useForm Hook 來管理表單狀態和驗證
     const {
       control,
       handleSubmit,
@@ -276,7 +277,6 @@ const EventModal = React.memo(
             .map((dispatch) => dispatch.labourer.id)
         )
       );
-      //   console.log("filterTheDayRestLabourer",filteredLabourerIds);
       return filteredLabourerIds;
     };
 
@@ -295,9 +295,8 @@ const EventModal = React.memo(
           return selectedJobTask.constructionSummaryJobTaskDispatches.some(
             (dispatch) => {
               if (dispatch.labourer.id === person.id) {
-                // 如果 dispatch.labourer.id 与 person.id 匹配，就将 dispatch.id 添加到 person 对象中
                 person.dispatchId = dispatch.id;
-                return true; // 返回 true 以将该 person 包含在结果中
+                return true;
               }
               return false;
             }
@@ -312,12 +311,9 @@ const EventModal = React.memo(
               (dispatched) => dispatched.labourer.id === labourer.id
             )
         );
-
         setDispatchForApi(beSeleted);
-        //console.log("DispatchForApi", beSeleted);
       } else {
         setDispatchForApi([]);
-        //console.log("DispatchForApi", []);
       }
       setIsLoading(false);
     };
@@ -348,19 +344,15 @@ const EventModal = React.memo(
     const handleChange = (event, value) => {
       setIsDispatchDirty(true);
       setDispatchForApi(value);
-
-      //   console.log("event", event);
     };
 
     // 點擊派工提交
     const handleDispatchOnly = async () => {
       setSendBackFlag(true);
-      //console.log("目前選單裡面的人:", taskSelectLabouerList);
 
       const newIncrease = dispatchForApi
         .filter((item) => item && !item.hasOwnProperty("dispatchId"))
         .map((item) => item.id);
-      //console.log("要新增的人(列id):", newIncrease);
       const removeWithPatchId = taskSelectLabouerList
         .filter((item) => item && item.hasOwnProperty("dispatchId"))
         .filter(
@@ -370,7 +362,7 @@ const EventModal = React.memo(
             )
         )
         .map((item) => item.dispatchId);
-      //   console.log("要移除的人(列派工id):", removeWithPatchId);
+
       //下面是處理新增派工的部分
       const dispatchUrl = `constructionSummaryJobTask/${jobTask.id}/dispatches`;
       const fd = new FormData();
@@ -391,6 +383,7 @@ const EventModal = React.memo(
         setReGetCalendarData(deliverInfo.date);
       } catch (error) {
         console.error("Error:", error);
+        setSendBackFlag(false);
       }
     };
 
@@ -431,10 +424,9 @@ const EventModal = React.memo(
     //下面是更改工項執行的api
     const PostBodyData = (jobTaskUrl, convertData) => {
       postBodyData(jobTaskUrl, convertData).then((result) => {
-        // console.log("convertData", convertData, "result", result);
         if (result.status) {
           showNotification("更改工項執行成功", true);
-          console.log(deliverInfo.date)
+          console.log(deliverInfo.date);
           setReGetSummaryListData(deliverInfo.date);
         } else {
           showNotification(
@@ -452,7 +444,6 @@ const EventModal = React.memo(
       setAddJobTask(null);
       setActiveJobTask("");
       setCurrentDivIndex(1);
-      // console.log("AddNewJobTask", summary);
       setJobTask(null);
       setTimeout(() => {
         setAddJobTask(summary);
@@ -646,7 +637,6 @@ const EventModal = React.memo(
                           variant="contained"
                           color="inherit"
                           className="!ease-in-out !duration-300 absolute top-3 right-0"
-                          // sx={{ transform: "translate(4px, 1rem)" }}
                           onClick={(e) => {
                             AddNewJobTask(e, summary);
                           }}
@@ -669,12 +659,7 @@ const EventModal = React.memo(
                 {jobTask ? (
                   <div className="mt-1">
                     <div className="w-full flex justify-center my-2">
-                      <span
-                        className="font-bold text-lg px-4 border-b-2"
-                        // onClick={() => {
-                        //   console.log(deliverInfo);
-                        // }}
-                      >
+                      <span className="font-bold text-lg px-4 border-b-2">
                         {!!jobTask && (
                           <span className="text">
                             {jobTask?.constructionJobTask?.name}
