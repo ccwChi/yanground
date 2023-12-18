@@ -21,6 +21,7 @@ import { deleteData, getData, postData } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../../hooks/useNotification";
 import { TransitionGroup } from "react-transition-group";
+import HelpQuestion from "../../components/HelpQuestion/HelpQuestion";
 
 // step-3 的 div，編修派工人員，想要正常執行 EditDispatchDiv，一定要傳一個 summaryID進去
 const EditDispatchDiv = React.memo(
@@ -395,7 +396,8 @@ const EditDispatchDiv = React.memo(
                   title={"派工人員"}
                   required={false}
                   classnames="mt-2"
-                ></InputTitle>
+                >
+                </InputTitle>
                 <List className="overflow-y-auto border border-neutral-300 rounded !mb-2.5">
                   {departMemberList?.length > 0 ? (
                     <TransitionGroup>

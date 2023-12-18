@@ -23,93 +23,104 @@ import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import ConstructionSummary from "./pages/ConstructionSummary/ConstructionSummary";
 import DispatchCalendar from "./pages/DispatchCalendar/DispatchCalendar";
+import ClientQuestionnaire from "./pages/Client/ClientQuestionnaire";
+import EducationTrainging from "./pages/EducationTraining/EducationTraining";
 
 const router = createBrowserRouter([
-	{
-		path: "/",
-		element: <App />,
-		errorElement: <ErrorMessage />,
-		children: [
-			{
-				index: true,
-				element: <Home />,
-			},
-			{
-				path: "/sites",
-				element: <Sites />,
-			},
-			{
-				path: "/constructiontypes",
-				element: <ConstructionTypes />,
-			},
-			{
-				path: "/constructiontypes/:type",
-				element: <ConstructionType />,
-			},
-			{
-				path: "/constructiontypes/:type/:job",
-				element: <ConstructionJob />,
-			},
-			{
-				path: "/constructionsummary",
-				element: <ConstructionSummary />,
-			},
-			{
-				path: "/project",
-				element: <Project />,
-			},
-			{
-				path: "/maps",
-				element: <Maps />,
-			},
-			{
-				path: "/dispatchList",
-				element: <DispatchList />,
-			},
-			{
-				path: "/users",
-				element: <Users />,
-			},
-			{
-				path: "/punch",
-				element: <Punch />,
-			},
-			{
-				path: "/userInfo",
-				element: <UserInfo />,
-			},
-			{
-				path: "/forbidden",
-				element: <Forbidden />,
-			},
-			{
-				path: "/dispatchcalendar",
-				element: <DispatchCalendar />,
-			},
-			{
-				path: "/unauthorized",
-				element: <Unauthorized />,
-			},
-			{
-				path: "/OJrqiGtV/H0aAwx3b58FUg==",
-				element: <Explotion />,
-			},
-			{
-				path: "/404",
-				element: <ErrorPages />,
-			},
-			{
-				path: "*",
-				element: <ErrorPages />,
-			},
-		],
-	},
+  {
+    path: "/",
+    element: <App />,
+    errorElement: <ErrorMessage />,
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: "/sites",
+        element: <Sites />,
+      },
+      {
+        path: "/constructiontypes",
+        element: <ConstructionTypes />,
+      },
+      {
+        path: "/constructiontypes/:type",
+        element: <ConstructionType />,
+      },
+      {
+        path: "/constructiontypes/:type/:job",
+        element: <ConstructionJob />,
+      },
+      {
+        path: "/constructionsummary",
+        element: <ConstructionSummary />,
+      },
+      {
+        path: "/project",
+        element: <Project />,
+      },
+      {
+        path: "/maps",
+        element: <Maps />,
+      },
+      {
+        path: "/dispatchList",
+        element: <DispatchList />,
+      },
+      {
+        path: "/users",
+        element: <Users />,
+      },
+      {
+        path: "/punch",
+        element: <Punch />,
+      },
+      {
+        path: "/userInfo",
+        element: <UserInfo />,
+      },
+      {
+        path: "/forbidden",
+        element: <Forbidden />,
+      },
+      {
+        path: "/dispatchcalendar",
+        element: <DispatchCalendar />,
+      },
+      {
+        path: "/educationtraining",
+        element: <EducationTrainging />,
+      },
+      {
+        path: "/unauthorized",
+        element: <Unauthorized />,
+      },
+      {
+        path: "/OJrqiGtV/H0aAwx3b58FUg==",
+        element: <Explotion />,
+      },
+      {
+        path: "/404",
+        element: <ErrorPages />,
+      },
+      {
+        path: "*",
+        element: <ErrorPages />,
+      },
+    ],
+  },
+  {
+    path: "/clientquestionnaire",
+    errorElement: <ErrorMessage />,
+    element: <ClientQuestionnaire />,
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-	// <React.StrictMode>
-	<RouterProvider router={router} />
-	// </React.StrictMode>
+  // <React.StrictMode>
+  <RouterProvider router={router} />
+  // </React.StrictMode>
 );
 
 reportWebVitals();
