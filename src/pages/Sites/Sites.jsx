@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import PageTitle from "../../components/Guideline/PageTitle";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
-import TableTabber from "../../components/Tabbar/TableTabber";
+import TableTabbar from "../../components/Tabbar/TableTabbar";
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
 import AddIcon from "@mui/icons-material/Add";
@@ -198,7 +198,7 @@ const Sites = () => {
 			<PageTitle title="案場" btnGroup={btnGroup} handleActionClick={handleActionClick} isLoading={!isLoading} />
 
 			{/* TabBar */}
-			{/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}
+			{/* <TableTabbar tabGroup={tabGroup} setCat={setCat} /> */}
 
 			{/* Table */}
 			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">

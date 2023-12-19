@@ -26,7 +26,7 @@ import { LoadingThree } from "../../components/Loader/Loading";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import InputTitle from "../../components/Guideline/InputTitle";
-import TableTabber from "../../components/Tabbar/TableTabber";
+import TableTabbar from "../../components/Tabbar/TableTabbar";
 
 const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentList, authorityList }) => {
 	// RWD Tabbar 當前位置
@@ -150,7 +150,7 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 				<FormProvider {...methods}>
 					{/* TabBar */}
 					<div className="md:hidden mt-3 mb-5 flex-1 -m-3">
-						<TableTabber tabGroup={tabGroup} setCat={setCat} cat={cat} />
+						<TableTabbar tabGroup={tabGroup} setCat={setCat} cat={cat} />
 					</div>
 
 					<form onSubmit={handleSubmit(onSubmit)}>

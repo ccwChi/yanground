@@ -283,9 +283,9 @@ const Users = () => {
 					showNotification("激活失敗。", false);
 				}
 			});
-		// } else if (dataMode === "attconf") {
-		// 	setModalValue(dataMode);
-		// 	setDeliverInfo(dataValue);
+			// } else if (dataMode === "attconf") {
+			// 	setModalValue(dataMode);
+			// 	setDeliverInfo(dataValue);
 		} else if (dataMode === "filter") {
 			handleOpenSearch();
 		} else if (dataMode === "viewpunch") {
@@ -382,7 +382,7 @@ const Users = () => {
 				haveValue={filters === defaultValue}
 				isDirty={isDirty}>
 				<form className="flex flex-col gap-2">
-					<div className="inline-flex items-center">
+					<div className="inline-flex items-center gap-2">
 						<InputTitle title={"Line 名稱"} classnames="whitespace-nowrap min-w-[80px]" pb={false} required={false} />
 						<Controller
 							name="name"
@@ -392,7 +392,7 @@ const Users = () => {
 							)}
 						/>
 					</div>
-					<div className="inline-flex items-center">
+					<div className="inline-flex items-center gap-2">
 						<InputTitle title={"部門名稱"} classnames="whitespace-nowrap min-w-[80px]" pb={false} required={false} />
 						<Controller
 							name="department"
@@ -417,7 +417,7 @@ const Users = () => {
 							)}
 						/>
 					</div>
-					<div className="inline-flex items-center justify-between">
+					<div className="inline-flex items-center justify-between gap-2">
 						<InputTitle title={"性別"} classnames="whitespace-nowrap pb-1" pb={false} required={false} />
 						<Controller
 							name="gender"
@@ -482,9 +482,6 @@ const Users = () => {
 					/>
 				</form>
 			</PageTitle>
-
-			{/* TabBar */}
-			{/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}
 
 			{/* Table */}
 			<div className="overflow-y-auto h-full order-3 sm:order-1">

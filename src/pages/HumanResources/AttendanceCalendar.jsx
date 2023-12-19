@@ -163,7 +163,7 @@ const AttendanceCalendar = () => {
 					(modeValue === dataCAList[0].value || !dataCAList.some((item) => item.value === modeValue))
 				}>
 				<div className="relative flex flex-col item-start sm:items-center gap-3">
-					<div className="inline-flex items-center w-full">
+					<div className="inline-flex items-center w-full gap-2">
 						<InputTitle title={"選擇資料"} pb={false} required={false} classnames="whitespace-nowrap" />
 						<Select
 							value={!modeValue ? dataCAList[0].value : modeValue}
@@ -182,7 +182,7 @@ const AttendanceCalendar = () => {
 							))}
 						</Select>
 					</div>
-					<div className="inline-flex items-center w-full">
+					<div className="inline-flex items-center w-full gap-2">
 						<InputTitle title={"部門"} pb={false} required={false} classnames="whitespace-nowrap" />
 						<Autocomplete
 							options={departmentList}
@@ -224,7 +224,7 @@ const AttendanceCalendar = () => {
 							loadingText={"載入中..."}
 						/>
 					</div>
-					<div className="inline-flex items-center w-full">
+					<div className="inline-flex items-center w-full gap-2">
 						<InputTitle title={"人員"} pb={false} required={false} classnames="whitespace-nowrap" />
 						<Autocomplete
 							options={usersList}
@@ -267,7 +267,7 @@ const AttendanceCalendar = () => {
 							disabled={!depValue}
 						/>
 					</div>
-					<div className="inline-flex items-center w-full">
+					<div className="inline-flex items-center w-full gap-2">
 						<InputTitle title={"條件"} pb={false} required={false} classnames="whitespace-nowrap" />
 						<Select
 							value={dateCondition}
@@ -282,7 +282,7 @@ const AttendanceCalendar = () => {
 							))}
 						</Select>
 					</div>
-					<div className="inline-flex items-center w-full">
+					<div className="inline-flex items-center w-full gap-2">
 						<InputTitle title={"日期"} pb={false} required={false} classnames="whitespace-nowrap" />
 						<DatePicker
 							defaultValue={dates}
