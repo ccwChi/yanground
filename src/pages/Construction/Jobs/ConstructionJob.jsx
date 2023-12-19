@@ -31,7 +31,7 @@ const ConstructionType = () => {
 	// Page 頁數設置
 	const [page, setPage] = useState(0);
 	// rows per Page 多少筆等同於一頁
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [rowsPerPage, setRowsPerPage] = useState(100);
 	// ModalValue 控制開啟的是哪一個 Modal
 	const [modalValue, setModalValue] = useState(false);
 	// 傳送額外資訊給 Modal
@@ -115,7 +115,7 @@ const ConstructionType = () => {
 			case "up":
 			case "down":
 				url += "/" + otherData + "/" + mode;
-				message = ["向下移動成功！"];
+				message = [`向${mode === 'up' ? "上" : "下"}移動成功！`];
 				break;
 			default:
 				break;

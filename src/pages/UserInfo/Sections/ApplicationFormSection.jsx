@@ -11,48 +11,73 @@ import DayOff from "./ApplicationFormSection/DayOff";
 import CompletePunchIO from "./ApplicationFormSection/CompletePunchIO";
 import WorkOverTime from "./ApplicationFormSection/WorkOvertime";
 import AuditLog from "./ApplicationFormSection/AuditLog";
-
-const applicationBtns = [
-	{
-		id: "applicationRecord",
-		icon: faBook,
-		color: "#6262a7",
-		text: "申請紀錄",
-		component: <ApplicationRecord />,
-	},
-	{
-		id: "dayOff",
-		icon: faDoorOpen,
-		color: "#547db7",
-		text: "請假",
-		component: <DayOff />,
-	},
-	{
-		id: "completePunchIO",
-		icon: faFeather,
-		color: "#039E8E",
-		text: "補打卡",
-		component: <CompletePunchIO />,
-	},
-	{
-		id: "workOvertime",
-		icon: faBuildingUser,
-		color: "#F7941D",
-		text: "加班",
-		component: <WorkOverTime />,
-	},
-	{
-		id: "auditLog",
-		icon: faPaperPlane,
-		color: "#F03355",
-		text: "審核紀錄",
-		component: <AuditLog />,
-	},
-];
+// Hooks
+import useLocalStorageValue from "../../../hooks/useLocalStorageValue";
+// Utils
+import { getData } from "../../../utils/api";
 
 const ApplicationFormSection = React.memo(({}) => {
 	const navigate = useNavigate();
 	const location = useLocation();
+	const userProfile = useLocalStorageValue("userProfile");
+	// 自身部門人員清單
+	const [memberList, setMemberList] = useState([]);
+
+	// 取得自身部門人員清單(去除自己)
+	useEffect(() => {
+		if (userProfile?.department) {
+			getData(`department/${userProfile.department.id}/staff`).then((result) => {
+				const data = result.result;
+				const formattedUser = data
+					.filter((us) => userProfile.id !== us.id)
+					.map((us) => ({
+						label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName,
+						value: us.id,
+					}));
+				setMemberList(formattedUser);
+			});
+		}
+	}, [userProfile]);
+
+	// 表單申請按鈕清單
+	const applicationBtns = [
+		{
+			id: "applicationRecord",
+			icon: faBook,
+			color: "#6262a7",
+			text: "申請紀錄",
+			component: <ApplicationRecord />,
+		},
+		{
+			id: "dayOff",
+			icon: faDoorOpen,
+			color: "#547db7",
+			text: "請假",
+			component: <DayOff userProfile={userProfile} memberList={memberList} />,
+		},
+		{
+			id: "completePunchIO",
+			icon: faFeather,
+			color: "#039E8E",
+			text: "補打卡",
+			component: <CompletePunchIO userProfile={userProfile} />,
+		},
+		{
+			id: "workOvertime",
+			icon: faBuildingUser,
+			color: "#F7941D",
+			text: "加班",
+			component: <WorkOverTime />,
+		},
+		{
+			id: "auditLog",
+			icon: faPaperPlane,
+			color: "#F03355",
+			text: "審核紀錄",
+			component: <AuditLog />,
+		},
+	];
+	// 選擇當前顯示清單
 	const [mode, setMode] = useState(applicationBtns[0]);
 
 	useEffect(() => {

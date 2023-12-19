@@ -6,39 +6,35 @@ import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { Controller, useFormContext } from "react-hook-form";
 import zhTW from "date-fns/locale/zh-TW";
 
-const ControlledDatePicker = ({
-  name,
-  format = "yyyy-MM-dd",
-  ...otherProps
-}) => {
-  const { control } = useFormContext();
+const ControlledDatePicker = ({ name, format = "yyyy-MM-dd", ...otherProps }) => {
+	const { control } = useFormContext();
 
-  return (
-    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={zhTW}>
-      <Controller
-        name={name}
-        control={control}
-        defaultValue={null}
-        render={({ field }) => (
-          <MobileDatePicker
-            slotProps={{ textField: { size: "small" } }}
-            className="inputPadding"
-            format={format}
-            dayOfWeekFormatter={(_day, weekday) => {
-              console.log(); // AVOID BUG
-            }}
-            sx={[
-              {
-                width: "100%",
-              },
-            ]}
-            {...field}
-            {...otherProps}
-          />
-        )}
-      />
-    </LocalizationProvider>
-  );
+	return (
+		<LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={zhTW}>
+			<Controller
+				name={name}
+				control={control}
+				defaultValue={null}
+				render={({ field }) => (
+					<MobileDatePicker
+						slotProps={{ textField: { size: "small" } }}
+						className="inputPadding"
+						format={format}
+						dayOfWeekFormatter={(_day, weekday) => {
+							console.log(); // AVOID BUG
+						}}
+						sx={[
+							{
+								width: "100%",
+							},
+						]}
+						{...field}
+						{...otherProps}
+					/>
+				)}
+			/>
+		</LocalizationProvider>
+	);
 };
 
 export default ControlledDatePicker;

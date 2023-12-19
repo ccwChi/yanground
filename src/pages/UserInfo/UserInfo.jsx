@@ -23,8 +23,8 @@ const UserInfo = () => {
 	const tabGroup = [
 		{ f: "info", text: "個人資訊" },
 		{ f: "punchlog", text: "打卡紀錄" },
-		{ f: "attendancelog", text: "考勤紀錄" },
-		{ f: "applicationform", text: "表單申請" },
+		// { f: "attendancelog", text: "考勤紀錄" },
+		// { f: "applicationform", text: "表單申請" },
 	];
 
 	// cat = Category 設置 tab 分類
@@ -167,7 +167,18 @@ const UserInfo = () => {
 				</div>
 			</div>
 
-			<TableTabbar tabGroup={tabGroup} cat={cat} setCat={setCat} />
+			<TableTabbar
+				tabGroup={tabGroup}
+				cat={cat}
+				setCat={setCat}
+				sx={{
+					"& .MuiTabs-scroller": {
+						borderRadius: "0.5rem",
+						background: "white",
+						boxShadow: "0 5px 10px rgba(0, 0, 0, 0.1)",
+					},
+				}}
+			/>
 
 			<div
 				className={`relative profile-section flex flex-col flex-1 overflow-hidden ${

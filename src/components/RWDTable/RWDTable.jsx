@@ -78,6 +78,11 @@ const RWDTable = ({
 																key={"AccordionActionKey" + rowIndex + "-" + index}
 																title={action.title}
 																aria-label={action.value}
+																className={
+																	(rowIndex === 0 && index === 0) || (data.length - 1 === rowIndex && index === 1)
+																		? "!hidden"
+																		: ""
+																}
 																color="custom"
 																size="small"
 																data-mode={action.value}

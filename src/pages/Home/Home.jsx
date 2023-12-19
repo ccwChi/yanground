@@ -38,7 +38,7 @@ const Home = () => {
 				getData("timesheet").then((result) => {
 					const data = result.result;
 
-					const transformedData = data.map((item) => {
+					const transformedData = data?.map((item) => {
 						const { date, summaries } = item;
 						const projectMap = new Map();
 

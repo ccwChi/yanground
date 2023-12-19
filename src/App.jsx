@@ -53,7 +53,7 @@ const App = () => {
 				{ text: "派工行事曆", href: "dispatchcalendar" },
 				{ text: "施工清單", href: "constructionsummary" },
 				{ text: "專案管理", href: "project" },
-				{ text: "派工清單", href: "dispatchList" },
+				{ text: "派工清單 (臨時)", href: "dispatchList" },
 			],
 		},
 		{
