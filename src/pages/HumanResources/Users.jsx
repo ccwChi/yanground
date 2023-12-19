@@ -133,7 +133,8 @@ const Users = () => {
 		{
 			mode: "viewpunch",
 			icon: <ExitToAppIcon fontSize="small" />,
-			text: "打卡與考勤",
+			text: "打卡紀錄",
+			// text: "打卡與考勤",
 			variant: "contained",
 			color: "secondary",
 			// fabVariant: "success",
@@ -173,7 +174,7 @@ const Users = () => {
 	// edit = 編輯名稱
 	const actions = [
 		{ value: "edit", icon: <EditIcon />, title: "編輯個人資料" },
-		{ value: "viewpunch", icon: <PunchClockIcon />, title: "打卡與考勤" },
+		{ value: "viewpunch", icon: <PunchClockIcon />, title: "個人打卡紀錄" }, //  "打卡與考勤"
 		// { value: "attconf", icon: <ViewTimelineIcon />, title: "出勤時間確認" },
 	];
 

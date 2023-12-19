@@ -63,7 +63,7 @@ const AttendanceCalendar = () => {
 	];
 	const dataCAList = [
 		{ value: "clockPunch", text: "打卡紀錄" },
-		{ value: "attendance", text: "出勤紀錄" },
+		// { value: "attendance", text: "出勤紀錄" },
 	];
 
 	// 區塊功能按鈕清單
@@ -139,7 +139,7 @@ const AttendanceCalendar = () => {
 			<PageTitle
 				title={`${
 					!userValue
-						? "打卡與考勤"
+						? "打卡紀錄" // "打卡與考勤"
 						: `${
 								usersList?.find((obj) => obj.id === userValue)?.label
 									? usersList.find((obj) => obj.id === userValue).label + "的"
