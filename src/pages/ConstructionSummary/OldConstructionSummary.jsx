@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PageTitle from "../../components/Guideline/PageTitle";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
+import TableTabber from "../../components/Tabbar/TableTabber";
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,11 +11,12 @@ import CommentIcon from "@mui/icons-material/Comment";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import { getData, postBodyData, postData } from "../../utils/api";
+import { UpdatedModal, TaskModal } from "./OldSummaryModal";
 import { useNotification } from "../../hooks/useNotification";
+import { DispatchModal } from "./OldSummaryDispatchModal";
 import constructionTypeList from "../../data/constructionTypes";
 import { LoadingFour } from "../../components/Loader/Loading";
 import Backdrop from "@mui/material/Backdrop";
-import { SummaryModal } from "./SummaryModal";
 
 const ConstructionSummary = () => {
   const navigate = useNavigate();
@@ -26,12 +28,11 @@ const ConstructionSummary = () => {
   // 傳遞稍後用 Flag
   const [sendBackFlag, setSendBackFlag] = useState(false);
   // cat = Category 設置 tab 分類
-  //   const [cat, setCat] = useState(null);
+  const [cat, setCat] = useState(null);
   // API List Data
-  const [summaryList, setSummaryList] = useState(null);
-
+  const [apiData, setApiData] = useState(null);
+  //const [constructionTypeList, setConstructionTypeList] = useState(null);
   const [projectsList, setProjectsList] = useState(null);
-  const [departMemberList, setDepartMemberList] = useState(null);
   // isLoading 等待請求 api
   const [isLoading, setIsLoading] = useState(true);
   // Page 頁數設置
@@ -46,17 +47,14 @@ const ConstructionSummary = () => {
       ? +queryParams.get("s")
       : 10
   );
-
-  const apiUrl = `constructionSummary?p=${page + 1}&s=${rowsPerPage}`;
-
-  const [activeStep, setActiveStep] = useState(0);
-
+  const furl = "constructionSummary";
+  const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
   // ModalValue 控制開啟的是哪一個 Modal
   const [modalValue, setModalValue] = useState(false);
   // 傳送額外資訊給 Modal
   const [deliverInfo, setDeliverInfo] = useState(null);
   // 如果要打開下一個面板
-  //   const [nextModalOpen, setNextModalOpen] = useState(null);
+  const [nextModalOpen, setNextModalOpen] = useState(null);
 
   // Tab 列表對應 api 搜尋參數
   // const tabGroup = [
@@ -108,31 +106,29 @@ const ConstructionSummary = () => {
 
   // 取得列表資料
   useEffect(() => {
-    getSummaryList(apiUrl, constructionTypeList);
+    getApiList(apiUrl, constructionTypeList);
     //getConstructionTypeList();
     getProjecstList();
-    getDepartMemberList(11);
   }, [apiUrl]);
 
   //取得清單資料
-  const getSummaryList = useCallback(
+  const getApiList = useCallback(
     (url, typesList) => {
-      // console.log("getSummaryList")
       setIsLoading(true);
       getData(url).then((result) => {
         //console.log(result)
         setIsLoading(false);
         const data = result.result;
         // setApiData(data);
-        if (page >= data?.totalPages) {
+        if (page >= data.totalPages) {
           setPage(0);
           setRowsPerPage(10);
           navigate(`?p=1&s=10`);
         }
 
-        // console.log(result.result);
+        //console.log(result.result.content);
         // 将第一个数组中的 "constructionType" 映射到相应的 "name" 值
-        if (result.result?.content.length > 0) {
+        if (result.result.content.length > 0) {
           const convertTypeData = result?.result?.content.map((item) => {
             const constructionType = item.constructionJob.constructionType;
             const correspondingName = typesList?.find(
@@ -146,8 +142,8 @@ const ConstructionSummary = () => {
           });
           const updateTask = { content: convertTypeData, ...data };
 
-          // 取得全部施工清單，並將資料的"CIVIL_CONSTRUCTION"轉變為新增 typename:土木
-          setSummaryList(updateTask);
+          //console.log(updateTask);
+          setApiData(updateTask);
         }
       });
     },
@@ -157,21 +153,78 @@ const ConstructionSummary = () => {
   const getProjecstList = () => {
     setIsLoading(true);
     getData("project").then((result) => {
-      const projectsList = result.result.content;
-      setProjectsList(projectsList);
       setIsLoading(false);
+      const projectsList = result.result.content;
+      //console.log(projectsList);
+      setProjectsList(projectsList);
     });
   };
-  const getDepartMemberList = useCallback((id) => {
-    const departMemberList = `department/${id}/staff`;
-    getData(departMemberList).then((result) => {
-      setDepartMemberList(result.result);
-      //console.log("departMemberList", result.result);
-    });
-  }, []);
-  // // 傳遞給後端資料
-  // const sendDataToBackend = (fd, mode, otherData) => {
-  // };
+
+  // 傳遞給後端資料
+  const sendDataToBackend = (fd, mode, otherData) => {
+    setSendBackFlag(true);
+    let url = "";
+    let message = [];
+    switch (mode) {
+      case "create":
+        url = "constructionSummary";
+        message = ["清單新增成功！"];
+        break;
+      case "edit":
+        url = "constructionSummary/" + otherData;
+        message = ["清單修改成功！"];
+        break;
+      case "task":
+        url = "constructionSummary/" + otherData.deliverInfoId + "/tasks";
+        message = ["清單細項送出成功！"];
+        break;
+      default:
+        break;
+    }
+    if (mode === "create" || mode === "edit") {
+      postData(url, fd).then((result) => {
+        if (result.status) {
+          showNotification(message[0], true);
+          getApiList(apiUrl, constructionTypeList);
+          onClose();
+        } else if (result.result.response === 400) {
+          //console.log(result.result);
+          showNotification(result.result.reason, false);
+          //目前唯一會導致400的原因只有名稱重複，大概吧
+        } else {
+          showNotification("沒有修改權限", false);
+          //目前測試需有資訊才能修改
+          //console.log(result);
+        }
+        setSendBackFlag(false);
+      });
+    } else if (mode === "task") {
+      postBodyData(url, fd).then((result) => {
+        //console.log(result);
+        if (result.status) {
+          showNotification(message[0], true);
+          getApiList(apiUrl, constructionTypeList);
+          onClose();
+          if (!!otherData?.nextModal) {
+            setModalValue(otherData?.nextModal);
+            setDeliverInfo(otherData?.deliverInfoId);
+          }
+        } else if (result.result.response === 400) {
+          //console.log(result.result);
+          showNotification(
+            "編輯施工清單工項執行們時拋出線程中斷異常：%s❗️",
+            false
+          );
+        } else {
+          showNotification("權限不足", false);
+        }
+        setSendBackFlag(false);
+      });
+    }
+    // for (var pair of fd.entries()) {
+    //   console.log(pair);
+    // }
+  };
 
   // 設置頁數
   const handleChangePage = useCallback(
@@ -196,10 +249,9 @@ const ConstructionSummary = () => {
     const dataMode = event.currentTarget.getAttribute("data-mode"); //在table的component裡讀取該選擇 如edit create
     const dataValue = event.currentTarget.getAttribute("data-value"); //在table的component裡讀取該筆資料id
     setModalValue(dataMode);
-    if (dataValue) {
-      setDeliverInfo(dataValue);
-    }
-    setActiveStep(dataMode === "task" ? 1 : dataMode === "dispatch" ? 2 : 0);
+    setDeliverInfo(
+      dataValue ? apiData.content.find((item) => item.id === dataValue) : ""
+    );
   };
 
   // 關閉 Modal 清除資料
@@ -208,34 +260,61 @@ const ConstructionSummary = () => {
     setDeliverInfo(null);
   };
 
-  // useEffect(() => {
-  //   console.log("點擊主面板的deliverInfo", deliverInfo);
-  // }, [deliverInfo]);
   // modal 開啟參數與顯示標題
   const modalConfig = [
     {
-      modalValue: ["create", "task", "edit", "dispatch"],
+      modalValue: "create",
       modalComponent: (
-        <SummaryModal
-          title=""
-          // sendDataToBackend={sendDataToBackend}
+        <UpdatedModal
+          title="新增施工清單"
+          sendDataToBackend={sendDataToBackend}
           onClose={onClose}
-          projectsList={projectsList}
-          departMemberList={departMemberList}
-          deliverInfoFromList={deliverInfo}
-          setDeliverInfoFromList={setDeliverInfo}
-          setDeliverInfo={setDeliverInfo}
-          activeStep={activeStep}
-          setActiveStep={setActiveStep}
-          getSummaryList={getSummaryList}
-          apiUrl={apiUrl}
           constructionTypeList={constructionTypeList}
+          projectsList={projectsList}
+        />
+      ),
+    },
+    {
+      modalValue: "edit",
+      modalComponent: (
+        <UpdatedModal
+          title="施工清單修改"
+          deliverInfo={deliverInfo}
+          sendDataToBackend={sendDataToBackend}
+          onClose={onClose}
+          constructionTypeList={constructionTypeList}
+          projectsList={projectsList}
+        />
+      ),
+    },
+    {
+      modalValue: "task",
+      modalComponent: (
+        <TaskModal
+          title="施工清單工項執行編輯"
+          deliverInfo={deliverInfo}
+          nextModalOpen={nextModalOpen}
+          setNextModalOpen={setNextModalOpen}
+          sendDataToBackend={sendDataToBackend}
+          onClose={onClose}
+        />
+      ),
+    },
+    {
+      modalValue: "dispatch",
+      modalComponent: (
+        <DispatchModal
+          title="工項執行派工"
+          deliverInfo={deliverInfo?.id ? deliverInfo.id : deliverInfo}
+          sendDataToBackend={sendDataToBackend}
+          setNextModalOpen={setNextModalOpen}
+          onClose={onClose}
         />
       ),
     },
   ];
   const config = modalValue
-    ? modalConfig.find((item) => item.modalValue.includes(modalValue))
+    ? modalConfig.find((item) => item.modalValue === modalValue)
     : null;
 
   return (
@@ -249,12 +328,12 @@ const ConstructionSummary = () => {
       />
 
       {/* TabBar */}
-      {/* <TableTabbar tabGroup={tabGroup} setCat={setCat} /> */}
+      {/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}
 
       {/* Table */}
       <div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
         <RWDTable
-          data={summaryList?.content ? summaryList.content : []}
+          data={apiData?.content ? apiData.content : []}
           columnsPC={columnsPC}
           columnsMobile={columnsMobile}
           actions={actions}
@@ -267,8 +346,8 @@ const ConstructionSummary = () => {
 
       {/* Pagination */}
       <Pagination
-        totalElement={summaryList ? summaryList?.totalElements : 0}
-        page={summaryList && page < summaryList?.totalPages ? page : 0}
+        totalElement={apiData ? apiData?.totalElements : 0}
+        page={apiData && page < apiData.totalPages ? page : 0}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}

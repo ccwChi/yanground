@@ -14,6 +14,7 @@ import {
   InputLabel,
   FormHelperText,
   Backdrop,
+  CircularProgress,
 } from "@mui/material";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import { useForm, Controller, FormProvider } from "react-hook-form";
@@ -36,7 +37,6 @@ const UpdatedModal = React.memo(
     constructionTypeList,
     projectsList,
   }) => {
-    // Alert 開關
     const [alertOpen, setAlertOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [constructionJobList, setConstructionJobList] = useState(null);
@@ -81,7 +81,6 @@ const UpdatedModal = React.memo(
           message: "完工日期不能早於施工日期",
           test: function (until) {
             const since = this.parent.since;
-
             // 只有在 estimatedSince 和 estimatedUntil 都有值時才驗證
             if (since && until) {
               const formattedSince = new Date(since).toLocaleDateString(
@@ -94,7 +93,6 @@ const UpdatedModal = React.memo(
               );
               return formattedUntil >= formattedSince;
             }
-
             return true; // 如果其中一個為空，則不驗證
           },
         }),
@@ -103,14 +101,17 @@ const UpdatedModal = React.memo(
       defaultValues,
       resolver: yupResolver(schema),
     });
-    // 使用 useForm Hook 來管理表單狀態和驗證
+
     const {
       control,
       handleSubmit,
       reset,
       setValue,
+      watch,
       formState: { errors, isDirty },
     } = methods;
+
+    const sinceDay = watch("since");
 
     //將外面傳進來的員工資料deliverInfo代入到每個空格之中
     useEffect(() => {
@@ -149,7 +150,6 @@ const UpdatedModal = React.memo(
       }
     };
 
-    // Alert 回傳值進行最終結果 --- true: 關閉 modal / all: 關閉 Alert
     const handleAlertClose = (agree) => {
       if (agree) {
         onClose();
@@ -360,36 +360,27 @@ const UpdatedModal = React.memo(
                         render={({ field: { value, onChange } }) => (
                           <FormControl
                             size="small"
-                            className="inputPadding"
+                            className="inputPadding relative"
                             fullWidth
                           >
-                            {value === "" ? (
-                              <InputLabel
-                                id="job-select-label"
-                                disableAnimation
-                                shrink={false}
-                                focused={false}
-                              >
-                                請選擇工程項目
-                              </InputLabel>
-                            ) : null}
-
                             <Select
-                              labelId="job-select-label"
-                              readOnly={
+                              disabled={
                                 deliverInfo?.constructionSummaryJobTasks
-                                  .length > 0
+                                  ?.length > 0 || isLoading
                               }
-                              MenuProps={{
-                                PaperProps: {
-                                  style: { maxHeight: "250px" },
-                                },
-                              }}
+                              labelId="task-select-label"
                               value={value}
                               onChange={onChange}
+                              displayEmpty
+                              //MenuProps={MenuProps}
                             >
+                              <MenuItem value="" disabled>
+                                <span className="text-neutral-400 font-light">
+                                  請選擇工程項目
+                                </span>
+                              </MenuItem>
                               {!!constructionJobList &&
-                                constructionJobList.map((type) => (
+                                constructionJobList?.map((type) => (
                                   <MenuItem
                                     key={"select" + type.id}
                                     value={type.id}
@@ -398,6 +389,11 @@ const UpdatedModal = React.memo(
                                   </MenuItem>
                                 ))}
                             </Select>
+                            {isLoading && (
+                              <span className="absolute flex items-center right-10 top-0 bottom-0">
+                                <CircularProgress color="primary" size={20} />
+                              </span>
+                            )}
                           </FormControl>
                         )}
                       />
@@ -419,7 +415,7 @@ const UpdatedModal = React.memo(
                     {/* 完工日期 */}
                     <div className="w-full">
                       <InputTitle title={"完工日期"} required={false} />
-                      <ControlledDatePicker name="until" />
+                      <ControlledDatePicker name="until" minDate={sinceDay} />
                       <FormHelperText
                         className="!text-red-600  break-words !text-right !mt-0"
                         sx={{ minHeight: "1.25rem" }}

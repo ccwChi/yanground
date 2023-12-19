@@ -36,15 +36,24 @@ import { TaskModal } from "./AddJobTask";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const tomorrow = new Date();
-tomorrow.setDate(tomorrow.getDate() + 1);
+const today = new Date();
+today.setDate(today.getDate() + 1);
 
 const EventModal = React.memo(
-  ({ deliverInfo, setReGetCalendarApi, onClose, departMemberList, isOpen }) => {
+  ({
+    deliverInfo,
+    sendBackFlag,
+    setSendBackFlag,
+    setReGetCalendarData,
+    setReGetSummaryListData,
+    onClose,
+    departMemberList,
+    isOpen,
+  }) => {
     // Alert 開關
     const [alertOpen, setAlertOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [sendBackFlag, setSendBackFlag] = useState(false);
+    // const [sendBackFlag, setSendBackFlag] = useState(false);
     const [isDispatchDirty, setIsDispatchDirty] = useState(false);
     const [jobTask, setJobTask] = useState(null);
     const [addJobTask, setAddJobTask] = useState(null);
@@ -66,6 +75,55 @@ const EventModal = React.memo(
     // 新增工項執行專用的汙染狀態
     const [jobTaskDirty, setJobTaskDirty] = useState(false);
 
+    // 設定幾天前開始不能編輯
+    const [isEditableDate, setIsEditableDate] = useState(null);
+    const datesBeforeDisable = -2;
+    const DisableEditdate = new Date(today);
+    DisableEditdate.setDate(today.getDate() + datesBeforeDisable);
+    const transDate = new Date(DisableEditdate.toISOString().slice(0, 10)); //變成yyyy-mm-dd
+    const reSetTransDate = new Date(transDate); //再變回日期原始碼，這樣做的用意是要把日期的時間重製成+8:00UTC
+    // console.log(deliverInfo);
+
+    // 設置不能
+    useEffect(() => {
+      if (!!deliverInfo?.date) {
+        if (new Date(deliverInfo.date) < reSetTransDate) {
+          setIsEditableDate(true);
+        } else {
+          setIsEditableDate(false);
+        }
+      }
+      // console.log(deliverInfo);
+    }, [deliverInfo]);
+
+    const generateDateRange = (since, until) => {
+      if (!!since && !!until) {
+        // 如果都有值，使用日期區間的方法生成日期陣列
+        const startDate = new Date(since);
+        const endDate = new Date(until);
+
+        const dates = [];
+        let currentDateIterator = new Date(startDate);
+        while (currentDateIterator <= endDate) {
+          dates.push(currentDateIterator.toISOString().slice(0, 10));
+          currentDateIterator.setDate(currentDateIterator.getDate() + 1);
+        }
+
+        return dates;
+      }
+      // else {
+      //   // 如果有null，生成 [null, yyyy-MM-dd] 或 [yyyy-MM-dd, null]
+      //   const dateArray = [];
+      //   if (since !== null) {
+      //     dateArray.push(since);
+      //     dateArray.push(null);
+      //   } else if (until !== null) {
+      //     dateArray.push(null);
+      //     dateArray.push(until);
+      //   }
+      //   return dateArray;
+      // }
+    };
     const showNotification = useNotification();
 
     const schema = yup.object().shape({
@@ -111,13 +169,14 @@ const EventModal = React.memo(
       defaultValues,
       resolver: yupResolver(schema),
     });
-    // 使用 useForm Hook 來管理表單狀態和驗證
     const {
       control,
       handleSubmit,
       reset,
+      watch,
       formState: { errors, isDirty },
     } = methods;
+    const limitEstimatedSince = watch("estimatedSince");
 
     // 任何jobTask改變重設工項執行選單顯示
     useEffect(() => {
@@ -163,7 +222,7 @@ const EventModal = React.memo(
 
     // 檢查表單是否汙染
     const onCheckDirty = () => {
-      if (isDirty || jobTaskDirty) {
+      if (isDirty || jobTaskDirty || isDispatchDirty) {
         setAlertOpen(true);
       } else {
         handleClose();
@@ -207,7 +266,6 @@ const EventModal = React.memo(
         },
       ];
       PostBodyData(postBodyJobTaskUrl, convertData);
-      setReGetCalendarApi(deliverInfo.date);
     };
 
     //該天全部專案有被選的人
@@ -219,7 +277,6 @@ const EventModal = React.memo(
             .map((dispatch) => dispatch.labourer.id)
         )
       );
-      //   console.log("filterTheDayRestLabourer",filteredLabourerIds);
       return filteredLabourerIds;
     };
 
@@ -238,9 +295,8 @@ const EventModal = React.memo(
           return selectedJobTask.constructionSummaryJobTaskDispatches.some(
             (dispatch) => {
               if (dispatch.labourer.id === person.id) {
-                // 如果 dispatch.labourer.id 与 person.id 匹配，就将 dispatch.id 添加到 person 对象中
                 person.dispatchId = dispatch.id;
-                return true; // 返回 true 以将该 person 包含在结果中
+                return true;
               }
               return false;
             }
@@ -255,19 +311,25 @@ const EventModal = React.memo(
               (dispatched) => dispatched.labourer.id === labourer.id
             )
         );
-
         setDispatchForApi(beSeleted);
-        //console.log("DispatchForApi", beSeleted);
       } else {
         setDispatchForApi([]);
-        //console.log("DispatchForApi", []);
       }
       setIsLoading(false);
     };
 
-    const handleJobTaskEdit = (selectedJobTask, summaryId) => {
-      const jobTask = { ...selectedJobTask, summaryId };
-      // console.log("jobTask", jobTask);
+    const handleJobTaskEdit = (
+      selectedJobTask,
+      summaryId,
+      summarySince,
+      summaryUntil
+    ) => {
+      const jobTask = {
+        ...selectedJobTask,
+        summaryId,
+        summarySince,
+        summaryUntil,
+      };
       setActiveJobTask(selectedJobTask.id);
       setDispatchForApi([]);
       setIsLoading(true);
@@ -282,18 +344,15 @@ const EventModal = React.memo(
     const handleChange = (event, value) => {
       setIsDispatchDirty(true);
       setDispatchForApi(value);
-      //   console.log("event", event);
     };
 
     // 點擊派工提交
     const handleDispatchOnly = async () => {
       setSendBackFlag(true);
-      //console.log("目前選單裡面的人:", taskSelectLabouerList);
 
       const newIncrease = dispatchForApi
         .filter((item) => item && !item.hasOwnProperty("dispatchId"))
         .map((item) => item.id);
-      //console.log("要新增的人(列id):", newIncrease);
       const removeWithPatchId = taskSelectLabouerList
         .filter((item) => item && item.hasOwnProperty("dispatchId"))
         .filter(
@@ -303,7 +362,7 @@ const EventModal = React.memo(
             )
         )
         .map((item) => item.dispatchId);
-      //   console.log("要移除的人(列派工id):", removeWithPatchId);
+
       //下面是處理新增派工的部分
       const dispatchUrl = `constructionSummaryJobTask/${jobTask.id}/dispatches`;
       const fd = new FormData();
@@ -321,9 +380,10 @@ const EventModal = React.memo(
             removeWithPatchId.map((deleteId) => deleteDataPromise(deleteId))
           ),
         ]);
-        setReGetCalendarApi(deliverInfo.date);
+        setReGetCalendarData(deliverInfo.date);
       } catch (error) {
         console.error("Error:", error);
+        setSendBackFlag(false);
       }
     };
 
@@ -336,7 +396,9 @@ const EventModal = React.memo(
           return "postTrue";
         } else {
           showNotification(
-            result?.result?.reason ? result?.result?.reason : "錯誤",
+            result?.result?.reason
+              ? result?.result?.reason
+              : "錯誤，請查看權限",
             false
           );
           return "postFalse";
@@ -362,16 +424,16 @@ const EventModal = React.memo(
     //下面是更改工項執行的api
     const PostBodyData = (jobTaskUrl, convertData) => {
       postBodyData(jobTaskUrl, convertData).then((result) => {
-        // console.log("convertData", convertData, "result", result);
         if (result.status) {
           showNotification("更改工項執行成功", true);
+          console.log(deliverInfo.date);
+          setReGetSummaryListData(deliverInfo.date);
         } else {
           showNotification(
             result?.result?.reason ? result.result.reason : "錯誤",
             false
           );
         }
-        setReGetCalendarApi(deliverInfo.date);
       });
     };
 
@@ -382,7 +444,6 @@ const EventModal = React.memo(
       setAddJobTask(null);
       setActiveJobTask("");
       setCurrentDivIndex(1);
-      // console.log("AddNewJobTask", summary);
       setJobTask(null);
       setTimeout(() => {
         setAddJobTask(summary);
@@ -402,7 +463,7 @@ const EventModal = React.memo(
       deleteData(deleteUrl).then((result) => {
         if (result.status) {
           showNotification("刪除派工更改成功", true);
-          setReGetCalendarApi(deliverInfo.date);
+          setReGetCalendarData(deliverInfo.date);
         } else if (result.result.response !== 200) {
           showNotification(
             result?.result?.reason ? result?.result?.reason : "刪除錯誤",
@@ -454,12 +515,20 @@ const EventModal = React.memo(
                         borderRight: 0,
                         borderTop: 0,
                       }}
-                      // onClick={() => {
-                      //   console.log(summary);
-                      // }}
                     >
-                      <span className="text-lg w-full ps-2 text-left flex items-center h-full">
+                      <span className="text-lg w-full ps-2 text-left flex items-center h-full  justify-between  ">
                         {summary.project.name + "-" + summary.name}
+                        <span
+                          className={`text-xs inline-block ms-4 min-w-fit `}
+                        >
+                          {summary?.since
+                            ? summary.since.split("-").slice(1).join("/")
+                            : ""}
+                          -
+                          {summary?.until
+                            ? summary.until.split("-").slice(1).join("/")
+                            : ""}
+                        </span>
                       </span>
                     </AccordionSummary>
                     <AccordionDetails>
@@ -471,10 +540,17 @@ const EventModal = React.memo(
                               "bg-slate-200 my-1 py-0.5"
                             }`}
                             onClick={() => {
-                              handleJobTaskEdit(summaryJobTask, summary.id);
+                              handleJobTaskEdit(
+                                summaryJobTask,
+                                summary.id,
+                                summary?.since,
+                                summary?.until
+                              );
                             }}
                           >
-                            <div className={`m-1 p-1 relative  `}>
+                            <div
+                              className={`m-1 p-1 relative flex justify-between`}
+                            >
                               <span
                                 className={`whitespace-nowrap text-base text-neutral-400 ${
                                   activeJobTask === summaryJobTask.id
@@ -483,6 +559,45 @@ const EventModal = React.memo(
                                 }`}
                               >
                                 {`[${summaryJobTask.constructionJobTask.name}]`}
+                              </span>
+                              <span
+                                className={`text-xs inline-block me-8 mt-1 `}
+                              >
+                                <span
+                                  className={`${
+                                    generateDateRange(
+                                      summary?.since,
+                                      summary?.until
+                                    ).includes(summaryJobTask?.estimatedSince)
+                                      ? ""
+                                      : "text-red-500"
+                                  }`}
+                                >
+                                  {summaryJobTask?.estimatedSince
+                                    ? summaryJobTask.estimatedSince
+                                        .split("-")
+                                        .slice(1)
+                                        .join("/")
+                                    : "-"}
+                                </span>
+                                -
+                                <span
+                                  className={`${
+                                    generateDateRange(
+                                      summary?.since,
+                                      summary?.until
+                                    ).includes(summaryJobTask?.estimatedUntil)
+                                      ? ""
+                                      : "text-red-500"
+                                  }`}
+                                >
+                                  {summaryJobTask?.estimatedUntil
+                                    ? summaryJobTask.estimatedUntil
+                                        .split("-")
+                                        .slice(1)
+                                        .join("/")
+                                    : "-"}
+                                </span>
                               </span>
                               <span className="cursor-pointer absolute right-0.5 top-0.5">
                                 <EditCalendarIcon
@@ -522,7 +637,6 @@ const EventModal = React.memo(
                           variant="contained"
                           color="inherit"
                           className="!ease-in-out !duration-300 absolute top-3 right-0"
-                          // sx={{ transform: "translate(4px, 1rem)" }}
                           onClick={(e) => {
                             AddNewJobTask(e, summary);
                           }}
@@ -545,12 +659,7 @@ const EventModal = React.memo(
                 {jobTask ? (
                   <div className="mt-1">
                     <div className="w-full flex justify-center my-2">
-                      <span
-                        className="font-bold text-lg px-4 border-b-2"
-                        // onClick={() => {
-                        //   console.log(deliverInfo);
-                        // }}
-                      >
+                      <span className="font-bold text-lg px-4 border-b-2">
                         {!!jobTask && (
                           <span className="text">
                             {jobTask?.constructionJobTask?.name}
@@ -561,11 +670,23 @@ const EventModal = React.memo(
                     </div>
 
                     {/* 派工div */}
-                    <div className="mt-2">
-                      <InputTitle
-                        title={`選擇 ${deliverInfo.date} 派工人員`}
-                        required={false}
-                      />
+                    <div className="mt-2 relative">
+                      <div className="my-2">
+                        選擇{" "}
+                        <span
+                          className={`${
+                            generateDateRange(
+                              jobTask?.estimatedSince,
+                              jobTask?.estimatedUntil
+                            )?.includes(deliverInfo.date)
+                              ? ""
+                              : "text-red-500"
+                          }`}
+                        >
+                          {deliverInfo.date}
+                        </span>{" "}
+                        派工人員
+                      </div>
                       <Autocomplete
                         multiple
                         options={taskSelectLabouerList.sort(
@@ -575,6 +696,7 @@ const EventModal = React.memo(
                         groupBy={(taskSelectLabouerList) =>
                           taskSelectLabouerList.department.name
                         }
+                        disabled={isEditableDate}
                         disableCloseOnSelect
                         getOptionLabel={(taskSelectLabouerList) =>
                           taskSelectLabouerList.nickname
@@ -605,11 +727,21 @@ const EventModal = React.memo(
                         renderInput={(params) => <TextField {...params} />}
                       />
                     </div>
-                    <div className="w-full -mt-2 mb-3 flex justify-end">
+
+                    <div className="w-full  flex  justify-between">
+                      <span className="text-sm text-red-500 mt-1">
+                        {generateDateRange(
+                          jobTask?.estimatedSince,
+                          jobTask?.estimatedUntil
+                        )?.includes(deliverInfo.date)
+                          ? ""
+                          : "(日期不再範圍內)"}
+                      </span>
                       <Button
                         variant="contained"
                         color="success"
-                        className="!mb-2 !ease-in-out !duration-300"
+                        disabled={isEditableDate}
+                        className="!mb-2 !ease-in-out !duration-300 !-mt-2 "
                         style={{ transform: "translateY(1rem)" }}
                         onClick={handleDispatchOnly}
                       >
@@ -622,11 +754,24 @@ const EventModal = React.memo(
                       <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="flex flex-col gap-1.5 mt-3">
                           <InputTitle title={`預計施工日期`} required={false} />
-                          <ControlledDatePicker name="estimatedSince" />
+                          <ControlledDatePicker
+                            name="estimatedSince"
+                            disabled={isEditableDate}
+                            minDate={new Date(jobTask?.summarySince)}
+                            maxDate={new Date(jobTask?.summaryUntil)}
+                          />
                         </div>
                         <div className="flex flex-col gap-1.5 mt-3">
                           <InputTitle title={"預計完工日期"} required={false} />
-                          <ControlledDatePicker name="estimatedUntil" />
+                          <ControlledDatePicker
+                            name="estimatedUntil"
+                            minDate={
+                              limitEstimatedSince
+                                ? limitEstimatedSince
+                                : new Date(jobTask?.summarySince)
+                            }
+                            maxDate={new Date(jobTask?.summaryUntil)}
+                          />
                         </div>
                         <div className="flex flex-col gap-1.5 mt-3">
                           <InputTitle title={"施工位置"} required={false} />
@@ -692,9 +837,10 @@ const EventModal = React.memo(
                       apiSelectedTask={addJobTask?.summaryJobTasks}
                       setAddJobTask={setAddJobTask}
                       deliverInfo={{ ...addJobTask, date: deliverInfo.date }}
-                      setReGetCalendarApi={setReGetCalendarApi}
+                      setReGetSummaryListData={setReGetSummaryListData}
                       isLoading={isLoading}
                       setIsLoading={setIsLoading}
+                      isEditableDate={isEditableDate}
                       jobTaskDirty={jobTaskDirty}
                       setJobTaskDirty={setJobTaskDirty}
                     />

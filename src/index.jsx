@@ -8,7 +8,7 @@ import ConstructionTypes from "./pages/Construction/ConstructionTypes";
 import ConstructionType from "./pages/Construction/Types/ConstructionType";
 import ConstructionJob from "./pages/Construction/Jobs/ConstructionJob";
 import ConstructionSummary from "./pages/ConstructionSummary/ConstructionSummary";
-import DispatchCalendar from "./pages/Calendar/DispatchCalendar";
+import DispatchCalendar from "./pages/DispatchCalendar/DispatchCalendar";
 import Project from "./pages/Project/Project";
 import Maps from "./pages/Project/Maps";
 import DispatchList from "./pages/DispatchList/DispatchList";
