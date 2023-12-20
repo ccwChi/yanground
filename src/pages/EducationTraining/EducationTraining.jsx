@@ -3,11 +3,11 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import { Box, Button, CardActionArea, Modal, Skeleton } from "@mui/material";
+import { CardActionArea, Modal, Skeleton } from "@mui/material";
 import PageTitle from "../../components/Guideline/PageTitle";
-import TableTabber from "../../components/Tabbar/TableTabber";
 import { useLocation } from "react-router-dom";
 import fakeData from "./fakeData";
+import TableTabbar from "../../components/Tabbar/TableTabbar";
 
 const EducationTrainging = () => {
   // 解析網址取得參數
@@ -17,7 +17,6 @@ const EducationTrainging = () => {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [loadingNewData, setLoadingNewData] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [showSkeleton, setShowSkeleton] = useState(false);
 
@@ -85,7 +84,7 @@ const EducationTrainging = () => {
   return (
     <>
       <PageTitle title="教育訓練" />
-      <TableTabber tabGroup={tabGroup} cat={cat} setCat={setCat} />
+      <TableTabbar tabGroup={tabGroup} cat={cat} setCat={setCat} />
 
       {/* block2 */}
       <div className="relative overflow-y-auto mt-5 flex flex-col flex-1 overflow-hidden sm:pb-3.5 pb-0">
