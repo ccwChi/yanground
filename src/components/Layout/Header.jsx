@@ -26,9 +26,9 @@ const Header = ({ toggleSidebar, classnames = "" }) => {
 
 	return (
 		<AppBar position="static" elevation={3} sx={{ zIndex: 1024 }} className={`opacity-90 ${classnames}`}>
-			<Toolbar className="justify-between text-white !min-h-[56px]">
+			<Toolbar className="justify-between text-white !min-h-[52px]">
 				<NavLink to="/" className="flex items-center text-1xl select-none">
-					<img src={logoIcon} alt="Logo" className="h-10 me-1" />
+					<img src={logoIcon} alt="Logo" className="h-9 me-1" />
 					<span className="whitespace-nowrap text-white font-medium -translate-y-px">元融科技</span>
 				</NavLink>
 

@@ -16,6 +16,7 @@ const Search = ({
 	handleCoverDialog,
 	handleClearDialog,
 	handleConfirmDialog,
+	handleCloseText = "取消",
 	haveValue,
 	isDirty,
 	children,
@@ -31,7 +32,7 @@ const Search = ({
 			</Tooltip>
 
 			<Dialog
-				sx={{ "& .MuiDialog-paper": { width: "80%", maxHeight: 500, margin: "1rem" } }}
+				sx={{ "& .MuiDialog-paper": { width: "90%", maxHeight: 500, margin: "1rem" } }}
 				maxWidth="xs"
 				open={open}
 				onClose={handleCloseDialog}>
@@ -39,13 +40,23 @@ const Search = ({
 				<DialogContent dividers>{children}</DialogContent>
 				<DialogActions>
 					<Button onClick={handleCloseDialog} autoFocus>
-						取消
+						{handleCloseText}
 					</Button>
-					<Button onClick={handleCoverDialog} disabled={!isDirty}>恢復</Button>
-					<Button onClick={handleClearDialog} disabled={haveValue}>重置</Button>
-					<Button onClick={handleConfirmDialog} disabled={!isDirty}>
-						確認
-					</Button>
+					{handleCoverDialog && (
+						<Button onClick={handleCoverDialog} disabled={!isDirty}>
+							恢復
+						</Button>
+					)}
+					{handleClearDialog && (
+						<Button onClick={handleClearDialog} disabled={haveValue}>
+							重置
+						</Button>
+					)}
+					{handleConfirmDialog && (
+						<Button onClick={handleConfirmDialog} disabled={!isDirty}>
+							確認
+						</Button>
+					)}
 				</DialogActions>
 			</Dialog>
 		</>

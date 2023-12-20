@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import ModalTemplete from "../../components/Modal/ModalTemplete";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 import { format } from "date-fns"; // format(data, 'yyyy-MM-dd')
@@ -14,32 +14,30 @@ import {
 	FormGroup,
 	Box,
 	useTheme,
-	useMediaQuery,
 	FormHelperText,
 	Backdrop,
 } from "@mui/material";
-import { useForm, Controller, FormProvider, authorityList } from "react-hook-form";
+import { useForm, Controller, FormProvider } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getData } from "../../utils/api";
 import { IOSSwitch } from "../../components/Switch/Switch";
-import { useNotification } from "../../hooks/useNotification";
+import { LoadingThree } from "../../components/Loader/Loading";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import InputTitle from "../../components/Guideline/InputTitle";
-import TableTabber from "../../components/Tabbar/TableTabber";
-import Loading from "../../components/Loader/Loading";
+import TableTabbar from "../../components/Tabbar/TableTabbar";
 
 const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentList, authorityList }) => {
-	const [isLoading, setIsLoading] = useState(false);
+	// RWD Tabbar 當前位置
 	const [cat, setCat] = useState("1");
-
 	// 檢查是否被汙染
 	const [alertOpen, setAlertOpen] = useState(false);
-
+	// Modal Data
+	const [apiData, setApiData] = useState(null);
 	const theme = useTheme();
-	const padScreen = useMediaQuery(theme.breakpoints.down("768"));
 
+	// 使用 Yup 來定義表單驗證規則
 	const schema = yup.object().shape({
 		nickname: yup.string().required("暱稱不得為空白!"),
 		nationalIdentityCardNumber: yup.mixed().test("is-national-id", "格式為第一字為英文 + 九個數字!", (value) => {
@@ -51,6 +49,74 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 		department: yup.string().required("部門不得為空白!"),
 	});
 
+	// 初始預設 default 值
+	const defaultValues = {
+		empolyeeId: apiData?.empolyeeId || "",
+		displayName: apiData?.displayName || "",
+		nickname: apiData?.nickname || "",
+		lastname: apiData?.lastname || "",
+		firstname: apiData?.firstname || "",
+		nationalIdentityCardNumber: apiData?.nationalIdentityCardNumber || "",
+		birthDate: apiData?.birthDate ? new Date(apiData.birthDate) : null,
+		gender: apiData?.gender === null ? null : apiData?.gender === true ? "male" : "female",
+		startedOn: apiData?.startedOn ? new Date(apiData.startedOn) : null,
+		department: apiData?.department?.id ? apiData.department.id : "",
+		authorities: apiData?.authorities.map((authority) => authority.id) || [],
+	};
+
+	// 使用 useForm Hook 來管理表單狀態和驗證
+	const methods = useForm({
+		defaultValues,
+		resolver: yupResolver(schema),
+	});
+
+	const {
+		control,
+		handleSubmit,
+		register,
+		reset,
+		formState: { errors, isDirty },
+	} = methods;
+
+	// 取得 Modal 資料
+	useEffect(() => {
+		if (deliverInfo) {
+			getData(`user/${deliverInfo}`).then((result) => {
+				const data = result.result;
+				setApiData(data);
+			});
+		}
+	}, [deliverInfo]);
+	useEffect(() => {
+		if (apiData) {
+			reset(defaultValues);
+		}
+	}, [apiData]);
+
+	// 提交表單資料到後端並執行相關操作
+	const onSubmit = (data) => {
+		const fd = new FormData();
+		const convertData = {
+			...data,
+			startedOn: data?.startedOn ? format(data.startedOn, "yyyy-MM-dd") : "",
+			birthDate: data?.birthDate ? format(data.birthDate, "yyyy-MM-dd") : "",
+			gender: data.gender === "male" ? true : data.gender === "female" ? false : "",
+			nationalIdentityCardNumber: data?.nationalIdentityCardNumber ? data.nationalIdentityCardNumber.toUpperCase() : "",
+		};
+		if (convertData?.nationalIdentityCardNumber === null || convertData?.nationalIdentityCardNumber === "") {
+			delete convertData.nationalIdentityCardNumber;
+		}
+		if (convertData?.department === null || convertData?.department === "") {
+			delete convertData.department;
+		}
+		for (let key in convertData) {
+			fd.append(key, convertData[key]);
+		}
+
+		sendDataToBackend(fd, "edit", deliverInfo);
+	};
+
+	// 檢查表單是否汙染
 	const onCheckDirty = () => {
 		if (isDirty) {
 			setAlertOpen(true);
@@ -59,83 +125,12 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 		}
 	};
 
+	// Alert 回傳值進行最終結果 --- true: 關閉 modal / all: 關閉 Alert
 	const handleAlertClose = (agree) => {
 		if (agree) {
 			onClose();
 		}
 		setAlertOpen(false);
-	};
-
-	const methods = useForm({
-		resolver: yupResolver(schema),
-	});
-
-	const {
-		control,
-		register,
-		handleSubmit,
-		reset,
-		formState: { errors, isDirty },
-	} = methods;
-
-	//將外面傳進來的員工資料deliverInfo代入到每個空格之中
-	useEffect(() => {
-		if (deliverInfo?.id) {
-			setIsLoading(true);
-			reset({
-				empolyeeId: deliverInfo?.empolyeeId || "",
-				displayName: deliverInfo?.displayName || "",
-				nickname: deliverInfo?.nickname || "",
-				lastname: deliverInfo?.lastname || "",
-				firstname: deliverInfo?.firstname || "",
-				nationalIdentityCardNumber: deliverInfo?.nationalIdentityCardNumber || "",
-				birthDate: deliverInfo?.birthDate ? new Date(deliverInfo.birthDate) : null,
-				gender: deliverInfo?.gender === null ? null : deliverInfo?.gender === true ? "male" : "female",
-				startedOn: deliverInfo?.startedOn ? new Date(deliverInfo.startedOn) : null,
-				department: deliverInfo?.department?.id ? deliverInfo.department.id : "",
-				authorities: deliverInfo?.authorities.map((authority) => authority.id) || [],
-			});
-			setIsLoading(false);
-		}
-	}, [deliverInfo, reset]);
-
-  const onSubmit = (data) => {
-    const fd = new FormData();
-    const convertData = {
-      ...data,
-      startedOn: data?.startedOn ? format(data.startedOn, "yyyy-MM-dd") : "",
-      birthDate: data?.birthDate ? format(data.birthDate, "yyyy-MM-dd") : "",
-      gender:
-        data.gender === "male" ? true : data.gender === "female" ? false : "",
-      nationalIdentityCardNumber: data?.nationalIdentityCardNumber
-        ? data.nationalIdentityCardNumber.toUpperCase()
-        : "",
-    };
-    if (
-      convertData?.nationalIdentityCardNumber === null ||
-      convertData?.nationalIdentityCardNumber === ""
-    ) {
-      delete convertData.nationalIdentityCardNumber;
-    }
-    if (convertData?.department === null || convertData?.department === "") {
-      delete convertData.department;
-    }
-    for (let key in convertData) {
-      fd.append(key, convertData[key]);
-    }
-    // console.log(convertData)
-    // for (var pair of fd.entries()) {
-    //   console.log(pair);
-    // }
-     sendDataToBackend(fd, "edit", deliverInfo.id);
-     resetModal();
-     sendDataToBackend(fd, "edit", deliverInfo.id);
-     resetModal();
-  };
-
-	const resetModal = () => {
-		reset();
-		onClose();
 	};
 
 	const tabGroup = [
@@ -146,15 +141,16 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 
 	return (
 		<>
+			{/* Modal */}
 			<ModalTemplete
 				title={title}
-				show={!!deliverInfo.id && !!authorityList ? true : false}
+				show={!!authorityList && (deliverInfo ? !!apiData : true)}
 				onClose={onCheckDirty}
 				maxWidth={"760px"}>
 				<FormProvider {...methods}>
 					{/* TabBar */}
 					<div className="md:hidden mt-3 mb-5 flex-1 -m-3">
-						<TableTabber tabGroup={tabGroup} setCat={setCat} cat={cat} />
+						<TableTabbar tabGroup={tabGroup} setCat={setCat} cat={cat} />
 					</div>
 
 					<form onSubmit={handleSubmit(onSubmit)}>
@@ -248,7 +244,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 									<Controller
 										name="nickname"
 										control={control}
-										//defaultValue={deliverInfo ? deliverInfo[1] : ""}
 										render={({ field }) => (
 											<TextField
 												variant="outlined"
@@ -348,7 +343,7 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 								{/* 到職日 */}
 								<div className="w-full mt-4">
 									<InputTitle title={"到職日"} />
-									<ControlledDatePicker name="startedOn"  />
+									<ControlledDatePicker name="startedOn" />
 								</div>
 								{/* 部門 */}
 								{/* <div className=" gap-1.5 w-100 md:w-[320px]"> */}
@@ -407,7 +402,7 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 																<IOSSwitch
 																	sx={{ m: 1 }}
 																	value={authority.id}
-																	defaultChecked={deliverInfo?.authorities.some(
+																	defaultChecked={apiData?.authorities.some(
 																		(existingAuthority) => existingAuthority.id === authority.id
 																	)}
 																/>
@@ -450,10 +445,8 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 					</form>
 				</FormProvider>
 			</ModalTemplete>
-			{/* <Backdrop sx={{ color: "#fff", zIndex: 1050 }} open={!deliverInfo.id || !authorityList} onClick={onCheckDirty}> 
-    <Loading size={40} /> 
-   </Backdrop> */}
 
+			{/* Alert */}
 			<AlertDialog
 				open={alertOpen}
 				onClose={handleAlertClose}
@@ -463,6 +456,14 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 				disagreeText="取消"
 				agreeText="確定"
 			/>
+
+			{/* Backdrop */}
+			<Backdrop
+				sx={{ color: "#fff", zIndex: 1050 }}
+				open={!authorityList || (deliverInfo ? !apiData : false)}
+				onClick={onCheckDirty}>
+				<LoadingThree />
+			</Backdrop>
 		</>
 	);
 };

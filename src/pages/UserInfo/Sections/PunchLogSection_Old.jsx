@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import Pagination from "../../components/Pagination/Pagination";
+import Pagination from "../../../components/Pagination/Pagination";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";

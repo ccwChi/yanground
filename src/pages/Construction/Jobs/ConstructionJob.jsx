@@ -22,6 +22,7 @@ const ConstructionType = () => {
   const navigate = useNavigate();
   const showNotification = useNotification();
 
+<<<<<<< HEAD
   // ApiUrl
   const apiUrl = `constructionJob/${jobs[1]}`;
   // API List Data
@@ -40,6 +41,26 @@ const ConstructionType = () => {
   const apiUrl_ = `${apiUrl}/task?p=${page + 1}&s=${rowsPerPage}`;
   // 傳遞稍後用 Flag
   const [sendBackFlag, setSendBackFlag] = useState(false);
+=======
+	// ApiUrl
+	const apiUrl = `constructionJob/${jobs[1]}`;
+	// API List Data
+	const [apiData, setApiData] = useState(null);
+	// isLoading 等待請求 API
+	const [isLoading, setIsLoading] = useState(true);
+	// Page 頁數設置
+	const [page, setPage] = useState(0);
+	// rows per Page 多少筆等同於一頁
+	const [rowsPerPage, setRowsPerPage] = useState(100);
+	// ModalValue 控制開啟的是哪一個 Modal
+	const [modalValue, setModalValue] = useState(false);
+	// 傳送額外資訊給 Modal
+	const [deliverInfo, setDeliverInfo] = useState(null);
+	// ApiUrl 2
+	const apiUrl_ = `${apiUrl}/task?p=${page + 1}&s=${rowsPerPage}`;
+	// 傳遞稍後用 Flag
+	const [sendBackFlag, setSendBackFlag] = useState(false);
+>>>>>>> 266c6cf6df33295b7ef5774bc40d78f78af2f3f4
 
   // 上方區塊功能按鈕清單
   const btnGroup = [
@@ -99,6 +120,7 @@ const ConstructionType = () => {
     });
   }, []);
 
+<<<<<<< HEAD
   // 傳遞給後端資料
   const sendDataToBackend = (fd, mode, otherData) => {
     setSendBackFlag(true);
@@ -122,6 +144,31 @@ const ConstructionType = () => {
       default:
         break;
     }
+=======
+	// 傳遞給後端資料
+	const sendDataToBackend = (fd, mode, otherData) => {
+		setSendBackFlag(true);
+		let url = "constructionJobTask";
+		let message = [];
+		switch (mode) {
+			case "create":
+				message = ["工項執行新增成功！"];
+				fd.append("constructionJob", jobs[1]);
+				break;
+			case "edit":
+				url += "/" + otherData;
+				message = ["工項執行編輯成功！"];
+				fd.append("constructionType", types[1]);
+				break;
+			case "up":
+			case "down":
+				url += "/" + otherData + "/" + mode;
+				message = [`向${mode === 'up' ? "上" : "下"}移動成功！`];
+				break;
+			default:
+				break;
+		}
+>>>>>>> 266c6cf6df33295b7ef5774bc40d78f78af2f3f4
 
     postData(url, fd).then((result) => {
       if (result.status) {

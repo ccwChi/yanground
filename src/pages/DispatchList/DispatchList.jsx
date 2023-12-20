@@ -122,7 +122,7 @@ const DispatchList = () => {
 		[page]
 	);
 
-	// 取得縣市資料
+	// 取得部門資料
 	useEffect(() => {
 		getData("department").then((result) => {
 			const data = result.result.content;

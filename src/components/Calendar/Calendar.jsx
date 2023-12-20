@@ -23,8 +23,11 @@ import "./calendar.scss";
 
 const Calendar = ({
 	data,
+	defaultViews = "dayGridMonth",
 	viewOptions = ["dayGridMonth", "timeGridWeek", "listMonth"],
 	_dayMaxEvents = 2,
+	pnlive = true,
+	goto,
 	...otherProps
 }) => {
 	const isTargetScreen = useMediaQuery("(max-width:991.98px)");
@@ -33,10 +36,16 @@ const Calendar = ({
 	const [calendarTitle, setCalendarTitle] = useState("");
 
 	useEffect(() => {
-		const newView = isTargetScreen ? "listMonth" : "dayGridMonth";
+		const newView = isTargetScreen ? "listMonth" : defaultViews;
 		calendarRef.current.getApi().changeView(newView);
 		setActiveButton(newView);
-	}, [isTargetScreen]);
+	}, [isTargetScreen, defaultViews]);
+
+	useEffect(() => {
+		if (goto) {
+			calendarRef.current.getApi().gotoDate(goto);
+		}
+	}, [goto]);
 
 	const handleViewChange = (view) => {
 		calendarRef.current.getApi().changeView(view);
@@ -83,25 +92,29 @@ const Calendar = ({
 
 	return (
 		<>
-			<div className="flex items-center justify-between pt-3 px-4" data-flag="header">
+			<div className="relative flex items-center justify-between pt-3 px-4" data-flag="header">
 				<div className="inline-flex items-center">
-					<Tooltip title="Previous">
-						<IconButton onClick={() => calendarRef.current.getApi().prev()} sx={{ mr: 0.5 }}>
-							<ArrowBackIosNewIcon fontSize="small" />
-						</IconButton>
-					</Tooltip>
-					<Tooltip title="Next">
-						<IconButton onClick={() => calendarRef.current.getApi().next()} sx={{ mr: 0.5 }}>
-							<ArrowForwardIosIcon fontSize="small" />
-						</IconButton>
-					</Tooltip>
+					{pnlive && (
+						<>
+							<Tooltip title="Previous">
+								<IconButton onClick={() => calendarRef.current.getApi().prev()} sx={{ mr: 0.5 }}>
+									<ArrowBackIosNewIcon fontSize="small" />
+								</IconButton>
+							</Tooltip>
+							<Tooltip title="Next">
+								<IconButton onClick={() => calendarRef.current.getApi().next()} sx={{ mr: 0.5 }}>
+									<ArrowForwardIosIcon fontSize="small" />
+								</IconButton>
+							</Tooltip>
+						</>
+					)}
 					<Tooltip title="今日">
 						<IconButton onClick={() => calendarRef.current.getApi().today()} sx={{ mr: 0.5 }}>
 							<TodayIcon fontSize="small" />
 						</IconButton>
 					</Tooltip>
 				</div>
-				<div className="font-bold text-primary-900 lg:text-2xl md:text-xl sm:text-lg text-base opacity-80 tracking-wide">
+				<div className="sm:absolute left-0 right-0 mx-auto font-bold text-primary-900 lg:text-2xl md:text-xl sm:text-lg text-base opacity-80 tracking-wide w-fit">
 					{calendarTitle}
 				</div>
 				<div className="punchlog_btngrpwrp">
@@ -129,7 +142,7 @@ const Calendar = ({
 			<FullCalendar
 				ref={calendarRef}
 				plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-				initialView={isTargetScreen ? "listMonth" : "dayGridMonth"}
+				initialView={isTargetScreen ? "listMonth" : defaultViews}
 				headerToolbar={false}
 				// 設為星期一開始
 				firstDay={1}

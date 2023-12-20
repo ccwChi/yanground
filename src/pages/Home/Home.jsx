@@ -38,7 +38,7 @@ const Home = () => {
 				getData("timesheet").then((result) => {
 					const data = result.result;
 
-					const transformedData = data.map((item) => {
+					const transformedData = data?.map((item) => {
 						const { date, summaries } = item;
 						const projectMap = new Map();
 
@@ -159,7 +159,7 @@ const Home = () => {
 				</div>
 			</div>
 
-			<div className="profile-section flex-1 -mb-7 sm:-mb-4 w-full px-2.5 pt-3.5 pb-14 sm:pb-3.5 flex flex-col overflow-y-auto sm:overflow-hidden">
+			<div className="profile-section flex-1 -mb-7 sm:-mb-4 w-full px-2.5 pt-3.5 pb-24 sm:pb-3.5 flex flex-col overflow-y-auto sm:overflow-hidden">
 				{/* <div className="panel panel-wallet">
 					<div className="left bg-secondary-50 text-white">
 						<div>
@@ -188,7 +188,7 @@ const Home = () => {
 					</div>
 				</div> */}
 
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 sm:flex-1 sm:overflow-hidden pb-4">
+				<div className="grid grid-cols-1 gap-3 px-4 sm:flex-1 sm:overflow-hidden pb-4">
 					<div className="flex flex-col shadow-md break-words panel border gap-3 bg-white overflow-hidden">
 						{/* 標題 */}
 						<div className="flex">
@@ -252,26 +252,6 @@ const Home = () => {
 									<Skeleton variant="rounded" width={"100%"} height={48} />
 								</div>
 							)}
-						</div>
-					</div>
-					<div className="flex flex-col shadow-md break-words panel border gap-3 bg-white overflow-hidden">
-						{/* 標題 */}
-						<div className="flex">
-							<div className="left text-neutral-400">
-								<CampaignIcon className="mx-3" sx={{ fontSize: "50px" }} />
-							</div>
-							<div className="left">
-								<div>
-									<span className="h5 text-text">公告</span>
-								</div>
-								<div className="text-neutral-400">Announcement</div>
-							</div>
-						</div>
-						<Divider variant="middle" />
-
-						{/* 主內容 */}
-						<div className="flex flex-col items-center justify-center flex-1 px-4 overflow-y-auto">
-							<span className="italic text-neutral-500 text-sm">(尚無公告)</span>
 						</div>
 					</div>
 				</div>

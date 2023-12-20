@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import TableTabber from "../../components/Tabbar/TableTabber";
+import TableTabbar from "../../components/Tabbar/TableTabbar";
 import { LoadingTwo } from "../../components/Loader/Loading";
 import Avatar from "@mui/material/Avatar";
 import { getData } from "../../utils/api";
-import PersonalInfoSection from "./PersonalInfoSection";
-import PunchLogSection from "./PunchLogSection_Old";
+import PersonalInfoSection from "./Sections/PersonalInfoSection";
+import PunchLogSection from "./Sections/PunchLogSection_Old";
 import "./userInfo.scss";
 
 const UserInfo = () => {
@@ -162,7 +162,7 @@ const UserInfo = () => {
 				</div>
 			</div>
 
-			<TableTabber
+			<TableTabbar
 				tabGroup={tabGroup}
 				cat={cat}
 				setCat={setCat}

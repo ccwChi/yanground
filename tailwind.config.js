@@ -30,6 +30,9 @@ module.exports = {
 				quaternary: {
 					50: "#6262a7",
 				},
+				quinary: {
+					50: "#F03355",
+				},
 			},
 			screens: {
 				sm: "576px",

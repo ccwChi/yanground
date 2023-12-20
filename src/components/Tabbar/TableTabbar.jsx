@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 
-const TableTabber = ({ tabGroup, cat, setCat, classnames = "", onTabChange }) => {
+const TableTabbar = ({ tabGroup, cat, setCat, classnames = "", onTabChange, ...otherProps }) => {
 	const navigate = useNavigate();
 
 	const handleChange = (event, newValue) => {
@@ -19,12 +19,12 @@ const TableTabber = ({ tabGroup, cat, setCat, classnames = "", onTabChange }) =>
 		<Tabs
 			value={cat}
 			onChange={handleChange}
-			className={`!bg-transparent ${classnames}`}
+			className={`!bg-transparent ${classnames} text-primary-800`}
 			variant="scrollable"
 			scrollButtons
 			allowScrollButtonsMobile
 			aria-label="scrollable auto tabs example"
-			style={{ color: "#273057" }}>
+            {...otherProps}>
 			{tabGroup.map((tab) => (
 				<Tab key={tab.f} label={tab.text} value={tab.f} />
 			))}
@@ -32,4 +32,4 @@ const TableTabber = ({ tabGroup, cat, setCat, classnames = "", onTabChange }) =>
 	);
 };
 
-export default TableTabber;
+export default TableTabbar;

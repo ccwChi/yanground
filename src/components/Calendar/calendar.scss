@@ -20,6 +20,9 @@
 	.fc-highlight {
 		background-color: rgb(255 196 196 / 30%);
 	}
+	.fc-list-empty {
+		background-color: $white-color;
+	}
 }
 .custom_calendar {
 	background-color: $white-color;
@@ -41,7 +44,8 @@
 	&.fc-dayGridMonth-view,
 	&.fc-timeGridWeek-view,
 	&.fc-dayGridWeek-view,
-	&.fc-dayGridDay-view {
+	&.fc-dayGridDay-view,
+	&.fc-timeGridDay-view {
 		td,
 		th {
 			padding: 2px 6px !important;
@@ -91,7 +95,7 @@
 	// }
 	.custom_calendar.fc-listMonth-view {
 		.fc-scroller {
-			padding-bottom: 1.5rem;
+			padding-bottom: 4rem;
 		}
 	}
 }

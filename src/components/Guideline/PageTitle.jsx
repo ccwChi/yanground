@@ -18,13 +18,12 @@ const PageTitle = ({
 	handleCoverDialog,
 	handleClearDialog,
 	handleConfirmDialog,
+	handleCloseText,
 	haveValue,
 	isDirty,
 }) => {
 	return (
-		<div
-			className={"relative hidden sm:flex justify-between text-primary-800 mb-3"}
-			style={{ padding: "0.5rem 2rem 1.5rem" }}>
+		<div className={"relative hidden sm:flex justify-between text-primary-800 mb-3 pt-2 md:px-6 lg:px-8 px-5 pb-6"}>
 			<div className="inline-flex items-center gap-2 pe-2">
 				<FontAwesomeIcon icon={faQuoteLeft} style={{ fontSize: "1.875rem" }} />
 				<span className="font-bold text-2xl leading-10">{title}</span>
@@ -36,6 +35,7 @@ const PageTitle = ({
 						handleCoverDialog={handleCoverDialog}
 						handleClearDialog={handleClearDialog}
 						handleConfirmDialog={handleConfirmDialog}
+						handleCloseText={handleCloseText}
 						haveValue={haveValue}
 						isDirty={isDirty}>
 						{children}

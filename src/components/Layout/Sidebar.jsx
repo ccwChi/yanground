@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import Avatar from "@mui/material/Avatar";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -17,6 +18,7 @@ import "./Layout.scss";
 const Sidebar = ({ menuItems, closeSidebar }) => {
 	const [expanded, setExpanded] = useState(null);
 	const userProfile = useLocalStorageValue("userProfile");
+	const isSmallScreen = useMediaQuery("(max-width:575.98px)");
 
 	const handleAccordionChange = (panel) => (event, isExpanded) => {
 		setExpanded(isExpanded ? panel : null);
@@ -37,8 +39,8 @@ const Sidebar = ({ menuItems, closeSidebar }) => {
 						alt={userProfile?.displayName}
 						src={userProfile?.pictureUrl}
 						sx={{
-							width: 150,
-							height: 150,
+							width: isSmallScreen ? 120 : 150,
+							height: isSmallScreen ? 120 : 150,
 							border: "solid 1.25em transparent",
 							borderRadius: "50%",
 							background:
@@ -71,7 +73,7 @@ const Sidebar = ({ menuItems, closeSidebar }) => {
 										<ListItemIcon className="items-center justify-center me-1" style={{ minWidth: "32px" }}>
 											<FontAwesomeIcon icon={menuItem.icon} className="text-base" />
 										</ListItemIcon>
-										<span className="self-center text-base">{menuItem.text}</span>
+										<span className="self-center sm:text-base text-sm">{menuItem.text}</span>
 									</AccordionSummary>
 									<AccordionDetails style={{ padding: 0 }}>
 										<List className="subMenu flex flex-col gap-1" style={{ paddingTop: 0, paddingBottom: 0 }}>
@@ -82,7 +84,7 @@ const Sidebar = ({ menuItems, closeSidebar }) => {
 													to={subMenuItem.href}
 													className="flex items-center ps-8 pe-4 h-10 accordionLink select-none"
 													onClick={closeSidebar}>
-													<span className="text-base">{subMenuItem.text}</span>
+													<span className="sm:text-base text-sm">{subMenuItem.text}</span>
 												</NavLink>
 											))}
 										</List>
@@ -96,7 +98,7 @@ const Sidebar = ({ menuItems, closeSidebar }) => {
 									<ListItemIcon className="items-center justify-center me-1" style={{ minWidth: "32px" }}>
 										<FontAwesomeIcon icon={menuItem.icon} className="text-base" />
 									</ListItemIcon>
-									<span className="self-center text-base">{menuItem.text}</span>
+									<span className="self-center sm:text-base text-sm">{menuItem.text}</span>
 								</NavLink>
 							)}
 						</div>

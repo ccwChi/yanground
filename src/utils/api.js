@@ -2,40 +2,50 @@
 const appUrl = process.env.REACT_APP_URL;
 
 // GET
-const getData = async (url = "") => {
-  const accessToken = JSON.parse(localStorage.getItem("accessToken"));
-  const headers = {
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  };
+const getData = async (url = "", customParam = false, forbiddenFunc, unauthorizedFunc) => {
+	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
+	const headers = {
+		mode: 'no-cors',
+		Authorization: `Bearer ${accessToken}`,
+		"Content-Type": "application/json",
+	};
 
-  return await fetch(`${appUrl}/${url}`, {
-    method: "GET",
-    headers,
-  })
-    .then((response) => {
-      if (!response.ok) {
-        const statusCode = response.status;
-        console.error("HTTP Error: Status Code", statusCode);
-        if (statusCode === 403) {
-          window.location.href = "/forbidden";
-        } else if (statusCode === 401) {
-          window.location.href = "/unauthorized";
-        }
-      }
-      return response.json();
-    })
-    .catch((error) => {
-      console.error("System Error：", error);
-      // throw error;
-      return error.message;
-    });
+	return await fetch(`${appUrl}/${url}`, {
+		method: "GET",
+		headers,
+	})
+		.then((response) => {
+			if (!response.ok) {
+				const statusCode = response.status;
+				console.error("HTTP Error: Status Code", statusCode);
+				if (statusCode === 403) {
+					if (customParam) {
+						forbiddenFunc();
+					} else {
+						window.location.href = "/forbidden";
+					}
+				} else if (statusCode === 401) {
+					if (customParam) {
+						unauthorizedFunc();
+					} else {
+						window.location.href = "/unauthorized";
+					}
+				}
+			}
+			return response.json();
+		})
+		.catch((error) => {
+			console.error("System Error：", error);
+			// throw error;
+			return error.message;
+		});
 };
 
 // POST
 const postData = async (url = "", formData) => {
   const accessToken = JSON.parse(localStorage.getItem("accessToken"));
   const headers = {
+		mode: 'no-cors',
     Authorization: `Bearer ${accessToken}`,
     "Content-Type": "application/json",
   };

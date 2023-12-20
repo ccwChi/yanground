@@ -1,30 +1,38 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import PageTitle from "../../components/Guideline/PageTitle";
-import RWDTable from "../../components/RWDTable/RWDTable";
-import Pagination from "../../components/Pagination/Pagination";
-import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
-import InputTitle from "../../components/Guideline/InputTitle";
-
 import { useForm, Controller } from "react-hook-form";
+
+// Component
+import RWDTable from "../../components/RWDTable/RWDTable";
+import PageTitle from "../../components/Guideline/PageTitle";
+import Pagination from "../../components/Pagination/Pagination";
+import InputTitle from "../../components/Guideline/InputTitle";
+import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
+// import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
+
+// Mui
 import FormControlLabel from "@mui/material/FormControlLabel";
-import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
-import RadioGroup from "@mui/material/RadioGroup";
+import MenuItem from "@mui/material/MenuItem";
 import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
 import Slider from "@mui/material/Slider";
 import Checkbox from "@mui/material/Checkbox";
-
 import EditIcon from "@mui/icons-material/Edit";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ViewTimelineIcon from "@mui/icons-material/ViewTimeline";
+import PunchClockIcon from "@mui/icons-material/PunchClock";
 import TuneIcon from "@mui/icons-material/Tune";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+
+// Custom
 import { getData, postData } from "../../utils/api";
 import EditModal from "./UsersModal";
 import AttconfModal from "./AttconfModal";
 import { useNotification } from "../../hooks/useNotification";
 
+// MenuItem 選單樣式調整
 const ITEM_HEIGHT = 36;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -36,6 +44,7 @@ const MenuProps = {
 	},
 };
 
+// 篩選 default 值
 const defaultValue = {
 	name: "",
 	department: "",
@@ -70,7 +79,7 @@ const Users = () => {
 	// ApiUrl
 	const furl = "user";
 	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
-	// 在主畫面先求得部門跟權限list再直接傳給面板
+	// 在主畫面先求得部門跟權限 list 再直接傳給面板
 	const [departmentList, setDepartmentList] = useState(null);
 	const [authorityList, setAuthorityList] = useState(null);
 	// ModalValue 控制開啟的是哪一個 Modal
@@ -119,7 +128,17 @@ const Users = () => {
 			variant: "contained",
 			color: "primary",
 			fabVariant: "success",
-			fab: <AutoFixHighIcon fontSize="large" />,
+			fab: <AutoFixHighIcon />,
+		},
+		{
+			mode: "viewpunch",
+			icon: <ExitToAppIcon fontSize="small" />,
+			text: "打卡紀錄",
+			// text: "打卡與考勤",
+			variant: "contained",
+			color: "secondary",
+			// fabVariant: "success",
+			fab: <ExitToAppIcon />,
 		},
 		// {
 		// 	mode: "filter",
@@ -128,7 +147,7 @@ const Users = () => {
 		// 	variant: "contained",
 		// 	color: "secondary",
 		// 	fabVariant: "secondary",
-		// 	fab: <TuneIcon fontSize="large" />,
+		// 	fab: <TuneIcon />,
 		// },
 	];
 
@@ -155,6 +174,7 @@ const Users = () => {
 	// edit = 編輯名稱
 	const actions = [
 		{ value: "edit", icon: <EditIcon />, title: "編輯個人資料" },
+		{ value: "viewpunch", icon: <PunchClockIcon />, title: "個人打卡紀錄" }, //  "打卡與考勤"
 		// { value: "attconf", icon: <ViewTimelineIcon />, title: "出勤時間確認" },
 	];
 
@@ -162,7 +182,6 @@ const Users = () => {
 	useEffect(() => {
 		getApiList(apiUrl);
 	}, [apiUrl]);
-
 	const getApiList = useCallback(
 		(url) => {
 			setIsLoading(true);
@@ -181,7 +200,7 @@ const Users = () => {
 		[page]
 	);
 
-	//取得部門清單跟權限清單
+	// 取得部門清單跟權限清單
 	useEffect(() => {
 		setIsLoading(true);
 		const departurl = "department";
@@ -269,14 +288,21 @@ const Users = () => {
 					showNotification("激活失敗。", false);
 				}
 			});
-		} else if (dataMode === "attconf") {
-			setModalValue(dataMode);
-			setDeliverInfo(dataValue);
+			// } else if (dataMode === "attconf") {
+			// 	setModalValue(dataMode);
+			// 	setDeliverInfo(dataValue);
 		} else if (dataMode === "filter") {
 			handleOpenSearch();
+		} else if (dataMode === "viewpunch") {
+			navigate(
+				`attendance_calendar?user=${dataValue || ""}&dep=${
+					apiData.content.find((item) => item.id === dataValue)?.department.id || ""
+				}&mode=clockPunch`
+			);
 		} else {
 			setModalValue(dataMode);
-			setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
+			setDeliverInfo(dataValue);
+			// setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
 		}
 	};
 
@@ -349,6 +375,7 @@ const Users = () => {
 				title="人事管理"
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
+				isLoading={!isLoading}
 				// searchMode
 				// 下面參數前提都是 searchMode = true
 				searchDialogOpen={searchDialogOpen}
@@ -360,7 +387,7 @@ const Users = () => {
 				haveValue={filters === defaultValue}
 				isDirty={isDirty}>
 				<form className="flex flex-col gap-2">
-					<div className="inline-flex items-center">
+					<div className="inline-flex items-center gap-2">
 						<InputTitle title={"Line 名稱"} classnames="whitespace-nowrap min-w-[80px]" pb={false} required={false} />
 						<Controller
 							name="name"
@@ -370,7 +397,7 @@ const Users = () => {
 							)}
 						/>
 					</div>
-					<div className="inline-flex items-center">
+					<div className="inline-flex items-center gap-2">
 						<InputTitle title={"部門名稱"} classnames="whitespace-nowrap min-w-[80px]" pb={false} required={false} />
 						<Controller
 							name="department"
@@ -395,7 +422,7 @@ const Users = () => {
 							)}
 						/>
 					</div>
-					<div className="inline-flex items-center justify-between">
+					<div className="inline-flex items-center justify-between gap-2">
 						<InputTitle title={"性別"} classnames="whitespace-nowrap pb-1" pb={false} required={false} />
 						<Controller
 							name="gender"
@@ -461,9 +488,6 @@ const Users = () => {
 				</form>
 			</PageTitle>
 
-			{/* TabBar */}
-			{/* <TableTabber tabGroup={tabGroup} setCat={setCat} /> */}
-
 			{/* Table */}
 			<div className="overflow-y-auto h-full order-3 sm:order-1">
 				<RWDTable
@@ -488,7 +512,8 @@ const Users = () => {
 			/>
 
 			{/* Floating Action Button */}
-			<FloatingActionButton btnGroup={btnGroup} handleActionClick={handleActionClick} />
+			{/* <FloatingActionButton btnGroup={btnGroup} handleActionClick={handleActionClick} /> */}
+			<MultipleFAB btnGroup={btnGroup} handleActionClick={handleActionClick} />
 
 			{/* Modal */}
 			{config && config.modalComponent}
