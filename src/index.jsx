@@ -28,6 +28,10 @@ import ConstructionSummary from "./pages/ConstructionSummary/ConstructionSummary
 import DispatchCalendar from "./pages/DispatchCalendar/DispatchCalendar";
 import ClientQuestionnaire from "./pages/Client/ClientQuestionnaire";
 import EducationTrainging from "./pages/EducationTraining/EducationTraining";
+import ConstructionSummary from "./pages/ConstructionSummary/ConstructionSummary";
+import DispatchCalendar from "./pages/DispatchCalendar/DispatchCalendar";
+import ClientQuestionnaire from "./pages/Client/ClientQuestionnaire";
+import EducationTrainging from "./pages/EducationTraining/EducationTraining";
 
 const router = createBrowserRouter([
   {
@@ -79,55 +83,54 @@ const router = createBrowserRouter([
 				path: "/users/attendance_calendar",
 				element: <UsersAttendanceCalendar />,
 			},
-      {
-        path: "/punch",
-        element: <Punch />,
-      },
-      {
-        path: "/userInfo",
-        element: <UserInfo />,
-      },
-      {
-        path: "/forbidden",
-        element: <Forbidden />,
-      },
-      {
-        path: "/dispatchcalendar",
-        element: <DispatchCalendar />,
-      },
-      {
-        path: "/educationtraining",
-        element: <EducationTrainging />,
-      },
-      {
-        path: "/unauthorized",
-        element: <Unauthorized />,
-      },
-      {
-        path: "/OJrqiGtV/H0aAwx3b58FUg==",
-        element: <Explotion />,
-      },
-      {
-        path: "/404",
-        element: <ErrorPages />,
-      },
-      {
-        path: "*",
-        element: <ErrorPages />,
-      },
-    ],
-  },
-  {
-    path: "/clientquestionnaire",
-    errorElement: <ErrorMessage />,
-    element: <ClientQuestionnaire />,
-  },
+			{
+				path: "/punch",
+				element: <Punch />,
+			},
+			{
+				path: "/userInfo",
+				element: <UserInfo />,
+			},
+			{
+				path: "/forbidden",
+				element: <Forbidden />,
+			},
+			{
+				path: "/dispatchcalendar",
+				element: <DispatchCalendar />,
+			},
+			{
+				path: "/educationtraining",
+				element: <EducationTrainging />,
+			},
+			{
+				path: "/clientquestionnaire",
+				element: <ClientQuestionnaire />,
+			},
+			{
+				path: "/unauthorized",
+				element: <Unauthorized />,
+			},
+			{
+				path: "/OJrqiGtV/H0aAwx3b58FUg==",
+				element: <Explotion />,
+			},
+			{
+				path: "/404",
+				element: <ErrorPages />,
+			},
+			{
+				path: "*",
+				element: <ErrorPages />,
+			},
+		],
+	},
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  // <React.StrictMode>
-  <RouterProvider router={router} />
-  // </React.StrictMode>
+	// <React.StrictMode>
+	<RouterProvider router={router} />
+	// </React.StrictMode>
 );
 
 reportWebVitals();

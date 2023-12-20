@@ -18,6 +18,7 @@ const nameMappings = [
 	{ name: "dispatchcalendar", display: "派工行事曆" },
 	{ name: "attendance_calendar", display: "打卡紀錄" }, // "打卡與考勤"
 	{ name: "forbidden", display: "403" },
+	{ name: "educationtraining", display: "教育訓練" },
 ];
 
 const CustomBreadcrumbs = React.memo(() => {
