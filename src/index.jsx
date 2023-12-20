@@ -18,8 +18,7 @@ import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
 import ErrorMessage from "./pages/Error/ErrorMessage";
 import ErrorPages from "./pages/Error/ErrorPages";
-import Forbidden from "./pages/Error/Forbidden";
-import Unauthorized from "./pages/Error/Unauthorized";
+import Error from "./pages/Error/Error";
 import Explotion from "./pages/Error/Explotion";
 import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
@@ -86,10 +85,6 @@ const router = createBrowserRouter([
 				element: <UserInfo />,
 			},
 			{
-				path: "/forbidden",
-				element: <Forbidden />,
-			},
-			{
 				path: "/dispatchcalendar",
 				element: <DispatchCalendar />,
 			},
@@ -103,7 +98,15 @@ const router = createBrowserRouter([
 			},
 			{
 				path: "/unauthorized",
-				element: <Unauthorized />,
+				element: <Error />,
+			},
+			{
+				path: "/forbidden",
+				element: <Error />,
+			},
+			{
+				path: "/internalservererror",
+				element: <Error />,
 			},
 			{
 				path: "/OJrqiGtV/H0aAwx3b58FUg==",
