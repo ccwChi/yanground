@@ -227,9 +227,13 @@ const Users = () => {
 					showNotification(result.result.reason ? result.result.reason : "發生錯誤，請洽詢資工部", false);
 				} else {
 					showNotification(
-						result.result.reason ? result.result.reason : "需上下班同時勾選不同的資料，不可缺一！",
+						result.result.reason
+						  ? result.result.reason
+						  : (result.result
+						  ? result.result
+						  : "權限不足"),
 						false
-					);
+					  );
 				}
 			}
 		});

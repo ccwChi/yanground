@@ -187,20 +187,20 @@ const ConstructionSummary = () => {
           showNotification(message[0], true);
           getApiList(apiUrl, constructionTypeList);
           onClose();
-        } else if (result.result.response === 400) {
-          //console.log(result.result);
-          showNotification(result.result.reason, false);
-          //目前唯一會導致400的原因只有名稱重複，大概吧
         } else {
-          showNotification("沒有修改權限", false);
-          //目前測試需有資訊才能修改
-          //console.log(result);
+          showNotification(
+            result.result.reason
+              ? result.result.reason
+              : result.result
+              ? result.result
+              : "權限不足",
+            false
+          );
         }
         setSendBackFlag(false);
       });
     } else if (mode === "task") {
       postBodyData(url, fd).then((result) => {
-        //console.log(result);
         if (result.status) {
           showNotification(message[0], true);
           getApiList(apiUrl, constructionTypeList);
@@ -209,14 +209,15 @@ const ConstructionSummary = () => {
             setModalValue(otherData?.nextModal);
             setDeliverInfo(otherData?.deliverInfoId);
           }
-        } else if (result.result.response === 400) {
-          //console.log(result.result);
+        } else {
           showNotification(
-            "編輯施工清單工項執行們時拋出線程中斷異常：%s❗️",
+            result.result.reason
+              ? result.result.reason
+              : (result.result
+              ? result.result
+              : "權限不足"),
             false
           );
-        } else {
-          showNotification("權限不足", false);
         }
         setSendBackFlag(false);
       });

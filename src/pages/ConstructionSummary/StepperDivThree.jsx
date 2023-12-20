@@ -172,11 +172,13 @@ const EditDispatchDiv = React.memo(
                 true
               );
               getTaskList();
-            } else if (result.result.response !== 200) {
+            } else {
               showNotification(
-                result?.result?.reason
+                result.result.reason
                   ? result.result.reason
-                  : "Oops! 發生錯誤!",
+                  : (result.result
+                  ? result.result
+                  : "權限不足"),
                 false
               );
               updateSwitchState();
@@ -211,7 +213,15 @@ const EditDispatchDiv = React.memo(
                   true
                 );
                 getTaskList();
-              } else if (result.result.response !== 200) {
+              } else  {
+                showNotification(
+                  result.result.reason
+                    ? result.result.reason
+                    : (result.result
+                    ? result.result
+                    : "權限不足"),
+                  false
+                );
                 updateSwitchState();
                 setIsDispatchLoading(false);
               }

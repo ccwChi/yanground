@@ -396,9 +396,11 @@ const EventModal = React.memo(
           return "postTrue";
         } else {
           showNotification(
-            result?.result?.reason
-              ? result?.result?.reason
-              : "錯誤，請查看權限",
+            result.result.reason
+              ? result.result.reason
+              : result.result
+              ? result.result
+              : "權限不足",
             false
           );
           return "postFalse";
@@ -412,9 +414,13 @@ const EventModal = React.memo(
         if (result.status) {
           showNotification("刪除派工更改成功", true);
           return "deleteTrue";
-        } else if (result.result.response !== 200) {
+        } else {
           showNotification(
-            result?.result?.reason ? result?.result?.reason : "刪除錯誤",
+            result.result.reason
+              ? result.result.reason
+              : result.result
+              ? result.result
+              : "權限不足",
             false
           );
           return "deleteFalse";
@@ -430,7 +436,11 @@ const EventModal = React.memo(
           setReGetSummaryListData(deliverInfo.date);
         } else {
           showNotification(
-            result?.result?.reason ? result.result.reason : "錯誤",
+            result.result.reason
+              ? result.result.reason
+              : result.result
+              ? result.result
+              : "權限不足",
             false
           );
         }
@@ -464,9 +474,13 @@ const EventModal = React.memo(
         if (result.status) {
           showNotification("刪除派工更改成功", true);
           setReGetCalendarData(deliverInfo.date);
-        } else if (result.result.response !== 200) {
+        } else {
           showNotification(
-            result?.result?.reason ? result?.result?.reason : "刪除錯誤",
+            result.result.reason
+              ? result.result.reason
+              : result.result
+              ? result.result
+              : "權限不足",
             false
           );
         }

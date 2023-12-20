@@ -3,120 +3,122 @@ const appUrl = process.env.REACT_APP_URL;
 
 // GET
 const getData = async (url = "") => {
-	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
-	const headers = {
-		Authorization: `Bearer ${accessToken}`,
-		"Content-Type": "application/json",
-	};
+  const accessToken = JSON.parse(localStorage.getItem("accessToken"));
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  };
 
-	return await fetch(`${appUrl}/${url}`, {
-		method: "GET",
-		headers,
-	})
-		.then((response) => {
-			if (!response.ok) {
-				const statusCode = response.status;
-				console.error("HTTP Error: Status Code", statusCode);
-				if (statusCode === 403) {
-					window.location.href = "/forbidden";
-				} else if (statusCode === 401) {
-					window.location.href = "/unauthorized";
-				}
-			}
-			return response.json();
-		})
-		.catch((error) => {
-			console.error("System Error：", error);
-			// throw error;
-			return error.message;
-		});
+  return await fetch(`${appUrl}/${url}`, {
+    method: "GET",
+    headers,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        const statusCode = response.status;
+        console.error("HTTP Error: Status Code", statusCode);
+        if (statusCode === 403) {
+          window.location.href = "/forbidden";
+        } else if (statusCode === 401) {
+          window.location.href = "/unauthorized";
+        }
+      }
+      return response.json();
+    })
+    .catch((error) => {
+      console.error("System Error：", error);
+      // throw error;
+      return error.message;
+    });
 };
 
 // POST
 const postData = async (url = "", formData) => {
-	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
-	const headers = {
-		Authorization: `Bearer ${accessToken}`,
-		"Content-Type": "application/json",
-	};
-	const params = new URLSearchParams(formData);
-	return await fetch(`${appUrl}/${url}?${params}`, {
-		method: "POST",
-		headers,
-	})
-		.then((response) => {
-			return response.json().then((res) => {
-				if (res.response === 200) return { status: true, result: res };
-				else {
-					return { status: false, result: res };
-				}
-			});
-			// return response.json();
-		})
-		.catch((error) => {
-			console.error("System Error：", error);
-			// throw error;
-			return { status: false, result: error.message };
-		});
+  const accessToken = JSON.parse(localStorage.getItem("accessToken"));
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  };
+  const params = new URLSearchParams(formData);
+  return await fetch(`${appUrl}/${url}?${params}`, {
+    method: "POST",
+    headers,
+  })
+    .then((response) => {
+      return response.json().then((res) => {
+        if (res.response === 200) return { status: true, result: res };
+        else if (res.status === 500) {
+          return { status: false, result: "回傳 500 錯誤" };
+        } else {
+          return { status: false, result: res };
+        }
+      });
+      // return response.json();
+    })
+    .catch((error) => {
+      console.error("System Error：", error);
+      // throw error;
+      return { status: false, result: error.message };
+    });
 };
 
 // POST BODY AUTHOR: JEFF
 const postBodyData = async (url = "", bodyData, paramsData) => {
-	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
-	const headers = {
-		Authorization: `Bearer ${accessToken}`,
-		"Content-Type": "application/json",
-	};
-	const params = new URLSearchParams(paramsData);
-	var raw = JSON.stringify(bodyData);
-	//console.log(raw);
-	return await fetch(`${appUrl}/${url}`, {
-		method: "POST",
-		headers,
-		body: raw,
-	})
-		.then((response) => {
-			return response.json().then((res) => {
-				if (res.response === 200) return { status: true, result: res };
-				else {
-					return { status: false, result: res };
-				}
-			});
-			// return response.json();
-		})
-		.catch((error) => {
-			console.error("System Error：", error);
-			// throw error;
-			return { status: false, result: error.message };
-		});
+  const accessToken = JSON.parse(localStorage.getItem("accessToken"));
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  };
+  const params = new URLSearchParams(paramsData);
+  var raw = JSON.stringify(bodyData);
+  //console.log(raw);
+  return await fetch(`${appUrl}/${url}`, {
+    method: "POST",
+    headers,
+    body: raw,
+  })
+    .then((response) => {
+      return response.json().then((res) => {
+        if (res.response === 200) return { status: true, result: res };
+        else {
+          return { status: false, result: res };
+        }
+      });
+      // return response.json();
+    })
+    .catch((error) => {
+      console.error("System Error：", error);
+      // throw error;
+      return { status: false, result: error.message };
+    });
 };
 
 // POST - Delete ver
 const deleteData = async (url = "", formData) => {
-	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
-	const headers = {
-		Authorization: `Bearer ${accessToken}`,
-		"Content-Type": "application/json",
-	};
-	const params = new URLSearchParams(formData);
-	return await fetch(`${appUrl}/${url}?${params}`, {
-		method: "DELETE",
-		headers,
-	})
-		.then((response) => {
-			return response.json().then((res) => {
-				if (res.response === 200) return { status: true, result: res };
-				else {
-					return { status: false, result: res };
-				}
-			});
-			// return response.json();
-		})
-		.catch((error) => {
-			console.error("System Error：", error);
-			// throw error;
-			return { status: false, result: error.message };
-		});
+  const accessToken = JSON.parse(localStorage.getItem("accessToken"));
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  };
+  const params = new URLSearchParams(formData);
+  return await fetch(`${appUrl}/${url}?${params}`, {
+    method: "DELETE",
+    headers,
+  })
+    .then((response) => {
+      return response.json().then((res) => {
+        if (res.response === 200) return { status: true, result: res };
+        else {
+          return { status: false, result: res };
+        }
+      });
+      // return response.json();
+    })
+    .catch((error) => {
+      console.error("System Error：", error);
+      // throw error;
+      return { status: false, result: error.message };
+    });
 };
 
 export { getData, postData, postBodyData, deleteData };

@@ -369,9 +369,13 @@ const DispatchCalendar = () => {
           showNotification(message[0], true);
           getConstructionSummaryList();
           onClose();
-        } else if (result.result.response !== 200) {
+        } else {
           showNotification(
-            result?.result?.reason ? result.result.reason : "錯誤",
+            result.result.reason
+              ? result.result.reason
+              : result.result
+              ? result.result
+              : "權限不足",
             false
           );
         }
