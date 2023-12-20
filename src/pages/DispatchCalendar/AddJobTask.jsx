@@ -291,13 +291,15 @@ const TaskModal = React.memo(
         if (result.status) {
           showNotification("資料上傳成功", true);
           setReGetSummaryListData(deliverInfo.date);
-        } else if (result.result.response === 400) {
+        } else {
           showNotification(
-            result?.result?.reason ? result?.result?.reason : "錯誤",
+            result.result.reason
+              ? result.result.reason
+              : result.result
+              ? result.result
+              : "權限不足",
             false
           );
-        } else {
-          showNotification("權限不足", false);
         }
         setSendBackFlag(false);
         setAddJobTask(null);

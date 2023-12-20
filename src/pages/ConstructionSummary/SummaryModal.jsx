@@ -163,10 +163,14 @@ const SummaryModal = React.memo(
             setActiveStep(1);
             setIsDivDirty(false);
             RefleshMainList();
-          } else if (result.result.response !== 400) {
+          } else {
             //console.log(result.result);
             showNotification(
-              result?.result?.reason ? result.result.reason : "錯誤",
+              result.result.reason
+                ? result.result.reason
+                : result.result
+                ? result.result
+                : "權限不足",
               false
             );
           }
@@ -179,9 +183,13 @@ const SummaryModal = React.memo(
             showNotification(message[0], true);
             setActiveStep(otherData[1]);
             RefleshMainList();
-          } else if (result.result.response !== 200) {
+          } else {
             showNotification(
-              result?.result?.reason ? result.result.reason : "錯誤",
+              result.result.reason
+                ? result.result.reason
+                : (result.result
+                ? result.result
+                : "權限不足"),
               false
             );
           }

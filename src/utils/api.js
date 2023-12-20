@@ -5,7 +5,7 @@ const appUrl = process.env.REACT_APP_URL;
 const getData = async (url = "", customParam = false, forbiddenFunc, unauthorizedFunc) => {
 	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
 	const headers = {
-		mode: 'no-cors',
+		mode: "no-cors",
 		Authorization: `Bearer ${accessToken}`,
 		"Content-Type": "application/json",
 	};
@@ -45,7 +45,7 @@ const getData = async (url = "", customParam = false, forbiddenFunc, unauthorize
 const postData = async (url = "", formData) => {
 	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
 	const headers = {
-		mode: 'no-cors',
+		mode: "no-cors",
 		Authorization: `Bearer ${accessToken}`,
 		"Content-Type": "application/json",
 	};
@@ -57,7 +57,9 @@ const postData = async (url = "", formData) => {
 		.then((response) => {
 			return response.json().then((res) => {
 				if (res.response === 200) return { status: true, result: res };
-				else {
+				else if (res.status === 500) {
+					return { status: false, result: "回傳 500 錯誤" };
+				} else {
 					return { status: false, result: res };
 				}
 			});

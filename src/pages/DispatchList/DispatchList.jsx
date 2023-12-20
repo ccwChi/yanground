@@ -156,7 +156,14 @@ const DispatchList = () => {
 				getApiList(apiUrl);
 				onClose();
 			} else {
-				showNotification(result.result.reason, false);
+				showNotification(
+					result.result.reason
+					  ? result.result.reason
+					  : (result.result
+					  ? result.result
+					  : "權限不足"),
+					false
+				  );
 			}
 			setSendBackFlag(false);
 		});

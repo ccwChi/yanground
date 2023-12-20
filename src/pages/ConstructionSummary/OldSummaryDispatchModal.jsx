@@ -126,8 +126,15 @@ const DispatchModal = React.memo(({ deliverInfo, onClose }) => {
           if (result.status) {
             showNotification("處理成功", true);
             getTaskList();
-          } else if (result.result.response !== 200) {
-            showNotification(result.result.reason, false);
+          } else {
+            showNotification(
+              result.result.reason
+                ? result.result.reason
+                : result.result
+                ? result.result
+                : "權限不足",
+              false
+            );
             updateSwitchState();
             setIsDispatchLoading(false);
           }
@@ -153,7 +160,15 @@ const DispatchModal = React.memo(({ deliverInfo, onClose }) => {
             if (result.status) {
               showNotification("處理成功", true);
               getTaskList();
-            } else if (result.result.response !== 200) {
+            } else {
+              showNotification(
+                result.result.reason
+                  ? result.result.reason
+                  : result.result
+                  ? result.result
+                  : "權限不足",
+                false
+              );
               updateSwitchState();
               setIsDispatchLoading(false);
             }

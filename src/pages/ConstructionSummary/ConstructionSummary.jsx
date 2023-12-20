@@ -15,6 +15,7 @@ import constructionTypeList from "../../data/constructionTypes";
 import { LoadingFour } from "../../components/Loader/Loading";
 import Backdrop from "@mui/material/Backdrop";
 import { SummaryModal } from "./SummaryModal";
+import HelpQuestion from "../../components/HelpQuestion/HelpQuestion";
 
 const ConstructionSummary = () => {
   const navigate = useNavigate();
@@ -247,7 +248,6 @@ const ConstructionSummary = () => {
         handleActionClick={handleActionClick}
         isLoading={!isLoading}
       />
-
       {/* TabBar */}
       {/* <TableTabbar tabGroup={tabGroup} setCat={setCat} /> */}
 
