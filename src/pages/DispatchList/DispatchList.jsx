@@ -112,7 +112,7 @@ const DispatchList = () => {
 				setIsLoading(false);
 				const data = result.result;
 				setApiData(data);
-				if (page >= data.totalPages) {
+				if (page >= data?.totalPages) {
 					setPage(0);
 					setRowsPerPage(10);
 					navigate(`?p=1&s=10`);
@@ -125,7 +125,7 @@ const DispatchList = () => {
 	// 取得部門資料
 	useEffect(() => {
 		getData("department").then((result) => {
-			const data = result.result.content;
+			const data = result.result?.content;
 			setDepartmentList(data);
 		});
 	}, []);

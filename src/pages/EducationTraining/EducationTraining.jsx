@@ -5,7 +5,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import { Box, Button, CardActionArea, Modal, Skeleton } from "@mui/material";
 import PageTitle from "../../components/Guideline/PageTitle";
-import TableTabber from "../../components/Tabbar/TableTabber";
+import TableTabbar from "../../components/Tabbar/TableTabbar";
 import { useLocation } from "react-router-dom";
 import fakeData from "./fakeData";
 
@@ -85,7 +85,7 @@ const EducationTrainging = () => {
   return (
     <>
       <PageTitle title="教育訓練" />
-      <TableTabber tabGroup={tabGroup} cat={cat} setCat={setCat} />
+      <TableTabbar tabGroup={tabGroup} cat={cat} setCat={setCat} />
 
       {/* block2 */}
       <div className="relative overflow-y-auto mt-5 flex flex-col flex-1 overflow-hidden sm:pb-3.5 pb-0">
