@@ -16,7 +16,8 @@ const nameMappings = [
 	{ name: "punch", display: "打卡" },
 	{ name: "maps", display: "地圖" },
 	{ name: "dispatchcalendar", display: "派工行事曆" },
-	{ name: "attendance_calendar", display: "打卡紀錄" }, // "打卡與考勤"
+	{ name: "attendance_calendar", display: "考勤紀錄" },
+	{ name: "unauthorized", display: "401" },
 	{ name: "forbidden", display: "403" },
 	{ name: "educationtraining", display: "教育訓練" },
 ];

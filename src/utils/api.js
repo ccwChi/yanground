@@ -30,6 +30,12 @@ const getData = async (url = "", customParam = false, forbiddenFunc, unauthorize
 					} else {
 						window.location.href = "/unauthorized";
 					}
+				} else if (statusCode === 500) {
+					if (customParam) {
+						unauthorizedFunc();
+					} else {
+						window.location.href = "/internalservererror";
+					}
 				}
 			}
 			return response.json();

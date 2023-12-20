@@ -18,8 +18,7 @@ import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
 import ErrorMessage from "./pages/Error/ErrorMessage";
 import ErrorPages from "./pages/Error/ErrorPages";
-import Forbidden from "./pages/Error/Forbidden";
-import Unauthorized from "./pages/Error/Unauthorized";
+import Error from "./pages/Error/Error";
 import Explotion from "./pages/Error/Explotion";
 import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
@@ -28,97 +27,101 @@ import ClientQuestionnaire from "./pages/Client/ClientQuestionnaire";
 import EducationTrainging from "./pages/EducationTraining/EducationTraining";
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    errorElement: <ErrorMessage />,
-    children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "/sites",
-        element: <Sites />,
-      },
-      {
-        path: "/constructiontypes",
-        element: <ConstructionTypes />,
-      },
-      {
-        path: "/constructiontypes/:type",
-        element: <ConstructionType />,
-      },
-      {
-        path: "/constructiontypes/:type/:job",
-        element: <ConstructionJob />,
-      },
-      {
-        path: "/constructionsummary",
-        element: <ConstructionSummary />,
-      },
-      {
-        path: "/project",
-        element: <Project />,
-      },
-      {
-        path: "/maps",
-        element: <Maps />,
-      },
-      {
-        path: "/dispatchList",
-        element: <DispatchList />,
-      },
-      {
-        path: "/users",
-        element: <Users />,
-      },
-      {
-        path: "/users/attendance_calendar",
-        element: <UsersAttendanceCalendar />,
-      },
-      {
-        path: "/punch",
-        element: <Punch />,
-      },
-      {
-        path: "/userInfo",
-        element: <UserInfo />,
-      },
-      {
-        path: "/forbidden",
-        element: <Forbidden />,
-      },
-      {
-        path: "/dispatchcalendar",
-        element: <DispatchCalendar />,
-      },
-      {
-        path: "/educationtraining",
-        element: <EducationTrainging />,
-      },
-      {
-        path: "/clientquestionnaire",
-        element: <ClientQuestionnaire />,
-      },
-      {
-        path: "/unauthorized",
-        element: <Unauthorized />,
-      },
-      {
-        path: "/OJrqiGtV/H0aAwx3b58FUg==",
-        element: <Explotion />,
-      },
-      {
-        path: "/404",
-        element: <ErrorPages />,
-      },
-      {
-        path: "*",
-        element: <ErrorPages />,
-      },
-    ],
-  },
+	{
+		path: "/",
+		element: <App />,
+		errorElement: <ErrorMessage />,
+		children: [
+			{
+				index: true,
+				element: <Home />,
+			},
+			{
+				path: "/sites",
+				element: <Sites />,
+			},
+			{
+				path: "/constructiontypes",
+				element: <ConstructionTypes />,
+			},
+			{
+				path: "/constructiontypes/:type",
+				element: <ConstructionType />,
+			},
+			{
+				path: "/constructiontypes/:type/:job",
+				element: <ConstructionJob />,
+			},
+			{
+				path: "/constructionsummary",
+				element: <ConstructionSummary />,
+			},
+			{
+				path: "/project",
+				element: <Project />,
+			},
+			{
+				path: "/maps",
+				element: <Maps />,
+			},
+			{
+				path: "/dispatchList",
+				element: <DispatchList />,
+			},
+			{
+				path: "/users",
+				element: <Users />,
+			},
+			{
+				path: "/users/attendance_calendar",
+				element: <UsersAttendanceCalendar />,
+			},
+			{
+				path: "/punch",
+				element: <Punch />,
+			},
+			{
+				path: "/userInfo",
+				element: <UserInfo />,
+			},
+			{
+				path: "/dispatchcalendar",
+				element: <DispatchCalendar />,
+			},
+			{
+				path: "/educationtraining",
+				element: <EducationTrainging />,
+			},
+			{
+				path: "/clientquestionnaire",
+				element: <ClientQuestionnaire />,
+			},
+			{
+				path: "/unauthorized",
+				element: <Error />,
+			},
+			{
+				path: "/forbidden",
+				element: <Error />,
+			},
+			{
+				path: "/internalservererror",
+				element: <Error />,
+			},
+			{
+				path: "/OJrqiGtV/H0aAwx3b58FUg==",
+				element: <Explotion />,
+			},
+			{
+				path: "/404",
+				element: <ErrorPages />,
+			},
+			{
+				path: "*",
+				element: <ErrorPages />,
+			},
+		],
+	},
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

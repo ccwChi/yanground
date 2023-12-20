@@ -89,7 +89,7 @@ const Project = () => {
 				setIsLoading(false);
 				const data = result.result;
 				setApiData(data);
-				if (page >= data.totalPages) {
+				if (page >= data?.totalPages) {
 					setPage(0);
 					setRowsPerPage(10);
 					navigate(`?p=1&s=10`);
@@ -102,7 +102,7 @@ const Project = () => {
 	// 取得縣市資料
 	useEffect(() => {
 		getData("administrativeDivision?p=1&s=50").then((result) => {
-			const data = result.result.content;
+			const data = result.result?.content;
 			setCityList(data);
 		});
 	}, []);

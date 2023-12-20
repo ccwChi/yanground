@@ -1,16 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
-
-// Component
-import RWDTable from "../../components/RWDTable/RWDTable";
-import PageTitle from "../../components/Guideline/PageTitle";
-import Pagination from "../../components/Pagination/Pagination";
-import InputTitle from "../../components/Guideline/InputTitle";
-import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
-// import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
-
-// Mui
+// MUI
 import FormControlLabel from "@mui/material/FormControlLabel";
 import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
@@ -25,9 +16,18 @@ import ViewTimelineIcon from "@mui/icons-material/ViewTimeline";
 import PunchClockIcon from "@mui/icons-material/PunchClock";
 import TuneIcon from "@mui/icons-material/Tune";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-
-// Custom
+// Component
+import RWDTable from "../../components/RWDTable/RWDTable";
+import PageTitle from "../../components/Guideline/PageTitle";
+import Pagination from "../../components/Pagination/Pagination";
+import InputTitle from "../../components/Guideline/InputTitle";
+import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
+// import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
+// Hooks
+import { useNotification } from "../../hooks/useNotification";
+// Untils
 import { getData, postData } from "../../utils/api";
+// Customs
 import EditModal from "./UsersModal";
 import AttconfModal from "./AttconfModal";
 import { useNotification } from "../../hooks/useNotification";
