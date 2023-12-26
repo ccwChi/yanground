@@ -2,7 +2,7 @@
 const appUrl = process.env.REACT_APP_URL;
 
 // GET
-const getData = async (url = "", customParam = false, forbiddenFunc, unauthorizedFunc) => {
+const getData = async (url = "", customParam = false, forbiddenFunc, unauthorizedFunc, internalservererrorFunc) => {
 	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
 	const headers = {
 		mode: "no-cors",
@@ -29,6 +29,12 @@ const getData = async (url = "", customParam = false, forbiddenFunc, unauthorize
 						unauthorizedFunc();
 					} else {
 						window.location.href = "/unauthorized";
+					}
+				} else if (statusCode === 500) {
+					if (customParam) {
+						internalservererrorFunc();
+					} else {
+						window.location.href = "/internalservererror";
 					}
 				}
 			}

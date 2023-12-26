@@ -1,5 +1,6 @@
 import React from "react";
 import Search from "../Search/Search";
+import Quiz from "../HelpQuestion/Quiz";
 import Button from "@mui/material/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuoteLeft } from "@fortawesome/free-solid-svg-icons";
@@ -10,6 +11,7 @@ const PageTitle = ({
 	handleActionClick,
 	isLoading = true,
 	children,
+	// 搜尋模式
 	searchMode = false,
 	// 下面參數前提都是 searchMode = true
 	searchDialogOpen,
@@ -21,12 +23,20 @@ const PageTitle = ({
 	handleCloseText,
 	haveValue,
 	isDirty,
+	// 說明顯示
+	quizMode = false,
+	// 下面參數前提都是 quizMode = true
+	quizContent,
+	quizModalSize = "439px",
+	quizModalClose,
 }) => {
 	return (
 		<div className={"relative hidden sm:flex justify-between text-primary-800 mb-3 pt-2 md:px-6 lg:px-8 px-5 pb-6"}>
 			<div className="inline-flex items-center gap-2 pe-2">
+				{/* Title */}
 				<FontAwesomeIcon icon={faQuoteLeft} style={{ fontSize: "1.875rem" }} />
 				<span className="font-bold text-2xl leading-10">{title}</span>
+				{/* 如果搜尋模式開啟 (searchMode=true) 就會出現篩選器 */}
 				{searchMode && (
 					<Search
 						open={searchDialogOpen}
@@ -41,6 +51,8 @@ const PageTitle = ({
 						{children}
 					</Search>
 				)}
+				{quizMode && <Quiz content={quizContent} maxWidth={quizModalSize} otherCloseFun={quizModalClose} />}
+				{/* 裝飾物 */}
 				<svg
 					className="absolute start-0 bottom-0"
 					xmlns="http://www.w3.org/2000/svg"
@@ -54,6 +66,7 @@ const PageTitle = ({
 				</svg>
 			</div>
 			<div className="inline-flex gap-2">
+				{/* 右側按鈕群組 */}
 				{btnGroup &&
 					btnGroup.map(
 						(btn) =>

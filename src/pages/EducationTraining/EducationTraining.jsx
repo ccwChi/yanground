@@ -5,9 +5,9 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import { CardActionArea, Modal, Skeleton } from "@mui/material";
 import PageTitle from "../../components/Guideline/PageTitle";
+import TableTabbar from "../../components/Tabbar/TableTabbar";
 import { useLocation } from "react-router-dom";
 import fakeData from "./fakeData";
-import TableTabbar from "../../components/Tabbar/TableTabbar";
 
 const EducationTrainging = () => {
   // 解析網址取得參數
