@@ -25,6 +25,7 @@ import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import ClientQuestionnaire from "./pages/Client/ClientQuestionnaire";
 import EducationTrainging from "./pages/EducationTraining/EducationTraining";
+import UserAttendanceReport from "./pages/HumanResources/UserAttendanceReport";
 
 const router = createBrowserRouter([
 	{
@@ -75,6 +76,10 @@ const router = createBrowserRouter([
 			{
 				path: "/users/attendance_calendar",
 				element: <UsersAttendanceCalendar />,
+			},
+			{
+				path: "/user_attendance_report",
+				element: <UserAttendanceReport />
 			},
 			{
 				path: "/punch",
