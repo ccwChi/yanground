@@ -28,51 +28,51 @@ import EducationTrainging from "./pages/EducationTraining/EducationTraining";
 
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    errorElement: <ErrorMessage />,
-    children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "/sites",
-        element: <Sites />,
-      },
-      {
-        path: "/constructiontypes",
-        element: <ConstructionTypes />,
-      },
-      {
-        path: "/constructiontypes/:type",
-        element: <ConstructionType />,
-      },
-      {
-        path: "/constructiontypes/:type/:job",
-        element: <ConstructionJob />,
-      },
-      {
-        path: "/constructionsummary",
-        element: <ConstructionSummary />,
-      },
-      {
-        path: "/project",
-        element: <Project />,
-      },
-      {
-        path: "/maps",
-        element: <Maps />,
-      },
-      {
-        path: "/dispatchList",
-        element: <DispatchList />,
-      },
-      {
-        path: "/users",
-        element: <Users />,
-      },
+	{
+		path: "/",
+		element: <App />,
+		errorElement: <ErrorMessage />,
+		children: [
+			{
+				index: true,
+				element: <Home />,
+			},
+			{
+				path: "/sites",
+				element: <Sites />,
+			},
+			{
+				path: "/constructiontypes",
+				element: <ConstructionTypes />,
+			},
+			{
+				path: "/constructiontypes/:type",
+				element: <ConstructionType />,
+			},
+			{
+				path: "/constructiontypes/:type/:job",
+				element: <ConstructionJob />,
+			},
+			{
+				path: "/constructionsummary",
+				element: <ConstructionSummary />,
+			},
+			{
+				path: "/project",
+				element: <Project />,
+			},
+			{
+				path: "/maps",
+				element: <Maps />,
+			},
+			{
+				path: "/dispatchList",
+				element: <DispatchList />,
+			},
+			{
+				path: "/users",
+				element: <Users />,
+			},
 			{
 				path: "/users/attendance_calendar",
 				element: <UsersAttendanceCalendar />,
@@ -126,9 +126,9 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-	// <React.StrictMode>
-	<RouterProvider router={router} />
-	// </React.StrictMode>
+  // <React.StrictMode>
+  <RouterProvider router={router} />
+  // </React.StrictMode>
 );
 
 reportWebVitals();

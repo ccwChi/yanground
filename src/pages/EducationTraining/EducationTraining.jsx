@@ -16,7 +16,7 @@ const EducationTrainging = () => {
 
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); 
   const [hasMore, setHasMore] = useState(true);
   const [showSkeleton, setShowSkeleton] = useState(false);
 
@@ -51,10 +51,6 @@ const EducationTrainging = () => {
     },
     [loading, hasMore]
   );
-
-  //   useEffect(() => {
-  //     console.log("observer", observer);
-  //   }, [observer]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -91,6 +87,7 @@ const EducationTrainging = () => {
         {cat === "paperData" ? (
           !loading ? (
             <></>
+            // <>這邊要列條列狀的教學載點</>
           ) : (
             <ListSkeletonLoading />
           )
@@ -107,6 +104,7 @@ const EducationTrainging = () => {
 
 export default EducationTrainging;
 
+// 卡片式的 loading 骨架
 const CardSkeletonLoading = () => {
   return (
     <div className="grid sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 p-4 ">
@@ -126,6 +124,7 @@ const CardSkeletonLoading = () => {
   );
 };
 
+// 條列式的 loading 骨架
 const ListSkeletonLoading = () => {
   return (
     <div className="flex flex-col px-8">
@@ -137,6 +136,7 @@ const ListSkeletonLoading = () => {
   );
 };
 
+// 卡片狀的影片資料呈現方式
 const VideoData = ({ data, lastDataRef }) => {
   const [clickVideo, setClickVideo] = useState(null);
 
@@ -160,7 +160,7 @@ const VideoData = ({ data, lastDataRef }) => {
             />
             <CardContent>
               <Typography gutterBottom variant="h6" component="div">
-                {video.title + index}
+                {video.title}
               </Typography>
             </CardContent>
           </CardActionArea>
