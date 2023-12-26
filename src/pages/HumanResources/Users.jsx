@@ -29,8 +29,6 @@ import { useNotification } from "../../hooks/useNotification";
 import { getData, postData } from "../../utils/api";
 // Customs
 import EditModal from "./UsersModal";
-import AttconfModal from "./AttconfModal";
-import { useNotification } from "../../hooks/useNotification";
 import { Backdrop } from "@mui/material";
 import { LoadingFour } from "../../components/Loader/Loading";
 

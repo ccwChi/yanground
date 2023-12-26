@@ -79,7 +79,7 @@ const App = () => {
 	];
 
 	useEffect(() => {
-		initLine();
+		// initLine();
 	}, []);
 
 	useEffect(() => {
@@ -90,7 +90,7 @@ const App = () => {
 					true,
 					() => {
 						enqueueSnackbar(
-							"抱歉，您無權訪問此頁面。此頁面僅限內部人員使用，若您認為這是一個錯誤，請聯繫人資或資訊部處理。感謝理解與合作。",
+							"抱歉，您無權訪問此頁面。此頁面僅限部分人員使用，若您認為這是一個錯誤，請聯繫人資處理。感謝理解與合作。",
 							{
 								variant: "error",
 								anchorOrigin: {
@@ -113,6 +113,16 @@ const App = () => {
 								autoHideDuration: 15000,
 							}
 						);
+					},
+					() => {
+						enqueueSnackbar("內部伺服器錯誤。請聯繫資訊部處理，感謝理解與合作。", {
+							variant: "error",
+							anchorOrigin: {
+								vertical: "bottom",
+								horizontal: "center",
+							},
+							autoHideDuration: 15000,
+						});
 					}
 				).then((data) => {
 					if (data?.result) {
@@ -201,7 +211,22 @@ const App = () => {
 
 export default App;
 
+// console.log(
+// 	"%c YuanRong!",
+// 	"font-weight: bold; font-size: 50px;color: red; text-shadow: 3px 3px 0 rgb(217,31,38) , 6px 6px 0 rgb(226,91,14) , 9px 9px 0 rgb(245,221,8) , 12px 12px 0 rgb(5,148,68) , 15px 15px 0 rgb(2,135,206) , 18px 18px 0 rgb(4,77,145) , 21px 21px 0 rgb(42,21,113); margin-bottom: 12px; padding: 5%"
+// );
+
+// console.log(`
+// ╔╔════════════════════╗╗
+// ||					  ||
+// ||	┓┏      ┳┓        ||
+// ||	┗┫┓┏┏┓┏┓┣┫┏┓┏┓┏┓  ||
+// ||	┗┛┗┻┗┻┛┗┛┗┗┛┛┗┗┫  ||
+// ||	               ┛  ||
+// └└++++++++++++++++++++┘┘`
+// );
+
 console.log(
 	"%c YuanRong!",
-	"font-weight: bold; font-size: 50px;color: red; text-shadow: 3px 3px 0 rgb(217,31,38) , 6px 6px 0 rgb(226,91,14) , 9px 9px 0 rgb(245,221,8) , 12px 12px 0 rgb(5,148,68) , 15px 15px 0 rgb(2,135,206) , 18px 18px 0 rgb(4,77,145) , 21px 21px 0 rgb(42,21,113); margin-bottom: 12px; padding: 5%"
+	"font-weight: bold; font-size: 50px; color: #fff; text-shadow: 0.01em 0.01em #436799, 0.02em 0.02em #436799, 0.03em 0.03em #436799, 0.04em 0.04em #436799, 0.05em 0.05em #436799, 0.06em 0.06em #436799, 0.07em 0.07em #436799, 0.08em 0.08em #436799, 0.09em 0.09em #436799, 0.1em 0.1em #436799, 0.11em 0.11em #436799, 0.12em 0.12em #436799, 0.13em 0.13em #436799, 0.14em 0.14em #436799, 0.15em 0.15em #436799, 0.16em 0.16em #436799, 0.17em 0.17em #436799, 0.18em 0.18em #436799, 0.19em 0.19em #436799, 0.2em 0.2em #436799, 0.21em 0.21em #547DB7, 0.22em 0.22em #547DB7, 0.23em 0.23em #547DB7, 0.24em 0.24em #547DB7, 0.25em 0.25em #547DB7, 0.26em 0.26em #547DB7, 0.27em 0.27em #547DB7, 0.28em 0.28em #547DB7, 0.29em 0.29em #547DB7, 0.3em 0.3em #547DB7, 0.31em 0.31em #547DB7, 0.32em 0.32em #547DB7, 0.33em 0.33em #547DB7, 0.34em 0.34em #547DB7, 0.35em 0.35em #547DB7, 0.36em 0.36em #547DB7, 0.37em 0.37em #547DB7, 0.38em 0.38em #547DB7, 0.39em 0.39em #547DB7, 0.4em 0.4em #547DB7, 0.41em 0.41em #45BDBF, 0.42em 0.42em #45BDBF, 0.43em 0.43em #45BDBF, 0.44em 0.44em #45BDBF, 0.45em 0.45em #45BDBF, 0.46em 0.46em #45BDBF, 0.47em 0.47em #45BDBF, 0.48em 0.48em #45BDBF, 0.49em 0.49em #45BDBF, 0.5em 0.5em #45BDBF, 0.51em 0.51em #45BDBF, 0.52em 0.52em #45BDBF, 0.53em 0.53em #45BDBF, 0.54em 0.54em #45BDBF, 0.55em 0.55em #45BDBF, 0.56em 0.56em #45BDBF, 0.57em 0.57em #45BDBF, 0.58em 0.58em #45BDBF, 0.59em 0.59em #45BDBF, 0.6em 0.6em #45BDBF; margin-bottom: 12px; padding: 5% 0%"
 );

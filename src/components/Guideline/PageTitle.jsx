@@ -1,5 +1,6 @@
 import React from "react";
 import Search from "../Search/Search";
+import Quiz from "../HelpQuestion/Quiz";
 import Button from "@mui/material/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuoteLeft } from "@fortawesome/free-solid-svg-icons";
@@ -10,6 +11,7 @@ const PageTitle = ({
 	handleActionClick,
 	isLoading = true,
 	children,
+	// 搜尋模式
 	searchMode = false,
 	// 下面參數前提都是 searchMode = true
 	searchDialogOpen,
@@ -21,6 +23,12 @@ const PageTitle = ({
 	handleCloseText,
 	haveValue,
 	isDirty,
+	// 說明顯示
+	quizMode = false,
+	// 下面參數前提都是 quizMode = true
+	quizContent,
+	quizModalSize = "439px",
+	quizModalClose,
 }) => {
 	return (
 		<div className={"relative hidden sm:flex justify-between text-primary-800 mb-3 pt-2 md:px-6 lg:px-8 px-5 pb-6"}>
@@ -43,6 +51,7 @@ const PageTitle = ({
 						{children}
 					</Search>
 				)}
+				{quizMode && <Quiz content={quizContent} maxWidth={quizModalSize} otherCloseFun={quizModalClose} />}
 				{/* 裝飾物 */}
 				<svg
 					className="absolute start-0 bottom-0"

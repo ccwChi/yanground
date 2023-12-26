@@ -5,14 +5,14 @@ import { useSnackbar } from "notistack";
 export const useNotification = () => {
 	const { enqueueSnackbar } = useSnackbar();
 
-	const showNotification = (message, isSuccess) => {
+	const showNotification = (message, isSuccess, time = 5000) => {
 		enqueueSnackbar(message, {
 			variant: isSuccess ? "success" : "error",
 			anchorOrigin: {
 				vertical: "bottom",       // 垂直，可選：'top', 'bottom'
 				horizontal: "center",     // 水平，可選：'left', 'center', 'right'
 			},
-			autoHideDuration: 5000,
+			autoHideDuration: time,
 		});
 	};
 
