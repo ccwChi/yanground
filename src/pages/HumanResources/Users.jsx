@@ -291,7 +291,7 @@ const Users = () => {
 			navigate(
 				`attendance_calendar?user=${dataValue || ""}&dep=${
 					apiData.content.find((item) => item.id === dataValue)?.department.id || ""
-				}&mode=clockPunch`
+				}`
 			);
 		} else {
 			setModalValue(dataMode);
