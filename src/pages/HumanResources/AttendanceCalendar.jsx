@@ -137,7 +137,7 @@ const AttendanceCalendar = () => {
 			setIsLoading(true);
 			// Define the API calls
 			const apiCallA = getData(
-				`user/${userValue}/attendance/${format(dates, dateConList[dateCondition - 1].formatThree)}` // ?p=1&s=30
+				`user/${userValue}/attendance/${format(dates, dateConList[dateCondition - 1].formatThree)}?p=1&s=31` 
 			);
 			const apiCallB = getData(
 				`user/${userValue}/clockPunch/${format(dates, dateConList[dateCondition - 1].formatThree)}?p=1&s=5000`

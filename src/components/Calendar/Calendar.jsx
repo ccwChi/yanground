@@ -171,6 +171,7 @@ const Calendar = ({
 				timeZone="Asia/Taipei"
 				// 確定日名稱和周名稱是否可點擊
 				navLinks={!isTargetScreen}
+				nextDayThreshold={"08:00:00"}
 				{...otherProps}
 			/>
 		</>
