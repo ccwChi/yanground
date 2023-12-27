@@ -7,22 +7,6 @@ import { utcToZonedTime } from "date-fns-tz";
 const alertText = "每天凌晨 12 點考勤系統會自動計算前一天的出勤狀況，檢查是否存在異常紀錄，包括缺勤和打卡情況。";
 
 const AttendanceSection = React.memo(({ apiAttData }) => {
-	const [events, setEvents] = useState([]);
-
-	useEffect(() => {
-		if (apiAttData) {
-			const formattedEvents = apiAttData.map((event) => ({
-				id: event.id,
-				title: event.clockIn ? "上班" : event.clockIn === false ? "下班" : "上/下班",
-				date: format(utcToZonedTime(parseISO(event.occurredAt), "Asia/Taipei"), "yyyy-MM-dd HH:mm:ss", {
-					locale: zhTW,
-				}),
-			}));
-
-			setEvents(formattedEvents);
-		}
-	}, [apiAttData]);
-
 	return (
 		<>
 			{/* <div className="flex px-4 pt-2 text-rose-400 font-bold text-xs">
@@ -30,7 +14,7 @@ const AttendanceSection = React.memo(({ apiAttData }) => {
 				<p>{alertText}</p>
 			</div> */}
 			<Calendar
-				data={events}
+				data={apiAttData}
 				select={(selected) => {
 					console.log("Date selected ", selected);
 				}}

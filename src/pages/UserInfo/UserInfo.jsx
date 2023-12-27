@@ -1,16 +1,25 @@
 import React, { useEffect, useState } from "react";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import { useLocation, useNavigate } from "react-router-dom";
-import TableTabbar from "../../components/Tabbar/TableTabbar";
-import { LoadingTwo } from "../../components/Loader/Loading";
+// MUI
+import useMediaQuery from "@mui/material/useMediaQuery";
 // import Avatar from "@mui/material/Avatar";
 import Brightness2Icon from "@mui/icons-material/Brightness2";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
+// Components
+import TableTabbar from "../../components/Tabbar/TableTabbar";
+import { LoadingTwo } from "../../components/Loader/Loading";
+// date-fns
+import { parseISO, format } from "date-fns";
+import { zhTW } from "date-fns/locale";
+import { utcToZonedTime } from "date-fns-tz";
+// Utils
 import { getData } from "../../utils/api";
+// Others
 import PersonalInfoSection from "./Sections/PersonalInfoSection"; // 個人資訊
 import PunchLogSection from "./Sections/PunchLogSection"; // 打卡紀錄
 import AttendanceSection from "./Sections/AttendanceSection"; // 考勤紀錄
 import ApplicationFormSection from "./Sections/ApplicationFormSection"; // 表單申請
+// Styles
 import "./userInfo.scss";
 
 const UserInfo = () => {
@@ -23,8 +32,8 @@ const UserInfo = () => {
 	const tabGroup = [
 		{ f: "info", text: "個人資訊" },
 		{ f: "punchlog", text: "打卡紀錄" },
-		// { f: "attendancelog", text: "考勤紀錄" },
-		// { f: "applicationform", text: "表單申請" },
+		{ f: "attendancelog", text: "考勤紀錄" },
+		{ f: "applicationform", text: "表單申請" },
 	];
 
 	// cat = Category 設置 tab 分類
@@ -35,10 +44,22 @@ const UserInfo = () => {
 	const [userProfile, setUserProfile] = useState(null);
 	// 迴圈專用 List
 	const [personalInfo, setPersonalInfo] = useState(null);
-	// 打卡紀錄 List
+	// 打卡紀錄 x 考勤紀錄 List
+	const [apiPccData, setApiPccData] = useState(null);
 	const [apiAttData, setApiAttData] = useState(null);
-	// isLoading 等待請求 API
-	const [isLoading, setIsLoading] = useState(true);
+
+	const getflagColorandText = (flag) => {
+		switch (flag) {
+			case true:
+				return { color: "#F03355", text: "考勤異常" };
+			case false:
+				return { color: "#FFA516", text: "考勤已修正" };
+			case null:
+				return { color: "#25B09B", text: "考勤正常" };
+			default:
+				break;
+		}
+	};
 
 	// 取得用戶資料
 	useEffect(() => {
@@ -91,11 +112,27 @@ const UserInfo = () => {
 	// 取得打卡歷程資料
 	useEffect(() => {
 		if (userProfile) {
-			setIsLoading(true);
-			getData(`clockPunch?p=1&s=5000`).then((result) => {
-				setIsLoading(false);
+			getData(`attendance`).then((result) => { // ?p=1&s=180
 				const data = result.result.content;
-				setApiAttData(data);
+				const formattedEvents = data.map((event) => ({
+					id: event.id,
+					title: getflagColorandText(event.anomaly).text,
+					color: getflagColorandText(event.anomaly).color,
+					start: event.date,
+				}));
+				setApiAttData(formattedEvents);
+			});
+			getData(`clockPunch?p=1&s=5000`).then((result) => {
+				const data = result.result.content;
+				const formattedEvents = data.map((event) => ({
+					id: event.id,
+					title: event.clockIn ? "上班" : event.clockIn === false ? "下班" : "上/下班",
+					date: format(utcToZonedTime(parseISO(event.occurredAt), "Asia/Taipei"), "yyyy-MM-dd HH:mm:ss", {
+						locale: zhTW,
+					}),
+					color: "#547DB7",
+				}));
+				setApiPccData(formattedEvents);
 			});
 		}
 	}, [userProfile]);
@@ -193,14 +230,14 @@ const UserInfo = () => {
 								<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
 							);
 						case "punchlog":
-							return apiAttData ? (
-								<PunchLogSection isLoading={isLoading} apiAttData={apiAttData} />
+							return apiPccData ? (
+								<PunchLogSection apiPccData={apiPccData} />
 							) : (
 								<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
 							);
 						case "attendancelog":
 							return apiAttData ? (
-								<AttendanceSection isLoading={isLoading} apiAttData={apiAttData} />
+								<AttendanceSection apiAttData={apiAttData} />
 							) : (
 								<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
 							);

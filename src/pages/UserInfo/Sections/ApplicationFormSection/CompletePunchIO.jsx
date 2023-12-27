@@ -174,7 +174,7 @@ const CompletePunchIO = React.memo(({ userProfile }) => {
 							<ControlledTimePicker
 								name="checkedDate"
 								format="yyyy-MM-dd a h:m"
-								minutesStep={30}
+								minutesStep={60}
 								minDateTime={new Date("2023-11")}
 							/>
 						</div>
