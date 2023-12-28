@@ -230,8 +230,8 @@ const DayOff = React.memo(({ userProfile, memberList }) => {
 								<ControlledTimePicker
 									name="sinceDate"
 									format="yyyy-MM-dd a h:m"
-									minutesStep={30}
 									minDateTime={new Date("2023-11")}
+									views={["year", "day", "hours"]}
 								/>
 							</div>
 							<div className="w-full">
@@ -239,9 +239,18 @@ const DayOff = React.memo(({ userProfile, memberList }) => {
 								<ControlledTimePicker
 									name="endDate"
 									format="yyyy-MM-dd a h:m"
-									minutesStep={30}
-									minDateTime={watchSinceDate}
+									// minDateTime={watchSinceDate}
+									minDateTime={(() => {
+										if (watchSinceDate) {
+											const adjustedDate = new Date(watchSinceDate);
+											adjustedDate.setHours(adjustedDate.getHours() + 1);
+											return adjustedDate;
+										} else {
+											return null;
+										}
+									})()}
 									disabled={!watchSinceDate}
+									views={["year", "day", "hours"]}
 								/>
 							</div>
 						</div>

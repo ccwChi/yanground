@@ -16,6 +16,40 @@ import useLocalStorageValue from "../../../hooks/useLocalStorageValue";
 // Utils
 import { getData } from "../../../utils/api";
 
+// 表單申請按鈕清單
+const applicationBtns = [
+	{
+		id: "applicationRecord",
+		icon: faBook,
+		color: "#6262a7",
+		text: "申請紀錄",
+	},
+	{
+		id: "dayOff",
+		icon: faDoorOpen,
+		color: "#547db7",
+		text: "請假",
+	},
+	{
+		id: "completePunchIO",
+		icon: faFeather,
+		color: "#039E8E",
+		text: "補打卡",
+	},
+	{
+		id: "workOvertime",
+		icon: faBuildingUser,
+		color: "#F7941D",
+		text: "加班",
+	},
+	{
+		id: "auditLog",
+		icon: faPaperPlane,
+		color: "#F03355",
+		text: "審核紀錄",
+	},
+];
+
 const ApplicationFormSection = React.memo(({}) => {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -39,44 +73,6 @@ const ApplicationFormSection = React.memo(({}) => {
 		}
 	}, [userProfile]);
 
-	// 表單申請按鈕清單
-	const applicationBtns = [
-		{
-			id: "applicationRecord",
-			icon: faBook,
-			color: "#6262a7",
-			text: "申請紀錄",
-			component: <ApplicationRecord />,
-		},
-		{
-			id: "dayOff",
-			icon: faDoorOpen,
-			color: "#547db7",
-			text: "請假",
-			component: <DayOff userProfile={userProfile} memberList={memberList} />,
-		},
-		{
-			id: "completePunchIO",
-			icon: faFeather,
-			color: "#039E8E",
-			text: "補打卡",
-			component: <CompletePunchIO userProfile={userProfile} />,
-		},
-		{
-			id: "workOvertime",
-			icon: faBuildingUser,
-			color: "#F7941D",
-			text: "加班",
-			component: <WorkOverTime />,
-		},
-		{
-			id: "auditLog",
-			icon: faPaperPlane,
-			color: "#F03355",
-			text: "審核紀錄",
-			component: <AuditLog />,
-		},
-	];
 	// 選擇當前顯示清單
 	const [mode, setMode] = useState(applicationBtns[0]);
 
@@ -116,7 +112,7 @@ const ApplicationFormSection = React.memo(({}) => {
 							id={item.id}
 							variant="contained"
 							className={`gap-5 !p-3 !w-12 sm:!w-14 aspect-square !min-w-0 !rounded-2xl ${
-								mode === item ? "active" : ""
+								mode.id === item.id ? "active" : ""
 							}`}
 							onClick={() => {
 								setMode(item);
@@ -135,7 +131,24 @@ const ApplicationFormSection = React.memo(({}) => {
 					</div>
 				))}
 			</div>
-			<div className="panel bg-white !mb-0 flex-1 !overflow-auto">{mode.component}</div>
+			<div className="panel bg-white !mb-0 flex-1 !overflow-auto">
+				{(() => {
+					switch (mode.id) {
+						case "applicationRecord":
+							return <ApplicationRecord />;
+						case "dayOff":
+							return <DayOff userProfile={userProfile} memberList={memberList} />;
+						case "completePunchIO":
+							return <CompletePunchIO userProfile={userProfile} />;
+						case "workOvertime":
+							return <WorkOverTime />;
+						case "auditLog":
+							return <AuditLog />;
+						default:
+							return null;
+					}
+				})()}
+			</div>
 		</div>
 	);
 });
