@@ -35,6 +35,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { format } from "date-fns";
 import InputTitle from "../../components/Guideline/InputTitle";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
+import HelpQuestion from "../../components/HelpQuestion/HelpQuestion";
 
 // step-2 的 div，編修工項執行，會用主面板拿到的summaryID重求API後設為deliveryInfo傳進來
 const EditJobTaskDiv = React.memo(
@@ -68,8 +69,12 @@ const EditJobTaskDiv = React.memo(
     const [taskEditOpen, setTaskEditOpen] = useState(false);
     const [deliverTaskInfo, setDeliverTaskInfo] = useState(null);
 
-    const summarySince = new Date(deliverInfo?.since);
-    const summaryUntil = new Date(deliverInfo?.until);
+    const summarySince = deliverInfo?.since
+      ? new Date(deliverInfo.since)
+      : null;
+    const summaryUntil = deliverInfo?.until
+      ? new Date(deliverInfo.until)
+      : null;
 
     const theme = useTheme();
     const padScreen = useMediaQuery(theme.breakpoints.down("768"));
@@ -623,23 +628,8 @@ const TaskEditDialog = React.memo(
         remark: data?.remark ? data.remark : "",
       };
 
-      if (!deliverTaskInfo.constructionSummaryJobTaskDispatches?.length) {
-        sendDataToTaskEdit(convertData);
-        onClose();
-      } else {
-        if (
-          convertData.estimatedSince === deliverTaskInfo.estimatedSince &&
-          convertData.estimatedUntil === deliverTaskInfo.estimatedUntil
-        ) {
-          sendDataToTaskEdit(convertData);
-          onClose();
-        }
-        // else {
-        //   setAlertDateChangeOpen(true);
-        // }
-      }
-
       sendDataToTaskEdit(convertData);
+      onClose();
     };
 
     return (
@@ -656,9 +646,23 @@ const TaskEditDialog = React.memo(
               <FormProvider {...methods}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="flex flex-col gap-1.5 mt-3">
-                    <InputTitle title={"預計施工日期"} required={false} />
+                    <div className="flex items-center">
+                      <InputTitle title={"預計施工日期"} required={false} />
+                      <HelpQuestion
+                        content="在未選專案日期的情況下無法選擇工項日期"
+                        className="mb-1.5 ms-2"
+                      />
+                      {/* <Quiz /> */}
+                    </div>
+                    {console.log(
+                      "summarySince",
+                      summarySince,
+                      "summaryUntil",
+                      summaryUntil
+                    )}
                     <ControlledDatePicker
                       name="estimatedSince"
+                      disabled={!summarySince || !summaryUntil}
                       minDate={summarySince}
                       maxDate={summaryUntil}
                     />
@@ -667,6 +671,7 @@ const TaskEditDialog = React.memo(
                     <InputTitle title={"預計完工日期"} required={false} />
                     <ControlledDatePicker
                       name="estimatedUntil"
+                      disabled={!summarySince || !summaryUntil}
                       minDate={!!estimatedSince ? estimatedSince : summarySince}
                       maxDate={summaryUntil}
                     />

@@ -77,14 +77,14 @@ const EventModal = React.memo(
 
     // 設定幾天前開始不能編輯
     const [isEditableDate, setIsEditableDate] = useState(null);
-    const datesBeforeDisable = -2;
+    const datesBeforeDisable = -30;
     const DisableEditdate = new Date(today);
     DisableEditdate.setDate(today.getDate() + datesBeforeDisable);
     const transDate = new Date(DisableEditdate.toISOString().slice(0, 10)); //變成yyyy-mm-dd
     const reSetTransDate = new Date(transDate); //再變回日期原始碼，這樣做的用意是要把日期的時間重製成+8:00UTC
     // console.log(deliverInfo);
 
-    // 設置不能
+    // 設置不能編輯的日子參數 true or false
     useEffect(() => {
       if (!!deliverInfo?.date) {
         if (new Date(deliverInfo.date) < reSetTransDate) {
@@ -743,13 +743,13 @@ const EventModal = React.memo(
                     </div>
 
                     <div className="w-full  flex  justify-between">
-                      <span className="text-sm text-red-500 mt-1">
+                      <span className="text-xs text-red-500 mt-1">
                         {generateDateRange(
                           jobTask?.estimatedSince,
                           jobTask?.estimatedUntil
                         )?.includes(deliverInfo.date)
                           ? ""
-                          : "(日期不再範圍內)"}
+                          : "(該日不在工項時間範圍內)"}
                       </span>
                       <Button
                         variant="contained"

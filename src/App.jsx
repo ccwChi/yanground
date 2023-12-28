@@ -63,6 +63,7 @@ const App = () => {
 			subMenuItems: [
 				{ text: "人事管理", href: "users" },
 				{ text: "帳戶資訊", href: "userinfo" },
+				{ text: "教育訓練", href: "educationtraining"}
 			],
 		},
 		// },

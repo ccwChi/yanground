@@ -112,12 +112,14 @@ const TaskModal = React.memo(
     const {
       control,
       handleSubmit,
-      formState: { errors },
+      watch,
+      formState: { errors, },
     } = methods;
     const { remove } = useFieldArray({
       control,
       name: "fields",
     });
+    const estimatedSinceDay = (index) => {return watch(`fields[${index}].estimatedSince`)}
     // 檢查表單是否汙染
 
     //取得工程項目執行並設定已選擇及剩下能選擇的清單
@@ -400,7 +402,7 @@ const TaskModal = React.memo(
                         />
                         <ControlledDatePicker
                           name={`fields[${index}].estimatedUntil`}
-                          minDate={summarySince}
+                          minDate={estimatedSinceDay(index)}
                           maxDate={summaryUntil}
                         />
                       </div>
