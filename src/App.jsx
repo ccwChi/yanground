@@ -5,13 +5,11 @@ import Sidebar from "./components/Layout/Sidebar";
 import Tabbar from "./components/Tabbar/Tabbar";
 import CustomBreadcrumbs from "./components/Breadcrumbs/CustomBreadcrumbs";
 import {
-	faUserGear,
-	faHelmetSafety,
-	faToolbox,
-	faVest,
-	faPersonDigging,
-	faFileLines,
 	faHouse,
+	faToolbox,
+	faFileLines,
+	faUsersGear,
+	faAddressCard,
 } from "@fortawesome/free-solid-svg-icons";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./utils/theme";
@@ -34,11 +32,6 @@ const App = () => {
 	// herf => URL
 	const menuItems = [
 		{ icon: faHouse, text: "主頁", href: "/" },
-		// {
-		//   icon: faHelmetSafety,
-		//   text: "案場",
-		//   href: "sites",
-		// },
 		{
 			icon: faFileLines,
 			text: "基礎資料",
@@ -57,26 +50,20 @@ const App = () => {
 			],
 		},
 		{
-			icon: faUserGear,
+			icon: faUsersGear,
 			text: "HRM",
 			href: "#",
+			subMenuItems: [{ text: "人事管理", href: "users" }],
+		},
+		{
+			icon: faAddressCard,
+			text: "會員中心",
+			href: "#",
 			subMenuItems: [
-				{ text: "人事管理", href: "users" },
 				{ text: "帳戶資訊", href: "userinfo" },
-				{ text: "教育訓練", href: "educationtraining"}
+				{ text: "教育訓練", href: "educationtraining" },
 			],
 		},
-		// },
-		// {
-		//  icon: faVest,
-		// 	icon: faPersonDigging,
-		// 	text: "範例",
-		// 	href: "#",
-		// 	subMenuItems: [
-		// 		{ text: "403", href: "forbidden" },
-		// 		{ text: "登出(暫放)", href: "logout" },
-		// 	],
-		// },
 	];
 
 	useEffect(() => {
