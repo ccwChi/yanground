@@ -30,7 +30,8 @@ const leaveTypes = [
 	{ value: "maternity", label: "產假" },
 	{ value: "paternity", label: "陪產假" },
 	{ value: "parental", label: "育嬰假" },
-	{ value: "marriQage", label: "婚假" }, // ?
+	{ value: "marriQage", label: "婚假" },
+	{ value: "xxx", label: "補假" },
 ];
 
 const DayOff = React.memo(({ userProfile, memberList }) => {
@@ -111,7 +112,11 @@ const DayOff = React.memo(({ userProfile, memberList }) => {
 		const hours = Math.floor(remainingTime / millisecondsPerHour);
 		const minutes = Math.round((remainingTime % millisecondsPerHour) / millisecondsPerMinute);
 
-		return { days, hours, minutes };
+		if (hours === 8) {
+			return { days: days + 1, hours: 0, minutes };
+		} else {
+			return { days, hours, minutes };
+		}
 	};
 
 	return (
