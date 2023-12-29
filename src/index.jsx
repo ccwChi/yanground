@@ -13,7 +13,7 @@ import Project from "./pages/Project/Project";
 import Maps from "./pages/Project/Maps";
 import DispatchList from "./pages/DispatchList/DispatchList";
 import Users from "./pages/HumanResources/Users";
-import UsersAttendanceCalendar from "./pages/HumanResources/AttendanceCalendar";
+import UsersAttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
 import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
 import ErrorMessage from "./pages/Error/ErrorMessage";
@@ -74,7 +74,7 @@ const router = createBrowserRouter([
 				element: <Users />,
 			},
 			{
-				path: "/users/attendance_calendar",
+				path: "/attendance_calendar",
 				element: <UsersAttendanceCalendar />,
 			},
 			{

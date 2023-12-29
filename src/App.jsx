@@ -4,13 +4,7 @@ import Header from "./components/Layout/Header";
 import Sidebar from "./components/Layout/Sidebar";
 import Tabbar from "./components/Tabbar/Tabbar";
 import CustomBreadcrumbs from "./components/Breadcrumbs/CustomBreadcrumbs";
-import {
-	faHouse,
-	faToolbox,
-	faFileLines,
-	faUsersGear,
-	faAddressCard,
-} from "@fortawesome/free-solid-svg-icons";
+import { faHouse, faToolbox, faFileLines, faUsersGear, faAddressCard } from "@fortawesome/free-solid-svg-icons";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./utils/theme";
 import "./app.scss";
@@ -46,14 +40,17 @@ const App = () => {
 				{ text: "派工行事曆", href: "dispatchcalendar" },
 				{ text: "施工清單", href: "constructionsummary" },
 				{ text: "專案管理", href: "project" },
-				{ text: "派工清單 (臨時)", href: "dispatchList" },
+				// { text: "派工清單 (臨時)", href: "dispatchList" },
 			],
 		},
 		{
 			icon: faUsersGear,
 			text: "HRM",
 			href: "#",
-			subMenuItems: [{ text: "人事管理", href: "users" }],
+			subMenuItems: [
+				{ text: "人事管理", href: "users" },
+				{ text: "考勤紀錄", href: "attendance_calendar" },
+			],
 		},
 		{
 			icon: faAddressCard,
@@ -67,7 +64,7 @@ const App = () => {
 	];
 
 	useEffect(() => {
-		initLine();
+		// initLine();
 	}, []);
 
 	useEffect(() => {
