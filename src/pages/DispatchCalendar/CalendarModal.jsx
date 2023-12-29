@@ -60,8 +60,9 @@ const EventModal = React.memo(
     const [taskSelectLabouerList, setTaskSelectLabouerList] = useState([]);
     const [dispatchForApi, setDispatchForApi] = useState([]);
 
+    // 點擊左邊欄的工項執行後要賦予的值
     const [activeJobTask, setActiveJobTask] = useState("");
-
+    const [dateInRange, setDateInRange] = useState(false);
     //點擊刪除工項執行垃圾桶跳出警告框
     const [alertDeleteJobTaskOpen, setAlertDeleteJobTaskOpen] = useState(false);
     const [deleteJobTaskId, setDeleteJobTaskId] = useState(true);
@@ -284,9 +285,16 @@ const EventModal = React.memo(
     const forTaskSelectLabouerList = (selectedJobTask) => {
       const dayRestLabourerIds = filterTheDayRestLabourer();
       //全部可選的人 減去 該天已被選的人 => 可選的人
-      const notSelected = departMemberList.filter(
-        (member) => !dayRestLabourerIds.includes(member.id)
-      );
+      const notSelected = departMemberList
+      .filter((member) => !dayRestLabourerIds.includes(member.id))
+      .map((member) => {
+        if (member.dispatchId) {
+          const { dispatchId, ...memberWithoutDispatchId } = member;
+          return memberWithoutDispatchId;
+        } else {
+          return member;
+        }
+      });
       //全部可選的人 中只選出 該天已被選的人 => 要設置狀態
       //最終結果是選哪個執行，選單只有該執行已派人的人+完全沒被派過的人
       let selectedPersonnel = [];
@@ -330,6 +338,12 @@ const EventModal = React.memo(
         summarySince,
         summaryUntil,
       };
+      setDateInRange(
+        generateDateRange(
+          selectedJobTask?.estimatedSince,
+          selectedJobTask?.estimatedUntil
+        )?.includes(deliverInfo.date)
+      );
       setActiveJobTask(selectedJobTask.id);
       setDispatchForApi([]);
       setIsLoading(true);
@@ -432,7 +446,6 @@ const EventModal = React.memo(
       postBodyData(jobTaskUrl, convertData).then((result) => {
         if (result.status) {
           showNotification("更改工項執行成功", true);
-          console.log(deliverInfo.date);
           setReGetSummaryListData(deliverInfo.date);
         } else {
           showNotification(
@@ -688,14 +701,7 @@ const EventModal = React.memo(
                       <div className="my-2">
                         選擇{" "}
                         <span
-                          className={`${
-                            generateDateRange(
-                              jobTask?.estimatedSince,
-                              jobTask?.estimatedUntil
-                            )?.includes(deliverInfo.date)
-                              ? ""
-                              : "text-red-500"
-                          }`}
+                          className={`${dateInRange ? "" : "text-red-500"}`}
                         >
                           {deliverInfo.date}
                         </span>{" "}
@@ -710,7 +716,7 @@ const EventModal = React.memo(
                         groupBy={(taskSelectLabouerList) =>
                           taskSelectLabouerList.department.name
                         }
-                        disabled={isEditableDate}
+                        disabled={!dateInRange}
                         disableCloseOnSelect
                         getOptionLabel={(taskSelectLabouerList) =>
                           taskSelectLabouerList.nickname
@@ -720,6 +726,7 @@ const EventModal = React.memo(
                         }
                         onChange={handleChange}
                         value={dispatchForApi}
+                        noOptionsText="當天已無可派人員"
                         renderOption={(
                           props,
                           taskSelectLabouerList,
@@ -744,12 +751,7 @@ const EventModal = React.memo(
 
                     <div className="w-full  flex  justify-between">
                       <span className="text-xs text-red-500 mt-1">
-                        {generateDateRange(
-                          jobTask?.estimatedSince,
-                          jobTask?.estimatedUntil
-                        )?.includes(deliverInfo.date)
-                          ? ""
-                          : "(該日不在工項時間範圍內)"}
+                        {dateInRange ? "" : "(當日不在工項時間範圍內)"}
                       </span>
                       <Button
                         variant="contained"
