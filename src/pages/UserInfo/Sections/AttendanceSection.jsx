@@ -15,12 +15,12 @@ const AttendanceSection = React.memo(({ apiAttData }) => {
 			</div> */}
 			<Calendar
 				data={apiAttData}
-				select={(selected) => {
-					console.log("Date selected ", selected);
-				}}
-				eventClick={(info) => {
-					console.log("Event clicked ", info);
-				}}
+				// select={(selected) => {
+				// 	console.log("Date selected ", selected);
+				// }}
+				// eventClick={(info) => {
+				// 	console.log("Event clicked ", info);
+				// }}
 			/>
 		</>
 	);
