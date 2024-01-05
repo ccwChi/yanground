@@ -11,7 +11,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import { getData, postBodyData, postData } from "../../utils/api";
 import { useNotification } from "../../hooks/useNotification";
-import constructionTypeList from "../../data/constructionTypes";
+import constructionTypeList from "../../datas/constructionTypes";
 import { LoadingFour } from "../../components/Loader/Loading";
 import Backdrop from "@mui/material/Backdrop";
 import { SummaryModal } from "./SummaryModal";

@@ -14,7 +14,7 @@ import { getData, postBodyData, postData } from "../../utils/api";
 import { UpdatedModal, TaskModal } from "./OldSummaryModal";
 import { useNotification } from "../../hooks/useNotification";
 import { DispatchModal } from "./OldSummaryDispatchModal";
-import constructionTypeList from "../../data/constructionTypes";
+import constructionTypeList from "../../datas/constructionTypes";
 import { LoadingFour } from "../../components/Loader/Loading";
 import Backdrop from "@mui/material/Backdrop";
 

@@ -12,7 +12,7 @@ import PunchClockIcon from "@mui/icons-material/PunchClock";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import { getData } from "../../utils/api";
-import constructionTypeList from "../../data/constructionTypes";
+import constructionTypeList from "../../datas/constructionTypes";
 import "./home.scss";
 import liff from "@line/liff";
 const LINE_ID = process.env.REACT_APP_LINEID;

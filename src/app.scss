@@ -73,6 +73,21 @@ $z-index-a: 1040;
 	animation: slideLeftRight 1s linear infinite;
 }
 
+.custom-html-style {
+	h1:first-of-type {
+		margin-top: 0;
+	}
+	pre {
+		background-color: transparent !important;
+	}
+	ol,
+	ul,
+	menu,
+	li {
+		list-style: revert;
+	}
+}
+
 //****** MUI ******//
 .inputPadding {
 	input,
@@ -179,6 +194,13 @@ $z-index-a: 1040;
 	.sidebar_wrapper,
 	.bg_overlay {
 		z-index: $z-index-a;
+	}
+
+	.rc-md-editor .editor-container {
+		flex-direction: column;
+		.sec-html {
+			border-top: 1px solid #e0e0e0;
+		}
 	}
 
 	/* MUI */

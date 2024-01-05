@@ -19,6 +19,7 @@ import PersonalInfoSection from "./Sections/PersonalInfoSection"; // 個人資�
 import PunchLogSection from "./Sections/PunchLogSection"; // 打卡紀錄
 import AttendanceSection from "./Sections/AttendanceSection"; // 考勤紀錄
 import ApplicationFormSection from "./Sections/ApplicationFormSection"; // 表單申請
+import OperationsManual from "./Sections/OperationsManual"; // 本頁說明
 // Styles
 import "./userInfo.scss";
 
@@ -34,6 +35,7 @@ const UserInfo = () => {
 		{ f: "punchlog", text: "打卡紀錄" },
 		{ f: "attendancelog", text: "考勤紀錄" },
 		// { f: "applicationform", text: "表單申請" },
+		{ f: "operationsmanual", text: "本頁說明" },
 	];
 
 	// cat = Category 設置 tab 分類
@@ -146,7 +148,7 @@ const UserInfo = () => {
 
 	return (
 		<div className="userinfo_wrapper flex flex-col flex-1 sm:-mt-9 -mt-10 sm:-mb-4 -mb-8 overflow-hidden">
-			<div className={`header  ${isNight() ? "bg-secondary-50" : "bg-[#45BDBF]"}`}>
+			<div className={`header ${isNight() ? "bg-secondary-50" : "bg-[#45BDBF]"}`}>
 				<div className="header-background-elements">
 					<div className={`header-circle circle-left ${isNight() ? "bg-[#2a776f]" : "bg-[#fffad0]"}`}></div>
 					<div className={`header-circle circle-right ${isNight() ? "bg-[#2a776f]" : "bg-[#fffad0]"}`}></div>
@@ -223,26 +225,28 @@ const UserInfo = () => {
 				}`}>
 				{(() => {
 					switch (cat) {
-						case "info":
+						case "info": // 個人資訊
 							return personalInfo ? (
 								<PersonalInfoSection userProfile={userProfile} personalInfo={personalInfo} />
 							) : (
 								<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
 							);
-						case "punchlog":
+						case "punchlog": // 打卡紀錄
 							return apiPccData ? (
 								<PunchLogSection apiPccData={apiPccData} />
 							) : (
 								<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
 							);
-						case "attendancelog":
+						case "attendancelog": // 考勤紀錄
 							return apiAttData ? (
 								<AttendanceSection apiAttData={apiAttData} />
 							) : (
 								<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
 							);
-						case "applicationform":
+						case "applicationform": // 表單申請
 							return <ApplicationFormSection />;
+						case "operationsmanual": // 本頁說明
+							return <OperationsManual />;
 						default: {
 							return null;
 						}

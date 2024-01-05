@@ -16,6 +16,9 @@ import Users from "./pages/HumanResources/Users";
 import UsersAttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
 import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
+import ClientQuestionnaire from "./pages/Client/ClientQuestionnaire";
+import EducationTrainging from "./pages/EducationTraining/EducationTraining";
+import MDWorkspace from "./pages/MDWorkspace/MDWorkspace";
 import ErrorMessage from "./pages/Error/ErrorMessage";
 import ErrorPages from "./pages/Error/ErrorPages";
 import Error from "./pages/Error/Error";
@@ -23,9 +26,7 @@ import Explotion from "./pages/Error/Explotion";
 import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
-import ClientQuestionnaire from "./pages/Client/ClientQuestionnaire";
-import EducationTrainging from "./pages/EducationTraining/EducationTraining";
-
+import "react-markdown-editor-lite/lib/index.css";
 
 const router = createBrowserRouter([
 	{
@@ -86,6 +87,10 @@ const router = createBrowserRouter([
 				element: <UserInfo />,
 			},
 			{
+				path: "/mdworkspace",
+				element: <MDWorkspace />,
+			},
+			{
 				path: "/dispatchcalendar",
 				element: <DispatchCalendar />,
 			},
@@ -126,9 +131,9 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  // <React.StrictMode>
-  <RouterProvider router={router} />
-  // </React.StrictMode>
+	// <React.StrictMode>
+	<RouterProvider router={router} />
+	// </React.StrictMode>
 );
 
 reportWebVitals();
