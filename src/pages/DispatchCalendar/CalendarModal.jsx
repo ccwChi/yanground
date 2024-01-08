@@ -112,18 +112,6 @@ const EventModal = React.memo(
 
         return dates;
       }
-      // else {
-      //   // 如果有null，生成 [null, yyyy-MM-dd] 或 [yyyy-MM-dd, null]
-      //   const dateArray = [];
-      //   if (since !== null) {
-      //     dateArray.push(since);
-      //     dateArray.push(null);
-      //   } else if (until !== null) {
-      //     dateArray.push(null);
-      //     dateArray.push(until);
-      //   }
-      //   return dateArray;
-      // }
     };
     const showNotification = useNotification();
 
@@ -286,15 +274,15 @@ const EventModal = React.memo(
       const dayRestLabourerIds = filterTheDayRestLabourer();
       //全部可選的人 減去 該天已被選的人 => 可選的人
       const notSelected = departMemberList
-      .filter((member) => !dayRestLabourerIds.includes(member.id))
-      .map((member) => {
-        if (member.dispatchId) {
-          const { dispatchId, ...memberWithoutDispatchId } = member;
-          return memberWithoutDispatchId;
-        } else {
-          return member;
-        }
-      });
+        .filter((member) => !dayRestLabourerIds.includes(member.id))
+        .map((member) => {
+          if (member.dispatchId) {
+            const { dispatchId, ...memberWithoutDispatchId } = member;
+            return memberWithoutDispatchId;
+          } else {
+            return member;
+          }
+        });
       //全部可選的人 中只選出 該天已被選的人 => 要設置狀態
       //最終結果是選哪個執行，選單只有該執行已派人的人+完全沒被派過的人
       let selectedPersonnel = [];
@@ -749,15 +737,22 @@ const EventModal = React.memo(
                       />
                     </div>
 
-                    <div className="w-full  flex  justify-between">
-                      <span className="text-xs text-red-500 mt-1">
+                    <div className="w-full flex justify-between">
+                      {dateInRange ? (
+                        <span className="text-xs text-red-500 mt-1"></span>
+                      ) : (
+                        <span className="text-xs text-red-500 mt-1">
+                          (當日不在工項時間範圍內，欲在當日派工請調整施工日期區間)
+                        </span>
+                      )}
+                      {/* <span className="text-xs text-red-500 mt-1">
                         {dateInRange ? "" : "(當日不在工項時間範圍內)"}
-                      </span>
+                      </span> */}
                       <Button
                         variant="contained"
                         color="success"
                         disabled={isEditableDate}
-                        className="!mb-2 !ease-in-out !duration-300 !-mt-2 "
+                        className="!mb-2 !ease-in-out !duration-300 !-mt-2 !min-w-[150px] h-fit"
                         style={{ transform: "translateY(1rem)" }}
                         onClick={handleDispatchOnly}
                       >

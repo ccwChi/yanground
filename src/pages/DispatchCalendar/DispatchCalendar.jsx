@@ -276,14 +276,25 @@ const DispatchCalendar = () => {
   };
 
   const getDepartMemberList = useCallback((id) => {
-    const departMemberList = `department/${id}/staff`;
-    getData(departMemberList).then((result) => {
-      const filterList = result.result.map((data) => {
-        const { id, nickname, department } = data;
-        return { id, nickname, department };
+    const idArray = [11, 13, 17, 19];
+    const promises = idArray.map((id) => {
+      const departMemberListEndpoint = `department/${id}/staff`;
+      return getData(departMemberListEndpoint).then((result) => {
+        const filterList = result.result.map((data) => {
+          const { id, nickname, department } = data;
+          return { id, nickname, department };
+        });
+        return filterList;
       });
-      setDepartMemberList(filterList);
     });
+    Promise.all(promises)
+      .then((allResults) => {
+        const mergedList = allResults.flat();
+        setDepartMemberList(mergedList);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
   }, []);
 
   const getConstructionSummaryList = useCallback(() => {
