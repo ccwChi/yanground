@@ -233,7 +233,6 @@ const Users = () => {
 		}
 
 		setApiUrl(constructedApiUrl);
-		console.log("constructedApiUrl", constructedApiUrl);
 	}, [page, rowsPerPage, queryParams]);
 
 	// 取得列表資料
@@ -416,6 +415,7 @@ const Users = () => {
 		reset(defaultValue);
 		setFilters(defaultValue);
 		setSearchDialogOpen(false);
+		setIsAgeEnabled(false);
 		navigate(`?p=1&s=10`);
 	};
 	// 搜尋送出
