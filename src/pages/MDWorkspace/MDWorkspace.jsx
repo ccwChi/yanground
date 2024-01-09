@@ -5,8 +5,11 @@ import UploadIcon from "@mui/icons-material/Upload";
 // Component
 import MarkdownView from "../../components/MarkdownView";
 import PageTitle from "../../components/Guideline/PageTitle";
+// Hooks
+import { useNotification } from "../../hooks/useNotification";
 
 const MDWorkspace = () => {
+	const showNotification = useNotification();
 	const [markdownContent, setMarkdownContent] = useState("");
 	const fileInputRef = useRef(null);
 	const mdEditor = useRef(null);
@@ -59,17 +62,27 @@ const MDWorkspace = () => {
 	};
 
 	const handleFileInputChange = (e) => {
+		var fileTypes = ["md"]; //acceptable file types
 		const file = e.target.files[0];
 
 		if (file) {
-			const reader = new FileReader();
+			var extension = file.name.split(".").pop().toLowerCase(), // file extension from input file
+				isSuccess = fileTypes.indexOf(extension) > -1; // is extension in acceptable types
 
-			reader.onload = (event) => {
-				const content = event.target.result;
-				setMarkdownContent(content);
-			};
+			if (isSuccess) {
+				const reader = new FileReader();
 
-			reader.readAsText(file);
+				reader.onload = (event) => {
+					const content = event.target.result;
+					setMarkdownContent(content);
+				};
+
+				reader.readAsText(file);
+
+				showNotification(`檔案「${file.name}」讀取成功！`, true);
+			} else {
+				showNotification("檔案類型錯誤，僅接受 .md 格式。", false);
+			}
 		}
 	};
 
@@ -86,7 +99,7 @@ const MDWorkspace = () => {
 	return (
 		<>
 			{/* PageTitle */}
-			<input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileInputChange} />
+			<input type="file" ref={fileInputRef} style={{ display: "none" }} accept=".md" onChange={handleFileInputChange} />
 			<PageTitle title="MD 文稿工作區" btnGroup={btnGroup} handleActionClick={handleActionClick} />
 			{/* <button onClick={handleClick}>Get value</button> */}
 
