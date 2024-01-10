@@ -114,7 +114,7 @@ const UserInfo = () => {
 	// 取得打卡歷程資料
 	useEffect(() => {
 		if (userProfile) {
-			getData(`attendance?p=1&s=180`).then((result) => {
+			getData(`user/${userProfile.id}/attendance?p=1&s=5000`).then((result) => {
 				const data = result.result.content;
 				const formattedEvents = data.map((event) => ({
 					id: event.id,
