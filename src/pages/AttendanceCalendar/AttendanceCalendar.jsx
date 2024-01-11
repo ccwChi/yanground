@@ -358,7 +358,7 @@ const AttendanceCalendar = () => {
 							value={!modeValue ? dataCAList[0].value : modeValue}
 							onChange={(event) =>
 								navigate(
-									`/users/attendance_calendar?user=${userValue || ""}&dep=${depValue || ""}&mode=${event.target.value}`
+									`/attendance_calendar?user=${userValue || ""}&dep=${depValue || ""}&mode=${event.target.value}`
 								)
 							}
 							className="inputPadding"
@@ -383,13 +383,13 @@ const AttendanceCalendar = () => {
 										setUsersList([]);
 										setApiDataA([]);
 										setApiDataB([]);
-										navigate(`/users/attendance_calendar`);
+										navigate(`/attendance_calendar`);
 									}
 								} else {
 									setUsersList([]);
 									setApiDataA([]);
 									setApiDataB([]);
-									navigate(`/users/attendance_calendar?dep=${newValue.id}`);
+									navigate(`/attendance_calendar?dep=${newValue.id}`);
 								}
 							}}
 							renderInput={(params) => (
@@ -426,12 +426,12 @@ const AttendanceCalendar = () => {
 									if (window.confirm("是否確認清空人員欄位？")) {
 										setApiDataA([]);
 										setApiDataB([]);
-										navigate(`/users/attendance_calendar?dep=${depValue || ""}`);
+										navigate(`/attendance_calendar?dep=${depValue || ""}`);
 									}
 								} else {
 									setApiDataA([]);
 									setApiDataB([]);
-									navigate(`/users/attendance_calendar?user=${newValue.id}&dep=${depValue || ""}`);
+									navigate(`/attendance_calendar?user=${newValue.id}&dep=${depValue || ""}`);
 								}
 							}}
 							renderInput={(params) => (

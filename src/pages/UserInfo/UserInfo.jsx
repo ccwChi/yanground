@@ -20,6 +20,7 @@ import PunchLogSection from "./Sections/PunchLogSection"; // 打卡紀錄
 import AttendanceSection from "./Sections/AttendanceSection"; // 考勤紀錄
 import ApplicationFormSection from "./Sections/ApplicationFormSection"; // 表單申請
 import OperationsManual from "./Sections/OperationsManual"; // 本頁說明
+import OperationsManual from "./Sections/OperationsManual"; // 本頁說明
 // Styles
 import "./userInfo.scss";
 
@@ -29,14 +30,14 @@ const UserInfo = () => {
   const queryParams = new URLSearchParams(location.search);
   const isSmallScreen = useMediaQuery("(max-width:575.98px)");
 
-  // Tab 列表對應 api 搜尋參數
-  const tabGroup = [
-    { f: "info", text: "個人資訊" },
-    { f: "punchlog", text: "打卡紀錄" },
-    { f: "attendancelog", text: "考勤紀錄" },
-    // { f: "applicationform", text: "表單申請" },
-    // { f: "operationsmanual", text: "本頁說明" },
-  ];
+	// Tab 列表對應 api 搜尋參數
+	const tabGroup = [
+		{ f: "info", text: "個人資訊" },
+		{ f: "punchlog", text: "打卡紀錄" },
+		{ f: "attendancelog", text: "考勤紀錄" },
+		// { f: "applicationform", text: "表單申請" },
+		// { f: "operationsmanual", text: "本頁說明" },
+	];
 
   // cat = Category 設置 tab 分類
   const [cat, setCat] = useState(
@@ -119,43 +120,33 @@ const UserInfo = () => {
     }
   }, [userProfile]);
 
-  // 取得打卡歷程資料
-  useEffect(() => {
-    if (userProfile) {
-      getData(`attendance?p=1&s=180`).then((result) => {
-        const data = result.result.content;
-        const formattedEvents = data.map((event) => ({
-          id: event.id,
-          title: getflagColorandText(event.anomaly).text,
-          color: getflagColorandText(event.anomaly).color,
-          start: event.date,
-          since: event.since,
-          until: event.until,
-        }));
-        setApiAttData(formattedEvents);
-      });
-      getData(`clockPunch?p=1&s=5000`).then((result) => {
-        const data = result.result.content;
-        const formattedEvents = data.map((event) => ({
-          id: event.id,
-          title: event.clockIn
-            ? "上班"
-            : event.clockIn === false
-            ? "下班"
-            : "上/下班",
-          date: format(
-            utcToZonedTime(parseISO(event.occurredAt), "Asia/Taipei"),
-            "yyyy-MM-dd HH:mm:ss",
-            {
-              locale: zhTW,
-            }
-          ),
-          color: "#547DB7",
-        }));
-        setApiPccData(formattedEvents);
-      });
-    }
-  }, [userProfile]);
+	// 取得打卡歷程資料
+	useEffect(() => {
+		if (userProfile) {
+			getData(`user/${userProfile.id}/attendance?p=1&s=5000`).then((result) => {
+				const data = result.result.content;
+				const formattedEvents = data.map((event) => ({
+					id: event.id,
+					title: getflagColorandText(event.anomaly).text,
+					color: getflagColorandText(event.anomaly).color,
+					start: event.date,
+				}));
+				setApiAttData(formattedEvents);
+			});
+			getData(`clockPunch?p=1&s=5000`).then((result) => {
+				const data = result.result.content;
+				const formattedEvents = data.map((event) => ({
+					id: event.id,
+					title: event.clockIn ? "上班" : event.clockIn === false ? "下班" : "上/下班",
+					date: format(utcToZonedTime(parseISO(event.occurredAt), "Asia/Taipei"), "yyyy-MM-dd HH:mm:ss", {
+						locale: zhTW,
+					}),
+					color: "#547DB7",
+				}));
+				setApiPccData(formattedEvents);
+			});
+		}
+	}, [userProfile]);
 
   const isNight = () => {
     const now = new Date();
@@ -164,22 +155,12 @@ const UserInfo = () => {
     return isNightTime;
   };
 
-  return (
-    <div className="userinfo_wrapper flex flex-col flex-1 sm:-mt-9 -mt-10 sm:-mb-4 -mb-8 overflow-hidden">
-      <div
-        className={`header ${isNight() ? "bg-secondary-50" : "bg-[#45BDBF]"}`}
-      >
-        <div className="header-background-elements">
-          <div
-            className={`header-circle circle-left ${
-              isNight() ? "bg-[#2a776f]" : "bg-[#fffad0]"
-            }`}
-          ></div>
-          <div
-            className={`header-circle circle-right ${
-              isNight() ? "bg-[#2a776f]" : "bg-[#fffad0]"
-            }`}
-          ></div>
+	return (
+		<div className="userinfo_wrapper flex flex-col flex-1 sm:-mt-9 -mt-10 sm:-mb-4 -mb-8 overflow-hidden">
+			<div className={`header ${isNight() ? "bg-secondary-50" : "bg-[#45BDBF]"}`}>
+				<div className="header-background-elements">
+					<div className={`header-circle circle-left ${isNight() ? "bg-[#2a776f]" : "bg-[#fffad0]"}`}></div>
+					<div className={`header-circle circle-right ${isNight() ? "bg-[#2a776f]" : "bg-[#fffad0]"}`}></div>
 
           <div className="dashed-shapes">
             <div className="dashed-shape shape-1"></div>
@@ -249,55 +230,42 @@ const UserInfo = () => {
         }}
       />
 
-      <div
-        className={`relative profile-section flex flex-col flex-1 overflow-hidden ${
-          cat === "punchlog" || cat === "attendancelog" ? "sm:pb-3.5 pb-0" : ""
-        }`}
-      >
-        {(() => {
-          switch (cat) {
-            case "info": // 個人資訊
-              return personalInfo ? (
-                <PersonalInfoSection
-                  userProfile={userProfile}
-                  personalInfo={personalInfo}
-                />
-              ) : (
-                <LoadingTwo
-                  size={isSmallScreen ? 120 : 160}
-                  textSize={"text-lg sm:text-xl"}
-                />
-              );
-            case "punchlog": // 打卡紀錄
-              return apiPccData ? (
-                <PunchLogSection apiPccData={apiPccData} />
-              ) : (
-                <LoadingTwo
-                  size={isSmallScreen ? 120 : 160}
-                  textSize={"text-lg sm:text-xl"}
-                />
-              );
-            case "attendancelog": // 考勤紀錄
-              return apiAttData ? (
-                <AttendanceSection apiAttData={apiAttData} />
-              ) : (
-                <LoadingTwo
-                  size={isSmallScreen ? 120 : 160}
-                  textSize={"text-lg sm:text-xl"}
-                />
-              );
-            case "applicationform": // 表單申請
-              return <ApplicationFormSection />;
-            case "operationsmanual": // 本頁說明
-              return <OperationsManual />;
-            default: {
-              return null;
-            }
-          }
-        })()}
-      </div>
-    </div>
-  );
+			<div
+				className={`relative profile-section flex flex-col flex-1 overflow-hidden ${
+					cat === "punchlog" || cat === "attendancelog" ? "sm:pb-3.5 pb-0" : ""
+				}`}>
+				{(() => {
+					switch (cat) {
+						case "info": // 個人資訊
+							return personalInfo ? (
+								<PersonalInfoSection userProfile={userProfile} personalInfo={personalInfo} />
+							) : (
+								<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
+							);
+						case "punchlog": // 打卡紀錄
+							return apiPccData ? (
+								<PunchLogSection apiPccData={apiPccData} />
+							) : (
+								<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
+							);
+						case "attendancelog": // 考勤紀錄
+							return apiAttData ? (
+								<AttendanceSection apiAttData={apiAttData} />
+							) : (
+								<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
+							);
+						case "applicationform": // 表單申請
+							return <ApplicationFormSection />;
+						case "operationsmanual": // 本頁說明
+							return <OperationsManual />;
+						default: {
+							return null;
+						}
+					}
+				})()}
+			</div>
+		</div>
+	);
 };
 
 export default UserInfo;

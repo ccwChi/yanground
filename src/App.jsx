@@ -4,13 +4,7 @@ import Header from "./components/Layout/Header";
 import Sidebar from "./components/Layout/Sidebar";
 import Tabbar from "./components/Tabbar/Tabbar";
 import CustomBreadcrumbs from "./components/Breadcrumbs/CustomBreadcrumbs";
-import {
-  faHouse,
-  faToolbox,
-  faFileLines,
-  faUsersGear,
-  faAddressCard,
-} from "@fortawesome/free-solid-svg-icons";
+import { faHouse, faToolbox, faFileLines, faUsersGear, faAddressCard } from "@fortawesome/free-solid-svg-icons";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./utils/theme";
 import "./app.scss";

@@ -18,7 +18,7 @@ import DispatchList from "./pages/DispatchList/DispatchList";
 // HRM
 import Users from "./pages/HumanResources/Users";
 import UsersAttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
-
+import AnomalyReport from "./pages/AnomalyReport/AnomalyReport";
 // Member Cencer
 import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
@@ -35,7 +35,6 @@ import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import "react-markdown-editor-lite/lib/index.css";
-import AnomalyReport from "./pages/AnomalyReport/AnomalyReport";
 
 const router = createBrowserRouter([
   {
@@ -144,9 +143,9 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  // <React.StrictMode>
-  <RouterProvider router={router} />
-  // </React.StrictMode>
+	// <React.StrictMode>
+	<RouterProvider router={router} />
+	// </React.StrictMode>
 );
 
 reportWebVitals();

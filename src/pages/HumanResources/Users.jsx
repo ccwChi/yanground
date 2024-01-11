@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useForm, Controller, FormProvider } from "react-hook-form";
+import { format } from "date-fns"; // format(data, 'yyyy-MM-dd')
 // MUI
 import FormControlLabel from "@mui/material/FormControlLabel";
 import TextField from "@mui/material/TextField";
@@ -18,6 +19,7 @@ import TuneIcon from "@mui/icons-material/Tune";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import Divider from "@mui/material/Divider";
 import SouthIcon from "@mui/icons-material/South";
+import { Backdrop } from "@mui/material";
 // Component
 import RWDTable from "../../components/RWDTable/RWDTable";
 import PageTitle from "../../components/Guideline/PageTitle";
@@ -28,11 +30,11 @@ import ControlledDatePicker from "../../components/DatePicker/ControlledDatePick
 // import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 // Hooks
 import { useNotification } from "../../hooks/useNotification";
+import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 // Untils
 import { getData, postData } from "../../utils/api";
 // Customs
 import EditModal from "./UsersModal";
-import { Backdrop } from "@mui/material";
 import { LoadingFour } from "../../components/Loader/Loading";
 
 // MenuItem 選單樣式調整
@@ -49,18 +51,19 @@ const MenuProps = {
 
 // 篩選 default 值
 const defaultValue = {
-	name: "",
+	phrase: "",
 	department: "",
 	gender: "",
-	age: [18, 65],
-	permissions: [],
-	startDate: null,
-	endDate: null,
+	age: null,
+	authorities: [],
+	startedFrom: null,
+	startedTo: null,
 };
 
 const Users = () => {
 	const navigate = useNavigate();
 	const showNotification = useNotification();
+	const navigateWithParams = useNavigateWithParams();
 
 	const [sendBackFlag, setSendBackFlag] = useState(false);
 
@@ -82,9 +85,6 @@ const Users = () => {
 	const [rowsPerPage, setRowsPerPage] = useState(
 		queryParams.has("s") && !isNaN(+queryParams.get("s")) ? +queryParams.get("s") : 10
 	);
-	// ApiUrl
-	const furl = "user";
-	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
 	// 在主畫面先求得部門跟權限 list 再直接傳給面板
 	const [departmentList, setDepartmentList] = useState(null);
 	const [authorityList, setAuthorityList] = useState(null);
@@ -96,16 +96,35 @@ const Users = () => {
 	const [searchDialogOpen, setSearchDialogOpen] = useState(false);
 	// 搜尋篩選清單
 	const [filters, setFilters] = useState(defaultValue);
+	// 控制顯示/隱藏 Slider 的狀態
+	const [isAgeEnabled, setIsAgeEnabled] = useState(false);
+	// ApiUrl
+	const furl = "user";
+	const [apiUrl, setApiUrl] = useState("");
 
 	// 預設搜尋篩選內容
+	const getValueOrFilter = (queryParam, filter) => {
+		const value = queryParams.get(queryParam);
+		if (queryParam === "authorities") {
+			return !!value ? value.split(",").map(Number) : filter;
+		} else {
+			return !!value ? value : filter;
+		}
+	};
+	const getAgeValue = () => {
+		const ageFrom = queryParams.get("ageFrom");
+		const ageTo = queryParams.get("ageTo");
+
+		return ageFrom !== null && ageTo !== null ? [parseInt(ageFrom, 10), parseInt(ageTo, 10)] : filters.age;
+	};
 	const defaultValues = {
-		name: filters.name,
-		department: filters.department,
-		gender: filters.gender,
-		age: filters.age,
-		permissions: filters.permissions,
-		startDate: filters.startDate,
-		endDate: filters.endDate,
+		phrase: getValueOrFilter("phrase", filters.phrase),
+		department: getValueOrFilter("department", filters.department),
+		gender: getValueOrFilter("gender", filters.gender),
+		age: getAgeValue(),
+		authorities: getValueOrFilter("authorities", filters.authorities),
+		startedFrom: filters.startedFrom, // getValueOrFilter("startedFrom", filters.startedFrom),
+		startedTo: filters.startedTo, // getValueOrFilter("startedTo", filters.startedTo),
 	};
 
 	// 使用 useForm Hook 來管理表單狀態和驗證
@@ -116,18 +135,21 @@ const Users = () => {
 		control,
 		reset,
 		watch,
-		getValues,
 		setValue,
 		formState: { isDirty },
 		handleSubmit,
 	} = methods;
-	const watchSinceDate = watch("startDate");
+	const watchSinceDate = watch("startedFrom");
 
 	useEffect(() => {
-		if (getValues("endDate") !== null) {
-			setValue("endDate", null);
+		const startedFromDate = new Date(watchSinceDate);
+		const startedToDate = new Date(watch("startedTo"));
+
+		// 檢查 startedFrom 是否大於 startedTo
+		if (startedFromDate > startedToDate) {
+			setValue("startedTo", null);
 		}
-	}, [watchSinceDate]);
+	}, [watchSinceDate, setValue]);
 
 	// Tab 列表對應 api 搜尋參數
 	// const tabGroup = [
@@ -155,15 +177,15 @@ const Users = () => {
 		// 	// fabVariant: "success",
 		// 	fab: <ExitToAppIcon />,
 		// },
-		// {
-		// 	mode: "filter",
-		// 	icon: null, // 設為 null 就可以避免 PC 出現
-		// 	text: "篩選",
-		// 	variant: "contained",
-		// 	color: "secondary",
-		// 	fabVariant: "secondary",
-		// 	fab: <TuneIcon />,
-		// },
+		{
+			mode: "filter",
+			icon: null, // 設為 null 就可以避免 PC 出現
+			text: "篩選",
+			variant: "contained",
+			color: "secondary",
+			fabVariant: "secondary",
+			fab: <TuneIcon />,
+		},
 	];
 
 	// 對照 api table 所顯示 key
@@ -193,9 +215,29 @@ const Users = () => {
 		// { value: "attconf", icon: <ViewTimelineIcon />, title: "出勤時間確認" },
 	];
 
+	// 更新 ApiUrl
+	useEffect(() => {
+		let constructedApiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
+
+		const searchquery = Object.fromEntries(queryParams.entries());
+		for (const key in searchquery) {
+			if (
+				key !== "p" &&
+				key !== "s" &&
+				searchquery[key] !== undefined &&
+				searchquery[key] !== null &&
+				searchquery[key] !== ""
+			) {
+				constructedApiUrl += `&${key}=${encodeURIComponent(searchquery[key])}`;
+			}
+		}
+
+		setApiUrl(constructedApiUrl);
+	}, [page, rowsPerPage, queryParams]);
+
 	// 取得列表資料
 	useEffect(() => {
-		getApiList(apiUrl);
+		if (apiUrl !== "") getApiList(apiUrl);
 	}, [apiUrl]);
 	const getApiList = useCallback(
 		(url) => {
@@ -205,10 +247,10 @@ const Users = () => {
 				const data = result.result;
 				setApiData(data);
 
-				if (page >= data.totalPages) {
+				if (page > data.totalPages) {
 					setPage(0);
 					setRowsPerPage(10);
-					navigate(`?p=1&s=10`);
+					navigateWithParams(1, 10);
 				}
 			});
 		},
@@ -276,7 +318,7 @@ const Users = () => {
 	const handleChangePage = useCallback(
 		(event, newPage) => {
 			setPage(newPage);
-			navigate(`?p=${newPage + 1}&s=${rowsPerPage}`);
+			navigateWithParams(newPage + 1, rowsPerPage);
 		},
 		[rowsPerPage]
 	);
@@ -286,7 +328,7 @@ const Users = () => {
 		const targetValue = parseInt(event.target.value, 10);
 		setRowsPerPage(targetValue);
 		setPage(0);
-		navigate(`?p=1&s=${targetValue}`);
+		navigateWithParams(1, targetValue);
 	};
 
 	// 當活動按鈕點擊時開啟 modal 並進行動作
@@ -373,13 +415,54 @@ const Users = () => {
 		reset(defaultValue);
 		setFilters(defaultValue);
 		setSearchDialogOpen(false);
+		setIsAgeEnabled(false);
+		navigate(`?p=1&s=10`);
 	};
 	// 搜尋送出
 	const onSubmit = (data) => {
-		reset(data);
 		setFilters(data);
 		setSearchDialogOpen(false);
-		console.log(data);
+
+		const fd = new FormData();
+
+		for (let key in data) {
+			switch (key) {
+				case "age":
+					if (data[key] !== null) {
+						const ageFrom = Math.max(data[key][0], data[key][1]);
+						const ageTo = Math.min(data[key][0], data[key][1]);
+						fd.append("ageFrom", ageFrom);
+						fd.append("ageTo", ageTo);
+					}
+					break;
+				case "startedFrom":
+				case "startedTo":
+					if (data[key] !== null) {
+						fd.append(key, format(data[key], "yyyy-MM-dd"));
+					}
+					break;
+				default:
+					if (data[key] !== null) {
+						fd.append(key, data[key]);
+					}
+					break;
+			}
+		}
+
+		const searchParams = new URLSearchParams(fd);
+		setPage(0);
+		setRowsPerPage(10);
+		navigate(`?p=1&s=10&${searchParams.toString()}`);
+	};
+
+	const handleCheckboxChange = (event) => {
+		let CBstatus = event.target.checked;
+		setIsAgeEnabled(CBstatus);
+		if (!CBstatus) {
+			setValue("age", null, { shouldDirty: true });
+		} else {
+			setValue("age", [18, 65], { shouldDirty: true });
+		}
 	};
 
 	return (
@@ -390,7 +473,7 @@ const Users = () => {
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
 				isLoading={!isLoading}
-				// searchMode
+				searchMode
 				// 下面參數前提都是 searchMode = true
 				searchDialogOpen={searchDialogOpen}
 				handleOpenDialog={handleOpenSearch}
@@ -404,7 +487,7 @@ const Users = () => {
 					<form className="flex flex-col gap-2">
 						<div className="inline-flex items-center gap-2">
 							<Controller
-								name="name"
+								name="phrase"
 								control={control}
 								render={({ field }) => (
 									<TextField
@@ -433,6 +516,7 @@ const Users = () => {
 										<MenuItem value="" disabled>
 											<span className="text-neutral-400 font-light">請選擇部門</span>
 										</MenuItem>
+										<MenuItem value="">全部部門</MenuItem>
 										{departmentList?.map((dep) => (
 											<MenuItem key={"select" + dep.id} value={dep.id}>
 												{dep.name}
@@ -450,37 +534,41 @@ const Users = () => {
 								render={({ field }) => (
 									<RadioGroup className="inputPadding" row label="性別" {...field}>
 										<FormControlLabel value={""} control={<Radio color="secondary" size="small" />} label="全部" />
-										<FormControlLabel
-											value={"female"}
-											control={<Radio color="secondary" size="small" />}
-											label="女性"
-										/>
-										<FormControlLabel value={"male"} control={<Radio color="secondary" size="small" />} label="男性" />
+										<FormControlLabel value={false} control={<Radio color="secondary" size="small" />} label="女性" />
+										<FormControlLabel value={true} control={<Radio color="secondary" size="small" />} label="男性" />
 									</RadioGroup>
 								)}
 							/>
 						</div>
-						<InputTitle title={"年齡"} classnames="whitespace-nowrap min-w-[70px]" pb={false} required={false} />
-						<Controller
-							name="age"
-							control={control}
-							render={({ field }) => (
-								<div className="px-3.5 sm:px-5">
-									<Slider
-										label="年齡"
-										value={field.value}
-										onChange={(event, value) => field.onChange(value)}
-										valueLabelDisplay="auto"
-										min={12}
-										max={80}
-										color="secondary"
-									/>
-								</div>
-							)}
-						/>
+						<div className="inline-flex items-center justify-between gap-2">
+							<InputTitle title={"年齡"} classnames="whitespace-nowrap min-w-[70px]" pb={false} required={false} />
+							<FormControlLabel
+								control={<Checkbox checked={isAgeEnabled} onChange={handleCheckboxChange} />}
+								label="根據年齡判斷"
+							/>
+						</div>
+						{isAgeEnabled && (
+							<Controller
+								name="age"
+								control={control}
+								render={({ field }) => (
+									<div className="px-3.5 sm:px-5">
+										<Slider
+											label="年齡"
+											value={field.value}
+											onChange={(event, value) => field.onChange(value)}
+											valueLabelDisplay="auto"
+											min={12}
+											max={80}
+											color="secondary"
+										/>
+									</div>
+								)}
+							/>
+						)}
 						<InputTitle title={"權限"} classnames="whitespace-nowrap min-w-[70px]" pb={false} required={false} />
 						<Controller
-							name="permissions"
+							name="authorities"
 							control={control}
 							render={({ field }) => (
 								<Select
@@ -502,7 +590,7 @@ const Users = () => {
 									{...field}>
 									{authorityList?.map((auth) => (
 										<MenuItem key={auth.id} value={auth.id}>
-											<Checkbox checked={watch("permissions").indexOf(auth.id) > -1} />
+											<Checkbox checked={watch("authorities").indexOf(auth.id) > -1} />
 											{auth.name}
 										</MenuItem>
 									))}
@@ -512,12 +600,12 @@ const Users = () => {
 						<InputTitle title={"到職日區間"} classnames="whitespace-nowrap min-w-[70px]" pb={false} required={false} />
 						<div className="inline-flex items-center">
 							<InputTitle title={"起"} classnames="whitespace-nowrap me-2" pb={false} required={false} />
-							<ControlledDatePicker name="startDate" maxDate={new Date()} />
+							<ControlledDatePicker name="startedFrom" maxDate={new Date()} />
 						</div>
 						<div className="inline-flex items-center">
 							<InputTitle title={"迄"} classnames="whitespace-nowrap me-2" pb={false} required={false} />
 							<ControlledDatePicker
-								name="endDate"
+								name="startedTo"
 								minDate={watchSinceDate}
 								disabled={!watchSinceDate}
 								maxDate={new Date()}
