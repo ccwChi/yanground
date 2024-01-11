@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 
 // import "./calendar.css";
-import constructionTypeList from "../../data/constructionTypes";
+import constructionTypeList from "../../datas/constructionTypes";
 
 import PageTitle from "../../components/Guideline/PageTitle";
 import AddIcon from "@mui/icons-material/Add";
@@ -13,7 +13,7 @@ import { LoadingThree } from "../../components/Loader/Loading";
 import Calendar from "../../components/Calendar/Calendar";
 import { Backdrop, Tooltip, useMediaQuery } from "@mui/material";
 import { UpdatedModal } from "./NewSummaryModal";
-import { calendarColorList } from "../../data/calendarColorList";
+import { calendarColorList } from "../../datas/calendarColorList";
 
 const today = new Date();
 //明天
@@ -271,6 +271,7 @@ const DispatchCalendar = () => {
       setReGetSummaryListData(null);
       setIsEventModalOpen(true);
       setEvents(events);
+      console.log(events)
       setIsLoading(false);
     });
   };
@@ -465,6 +466,7 @@ const DispatchCalendar = () => {
           handleEventClick(e.event.startStr);
         }}
         eventContent={(eventInfo) => {
+          console.log(eventInfo)
           return <CustomEventContent event={eventInfo.event} />;
         }}
         eventColor={isTargetScreen ? "transparent" : "#F48A64"}

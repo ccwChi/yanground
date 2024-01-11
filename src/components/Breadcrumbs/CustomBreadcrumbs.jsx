@@ -17,11 +17,12 @@ const nameMappings = [
 	{ name: "maps", display: "地圖" },
 	{ name: "dispatchcalendar", display: "派工行事曆" },
 	{ name: "attendance_calendar", display: "考勤紀錄" },
+	{ name: "educationtraining", display: "教育訓練" },
+	{ name: "mdworkspace", display: "MD 文稿工作區" },
 	{ name: "unauthorized", display: "訪問該頁面需要授權" },
 	{ name: "forbidden", display: "禁止訪問該頁面" },
 	{ name: "404", display: "未找到該頁面" },
 	{ name: "internalservererror", display: "內部伺服器錯誤" },
-	{ name: "educationtraining", display: "教育訓練" },
 ];
 
 const CustomBreadcrumbs = React.memo(() => {

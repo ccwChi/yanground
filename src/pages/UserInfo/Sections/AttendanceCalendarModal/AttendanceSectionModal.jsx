@@ -11,7 +11,7 @@ import ApplicationFormSection from "../ApplicationFormSection";
 import ApplicationReacord from "../ApplicationFormSection/ApplicationReacord";
 import DayOff from "./DayOff";
 import CompletePunchIO from "./CompletePunchIO";
-import WorkOvertime from "../ApplicationFormSection/WorkOvertime";
+import WorkOvertime from "./WorkOvertime";
 import AuditLog from "../ApplicationFormSection/AuditLog";
 import {
   Autocomplete,
@@ -43,7 +43,7 @@ import InputTitle from "../../../../components/Guideline/InputTitle";
 import ControlledTimePicker from "../../../../components/DatePicker/ControlledTimePicker";
 import AlertDialog from "../../../../components/Alert/AlertDialog";
 import { LoadingFour } from "../../../../components/Loader/Loading";
-import { de } from "date-fns/locale";
+import { zhTW } from "date-fns/locale";
 
 const AttendanceSectionModal = ({
   deliverInfo,
@@ -66,6 +66,7 @@ const AttendanceSectionModal = ({
       setIsDirty(false);
     } else {
       onClose();
+      setSelectedDiv(0);
     }
   };
 
@@ -116,7 +117,15 @@ const AttendanceSectionModal = ({
   return (
     <>
       <ModalTemplete
-        title={"選擇申請單"}
+        title={
+          selectedDiv === 0
+            ? "選擇申請單"
+            : selectedDiv === 1
+            ? "請假申請單"
+            : selectedDiv === 2
+            ? "補打卡申請單"
+            : "加班申請單"
+        }
         show={isOpen}
         maxWidth={"700px"}
         onClose={onCheckDirty}
@@ -153,7 +162,11 @@ const AttendanceSectionModal = ({
               setIsDirty={setIsDirty}
             />
           ) : (
-            <DivThree />
+            <WorkOvertime
+              userProfile={userProfile}
+              memberList={memberList}
+              setIsDirty={setIsDirty}
+            />
           )}
         </div>
       </ModalTemplete>
@@ -203,12 +216,33 @@ const DivZero = ({ userProfile, memberList, setSelectedDiv, deliverInfo }) => {
       component: <WorkOvertime />,
     },
   ];
-
+  // console.log(deliverInfo);
   return (
     <>
-
-      <div className="h-16 w-full flex gap-4">
-        <Card className="flex-1 p-2 ">{deliverInfo.start}</Card>
+      <div className="h-22 w-full flex gap-4">
+        <Card className="flex-1 p-2 ">
+          {deliverInfo.start}
+          {" " +
+            new Date(deliverInfo.start).toLocaleDateString("zh-TW", {
+              weekday: "long",
+            })}
+          <p>
+            上班時間:{" "}
+            {deliverInfo?.since
+              ? deliverInfo.since.slice(0, 10) +
+                " " +
+                deliverInfo.since.slice(11, 19)
+              : "無紀錄"}
+          </p>
+          <p>
+            下班時間:{" "}
+            {deliverInfo?.until
+              ? deliverInfo.until.slice(0, 10) +
+                " " +
+                deliverInfo.until.slice(11, 19)
+              : "無紀錄"}
+          </p>
+        </Card>
         <Card
           className="w-32 justify-center items-center hidden md:flex"
           sx={{ backgroundColor: deliverInfo.color, color: "white" }}
@@ -216,11 +250,7 @@ const DivZero = ({ userProfile, memberList, setSelectedDiv, deliverInfo }) => {
           //   console.log(deliverInfo);
           // }}
         >
-          {deliverInfo.anomaly === true
-            ? "考勤異常"
-            : deliverInfo.anomaly === false
-            ? "異常已修正"
-            : "考勤正常"}
+          {deliverInfo.title}
         </Card>
       </div>
       <div className="flex-1 flex flex-col sm:flex-row gap-5">

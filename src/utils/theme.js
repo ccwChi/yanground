@@ -87,13 +87,20 @@ const theme = createTheme({
 				},
 			},
 		},
-		MuiPopper: { 
-			styleOverrides: { 
-			 root: { 
-			  zIndex: '10000 !important', 
-			 }, 
-			}, 
-		   },
+		MuiPopper: {
+			styleOverrides: {
+				root: {
+					zIndex: "10000 !important",
+				},
+			},
+		},
+		// MuiTreeItem: {
+		// 	styleOverrides: {
+		// 		content: {
+		// 			backgroundColor: "transparent !important",
+		// 		},
+		// 	},
+		// },
 	},
 });
 

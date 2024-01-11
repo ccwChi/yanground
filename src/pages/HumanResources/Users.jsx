@@ -146,15 +146,15 @@ const Users = () => {
 			fabVariant: "success",
 			fab: <AutoFixHighIcon />,
 		},
-		{
-			mode: "viewpunch",
-			icon: <ExitToAppIcon fontSize="small" />,
-			text: "考勤紀錄",
-			variant: "contained",
-			color: "secondary",
-			// fabVariant: "success",
-			fab: <ExitToAppIcon />,
-		},
+		// {	// 已剝離變成一個新頁面
+		// 	mode: "viewpunch",
+		// 	icon: <ExitToAppIcon fontSize="small" />,
+		// 	text: "考勤紀錄",
+		// 	variant: "contained",
+		// 	color: "secondary",
+		// 	// fabVariant: "success",
+		// 	fab: <ExitToAppIcon />,
+		// },
 		// {
 		// 	mode: "filter",
 		// 	icon: null, // 設為 null 就可以避免 PC 出現
@@ -309,7 +309,7 @@ const Users = () => {
 			handleOpenSearch();
 		} else if (dataMode === "viewpunch") {
 			navigate(
-				`attendance_calendar?user=${dataValue || ""}&dep=${
+				`/attendance_calendar?user=${dataValue || ""}&dep=${
 					apiData.content.find((item) => item.id === dataValue)?.department.id || ""
 				}&mode=clockPunch`
 			);
