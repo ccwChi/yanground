@@ -117,18 +117,20 @@ const AttendanceCalendar = () => {
 	}, []);
 
 	// 取得人員資料
-	useEffect(() => {
-		if (depValue) {
-			getData(`department/${depValue}/staff`).then((result) => {
-				const data = result.result;
-				const formattedUser = data.map((us) => ({
-					label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName,
-					id: us.id,
-				}));
-				setUsersList(formattedUser);
-			});
-		}
-	}, [depValue]);
+	useEffect(() => { 
+		if (depValue) { 
+		 getData(`department/${depValue}/staff`).then((result) => { 
+		  if (result.result) { 
+		   const data = result.result; 
+		   const formattedUser = data.map((us) => ({ 
+			label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName, 
+			id: us.id, 
+		   })); 
+		   setUsersList(formattedUser); 
+		  } 
+		 }); 
+		} 
+	   }, [depValue]);
 
 	// 取得日曆資料
 	useEffect(() => {
