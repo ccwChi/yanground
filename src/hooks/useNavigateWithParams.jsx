@@ -3,13 +3,15 @@ import { useNavigate } from "react-router-dom";
 const useNavigateWithParams = () => {
 	const navigate = useNavigate();
 
-	const navigateWithParams = (newPage, rowsPerPage, additionalParams = {}) => {
+	const navigateWithParams = (newPage, rowsPerPage, additionalParams = {}, havePage = true) => {
 		// 獲取現有的查詢參數
 		const currentParams = new URLSearchParams(window.location.search);
 
-		// 設置新的查詢參數
-		currentParams.set("p", `${newPage + 1}`);
-		currentParams.set("s", `${rowsPerPage}`);
+		if (havePage) {
+			// 設置新的查詢參數
+			currentParams.set("p", `${newPage + 1}`);
+			currentParams.set("s", `${rowsPerPage}`);
+		}
 
 		// 添加額外的查詢參數
 		for (const param in additionalParams) {
@@ -32,7 +34,7 @@ export default useNavigateWithParams;
 
 //     useEffect(() => {
 //       // 在 useEffect 中使用自定義 hook
-//       navigateWithParams(1, 10, { filter: 'example', sort: 'asc' });
+//       navigateWithParams(1, 10, { filter: 'example' });
 //     }, [navigateWithParams]);
 
 //     return (
