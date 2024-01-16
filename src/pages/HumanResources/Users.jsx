@@ -191,14 +191,14 @@ const Users = () => {
 	// 對照 api table 所顯示 key
 	const columnsPC = [
 		{ key: "pictureUrl", label: "", size: "120px" },
-		{ key: "displayName", label: "line名稱", size: "16%", align: "left" },
+		{ key: "displayName", label: "LINE 顯示名稱", size: "16%", align: "left" },
 		{ key: "nickname", label: "暱稱", size: "14%" },
 		{ key: "gender", label: "性別", size: "10%" },
 		{ key: ["department", "name"], label: "部門", size: "14%" },
 		{ key: "startedOn", label: "到職日", size: "16%" },
 	];
 	const columnsMobile = [
-		{ key: "displayName", label: "line名稱" },
+		{ key: "displayName", label: "LINE 顯示名稱" },
 		{ key: "lastname", label: "姓氏" },
 		{ key: "firstname", label: "名字" },
 		{ key: "nickname", label: "暱稱" },
