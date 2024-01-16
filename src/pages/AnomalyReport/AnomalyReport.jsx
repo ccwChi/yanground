@@ -49,9 +49,9 @@ const AnomalyReport = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const depValue = queryParams.get("dep");
-  // console.log(depValue);
   const userValue = queryParams.get("user");
-  const anomaly = queryParams.get("anomaly");
+  const stateValue = queryParams.get("state");
+  const dateValue = queryParams.get("date");
   const tabCat = queryParams.get("tab");
 
   // Page 頁數設置
@@ -193,32 +193,51 @@ const AnomalyReport = () => {
         }));
         setUsersList(formattedUser);
       });
-      const filterDepart = events.filter((event) => {
-        return event.user.departmentId === depValue;
-      });
-      console.log("run devValue, filterDepart=", filterDepart);
-      setShowData(filterDepart);
     }
-    // console.log(dates)
   }, [depValue, departmentList]);
 
   useEffect(() => {
-    console.log("useEffect的console.log(userValue)", userValue);
-    if (userValue && showData) {
-      const filterLabor = events.filter((event) => {
+    setShowData(events);
+    let tempShowData = events;
+    if (depValue !== null) {
+      tempShowData = tempShowData.filter((event) => {
+        return event.user.departmentId === depValue;
+      });
+    }
+    if (userValue !== null) {
+      tempShowData = tempShowData.filter((event) => {
         return event.user.id === userValue;
       });
-      console.log("run userValue, filterLabor=", filterLabor);
-      setShowData(filterLabor);
     }
-  }, [userValue]);
+    if (stateValue !== null) {
+      tempShowData = tempShowData.filter((event) => {
+        return event.anomaly === stateValue;
+      });
+    }
+
+    if (dateValue !== null) {
+      if (dateCondition === 1) {
+        tempShowData = tempShowData.filter((event) => {
+          return event.date === dateValue;
+        });
+      }
+      if (dateCondition === 2) {
+        tempShowData = tempShowData.filter((event) => {
+          const startOfMonth = event.date.slice(0, 7);
+          return startOfMonth === dateValue;
+        });
+      }
+    }
+    console.log(tempShowData);
+    setShowData(tempShowData);
+  }, [depValue, userValue, stateValue, dateValue, events]);
 
   // 取得日曆資料
   useEffect(() => {
     // setIsLoading(true);
     // Define the API calls
     const type = "ATTENDANCE";
-    const since = "2024-01-06";
+    const since = "2023-12-01";
     const until = "2024-01-06";
     const anomaly = "";
     // const fullAttendance = getData(
@@ -227,12 +246,12 @@ const AnomalyReport = () => {
     //   console.log(result)
     //   const rawData = result.result.content.map(
     //     ({ anomaly, date, id, since, until, user }) => ({
-    //       anomaly: anomaly ? "異常" : !anomaly ? "已補單" : "正常",
+    //       title: user.department.name + " - " + user.nickname,
+    //       anomaly: anomaly ? "2" : !anomaly ? "3" : "4", //2是異常，3已修正，4正常
     //       date,
     //       id,
-    //       since: since ? since.slice(11, 19) : "無紀錄",
-    //       until: until ? until.slice(11, 19) : "無紀錄",
-    //       title: user.department.name + " - " + user.nickname,
+    //       since: since ? since.slice(11, 19) : "-",
+    //       until: until ? until.slice(11, 19) : "-",
     //       color: getflagColorandText(anomaly).color,
     //       user: {
     //         id: user.id,
@@ -243,51 +262,60 @@ const AnomalyReport = () => {
     //       },
     //     })
     //   );
-    //   setEvents(rawData);
-    //   console.log(rawData);
+    //   setEvents(
+    //     rawData.sort((a, b) => {
+    //       if (a.user.departmentId < b.user.departmentId) {
+    //         return -1;
+    //       }
+    //       if (a.user.departmentId > b.user.departmentId) {
+    //         return 1;
+    //       }
+    //       return 0;
+    //     })
+    //   );
+    //   console.log(
+    //     rawData.sort((a, b) => {
+    //       if (a.user.departmentId < b.user.departmentId) {
+    //         return -1;
+    //       }
+    //       if (a.user.departmentId > b.user.departmentId) {
+    //         return 1;
+    //       }
+    //       return 0;
+    //     })
+    //   );
     //   setIsLoading(false);
     // });
-
-    const rawData = result.result.content.map(
-      ({ anomaly, date, id, since, until, user }) => ({
-        title: user.department.name + " - " + user.nickname,
-        anomaly: anomaly ? "異常" : !anomaly ? "已補單" : "正常",
-        date,
-        id,
-        since: since ? since.slice(11, 19) : "-",
-        until: until ? until.slice(11, 19) : "-",
-        color: getflagColorandText(anomaly).color,
-        user: {
-          id: user.id,
-          nickname: user.nickname,
-          fullName: user.lastname + user.firstname,
-          department: user.department.name,
-          departmentId: user.department.id,
-        },
-      })
-    );
-    setEvents(
-      rawData.sort((a, b) => {
-        if (a.user.departmentId < b.user.departmentId) {
-          return -1;
-        }
-        if (a.user.departmentId > b.user.departmentId) {
-          return 1;
-        }
-        return 0;
-      })
-    );
-    console.log(
-      rawData.sort((a, b) => {
-        if (a.user.departmentId < b.user.departmentId) {
-          return -1;
-        }
-        if (a.user.departmentId > b.user.departmentId) {
-          return 1;
-        }
-        return 0;
-      })
-    );
+    setEvents(result)
+    // const rawData = result.result.content.map(
+    //   ({ anomaly, date, id, since, until, user }) => ({
+    //     title: user.department.name + " - " + user.nickname,
+    //     anomaly: anomaly ? "2" : !anomaly ? "3" : "4", //2是異常，3已修正，4正常
+    //     date,
+    //     id,
+    //     since: since ? since.slice(11, 19) : "-",
+    //     until: until ? until.slice(11, 19) : "-",
+    //     color: getflagColorandText(anomaly).color,
+    //     user: {
+    //       id: user.id,
+    //       nickname: user.nickname,
+    //       fullName: user.lastname + user.firstname,
+    //       department: user.department.name,
+    //       departmentId: user.department.id,
+    //     },
+    //   })
+    // );
+    // setEvents(
+    //   rawData.sort((a, b) => {
+    //     if (a.user.departmentId < b.user.departmentId) {
+    //       return -1;
+    //     }
+    //     if (a.user.departmentId > b.user.departmentId) {
+    //       return 1;
+    //     }
+    //     return 0;
+    //   })
+    // );
   }, []);
 
   // 開啟 SearchDialog
@@ -345,39 +373,30 @@ const AnomalyReport = () => {
   // edit = 編輯名稱
   const actions = [
     { value: "edit", icon: <EditIcon />, title: "編輯個人資料" },
-    // { value: "attconf", icon: <ViewTimelineIcon />, title: "出勤時間確認" },
   ];
+
   useEffect(() => {
-    console.log(depValue, "depValue", userValue);
-    setSearchCondition({
-      ...searchCondition,
-      department: depValue ? depValue : "",
-      labor: userValue ? userValue : "",
-    });
+    if (dates) {
+      const dateObject = new Date(dates);
+      const year = dateObject.getFullYear();
+      const month = (dateObject.getMonth() + 1).toString().padStart(2, "0"); // 加1是因为getMonth返回的是0-11
+      const day = dateObject.getDate().toString().padStart(2, "0");
+      const newParams = new URLSearchParams(window.location.search);
 
-    const dateObject = new Date(dates);
-    const year = dateObject.getFullYear();
-    const month = (dateObject.getMonth() + 1).toString().padStart(2, "0"); // 加1是因为getMonth返回的是0-11
-    const day = dateObject.getDate().toString().padStart(2, "0");
-
-    if (dateCondition === 1) {
-      console.log(dateCondition)
-      setSearchCondition({
-        ...searchCondition,
-        date: `${year}-${month}`,
-      });
-    } else if (dateCondition === 2) {
-      console.log(dateCondition)
-      setSearchCondition({
-        ...searchCondition,
-        date: `${year}-${month}-${day}`,
-      });
+      if (dateCondition === 2) {
+        newParams.set("date", `${year}-${month}`);
+      } else if (dateCondition === 1) {
+        newParams.set("date", `${year}-${month}-${day}`);
+      }
+      navigate(`?${newParams.toString()}`);
     }
-  }, [depValue, userValue, dateCondition, dates]);
+    // 处理部门参数
+  }, [dates]);
 
-  useEffect(() => {
-    console.log(searchCondition);
-  }, [searchCondition]);
+  // const onTabChange = (value) => {
+  //   const newParams = new URLSearchParams(window.location.search);
+  //   newParams.set("date", `${year}-${month}`);
+  // }
   // 設置頁數
   // const handleChangePage = useCallback(
   //   (event, newPage) => {
@@ -394,6 +413,19 @@ const AnomalyReport = () => {
   //   setPage(0);
   //   navigateWithParams(1, targetValue);
   // };
+
+  const AddNewParam = (param, newValue) => {
+    const newParams = new URLSearchParams(window.location.search);
+
+    // 处理部门参数
+    if (newValue) {
+      newParams.set(param, newValue.id);
+    } else {
+      newParams.delete(param);
+    }
+    navigate(`?${newParams.toString()}`);
+  };
+
   // -----------------------------------------------------
   return (
     <>
@@ -430,179 +462,179 @@ const AnomalyReport = () => {
           // 	)
         }
         // 說明顯示
-        quizMode
-        // 下面參數前提都是 quizMode = true
-        quizContent={
-          <div className="pt-3">
-            <div
-              className="flex flex-col items-center"
-              style={{
-                height: 255,
-                maxWidth: 400,
-                width: "100%",
-                overflowY: "auto",
-              }}
-            >
-              {(() => {
-                switch (activeStep) {
-                  case 0:
-                    return (
-                      <p className="font-bold text-primary-900 pb-3">
-                        〔畫面元素介紹〕
-                      </p>
-                    );
-                  case 1:
-                    return (
-                      <p className="font-bold text-primary-900 pb-3">
-                        〔更新頻率概述〕
-                      </p>
-                    );
-                  case 2:
-                    return (
-                      <p className="font-bold text-primary-900 pb-3">
-                        〔考勤顏色說明〕
-                      </p>
-                    );
-                  default:
-                    return null;
-                }
-              })()}
-              {(() => {
-                switch (activeStep) {
-                  case 0:
-                    return (
-                      <div className="flex flex-col items-center h-full text-sm">
-                        <img
-                          className="border mt-3 mb-6 rounded"
-                          src={ARimg}
-                          alt="考勤與打卡圖片示意"
-                        />
-                        <p>
-                          上方為
-                          <span className="text-base font-bold text-primary-800">
-                            「考勤紀錄」
-                          </span>
-                        </p>
-                        <p>
-                          下方為
-                          <span className="text-base font-bold text-primary-800">
-                            「打卡紀錄」
-                          </span>
-                        </p>
-                      </div>
-                    );
-                  case 1:
-                    return (
-                      <div className="flex flex-col items-start h-full text-sm gap-3">
-                        <div className="inline-flex">
-                          <span className="whitespace-nowrap">考勤紀錄：</span>
-                          <p>
-                            <span className="text-base font-bold text-primary-800">
-                              每日隔日凌晨 12:00 更新考勤數據。
-                            </span>
-                          </p>
-                        </div>
-                        <div className="inline-flex">
-                          <span className="whitespace-nowrap">打卡紀錄：</span>
-                          <p>
-                            <span className="text-base font-bold text-primary-800">
-                              即時更新
-                            </span>
-                            ，立即刷新頁面即可查看最新紀錄。
-                          </p>
-                        </div>
-                        <p>情境範例：</p>
-                        <ul>
-                          <li>
-                            1/1 大明 8:00 打卡上班，17:00
-                            打卡下班，地理位置正常，打卡紀錄會即時更新至資料庫。
-                          </li>
-                          <li>
-                            1/2 凌晨 12:00 系統更新資訊，會顯示
-                            <span className="font-bold">「考勤正常」</span>。
-                          </li>
-                        </ul>
-                      </div>
-                    );
-                  case 2:
-                    return (
-                      <div className="flex flex-col w-full h-full text-sm gap-3">
-                        <div className="inline-flex flex-col gap-1">
-                          <span className="px-2 py-0.5 bg-[#F03355] rounded text-white w-fit">
-                            考勤異常
-                          </span>
-                          <p>考勤資料異常狀況：</p>
-                          <ul>
-                            <li>
-                              1. <span className="font-bold">上班時間異常</span>
-                            </li>
-                            <li>
-                              2. <span className="font-bold">下班時間異常</span>
-                            </li>
-                            <li>
-                              3. <span className="font-bold">打卡範圍異常</span>
-                            </li>
-                            <li>
-                              4. <span className="font-bold">工時異常</span>{" "}
-                              (上下班/請假時間不滿 8 小時)
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="inline-flex flex-col gap-1">
-                          <span className="px-2 py-0.5 bg-[#FFA516] rounded text-white w-fit">
-                            考勤已修正
-                          </span>
-                          <p>
-                            代表
-                            <span className="font-bold">已經進行編輯修正</span>
-                            的情況。
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  default:
-                    return activeStep;
-                }
-              })()}
-            </div>
-            <MobileStepper
-              variant="dots"
-              steps={maxSteps}
-              position="static"
-              activeStep={activeStep}
-              sx={{ maxWidth: 400, flexGrow: 1, px: 0, pb: 0 }}
-              backButton={
-                <Button
-                  size="small"
-                  onClick={handleBack}
-                  disabled={activeStep === 0}
-                >
-                  {theme.direction === "rtl" ? (
-                    <KeyboardArrowRight />
-                  ) : (
-                    <KeyboardArrowLeft />
-                  )}
-                  上一頁
-                </Button>
-              }
-              nextButton={
-                <Button
-                  size="small"
-                  onClick={handleNext}
-                  disabled={activeStep === maxSteps - 1}
-                >
-                  下一頁
-                  {theme.direction === "rtl" ? (
-                    <KeyboardArrowLeft />
-                  ) : (
-                    <KeyboardArrowRight />
-                  )}
-                </Button>
-              }
-            />
-          </div>
-        }
-        quizModalClose={() => setActiveStep(0)}
+        // quizMode
+        // // 下面參數前提都是 quizMode = true
+        // quizContent={
+        //   <div className="pt-3">
+        //     <div
+        //       className="flex flex-col items-center"
+        //       style={{
+        //         height: 255,
+        //         maxWidth: 400,
+        //         width: "100%",
+        //         overflowY: "auto",
+        //       }}
+        //     >
+        //       {(() => {
+        //         switch (activeStep) {
+        //           case 0:
+        //             return (
+        //               <p className="font-bold text-primary-900 pb-3">
+        //                 〔畫面元素介紹〕
+        //               </p>
+        //             );
+        //           case 1:
+        //             return (
+        //               <p className="font-bold text-primary-900 pb-3">
+        //                 〔更新頻率概述〕
+        //               </p>
+        //             );
+        //           case 2:
+        //             return (
+        //               <p className="font-bold text-primary-900 pb-3">
+        //                 〔考勤顏色說明〕
+        //               </p>
+        //             );
+        //           default:
+        //             return null;
+        //         }
+        //       })()}
+        //       {(() => {
+        //         switch (activeStep) {
+        //           case 0:
+        //             return (
+        //               <div className="flex flex-col items-center h-full text-sm">
+        //                 <img
+        //                   className="border mt-3 mb-6 rounded"
+        //                   src={ARimg}
+        //                   alt="考勤與打卡圖片示意"
+        //                 />
+        //                 <p>
+        //                   上方為
+        //                   <span className="text-base font-bold text-primary-800">
+        //                     「考勤紀錄」
+        //                   </span>
+        //                 </p>
+        //                 <p>
+        //                   下方為
+        //                   <span className="text-base font-bold text-primary-800">
+        //                     「打卡紀錄」
+        //                   </span>
+        //                 </p>
+        //               </div>
+        //             );
+        //           case 1:
+        //             return (
+        //               <div className="flex flex-col items-start h-full text-sm gap-3">
+        //                 <div className="inline-flex">
+        //                   <span className="whitespace-nowrap">考勤紀錄：</span>
+        //                   <p>
+        //                     <span className="text-base font-bold text-primary-800">
+        //                       每日隔日凌晨 12:00 更新考勤數據。
+        //                     </span>
+        //                   </p>
+        //                 </div>
+        //                 <div className="inline-flex">
+        //                   <span className="whitespace-nowrap">打卡紀錄：</span>
+        //                   <p>
+        //                     <span className="text-base font-bold text-primary-800">
+        //                       即時更新
+        //                     </span>
+        //                     ，立即刷新頁面即可查看最新紀錄。
+        //                   </p>
+        //                 </div>
+        //                 <p>情境範例：</p>
+        //                 <ul>
+        //                   <li>
+        //                     1/1 大明 8:00 打卡上班，17:00
+        //                     打卡下班，地理位置正常，打卡紀錄會即時更新至資料庫。
+        //                   </li>
+        //                   <li>
+        //                     1/2 凌晨 12:00 系統更新資訊，會顯示
+        //                     <span className="font-bold">「考勤正常」</span>。
+        //                   </li>
+        //                 </ul>
+        //               </div>
+        //             );
+        //           case 2:
+        //             return (
+        //               <div className="flex flex-col w-full h-full text-sm gap-3">
+        //                 <div className="inline-flex flex-col gap-1">
+        //                   <span className="px-2 py-0.5 bg-[#F03355] rounded text-white w-fit">
+        //                     考勤異常
+        //                   </span>
+        //                   <p>考勤資料異常狀況：</p>
+        //                   <ul>
+        //                     <li>
+        //                       1. <span className="font-bold">上班時間異常</span>
+        //                     </li>
+        //                     <li>
+        //                       2. <span className="font-bold">下班時間異常</span>
+        //                     </li>
+        //                     <li>
+        //                       3. <span className="font-bold">打卡範圍異常</span>
+        //                     </li>
+        //                     <li>
+        //                       4. <span className="font-bold">工時異常</span>{" "}
+        //                       (上下班/請假時間不滿 8 小時)
+        //                     </li>
+        //                   </ul>
+        //                 </div>
+        //                 <div className="inline-flex flex-col gap-1">
+        //                   <span className="px-2 py-0.5 bg-[#FFA516] rounded text-white w-fit">
+        //                     考勤已修正
+        //                   </span>
+        //                   <p>
+        //                     代表
+        //                     <span className="font-bold">已經進行編輯修正</span>
+        //                     的情況。
+        //                   </p>
+        //                 </div>
+        //               </div>
+        //             );
+        //           default:
+        //             return activeStep;
+        //         }
+        //       })()}
+        //     </div>
+        //     <MobileStepper
+        //       variant="dots"
+        //       steps={maxSteps}
+        //       position="static"
+        //       activeStep={activeStep}
+        //       sx={{ maxWidth: 400, flexGrow: 1, px: 0, pb: 0 }}
+        //       backButton={
+        //         <Button
+        //           size="small"
+        //           onClick={handleBack}
+        //           disabled={activeStep === 0}
+        //         >
+        //           {theme.direction === "rtl" ? (
+        //             <KeyboardArrowRight />
+        //           ) : (
+        //             <KeyboardArrowLeft />
+        //           )}
+        //           上一頁
+        //         </Button>
+        //       }
+        //       nextButton={
+        //         <Button
+        //           size="small"
+        //           onClick={handleNext}
+        //           disabled={activeStep === maxSteps - 1}
+        //         >
+        //           下一頁
+        //           {theme.direction === "rtl" ? (
+        //             <KeyboardArrowLeft />
+        //           ) : (
+        //             <KeyboardArrowRight />
+        //           )}
+        //         </Button>
+        //       }
+        //     />
+        //   </div>
+        // }
+        // quizModalClose={() => setActiveStep(0)}
       >
         <div className="relative flex flex-col item-start sm:items-center gap-3">
           <div className="inline-flex items-center w-full gap-2">
@@ -617,27 +649,21 @@ const AnomalyReport = () => {
               className="flex-1"
               value={departmentList?.find((obj) => obj.id === depValue) || null}
               onChange={(event, newValue, reason) => {
-                console.log(
-                  "event",
-                  event,
-                  "newValue",
-                  newValue,
-                  "reason",
-                  reason
-                );
                 if (reason === "clear") {
                   if (window.confirm("是否確認清空部門欄位？")) {
                     setUsersList([]);
-                    setApiDataA([]);
-                    setApiDataB([]);
-
                     navigate(`/anomaly_report`);
                   }
                 } else {
                   setUsersList([]);
-                  setApiDataA([]);
-                  setApiDataB([]);
-                  navigate(`/anomaly_report?dep=${newValue.id}`);
+                  const newParams = new URLSearchParams(window.location.search);
+
+                  if (newValue) {
+                    newParams.set("dep", newValue.id);
+                  } else {
+                    newParams.delete("dep");
+                  }
+                  navigate(`?${newParams.toString()}`);
                 }
               }}
               renderInput={(params) => (
@@ -678,18 +704,20 @@ const AnomalyReport = () => {
               className="flex-1"
               value={usersList?.find((obj) => obj.id === userValue) || null}
               onChange={(event, newValue, reason) => {
+                console.log("newValue", newValue, "reason", reason);
                 if (reason === "clear") {
                   if (window.confirm("是否確認清空人員欄位？")) {
-                    setApiDataA([]);
-                    setApiDataB([]);
                     navigate(`/anomaly_report?dep=${depValue || ""}`);
                   }
                 } else {
-                  setApiDataA([]);
-                  setApiDataB([]);
-                  navigate(
-                    `/anomaly_report?user=${newValue.id}&dep=${depValue || ""}`
-                  );
+                  const newParams = new URLSearchParams(window.location.search);
+
+                  if (newValue) {
+                    newParams.set("user", newValue.id);
+                  } else {
+                    newParams.delete("user");
+                  }
+                  navigate(`?${newParams.toString()}`);
                 }
               }}
               renderInput={(params) => (
@@ -728,14 +756,17 @@ const AnomalyReport = () => {
               classnames="whitespace-nowrap"
             />
             <Select
-              value={searchCondition.state}
-              // onChange={(event) => setDateCondition(event.target.value)}
-              onChange={(event) =>
-                setSearchCondition({
-                  ...searchCondition,
-                  state: event.target.value,
-                })
-              }
+              value={stateValue ? stateValue : 1}
+              onChange={(event, newValue, reason) => {
+                const newParams = new URLSearchParams(window.location.search);
+
+                if (event.target.value === 1) {
+                  newParams.delete("state");
+                } else if (event.target.value) {
+                  newParams.set("state", event.target.value);
+                }
+                navigate(`?${newParams.toString()}`);
+              }}
               className="inputPadding !pe-5"
               displayEmpty
               fullWidth
@@ -756,7 +787,6 @@ const AnomalyReport = () => {
             />
             <Select
               value={dateCondition}
-              // onChange={(event) => setDateCondition(event.target.value)}
               onChange={(event) => setDateCondition(event.target.value)}
               className="inputPadding !pe-5"
               displayEmpty
@@ -779,6 +809,7 @@ const AnomalyReport = () => {
             <DatePicker
               defaultValue={dates}
               setDates={setDates}
+              // date的網址param在上面用useEffect來進行處理
               views={selectedDateCon.views}
               format={selectedDateCon.formatOne}
               minDate={new Date("2023-11")}
@@ -801,7 +832,7 @@ const AnomalyReport = () => {
         // </div>
         <div className="overflow-y-auto flex-1 h-full order-3 sm:order-1">
           <RWDTable
-            data={showData.length > 0 ? showData : events}
+            data={showData}
             columnsPC={columnsPC}
             columnsMobile={columnsMobile}
             // actions={actions}
