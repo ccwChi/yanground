@@ -9,10 +9,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import TuneIcon from "@mui/icons-material/Tune";
 import { useTheme } from "@mui/material/styles";
-import MobileStepper from "@mui/material/MobileStepper";
-import Button from "@mui/material/Button";
-import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+
 // Components
 import PageTitle from "../../components/Guideline/PageTitle";
 import Calendar from "../../components/Calendar/Calendar";
@@ -20,31 +17,23 @@ import InputTitle from "../../components/Guideline/InputTitle";
 import DatePicker from "../../components/DatePicker/DatePicker";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 import { LoadingTwo } from "../../components/Loader/Loading";
-// date-fns
-import { parseISO, format } from "date-fns";
-import { zhTW } from "date-fns/locale";
-import { utcToZonedTime } from "date-fns-tz";
-// Hooks
-import { useNotification } from "../../hooks/useNotification";
+
 // Utils
 import { getData } from "../../utils/api";
 // Others
-import ARimg from "../../assets/images/AnomalousImageRepresentation.png";
-import { async } from "q";
 import TableTabbar from "../../components/Tabbar/TableTabbar";
-import emptyImg from "../../../src/assets/images/emptyCatSleep.png";
 import { Tooltip, useMediaQuery } from "@mui/material";
-//
+// Table 及 Table 所需按鈕、頁數
 import RWDTable from "../../components/RWDTable/RWDTable";
 import EditIcon from "@mui/icons-material/Edit";
-import { result } from "./result";
-import useNavigateWithParams from "../../hooks/useNavigateWithParams";
-import { useCallback } from "react";
 import Pagination from "../../components/Pagination/Pagination";
+
+// 用網址傳參數
+import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 
 const AnomalyReport = () => {
   const navigate = useNavigate();
-  const showNotification = useNotification();
+
   // 解析網址取得參數
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -52,7 +41,7 @@ const AnomalyReport = () => {
   const userValue = queryParams.get("user");
   const stateValue = queryParams.get("state");
   const dateValue = queryParams.get("date");
-  const tabCat = queryParams.get("tab");
+  const tabCat = queryParams.get("cat");
 
   // Page 頁數設置
   const [page, setPage] = useState(
@@ -66,13 +55,12 @@ const AnomalyReport = () => {
       ? +queryParams.get("s")
       : 10
   );
+  const today = new Date().toISOString().slice(0, 10); // 會得到2024-01-16這樣的格式
 
   const modeValue = queryParams.get("mode");
   // API List Data
-  const [apiDataA, setApiDataA] = useState([]);
-  const [apiDataB, setApiDataB] = useState([]);
+  const [apiData, setApiData] = useState([]);
   const [events, setEvents] = useState([]);
-  const [showData, setShowData] = useState([]);
   // 部門
   const [departmentList, setDepartmentList] = useState([]);
   // 人員
@@ -83,14 +71,6 @@ const AnomalyReport = () => {
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   // cat = Category 設置 tab 分類
   const [cat, setCat] = useState("table");
-  // 搜尋條件
-  const [searchCondition, setSearchCondition] = useState({
-    department: "",
-    labor: "",
-    state: 1,
-    dateCondition: 1,
-    date: null,
-  });
   // 搜尋日期
   const [dates, setDates] = useState(null);
   // 設定日期條件
@@ -117,7 +97,6 @@ const AnomalyReport = () => {
       formatTwo: "yyyy-MM",
       formatThree: "yyyy/MM",
     },
-    // { id: 3, text: "依據年份進行搜尋", views: ["year"], formatOne: "yyyy 年", formatTwo: "yyyy" },
   ];
   const anomalyList = [
     {
@@ -136,10 +115,6 @@ const AnomalyReport = () => {
       id: 4,
       text: "正常",
     },
-  ];
-  const dataCAList = [
-    { value: "clockPunch", text: "打卡紀錄" },
-    { value: "attendance", text: "出勤紀錄" },
   ];
 
   // 區塊功能按鈕清單
@@ -167,7 +142,6 @@ const AnomalyReport = () => {
         break;
     }
   };
-  useEffect(() => {});
 
   // 取得部門資料
   useEffect(() => {
@@ -181,7 +155,6 @@ const AnomalyReport = () => {
   // 取得人員資料
   useEffect(() => {
     if (depValue) {
-      console.log("useEffect的console.log(depValue)", depValue);
       getData(`department/${depValue}/staff`).then((result) => {
         const data = result.result;
         const formattedUser = data.map((us) => ({
@@ -197,8 +170,8 @@ const AnomalyReport = () => {
   }, [depValue, departmentList]);
 
   useEffect(() => {
-    setShowData(events);
-    let tempShowData = events;
+    setEvents(apiData);
+    let tempShowData = apiData;
     if (depValue !== null) {
       tempShowData = tempShowData.filter((event) => {
         return event.user.departmentId === depValue;
@@ -210,8 +183,10 @@ const AnomalyReport = () => {
       });
     }
     if (stateValue !== null) {
+      if (stateValue === 1) {
+      }
       tempShowData = tempShowData.filter((event) => {
-        return event.anomaly === stateValue;
+        return event.anomaly.id === stateValue;
       });
     }
 
@@ -228,96 +203,62 @@ const AnomalyReport = () => {
         });
       }
     }
-    console.log(tempShowData);
-    setShowData(tempShowData);
-  }, [depValue, userValue, stateValue, dateValue, events]);
+    setEvents(tempShowData);
+    setIsLoading(false);
+  }, [depValue, userValue, stateValue, dateValue, apiData]);
 
   // 取得日曆資料
   useEffect(() => {
-    // setIsLoading(true);
+    setIsLoading(true);
     // Define the API calls
     const type = "ATTENDANCE";
     const since = "2023-12-01";
-    const until = "2024-01-06";
+    const until = today;
     const anomaly = "";
-    // const fullAttendance = getData(
-    //   `attendance?type=${type}&since=${since}&anomaly=${anomaly}&until=${until}&s=5000&p=1`
-    // ).then((result) => {
-    //   console.log(result)
-    //   const rawData = result.result.content.map(
-    //     ({ anomaly, date, id, since, until, user }) => ({
-    //       title: user.department.name + " - " + user.nickname,
-    //       anomaly: anomaly ? "2" : !anomaly ? "3" : "4", //2是異常，3已修正，4正常
-    //       date,
-    //       id,
-    //       since: since ? since.slice(11, 19) : "-",
-    //       until: until ? until.slice(11, 19) : "-",
-    //       color: getflagColorandText(anomaly).color,
-    //       user: {
-    //         id: user.id,
-    //         nickname: user.nickname,
-    //         fullName: user.lastname + user.firstname,
-    //         department: user.department.name,
-    //         departmentId: user.department.id,
-    //       },
-    //     })
-    //   );
-    //   setEvents(
-    //     rawData.sort((a, b) => {
-    //       if (a.user.departmentId < b.user.departmentId) {
-    //         return -1;
-    //       }
-    //       if (a.user.departmentId > b.user.departmentId) {
-    //         return 1;
-    //       }
-    //       return 0;
-    //     })
-    //   );
-    //   console.log(
-    //     rawData.sort((a, b) => {
-    //       if (a.user.departmentId < b.user.departmentId) {
-    //         return -1;
-    //       }
-    //       if (a.user.departmentId > b.user.departmentId) {
-    //         return 1;
-    //       }
-    //       return 0;
-    //     })
-    //   );
-    //   setIsLoading(false);
-    // });
-    setEvents(result)
-    // const rawData = result.result.content.map(
-    //   ({ anomaly, date, id, since, until, user }) => ({
-    //     title: user.department.name + " - " + user.nickname,
-    //     anomaly: anomaly ? "2" : !anomaly ? "3" : "4", //2是異常，3已修正，4正常
-    //     date,
-    //     id,
-    //     since: since ? since.slice(11, 19) : "-",
-    //     until: until ? until.slice(11, 19) : "-",
-    //     color: getflagColorandText(anomaly).color,
-    //     user: {
-    //       id: user.id,
-    //       nickname: user.nickname,
-    //       fullName: user.lastname + user.firstname,
-    //       department: user.department.name,
-    //       departmentId: user.department.id,
-    //     },
-    //   })
-    // );
-    // setEvents(
-    //   rawData.sort((a, b) => {
-    //     if (a.user.departmentId < b.user.departmentId) {
-    //       return -1;
-    //     }
-    //     if (a.user.departmentId > b.user.departmentId) {
-    //       return 1;
-    //     }
-    //     return 0;
-    //   })
-    // );
+    getData(
+      `attendance?type=${type}&since=${since}&anomaly=${anomaly}&until=${until}&s=5000&p=1`
+    ).then((result) => {
+      const rawData = result.result.content.map(
+        ({ anomaly, date, id, since, until, user }) => ({
+          title: user.department.name + " - " + user.nickname,
+          anomaly: anomaly
+            ? { text: "異常", id: "2" }
+            : anomaly === false
+            ? { text: "已修正", id: "3" }
+            : { text: "正常", id: "4" },
+          date,
+          id,
+          since: since ? since.slice(11, 19) : "-",
+          until: until ? until.slice(11, 19) : "-",
+          color: getflagColorandText(anomaly).color,
+          user: {
+            id: user.id,
+            nickname: user.nickname,
+            fullName: user.lastname + user.firstname,
+            department: user.department.name,
+            departmentId: user.department.id,
+          },
+        })
+      );
+      setApiData(
+        rawData.sort((a, b) => {
+          if (a.date < b.date) {
+            return 1;
+          }
+          if (a.date > b.date) {
+            return -1;
+          }
+          return 0;
+        })
+      );
+    });
   }, []);
 
+  useEffect(() => {
+    if (tabCat === "calendar") {
+      setCat("calendar");
+    }
+  }, [tabCat]);
   // 開啟 SearchDialog
   const handleOpenSearch = () => {
     setSearchDialogOpen(true);
@@ -355,18 +296,18 @@ const AnomalyReport = () => {
     { key: ["user", "fullName"], label: "姓名", size: "180px" },
     { key: ["user", "department"], label: "部門", size: "180px" },
     { key: "date", label: "日期", size: "190px" },
-    { key: "anomaly", label: "狀態", size: "170px" },
+    { key: ["anomaly", "text"], label: "狀態", size: "170px" },
     { key: "since", label: "上班時間", size: "180px" },
     { key: "until", label: "下班時間", size: "180px" },
     // { key: "until", label: "補單狀況", size: "14%" },
   ];
   const columnsMobile = [
-    { key: "displayName", label: "line名稱" },
+    // { key: "displayName", label: "LINE 顯示名稱" },
     { key: ["user", "fullName"], label: "姓名" },
     { key: ["user", "nickname"], label: "暱稱" },
     { key: ["user", "department"], label: "部門" },
     { key: "date", label: "日期" },
-    { key: "anomaly", label: "狀態" },
+    { key: ["anomaly", "text"], label: "狀態" },
     { key: "since", label: "上班時間" },
     { key: "until", label: "下班時間" },
   ];
@@ -381,16 +322,13 @@ const AnomalyReport = () => {
       const year = dateObject.getFullYear();
       const month = (dateObject.getMonth() + 1).toString().padStart(2, "0"); // 加1是因为getMonth返回的是0-11
       const day = dateObject.getDate().toString().padStart(2, "0");
-      const newParams = new URLSearchParams(window.location.search);
 
       if (dateCondition === 2) {
-        newParams.set("date", `${year}-${month}`);
+        navigateWithParams(0, 0, { date: `${year}-${month}` }, false);
       } else if (dateCondition === 1) {
-        newParams.set("date", `${year}-${month}-${day}`);
+        navigateWithParams(0, 0, { date: `${year}-${month}-${day}` }, false);
       }
-      navigate(`?${newParams.toString()}`);
     }
-    // 处理部门参数
   }, [dates]);
 
   // const onTabChange = (value) => {
@@ -414,40 +352,12 @@ const AnomalyReport = () => {
   //   navigateWithParams(1, targetValue);
   // };
 
-  const AddNewParam = (param, newValue) => {
-    const newParams = new URLSearchParams(window.location.search);
-
-    // 处理部门参数
-    if (newValue) {
-      newParams.set(param, newValue.id);
-    } else {
-      newParams.delete(param);
-    }
-    navigate(`?${newParams.toString()}`);
-  };
-
   // -----------------------------------------------------
   return (
     <>
-      <Button
-        onClick={() => {
-          console.log(showData);
-        }}
-      >
-        SHOW SHOWdATA
-      </Button>
       {/* PageTitle & Search */}
       <PageTitle
-        title={`${
-          !userValue
-            ? "考勤紀錄"
-            : `${
-                usersList?.find((obj) => obj.id === userValue)?.label
-                  ? usersList.find((obj) => obj.id === userValue).label + "的"
-                  : ""
-              }考勤紀錄
-						  `
-        }`}
+        title={"異常考勤"}
         // 搜尋模式
         searchMode
         // 下面參數前提都是 searchMode = true
@@ -456,7 +366,10 @@ const AnomalyReport = () => {
         handleCloseDialog={handleCloseSearch}
         handleCloseText={"關閉"}
         haveValue={
-          !depValue && !userValue && dateCondition === 2
+          !depValue &&
+          !userValue &&
+          (stateValue === 1 || stateValue === null) &&
+          !dateValue
           // && (modeValue === dataCAList[0].value
           // 	|| !dataCAList.some((item) => item.value === modeValue)
           // 	)
@@ -650,20 +563,21 @@ const AnomalyReport = () => {
               value={departmentList?.find((obj) => obj.id === depValue) || null}
               onChange={(event, newValue, reason) => {
                 if (reason === "clear") {
-                  if (window.confirm("是否確認清空部門欄位？")) {
-                    setUsersList([]);
-                    navigate(`/anomaly_report`);
+                  if (
+                    window.confirm("清空部門欄位會連帶清空選擇人員，確定清空？")
+                  ) {
+                    const newParams = new URLSearchParams(
+                      window.location.search
+                    );
+                    newParams.delete("dep");
+                    newParams.delete("user");
+                    navigate(`?${newParams.toString()}`);
+                    // setUsersList([]);
+                    // navigate(`/anomaly_report`);
                   }
                 } else {
                   setUsersList([]);
-                  const newParams = new URLSearchParams(window.location.search);
-
-                  if (newValue) {
-                    newParams.set("dep", newValue.id);
-                  } else {
-                    newParams.delete("dep");
-                  }
-                  navigate(`?${newParams.toString()}`);
+                  navigateWithParams(0, 0, { dep: newValue.id }, false);
                 }
               }}
               renderInput={(params) => (
@@ -704,20 +618,12 @@ const AnomalyReport = () => {
               className="flex-1"
               value={usersList?.find((obj) => obj.id === userValue) || null}
               onChange={(event, newValue, reason) => {
-                console.log("newValue", newValue, "reason", reason);
                 if (reason === "clear") {
-                  if (window.confirm("是否確認清空人員欄位？")) {
-                    navigate(`/anomaly_report?dep=${depValue || ""}`);
-                  }
-                } else {
                   const newParams = new URLSearchParams(window.location.search);
-
-                  if (newValue) {
-                    newParams.set("user", newValue.id);
-                  } else {
-                    newParams.delete("user");
-                  }
+                  newParams.delete("user");
                   navigate(`?${newParams.toString()}`);
+                } else {
+                  navigateWithParams(0, 0, { user: newValue.id }, false);
                 }
               }}
               renderInput={(params) => (
@@ -757,15 +663,19 @@ const AnomalyReport = () => {
             />
             <Select
               value={stateValue ? stateValue : 1}
-              onChange={(event, newValue, reason) => {
+              onChange={(event) => {
                 const newParams = new URLSearchParams(window.location.search);
-
                 if (event.target.value === 1) {
                   newParams.delete("state");
+                  navigate(`?${newParams.toString()}`);
                 } else if (event.target.value) {
-                  newParams.set("state", event.target.value);
+                  navigateWithParams(
+                    0,
+                    0,
+                    { state: event.target.value },
+                    false
+                  );
                 }
-                navigate(`?${newParams.toString()}`);
               }}
               className="inputPadding !pe-5"
               displayEmpty
@@ -787,7 +697,13 @@ const AnomalyReport = () => {
             />
             <Select
               value={dateCondition}
-              onChange={(event) => setDateCondition(event.target.value)}
+              onChange={(event) => {
+                setDateCondition(event.target.value);
+                setDates(null);
+                const newParams = new URLSearchParams(window.location.search);
+                newParams.delete("date");
+                navigate(`?${newParams.toString()}`);
+              }}
               className="inputPadding !pe-5"
               displayEmpty
               fullWidth
@@ -807,7 +723,9 @@ const AnomalyReport = () => {
               classnames="whitespace-nowrap"
             />
             <DatePicker
-              defaultValue={dates}
+              mode="moblie"
+              defaultValue={null}
+              value={dates}
               setDates={setDates}
               // date的網址param在上面用useEffect來進行處理
               views={selectedDateCon.views}
@@ -820,19 +738,12 @@ const AnomalyReport = () => {
 
       {/* TabBar */}
       <TableTabbar tabGroup={tabGroup} setCat={setCat} cat={cat} />
+
       {/* Calendar */}
       {cat === "table" ? (
-        // <div className="flex flex-col items-center justify-center gap-2 pt-[15%] pb-[15%]">
-        //   <img
-        //     src={emptyImg}
-        //     alt="catimage"
-        //     className="w-2/5 max-w-sm min-w-[10rem]"
-        //   />
-        //   <p className="h5">「列表」畫面施工中 Zzz ...</p>
-        // </div>
         <div className="overflow-y-auto flex-1 h-full order-3 sm:order-1">
           <RWDTable
-            data={showData}
+            data={events}
             columnsPC={columnsPC}
             columnsMobile={columnsMobile}
             // actions={actions}
@@ -856,7 +767,7 @@ const AnomalyReport = () => {
           viewOptions={["dayGridMonth", "dayGridWeek"]}
           _dayMaxEvents={3}
           navLinkDayClick={(date, jsEvent) => {}}
-          eventContent={!isTargetScreen && CustomEventContent}
+          eventContent={(e) => CustomEventContent(e, isTargetScreen)}
         />
       )}
 
@@ -876,9 +787,9 @@ const AnomalyReport = () => {
 
 export default AnomalyReport;
 
-const CustomEventContent = ({ event }) => {
+const CustomEventContent = ({ event, isTargetScreen }) => {
   const extendedProps = event._def.extendedProps;
-  // console.log(extendedProps);
+
   return (
     <>
       <div>
@@ -900,9 +811,9 @@ const CustomEventContent = ({ event }) => {
               <p className="text-base">{event.startStr}</p>
               <p className="text-base">
                 異常狀態 :{" "}
-                {extendedProps.anomaly
+                {extendedProps.anomaly.id === "2"
                   ? "異常"
-                  : !extendedProps.anomaly
+                  : extendedProps.anomaly.id === "3"
                   ? "已補單"
                   : "正常"}
               </p>
