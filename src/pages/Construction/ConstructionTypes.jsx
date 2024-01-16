@@ -22,9 +22,13 @@ const ConstructionTypes = () => {
 	// Btn Img
 	const imageUrls = [
 		"https://www.yuanrong-tech.com.tw/WebFiles/img/77470008-8f35-4785-8870-d85b2e00f33e/354ab255-bdea-4192-b7a3-99b7111ff4aa.png",
+		"https://www.yuanrong-tech.com.tw/WebFiles/img/3e63d586-7595-4305-80cc-58fa20da805c/7a52f936-49f6-45de-9f32-e98a5ac6e0ef.jpg",
+		"https://www.yuanrong-tech.com.tw/WebFiles/img/77470008-8f35-4785-8870-d85b2e00f33e/ee9497de-729b-47a9-a620-abdaed272427.png",
+		"https://www.yuanrong-tech.com.tw/WebFiles/img/a35dd396-2308-4fd7-b191-ec0173e75a0c/94bdf01d-26c7-4b78-bae8-7bd5dd459103.jpg",
 		"https://www.yuanrong-tech.com.tw/WebFiles/img/59c0b760-1ac3-4d46-8a90-9e70f2d91920/31864d28-61e6-440d-a125-5f23b203e2fe.jpg",
-		"https://www.yuanrong-tech.com.tw/WebFiles/img/a35dd396-2308-4fd7-b191-ec0173e75a0c/3157add8-cfc2-4560-b67f-8de8b08bfd44.jpg",
+		"https://www.yuanrong-tech.com.tw/WebFiles/img/59c0b760-1ac3-4d46-8a90-9e70f2d91920/5853a6f2-733b-4dc4-a207-bdce480ac324.jpg",
 		"https://www.yuanrong-tech.com.tw/WebFiles/img/3e63d586-7595-4305-80cc-58fa20da805c/eccdb80b-6779-44ad-b3c0-dfc3200a905d.jpg",
+		"https://www.yuanrong-tech.com.tw/WebFiles/img/3e63d586-7595-4305-80cc-58fa20da805c/01216c45-6866-4edb-9ee9-6f1c1fbfcfc6.jpg",
 		"https://www.yuanrong-tech.com.tw/WebFiles/img/3e63d586-7595-4305-80cc-58fa20da805c/7a52f936-49f6-45de-9f32-e98a5ac6e0ef.jpg",
 	];
 
