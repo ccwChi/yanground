@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import useMediaQuery from "@mui/material/useMediaQuery";
+// FullCalendar
+import interactionPlugin from "@fullcalendar/interaction";
+import zhTwLocale from "@fullcalendar/core/locales/zh-tw";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import listPlugin from "@fullcalendar/list";
-import zhTwLocale from "@fullcalendar/core/locales/zh-tw";
-import interactionPlugin from "@fullcalendar/interaction";
+import multiMonthPlugin from "@fullcalendar/multimonth";
+// MUI
+import useMediaQuery from "@mui/material/useMediaQuery";
 import IconButton from "@mui/material/IconButton";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Button from "@mui/material/Button";
@@ -13,12 +16,14 @@ import Tooltip from "@mui/material/Tooltip";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import TodayIcon from "@mui/icons-material/Today";
+import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import CalendarViewWeekIcon from "@mui/icons-material/CalendarViewWeek";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AvTimerIcon from "@mui/icons-material/AvTimer";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+// Custom
 import "./calendar.scss";
 
 const Calendar = ({
@@ -28,17 +33,24 @@ const Calendar = ({
 	_dayMaxEvents = 2,
 	pnlive = true,
 	goto,
+	weekNumbers = true,
+	customInitialView = false,
 	...otherProps
 }) => {
 	const isTargetScreen = useMediaQuery("(max-width:991.98px)");
+	const isTargetScreenSm = useMediaQuery("(max-width:389.98px)");
 	const calendarRef = useRef(null);
 	const [activeButton, setActiveButton] = useState("");
 	const [calendarTitle, setCalendarTitle] = useState("");
 
 	useEffect(() => {
-		const newView = isTargetScreen ? "listMonth" : defaultViews;
-		calendarRef.current.getApi().changeView(newView);
-		setActiveButton(newView);
+		if (!customInitialView) {
+			const newView = isTargetScreen ? "listMonth" : defaultViews;
+			calendarRef.current.getApi().changeView(newView);
+			setActiveButton(newView);
+		} else {
+			setActiveButton(defaultViews);
+		}
 	}, [isTargetScreen, defaultViews]);
 
 	useEffect(() => {
@@ -66,6 +78,8 @@ const Calendar = ({
 				return "日 (時)";
 			case "listMonth":
 				return "列表";
+			case "multiMonthYear":
+				return "年";
 			default:
 				return null;
 		}
@@ -85,6 +99,8 @@ const Calendar = ({
 				return <AvTimerIcon fontSize="small" />;
 			case "listMonth":
 				return <ListAltIcon fontSize="small" />;
+			case "multiMonthYear":
+				return <CalendarViewMonthIcon fontSize="small" />;
 			default:
 				return null;
 		}
@@ -92,7 +108,7 @@ const Calendar = ({
 
 	return (
 		<>
-			<div className="relative flex items-center justify-between pt-3 px-4" data-flag="header">
+			<div className="relative flex items-center justify-between pt-1 sm:pt-3 px-4" data-flag="header">
 				<div className="inline-flex items-center">
 					{pnlive && (
 						<>
@@ -114,11 +130,19 @@ const Calendar = ({
 						</IconButton>
 					</Tooltip>
 				</div>
-				<div className="sm:absolute left-0 right-0 mx-auto font-bold text-primary-900 lg:text-2xl md:text-xl sm:text-lg text-base opacity-80 tracking-wide w-fit">
-					{calendarTitle}
-				</div>
+				{!isTargetScreenSm && (
+					<div className="sm:absolute left-0 right-0 mx-auto font-bold text-primary-900 lg:text-2xl md:text-xl text-lg opacity-80 tracking-wide w-fit">
+						{calendarTitle}
+					</div>
+				)}
 				<div className="punchlog_btngrpwrp">
-					{!isTargetScreen ? (
+					{isTargetScreen && !customInitialView ? (
+						<ButtonGroup variant="outlined">
+							<Button onClick={() => handleViewChange("listMonth")} className={"primary"}>
+								<ListAltIcon fontSize="small" />
+							</Button>
+						</ButtonGroup>
+					) : (
 						<ButtonGroup variant="outlined">
 							{viewOptions.map((view) => (
 								<Tooltip key={view} title={getTitleForView(view)}>
@@ -130,19 +154,18 @@ const Calendar = ({
 								</Tooltip>
 							))}
 						</ButtonGroup>
-					) : (
-						<ButtonGroup variant="outlined">
-							<Button onClick={() => handleViewChange("listMonth")} className={"primary"}>
-								<ListAltIcon fontSize="small" />
-							</Button>
-						</ButtonGroup>
 					)}
 				</div>
 			</div>
+			{isTargetScreenSm && (
+				<div className="left-0 right-0 mx-auto font-bold text-primary-900 text-base opacity-80 tracking-wide w-fit">
+					{calendarTitle}
+				</div>
+			)}
 			<FullCalendar
 				ref={calendarRef}
-				plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-				initialView={isTargetScreen ? "listMonth" : defaultViews}
+				plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, multiMonthPlugin]}
+				initialView={customInitialView ? defaultViews : isTargetScreen ? "listMonth" : defaultViews}
 				headerToolbar={false}
 				// 設為星期一開始
 				firstDay={1}
@@ -162,7 +185,7 @@ const Calendar = ({
 				// 在月視圖中決定是否應該呈現上個月或下個月的日期
 				showNonCurrentDates={false}
 				// 決定是否應在日曆上顯示週數
-				weekNumbers={true}
+				weekNumbers={weekNumbers}
 				// 週數格式 e.g. short - W 6 ; narrow - W6 ; numeric - 6
 				weekNumberFormat={{ week: "narrow" }}
 				viewClassNames={"custom_calendar"}

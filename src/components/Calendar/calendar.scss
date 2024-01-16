@@ -64,6 +64,17 @@
 			padding: 8px 0 !important;
 		}
 	}
+	&.fc-multiMonthYear-view {
+		padding-bottom: 8.5rem;
+		table {
+			thead tr th {
+				padding: 8px 0 !important;
+			}
+			tbody tr td {
+				padding: 0 !important;
+			}
+		}
+	}
 	tr {
 		padding: 4px 8px;
 		height: auto;
@@ -92,14 +103,34 @@
 }
 
 @media (max-width: 575.98px) {
-	// .fc {
-	// 	.fc-toolbar-title {
-	// 		font-size: 0.875rem;
-	// 	}
-	// }
+	.fc {
+		padding-top: 0.25rem;
+	}
 	.custom_calendar.fc-listMonth-view {
 		.fc-scroller {
 			padding-bottom: 4rem;
+		}
+	}
+	.custom_calendar {
+		&.fc-dayGridMonth-view,
+		&.fc-multiMonthYear-view {
+			table {
+				thead tr th,
+				tbody tr td {
+					div {
+						font-size: 0.75rem !important;
+					}
+				}
+			}
+		}
+		&.fc-dayGridMonth-view {
+			td,
+			th {
+				padding: 2px 0 !important;
+			}
+		}
+		&.fc-multiMonthYear-view {
+			padding-bottom: 2.75rem;
 		}
 	}
 }

@@ -5,6 +5,7 @@ import UploadIcon from "@mui/icons-material/Upload";
 // Component
 import MarkdownView from "../../components/MarkdownView";
 import PageTitle from "../../components/Guideline/PageTitle";
+import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
 // Hooks
 import { useNotification } from "../../hooks/useNotification";
 
@@ -108,11 +109,14 @@ const MDWorkspace = () => {
 				ref={mdEditor}
 				value={markdownContent}
 				placeholder={"請在這裡輸入文字... (採用 markdown 語法)"}
-				className="flex-1 !z-[1025] sm:-mb-4 overflow-hidden"
+				className="flex-1 !z-[1024] sm:-mb-4 overflow-hidden"
 				onChange={handleEditorChange}
 				// plugins={PLUGINS}
 				renderHTML={(text) => <MarkdownView text={text} />}
 			/>
+			
+			{/* FAB */}
+			<MultipleFAB btnGroup={btnGroup} handleActionClick={handleActionClick} />
 		</>
 	);
 };

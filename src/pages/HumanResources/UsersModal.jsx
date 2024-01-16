@@ -212,7 +212,7 @@ const EditModal = ({
                 </div>
                 {/* line名稱 */}
                 <div className="w-full">
-                  <InputTitle title={"line名稱"} required={false} />
+                  <InputTitle title={"LINE 顯示名稱"} required={false} />
                   <Controller
                     name="displayName"
                     control={control}
@@ -221,7 +221,7 @@ const EditModal = ({
                         variant="outlined"
                         size="small"
                         className="inputPadding"
-                        placeholder="line名稱"
+                        placeholder="LINE 顯示名稱"
                         fullWidth
                         {...field}
                         inputProps={{ readOnly: true }}

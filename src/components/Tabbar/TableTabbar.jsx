@@ -1,14 +1,16 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+// MUI
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+// Hooks
+import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 
 const TableTabbar = ({ tabGroup, cat, setCat, classnames = "", onTabChange, ...otherProps }) => {
-	const navigate = useNavigate();
+	const navigateWithParams = useNavigateWithParams();
 
 	const handleChange = (event, newValue) => {
 		setCat(newValue);
-		navigate(`?cat=${newValue}`);
+		navigateWithParams(0, 0, { cat: newValue }, false);
 
 		if (onTabChange) {
 			onTabChange(newValue);
@@ -24,7 +26,7 @@ const TableTabbar = ({ tabGroup, cat, setCat, classnames = "", onTabChange, ...o
 			scrollButtons
 			allowScrollButtonsMobile
 			aria-label="scrollable auto tabs example"
-            {...otherProps}>
+			{...otherProps}>
 			{tabGroup.map((tab) => (
 				<Tab key={tab.f} label={tab.text} value={tab.f} />
 			))}

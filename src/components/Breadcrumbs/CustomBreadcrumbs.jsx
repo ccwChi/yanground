@@ -1,24 +1,33 @@
 import React, { useEffect, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+// MUI
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
-import { NavLink, useLocation } from "react-router-dom";
 
 const nameMappings = [
-	{ name: "userinfo", display: "帳戶資訊" },
-	{ name: "sites", display: "案場" },
+	// 基礎資料
 	{ name: "constructionTypes", display: "工程類別" },
+	// 工作管理
+	{ name: "sites", display: "案場" },
+	{ name: "dispatchcalendar", display: "派工行事曆" },
 	{ name: "constructionsummary", display: "施工清單" },
-	{ name: "users", display: "人事管理" },
 	{ name: "dispatchList", display: "派工清單" },
 	{ name: "project", display: "專案管理" },
+	// HRM
+	{ name: "users", display: "人事管理" },
+	{ name: "attendancecalendar", display: "考勤紀錄" },
+	{ name: "anomaly_report", display: "異常考勤" },
+	{ name: "workcalendar", display: "辦公行事曆" },
+	// 會員中心
+	{ name: "userinfo", display: "帳戶資訊" },
+	{ name: "educationtraining", display: "教育訓練" },
+	{ name: "mdworkspace", display: "MD 文稿工作區" },
+	// Others
 	{ name: "setting", display: "設定" },
 	{ name: "punch", display: "打卡" },
 	{ name: "maps", display: "地圖" },
-	{ name: "dispatchcalendar", display: "派工行事曆" },
-	{ name: "attendance_calendar", display: "考勤紀錄" },
-	{ name: "educationtraining", display: "教育訓練" },
-	{ name: "mdworkspace", display: "MD 文稿工作區" },
+	// Error
 	{ name: "unauthorized", display: "訪問該頁面需要授權" },
 	{ name: "forbidden", display: "禁止訪問該頁面" },
 	{ name: "404", display: "未找到該頁面" },

@@ -11,15 +11,15 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import Slider from "@mui/material/Slider";
 import Checkbox from "@mui/material/Checkbox";
+import Divider from "@mui/material/Divider";
+import Backdrop from "@mui/material/Backdrop";
+import SouthIcon from "@mui/icons-material/South";
 import EditIcon from "@mui/icons-material/Edit";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ViewTimelineIcon from "@mui/icons-material/ViewTimeline";
 import PunchClockIcon from "@mui/icons-material/PunchClock";
 import TuneIcon from "@mui/icons-material/Tune";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import Divider from "@mui/material/Divider";
-import SouthIcon from "@mui/icons-material/South";
-import { Backdrop } from "@mui/material";
 // Component
 import RWDTable from "../../components/RWDTable/RWDTable";
 import PageTitle from "../../components/Guideline/PageTitle";
@@ -27,6 +27,7 @@ import Pagination from "../../components/Pagination/Pagination";
 import InputTitle from "../../components/Guideline/InputTitle";
 import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
+import { LoadingFour } from "../../components/Loader/Loading";
 // import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 // Hooks
 import { useNotification } from "../../hooks/useNotification";
@@ -35,7 +36,6 @@ import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 import { getData, postData } from "../../utils/api";
 // Customs
 import EditModal from "./UsersModal";
-import { LoadingFour } from "../../components/Loader/Loading";
 
 // MenuItem 選單樣式調整
 const ITEM_HEIGHT = 36;
@@ -191,14 +191,14 @@ const Users = () => {
 	// 對照 api table 所顯示 key
 	const columnsPC = [
 		{ key: "pictureUrl", label: "", size: "120px" },
-		{ key: "displayName", label: "line名稱", size: "16%", align: "left" },
+		{ key: "displayName", label: "LINE 顯示名稱", size: "16%", align: "left" },
 		{ key: "nickname", label: "暱稱", size: "14%" },
 		{ key: "gender", label: "性別", size: "10%" },
 		{ key: ["department", "name"], label: "部門", size: "14%" },
 		{ key: "startedOn", label: "到職日", size: "16%" },
 	];
 	const columnsMobile = [
-		{ key: "displayName", label: "line名稱" },
+		{ key: "displayName", label: "LINE 顯示名稱" },
 		{ key: "lastname", label: "姓氏" },
 		{ key: "firstname", label: "名字" },
 		{ key: "nickname", label: "暱稱" },
@@ -351,7 +351,7 @@ const Users = () => {
 			handleOpenSearch();
 		} else if (dataMode === "viewpunch") {
 			navigate(
-				`/attendance_calendar?user=${dataValue || ""}&dep=${
+				`/attendancecalendar?user=${dataValue || ""}&dep=${
 					apiData.content.find((item) => item.id === dataValue)?.department.id || ""
 				}&mode=clockPunch`
 			);
