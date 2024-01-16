@@ -17,9 +17,9 @@ import Maps from "./pages/Project/Maps";
 import DispatchList from "./pages/DispatchList/DispatchList";
 // HRM
 import Users from "./pages/HumanResources/Users";
-import UsersAttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
+import AttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
 import AnomalyReport from "./pages/AnomalyReport/AnomalyReport";
-import OfficeCalendar from "./pages/OfficeCalendar/OfficeCalendar";
+import WorkCalendar from "./pages/WorkCalendar/WorkCalendar";
 // Member Cencer
 import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
@@ -84,16 +84,16 @@ const router = createBrowserRouter([
 				element: <Users />,
 			},
 			{
-				path: "/attendance_calendar",
-				element: <UsersAttendanceCalendar />,
+				path: "/attendancecalendar",
+				element: <AttendanceCalendar />,
 			},
 			{
 				path: "/anomaly_report",
 				element: <AnomalyReport />,
 			},
 			{
-				path: "/office_calendar",
-				element: <OfficeCalendar />,
+				path: "/workcalendar",
+				element: <WorkCalendar />,
 			},
 			{
 				path: "/punch",

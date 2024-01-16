@@ -38,6 +38,7 @@ const Calendar = ({
 	...otherProps
 }) => {
 	const isTargetScreen = useMediaQuery("(max-width:991.98px)");
+	const isTargetScreenSm = useMediaQuery("(max-width:389.98px)");
 	const calendarRef = useRef(null);
 	const [activeButton, setActiveButton] = useState("");
 	const [calendarTitle, setCalendarTitle] = useState("");
@@ -47,6 +48,8 @@ const Calendar = ({
 			const newView = isTargetScreen ? "listMonth" : defaultViews;
 			calendarRef.current.getApi().changeView(newView);
 			setActiveButton(newView);
+		} else {
+			setActiveButton(defaultViews);
 		}
 	}, [isTargetScreen, defaultViews]);
 
@@ -76,7 +79,7 @@ const Calendar = ({
 			case "listMonth":
 				return "列表";
 			case "multiMonthYear":
-				return "多月顯示";
+				return "年";
 			default:
 				return null;
 		}
@@ -105,7 +108,7 @@ const Calendar = ({
 
 	return (
 		<>
-			<div className="relative flex items-center justify-between pt-3 px-4" data-flag="header">
+			<div className="relative flex items-center justify-between pt-1 sm:pt-3 px-4" data-flag="header">
 				<div className="inline-flex items-center">
 					{pnlive && (
 						<>
@@ -127,9 +130,11 @@ const Calendar = ({
 						</IconButton>
 					</Tooltip>
 				</div>
-				<div className="sm:absolute left-0 right-0 mx-auto font-bold text-primary-900 lg:text-2xl md:text-xl sm:text-lg text-base opacity-80 tracking-wide w-fit">
-					{calendarTitle}
-				</div>
+				{!isTargetScreenSm && (
+					<div className="sm:absolute left-0 right-0 mx-auto font-bold text-primary-900 lg:text-2xl md:text-xl text-lg opacity-80 tracking-wide w-fit">
+						{calendarTitle}
+					</div>
+				)}
 				<div className="punchlog_btngrpwrp">
 					{isTargetScreen && !customInitialView ? (
 						<ButtonGroup variant="outlined">
@@ -152,6 +157,11 @@ const Calendar = ({
 					)}
 				</div>
 			</div>
+			{isTargetScreenSm && (
+				<div className="left-0 right-0 mx-auto font-bold text-primary-900 text-base opacity-80 tracking-wide w-fit">
+					{calendarTitle}
+				</div>
+			)}
 			<FullCalendar
 				ref={calendarRef}
 				plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, multiMonthPlugin]}

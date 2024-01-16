@@ -16,9 +16,9 @@ const nameMappings = [
 	{ name: "project", display: "專案管理" },
 	// HRM
 	{ name: "users", display: "人事管理" },
-	{ name: "attendance_calendar", display: "考勤紀錄" },
+	{ name: "attendancecalendar", display: "考勤紀錄" },
 	{ name: "anomaly_report", display: "異常考勤" },
-	{ name: "office_calendar", display: "辦公行事曆" },
+	{ name: "workcalendar", display: "辦公行事曆" },
 	// 會員中心
 	{ name: "userinfo", display: "帳戶資訊" },
 	{ name: "educationtraining", display: "教育訓練" },

@@ -117,20 +117,20 @@ const AttendanceCalendar = () => {
 	}, []);
 
 	// 取得人員資料
-	useEffect(() => { 
-		if (depValue) { 
-		 getData(`department/${depValue}/staff`).then((result) => { 
-		  if (result.result) { 
-		   const data = result.result; 
-		   const formattedUser = data.map((us) => ({ 
-			label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName, 
-			id: us.id, 
-		   })); 
-		   setUsersList(formattedUser); 
-		  } 
-		 }); 
-		} 
-	   }, [depValue]);
+	useEffect(() => {
+		if (depValue) {
+			getData(`department/${depValue}/staff`).then((result) => {
+				if (result.result) {
+					const data = result.result;
+					const formattedUser = data.map((us) => ({
+						label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName,
+						id: us.id,
+					}));
+					setUsersList(formattedUser);
+				}
+			});
+		}
+	}, [depValue]);
 
 	// 取得日曆資料
 	useEffect(() => {
@@ -138,7 +138,7 @@ const AttendanceCalendar = () => {
 			setIsLoading(true);
 			// Define the API calls
 			const apiCallA = getData(
-				`user/${userValue}/attendance/${format(dates, dateConList[dateCondition - 1].formatThree)}?p=1&s=31` 
+				`user/${userValue}/attendance/${format(dates, dateConList[dateCondition - 1].formatThree)}?p=1&s=31`
 			);
 			const apiCallB = getData(
 				`user/${userValue}/clockPunch/${format(dates, dateConList[dateCondition - 1].formatThree)}?p=1&s=5000`
@@ -360,7 +360,7 @@ const AttendanceCalendar = () => {
 							value={!modeValue ? dataCAList[0].value : modeValue}
 							onChange={(event) =>
 								navigate(
-									`/attendance_calendar?user=${userValue || ""}&dep=${depValue || ""}&mode=${event.target.value}`
+									`/attendancecalendar?user=${userValue || ""}&dep=${depValue || ""}&mode=${event.target.value}`
 								)
 							}
 							className="inputPadding"
@@ -385,13 +385,13 @@ const AttendanceCalendar = () => {
 										setUsersList([]);
 										setApiDataA([]);
 										setApiDataB([]);
-										navigate(`/attendance_calendar`);
+										navigate(`/attendancecalendar`);
 									}
 								} else {
 									setUsersList([]);
 									setApiDataA([]);
 									setApiDataB([]);
-									navigate(`/attendance_calendar?dep=${newValue.id}`);
+									navigate(`/attendancecalendar?dep=${newValue.id}`);
 								}
 							}}
 							renderInput={(params) => (
@@ -428,12 +428,12 @@ const AttendanceCalendar = () => {
 									if (window.confirm("是否確認清空人員欄位？")) {
 										setApiDataA([]);
 										setApiDataB([]);
-										navigate(`/attendance_calendar?dep=${depValue || ""}`);
+										navigate(`/attendancecalendar?dep=${depValue || ""}`);
 									}
 								} else {
 									setApiDataA([]);
 									setApiDataB([]);
-									navigate(`/attendance_calendar?user=${newValue.id}&dep=${depValue || ""}`);
+									navigate(`/attendancecalendar?user=${newValue.id}&dep=${depValue || ""}`);
 								}
 							}}
 							renderInput={(params) => (
