@@ -63,7 +63,6 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 		department: apiData?.department?.id ? apiData.department.id : "",
 		authorities: apiData?.authorities.map((authority) => authority.id) || [],
 	};
-	console.log(apiData || null);
 
 	// 使用 useForm Hook 來管理表單狀態和驗證
 	const methods = useForm({
