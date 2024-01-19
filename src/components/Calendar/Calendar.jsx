@@ -23,6 +23,8 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AvTimerIcon from "@mui/icons-material/AvTimer";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+// Hooks
+import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 // Custom
 import "./calendar.scss";
 
@@ -35,8 +37,11 @@ const Calendar = ({
 	goto,
 	weekNumbers = true,
 	customInitialView = false,
+	onPreviousClick,
+	onNextClick,
 	...otherProps
 }) => {
+	const navigateWithParams = useNavigateWithParams();
 	const isTargetScreen = useMediaQuery("(max-width:991.98px)");
 	const isTargetScreenSm = useMediaQuery("(max-width:389.98px)");
 	const calendarRef = useRef(null);
@@ -113,12 +118,22 @@ const Calendar = ({
 					{pnlive && (
 						<>
 							<Tooltip title="Previous">
-								<IconButton onClick={() => calendarRef.current.getApi().prev()} sx={{ mr: 0.5 }}>
+								<IconButton
+									onClick={() => {
+										calendarRef.current.getApi().prev();
+										onPreviousClick && onPreviousClick(); // Call the external function if provided
+									}}
+									sx={{ mr: 0.5 }}>
 									<ArrowBackIosNewIcon fontSize="small" />
 								</IconButton>
 							</Tooltip>
 							<Tooltip title="Next">
-								<IconButton onClick={() => calendarRef.current.getApi().next()} sx={{ mr: 0.5 }}>
+								<IconButton
+									onClick={() => {
+										calendarRef.current.getApi().next();
+										onNextClick && onNextClick(); // Call the external function if provided
+									}}
+									sx={{ mr: 0.5 }}>
 									<ArrowForwardIosIcon fontSize="small" />
 								</IconButton>
 							</Tooltip>
@@ -170,7 +185,9 @@ const Calendar = ({
 				// 設為星期一開始
 				firstDay={1}
 				datesSet={(dateInfo) => {
-					setCalendarTitle(dateInfo.view.title);
+					const ctitle = dateInfo.view.title;
+					setCalendarTitle(ctitle);
+					navigateWithParams(0, 0, { calendaryears: ctitle.slice(0, 4) }, false);
 				}}
 				events={data}
 				// 最多顯示多少個

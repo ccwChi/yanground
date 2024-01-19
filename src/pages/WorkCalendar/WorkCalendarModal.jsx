@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { format } from "date-fns";
 // MUI
 import Button from "@mui/material/Button";
 import Select from "@mui/material/Select";
@@ -26,8 +27,6 @@ const MenuProps = {
 	},
 };
 
-const typeList = [{ id: "SUSPENDED", text: "停職" }];
-
 // 行政院行事曆網址 Modal
 const AdminCalendarUrlModal = React.memo(({ title, sendDataToBackend, onClose }) => {
 	// Alert 開關
@@ -35,12 +34,12 @@ const AdminCalendarUrlModal = React.memo(({ title, sendDataToBackend, onClose })
 
 	// 初始預設 default 值
 	const defaultValues = {
-		url: "",
+		source: "",
 	};
 
 	// 使用 Yup 來定義表單驗證規則
 	const schema = yup.object().shape({
-		url: yup.string().required("不可為空值！"),
+		source: yup.string().required("不可為空值！"),
 	});
 
 	// 使用 useForm Hook 來管理表單狀態和驗證
@@ -98,11 +97,16 @@ const AdminCalendarUrlModal = React.memo(({ title, sendDataToBackend, onClose })
 								<a href="https://data.gov.tw/dataset/14718" target="_blank" rel="noopener noreferrer">
 									中華民國政府行政機關辦公日曆表
 								</a>
-								以取得資訊。 (CSV 按鈕右鍵選取 “複製連結網址”)
+								以取得資訊。
+								<br /> (點擊“檢視資料”後，在“JSON”按鈕右鍵選取“複製連結網址”)
+								<div className="flex mt-2">
+									<p className="!my-0 text-rose-400 font-bold text-xs !me-1">＊</p>
+									<p className="!my-0 text-rose-400 font-bold text-xs">注意！請選取 Google 行事曆專用版本日曆表。</p>
+								</div>
 							</div>
 							<div className="mb-1.5">
 								<Controller
-									name="url"
+									name="source"
 									control={control}
 									render={({ field }) => (
 										<TextField
@@ -117,7 +121,7 @@ const AdminCalendarUrlModal = React.memo(({ title, sendDataToBackend, onClose })
 										/>
 									)}
 								/>
-								<FormHelperText className="!text-red-600 h-5">{errors["url"]?.message}</FormHelperText>
+								<FormHelperText className="!text-red-600 h-5">{errors["source"]?.message}</FormHelperText>
 							</div>
 							<Button type="submit" variant="contained" color="success" className="!text-base !h-12" fullWidth>
 								儲存
@@ -142,20 +146,24 @@ const AdminCalendarUrlModal = React.memo(({ title, sendDataToBackend, onClose })
 });
 
 // 臨時公告假期 Modal
-const TemporaryAnnouncementModal = React.memo(({ title, sendDataToBackend, onClose, selectedDate }) => {
+const TemporaryAnnouncementModal = React.memo(({ title, sendDataToBackend, onClose, selectedDate, dayOffTypeList }) => {
 	// Alert 開關
 	const [alertOpen, setAlertOpen] = useState(false);
 
 	// 初始預設 default 值
 	const defaultValues = {
-		date: selectedDate ? new Date(selectedDate) : null,
-		reason: "",
-		type: "SUSPENDED",
+		date: selectedDate ? new Date(selectedDate) : new Date(),
+		cause: "",
+		type: dayOffTypeList ? "SUSPENDED" : "",
 	};
 
 	// 使用 Yup 來定義表單驗證規則
 	const schema = yup.object().shape({
-		reason: yup.string().required("不可為空值！"),
+		date: yup
+			.date()
+			.transform((v) => (v instanceof Date && !isNaN(v) ? v : null))
+			.required("不可為空值！"),
+		cause: yup.string().required("不可為空值！"),
 	});
 
 	// 使用 useForm Hook 來管理表單狀態和驗證
@@ -172,12 +180,14 @@ const TemporaryAnnouncementModal = React.memo(({ title, sendDataToBackend, onClo
 	// 提交表單資料到後端並執行相關操作
 	const onSubmit = (data) => {
 		const fd = new FormData();
+		const _date = format(data.date, "yyyy/MM/dd");
 
+		delete data.date;
 		for (let key in data) {
 			fd.append(key, data[key]);
 		}
 
-		sendDataToBackend(fd, "temporaryannouncement", selectedDate.replace(/-/g, "/"));
+		sendDataToBackend(fd, "temporaryannouncement", _date);
 	};
 
 	// 檢查表單是否汙染
@@ -206,19 +216,20 @@ const TemporaryAnnouncementModal = React.memo(({ title, sendDataToBackend, onClo
 						{/* {selectedDate} */}
 						<div className="flex flex-col pt-4">
 							{/* 日期 */}
-							<div className="mb-3">
+							<div className="mb-1.5">
 								<InputTitle title={"日期"} required={false} />
 								<ControlledDatePicker name="date" />
+								<FormHelperText className="!text-red-600 h-5">{errors["date"]?.message}</FormHelperText>
 							</div>
 							{/* 原因 */}
 							<div className="mb-1.5">
 								<InputTitle title={"原因"} />
 								<Controller
-									name="reason"
+									name="cause"
 									control={control}
 									render={({ field }) => (
 										<TextField
-											error={!!errors["reason"]?.message}
+											error={!!errors["cause"]?.message}
 											variant="outlined"
 											size="small"
 											className="inputPadding"
@@ -229,7 +240,7 @@ const TemporaryAnnouncementModal = React.memo(({ title, sendDataToBackend, onClo
 										/>
 									)}
 								/>
-								<FormHelperText className="!text-red-600 h-5">{errors["reason"]?.message}</FormHelperText>
+								<FormHelperText className="!text-red-600 h-5">{errors["cause"]?.message}</FormHelperText>
 							</div>
 
 							<div className="mb-5">
@@ -244,13 +255,14 @@ const TemporaryAnnouncementModal = React.memo(({ title, sendDataToBackend, onClo
 											displayEmpty
 											{...field}
 											fullWidth
+											disabled={!dayOffTypeList}
 											MenuProps={MenuProps}>
 											<MenuItem value="" disabled>
-												<span className="text-neutral-400 font-light">請選擇申請人</span>
+												<span className="text-neutral-400 font-light">請選擇假別</span>
 											</MenuItem>
-											{typeList?.map((obj) => (
-												<MenuItem key={obj.id} value={obj.id}>
-													{obj.text}
+											{dayOffTypeList?.map((obj) => (
+												<MenuItem key={obj.value} value={obj.value}>
+													{obj.chinese}
 												</MenuItem>
 											))}
 										</Select>

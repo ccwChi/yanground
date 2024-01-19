@@ -51,7 +51,7 @@ const App = () => {
 				{ text: "人事管理", href: "users" },
 				{ text: "考勤紀錄", href: "attendancecalendar" },
 				{ text: "異常考勤", href: "anomaly_report" },
-				// { text: "辦公行事曆", href: "workcalendar" },
+				{ text: "辦公行事曆", href: "workcalendar" },
 			],
 		},
 		{
