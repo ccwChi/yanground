@@ -83,6 +83,7 @@ const WorkCalendar = () => {
 				const formattedEvents = data.map((event) => ({
 					id: event.id,
 					title: event.cause,
+					color: event.type !== 'SUSPENDED' ? "#F48A64" : "#FFA516",
 					// 使用日期對象的 toISOString 方法和 substring 方法進行格式轉換
 					start: format(new Date(event.date), "yyyy-MM-dd", { timeZone: "Asia/Taipei" }),
 				}));
@@ -196,7 +197,7 @@ const WorkCalendar = () => {
 				eventContent={(eventInfo) => {
 					return (
 						<Tooltip title={eventInfo.event._def.title}>
-							<div className="px-1.5 text-ellipsis whitespace-nowrap overflow-hidden">{eventInfo.event._def.title}</div>
+							<div className="px-1.5 py-0.5 text-ellipsis whitespace-nowrap overflow-hidden">{eventInfo.event._def.title}</div>
 						</Tooltip>
 					);
 				}}
