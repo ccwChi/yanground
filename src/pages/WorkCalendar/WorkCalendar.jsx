@@ -89,7 +89,7 @@ const WorkCalendar = () => {
 				setApiData(formattedEvents);
 				setIsLoading(false);
 			} else {
-				setApiData(null)
+				setApiData(null);
 			}
 		});
 	};
@@ -136,9 +136,7 @@ const WorkCalendar = () => {
 		postData(url, fd).then((result) => {
 			if (result.status) {
 				showNotification(message[0], true);
-				if (mode === "temporaryannouncement") {
-					getApiList();
-				}
+				getApiList(calendaryears);
 				onClose();
 				setSendBackFlag(false);
 			} else {
