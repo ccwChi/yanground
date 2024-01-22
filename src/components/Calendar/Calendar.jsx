@@ -47,9 +47,10 @@ const Calendar = ({
 	const calendarRef = useRef(null);
 	const [activeButton, setActiveButton] = useState("");
 	const [calendarTitle, setCalendarTitle] = useState("");
+	const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
 
 	useEffect(() => {
-		if (!customInitialView) {
+		if (!customInitialView || isIOS) {
 			const newView = isTargetScreen ? "listMonth" : defaultViews;
 			calendarRef.current.getApi().changeView(newView);
 			setActiveButton(newView);
@@ -151,7 +152,7 @@ const Calendar = ({
 					</div>
 				)}
 				<div className="punchlog_btngrpwrp">
-					{isTargetScreen && !customInitialView ? (
+					{isTargetScreen && (!customInitialView || isIOS) ? (
 						<ButtonGroup variant="outlined">
 							<Button onClick={() => handleViewChange("listMonth")} className={"primary"}>
 								<ListAltIcon fontSize="small" />
@@ -179,8 +180,12 @@ const Calendar = ({
 			)}
 			<FullCalendar
 				ref={calendarRef}
-				plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, multiMonthPlugin]}
-				initialView={customInitialView ? defaultViews : isTargetScreen ? "listMonth" : defaultViews}
+				plugins={
+					viewOptions.includes("multiMonthYear")
+						? [dayGridPlugin, listPlugin, multiMonthPlugin]
+						: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, multiMonthPlugin]
+				}
+				initialView={customInitialView && !isIOS ? defaultViews : isTargetScreen ? "listMonth" : defaultViews}
 				headerToolbar={false}
 				// 設為星期一開始
 				firstDay={1}

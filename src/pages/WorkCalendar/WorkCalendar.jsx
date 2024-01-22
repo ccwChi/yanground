@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { useLocation } from "react-router-dom";
 // MUI
@@ -80,12 +80,13 @@ const WorkCalendar = () => {
 		getData(`${apiUrl}${yDate ? "/" + yDate : ""}`).then((result) => {
 			if (result.result) {
 				const data = result.result;
+
 				const formattedEvents = data.map((event) => ({
 					id: event.id,
 					title: event.cause,
-					color: event.type !== 'SUSPENDED' ? "#F48A64" : "#FFA516",
-					// 使用日期對象的 toISOString 方法和 substring 方法進行格式轉換
+					color: event.type !== "SUSPENDED" ? "#F48A64" : "#FFA516",
 					start: format(new Date(event.date), "yyyy-MM-dd", { timeZone: "Asia/Taipei" }),
+					// start: format(new Date(`${event.date[0]}-${String(event.date[1]).padStart(2, "0")}-${String(event.date[2]).padStart(2, "0")}T00:00:00.000Z`), "yyyy-MM-dd", { timeZone: "Asia/Taipei" }),
 				}));
 				setApiData(formattedEvents);
 				setIsLoading(false);
@@ -185,7 +186,7 @@ const WorkCalendar = () => {
 			<Calendar
 				data={apiData || []}
 				defaultViews="multiMonthYear"
-				viewOptions={["dayGridMonth", "multiMonthYear"]}
+				viewOptions={["dayGridMonth", "listMonth", "multiMonthYear"]}
 				weekNumbers={false}
 				navLinks={false}
 				customInitialView={true}
@@ -197,7 +198,9 @@ const WorkCalendar = () => {
 				eventContent={(eventInfo) => {
 					return (
 						<Tooltip title={eventInfo.event._def.title}>
-							<div className="px-1.5 py-0.5 text-ellipsis whitespace-nowrap overflow-hidden">{eventInfo.event._def.title}</div>
+							<div className="px-1.5 py-0.5 text-ellipsis whitespace-nowrap overflow-hidden">
+								{eventInfo.event._def.title}
+							</div>
 						</Tooltip>
 					);
 				}}
