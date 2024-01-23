@@ -103,6 +103,9 @@ const EditModal = ({ title, deliverInfo, sendDataToBackend, onClose, departmentL
 			gender: data.gender === "male" ? true : data.gender === "female" ? false : "",
 			nationalIdentityCardNumber: data?.nationalIdentityCardNumber ? data.nationalIdentityCardNumber.toUpperCase() : "",
 		};
+		if (convertData?.employeeId === ""){
+			delete convertData.employeeId;
+		}
 		if (convertData?.nationalIdentityCardNumber === null || convertData?.nationalIdentityCardNumber === "") {
 			delete convertData.nationalIdentityCardNumber;
 		}
