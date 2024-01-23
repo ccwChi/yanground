@@ -700,25 +700,6 @@ const EventModal = React.memo(
                           {deliverInfo.date}{" "}
                         </span>
                         派工人員
-                        {!dateInRange && (
-                          <span className="inline-flex justify-start ms-2">
-                            <HelpQuestion
-                              iconColor={"error"}
-                              content={
-                                <>
-                                  <span className="flex flex-col">
-                                    <span className="ms-2">
-                                      {deliverInfo.date}{" "}
-                                      不在工項時間範圍內，欲在當日派工請調整施工日期區間
-                                    </span>
-                                  </span>
-                                </>
-                              }
-                              // content="在未選專案日期的情況下無法選擇工項日期。"
-                              className=""
-                            />
-                          </span>
-                        )}
                       </div>
 
                       <Autocomplete
@@ -775,6 +756,18 @@ const EventModal = React.memo(
                       >
                         僅修改人員/儲存
                       </Button>
+                    </div>
+                    <div>
+                      {!dateInRange && (
+                        <span className="inline-flex justify-start mt-3 text-red-500">
+                          <span className="flex flex-col">
+                            <span className="">
+                              {deliverInfo.date}{" "}
+                              不在工項時間範圍內，欲在當日派工請調整施工日期區間。
+                            </span>
+                          </span>
+                        </span>
+                      )}
                     </div>
                     <hr className="mt-5 bg-slate-800" />
                     {/* 清單div */}

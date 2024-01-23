@@ -348,7 +348,7 @@ const StepperDivTwoForJobTask = React.memo(
                     </MenuItem>
                   ))}
                 </Select>
-                {!!selectedJob && optionableTaskList.length === 0 && (
+                {!!selectedJob && optionableTaskList.length === 0 && isLoading && (
                   <span className="absolute flex items-center right-8 top-0 bottom-0">
                     <CircularProgress color="primary" size={18} />
                   </span>
