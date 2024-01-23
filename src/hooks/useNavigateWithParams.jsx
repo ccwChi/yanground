@@ -9,7 +9,7 @@ const useNavigateWithParams = () => {
 
 		if (havePage) {
 			// 設置新的查詢參數
-			currentParams.set("p", `${newPage + 1}`);
+			currentParams.set("p", `${newPage}`);
 			currentParams.set("s", `${rowsPerPage}`);
 		}
 

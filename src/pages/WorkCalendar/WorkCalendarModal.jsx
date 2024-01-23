@@ -213,7 +213,6 @@ const TemporaryAnnouncementModal = React.memo(({ title, sendDataToBackend, onClo
 			<ModalTemplete title={title} show={true} maxWidth={"540px"} onClose={onCheckDirty}>
 				<FormProvider {...methods}>
 					<form onSubmit={handleSubmit(onSubmit)}>
-						{/* {selectedDate} */}
 						<div className="flex flex-col pt-4">
 							{/* 日期 */}
 							<div className="mb-1.5">

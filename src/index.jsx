@@ -20,6 +20,7 @@ import Users from "./pages/HumanResources/Users";
 import AttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
 import AnomalyReport from "./pages/AnomalyReport/AnomalyReport";
 import WorkCalendar from "./pages/WorkCalendar/WorkCalendar";
+import SalaryCalculation from "./pages/SalaryCalculation/SalaryCalculation";
 // Member Cencer
 import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
@@ -94,6 +95,10 @@ const router = createBrowserRouter([
 			{
 				path: "/workcalendar",
 				element: <WorkCalendar />,
+			},
+			{
+				path: "/salarycalculation",
+				element: <SalaryCalculation />,
 			},
 			{
 				path: "/punch",
