@@ -32,7 +32,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TaskModal } from "./AddJobTask";
-
+import HelpQuestion from "../../components/HelpQuestion/HelpQuestion";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
@@ -85,6 +85,10 @@ const EventModal = React.memo(
     const reSetTransDate = new Date(transDate); //再變回日期原始碼，這樣做的用意是要把日期的時間重製成+8:00UTC
     // console.log(deliverInfo);
 
+    // 用來儲存求得的 api Data
+    const [jobList, setJobList] = useState([]);
+    const [taskList, setTaskList] = useState([]);
+    // console.log(deliverInfo);
     // 設置不能編輯的日子參數 true or false
     useEffect(() => {
       if (!!deliverInfo?.date) {
@@ -238,6 +242,7 @@ const EventModal = React.memo(
 
     //僅提交工項執行的資料上傳
     const onSubmit = (data) => {
+      console.log(data);
       setSendBackFlag(true);
 
       const convertData = [
@@ -567,7 +572,7 @@ const EventModal = React.memo(
                               className={`m-1 p-1 relative flex justify-between`}
                             >
                               <span
-                                className={`whitespace-nowrap text-base text-neutral-400 ${
+                                className={`whitespace-nowrap text-base text-neutral-400 flex-1 text-wrap ${
                                   activeJobTask === summaryJobTask.id
                                     ? "text-neutral-600"
                                     : "text-neutral-400"
@@ -576,7 +581,7 @@ const EventModal = React.memo(
                                 {`[${summaryJobTask.constructionJobTask.name}]`}
                               </span>
                               <span
-                                className={`text-xs inline-block me-8 mt-1 `}
+                                className={`text-xs inline-block me-8 mt-1 w-[68px] text-right`}
                               >
                                 <span
                                   className={`${
@@ -686,15 +691,36 @@ const EventModal = React.memo(
 
                     {/* 派工div */}
                     <div className="mt-2 relative">
-                      <div className="my-2">
+                      <div className="my-2 flex items-center">
                         選擇{" "}
                         <span
                           className={`${dateInRange ? "" : "text-red-500"}`}
                         >
-                          {deliverInfo.date}
-                        </span>{" "}
+                          {" "}
+                          {deliverInfo.date}{" "}
+                        </span>
                         派工人員
+                        {!dateInRange && (
+                          <span className="inline-flex justify-start ms-2">
+                            <HelpQuestion
+                              iconColor={"error"}
+                              content={
+                                <>
+                                  <span className="flex flex-col">
+                                    <span className="ms-2">
+                                      {deliverInfo.date}{" "}
+                                      不在工項時間範圍內，欲在當日派工請調整施工日期區間
+                                    </span>
+                                  </span>
+                                </>
+                              }
+                              // content="在未選專案日期的情況下無法選擇工項日期。"
+                              className=""
+                            />
+                          </span>
+                        )}
                       </div>
+
                       <Autocomplete
                         multiple
                         options={taskSelectLabouerList.sort(
@@ -738,16 +764,7 @@ const EventModal = React.memo(
                     </div>
 
                     <div className="w-full flex justify-between">
-                      {dateInRange ? (
-                        <span className="text-xs text-red-500 mt-1"></span>
-                      ) : (
-                        <span className="text-xs text-red-500 mt-1">
-                          (當日不在工項時間範圍內，欲在當日派工請調整施工日期區間)
-                        </span>
-                      )}
-                      {/* <span className="text-xs text-red-500 mt-1">
-                        {dateInRange ? "" : "(當日不在工項時間範圍內)"}
-                      </span> */}
+                      <div className="w-fit h-fit mt-3"></div>
                       <Button
                         variant="contained"
                         color="success"

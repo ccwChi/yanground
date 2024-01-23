@@ -9,7 +9,7 @@ const HelpQuestion = ({
   titleSize = "10px",
   content = "",
   iconSize = 18,
-  iconColor = "secondary",
+  iconColor = "secondary", //'inherit''action''disabled''primary''secondary''error''info''success''warning'
   otherCloseFun,
   maxWidth = "280px",
   ...props

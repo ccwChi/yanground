@@ -1,25 +1,26 @@
 import React, { useEffect, useState, useCallback } from "react";
-import ModalTemplete from "../../components/Modal/ModalTemplete";
 
-import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
-import { format } from "date-fns";
+// modal家族 含面板警告載入中，一些icon
+import ModalTemplete from "../../components/Modal/ModalTemplete";
+import { useNotification } from "../../hooks/useNotification";
+import { Backdrop } from "@mui/material";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import {
   Loading,
   LoadingFour,
   LoadingThree,
 } from "../../components/Loader/Loading";
-import { Backdrop } from "@mui/material";
-
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 
-import { deleteData, getData, postBodyData, postData } from "../../utils/api";
-import { useNotification } from "../../hooks/useNotification";
-import ForSummaryStepper from "../../components/Stepper/Stepper";
-import EditSummaryDiv from "./StepperDivOne";
-import EditJobTaskDiv from "./StepperDivTwo";
-import EditDispatchDiv from "./StepperDivThree";
+// api
+import { getData, postBodyData, postData } from "../../utils/api";
 
+// modal中的不同頁面
+import ForSummaryStepper from "../../components/Stepper/Stepper";
+import StepperDivOneForSummary from "./StepperDivOneForSummary";
+import StepperDivTwoForJobTask from "./StepperDivTwoForJobTask";
+import StepperDivThreeForDispatch from "./StepperDivThreeForDispatch";
+import constructionTypeList from "../../datas/constructionTypes";
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -35,7 +36,6 @@ const SummaryModal = React.memo(
     setActiveStep,
     getSummaryList,
     apiUrl,
-    constructionTypeList,
   }) => {
     const [deliverInfo, setDeliverInfo] = useState(null);
     const showNotification = useNotification();
@@ -87,21 +87,27 @@ const SummaryModal = React.memo(
     // 為了避免同步不同不問題，如果是點擊編輯，就用deliveryInfo的summaryID來重新取得清單資料
     // 然後再把這個新的deliveryInfo傳給對應面板
     useEffect(() => {
+      console.log(deliverInfoFromList);
       if (!!deliverInfoFromList) {
-        setIsLoading(true);
-        const url = `constructionSummary/${deliverInfoFromList}`;
-        getData(url).then((result) => {
-          const data = result.result;
-          const correspondingName = constructionTypeList?.find(
-            (t) => t.name === data?.constructionJob?.constructionType
-          );
-          if (correspondingName) {
-            data.constructionJob.typeName = correspondingName.label;
-          } //在job.constructionType="CIVIL_CONSTRUCTION"這樣的情況插入typeName=土木這個屬性
-          setDeliverInfo(data);
-        });
+        getSummaryApi(deliverInfoFromList);
       }
     }, []);
+
+    //獲取整張施工清單作為deliveryInfo得資料
+    const getSummaryApi = (deliverInfoFromList) => {
+      setIsLoading(true);
+      const url = `constructionSummary/${deliverInfoFromList}`;
+      getData(url).then((result) => {
+        const data = result.result;
+        const correspondingName = constructionTypeList?.find(
+          (t) => t.name === data?.constructionJob?.constructionType
+        );
+        if (correspondingName) {
+          data.constructionJob.typeName = correspondingName.label;
+        } //在job.constructionType="CIVIL_CONSTRUCTION"這樣的情況插入typeName=土木這個屬性
+        setDeliverInfo(data);
+      });
+    };
 
     //將外面傳進來的員工資料deliverInfo代入到每個空格之中
 
@@ -127,6 +133,7 @@ const SummaryModal = React.memo(
 
     // 傳遞給後端資料
     const sendDataToBackend = (fd, mode, otherData) => {
+      console.log(fd, mode);
       setSendBackFlag(true);
       let url = "";
       let message = [];
@@ -179,6 +186,7 @@ const SummaryModal = React.memo(
       } else if (mode === "task") {
         postBodyData(url, fd).then((result) => {
           if (result.status) {
+            getSummaryApi(otherData[0]);
             setIsDivDirty(false);
             showNotification(message[0], true);
             setActiveStep(otherData[1]);
@@ -187,9 +195,9 @@ const SummaryModal = React.memo(
             showNotification(
               result.result.reason
                 ? result.result.reason
-                : (result.result
+                : result.result
                 ? result.result
-                : "權限不足"),
+                : "權限不足",
               false
             );
           }
@@ -213,7 +221,7 @@ const SummaryModal = React.memo(
         >
           <div className="h-[500px] min-h-[50vh]">
             {activeStep === 0 ? (
-              <EditSummaryDiv
+              <StepperDivOneForSummary
                 deliverInfo={deliverInfo}
                 projectsList={projectsList}
                 setIsDivDirty={setIsDivDirty}
@@ -223,9 +231,10 @@ const SummaryModal = React.memo(
                 getConstructionTypeList={getConstructionTypeList}
                 isLoading={isLoading}
                 onClose={onClose}
+                setActiveStep={setActiveStep}
               />
             ) : activeStep === 1 ? (
-              <EditJobTaskDiv
+              <StepperDivTwoForJobTask
                 deliverInfo={deliverInfo}
                 sendDataToBackend={sendDataToBackend}
                 isDivDirty={isDivDirty}
@@ -236,9 +245,10 @@ const SummaryModal = React.memo(
                 setDeliverInfoFromList={setDeliverInfoFromList}
                 isLoading={isLoading}
                 setIsLoading={setIsLoading}
+                setActiveStep={setActiveStep}
               />
             ) : (
-              <EditDispatchDiv
+              <StepperDivThreeForDispatch
                 deliverInfo={deliverInfo}
                 setActiveStep={setActiveStep}
                 setCurrentDivIndex={setCurrentDivIndex}

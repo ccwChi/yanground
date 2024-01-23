@@ -26,6 +26,7 @@ import { getData, postBodyData } from "../../utils/api";
 import InputTitle from "../../components/Guideline/InputTitle";
 import { useNotification } from "../../hooks/useNotification";
 import { LoadingFour } from "../../components/Loader/Loading";
+import constructionTypeList from "../../datas/constructionTypes";
 
 const TaskModal = React.memo(
   ({
@@ -36,44 +37,67 @@ const TaskModal = React.memo(
     setJobTaskDirty,
   }) => {
     // Alert 開關
-
+    // console.log(deliverInfo);
     const [isLoading, setIsLoading] = useState(false);
 
-    // 會有 A.原已選擇task清單，B.原總task清單，然後過濾，最後呈現 C.過濾完task清單(顯示在下拉是選單)、D.已選擇task清單(呈現在下面跟右邊的面板)
-    //A.原已選擇task清單，從api取得已選擇的工項執行task清單, 還沒過濾之前
-    const [apiSelectedTask, setApiSelectedTask] = useState(null);
-    //B 在useEffect取得後直接做處理因此沒有另外儲存
-    //C.過濾完task清單
-    const [constructionTaskList, setConstructionTaskList] = useState(null);
-    //D.此施工清單已選擇的工項執行task清單，list呈現的部分
-    const [selectedTasks, setSelectedTasks] = useState([]);
-    //新增加的但減去D的部分
-    const [onlyNewSelected, setOnlyNewSelected] = useState([]);
+    // // 會有 A.原已選擇task清單，B.原總task清單，然後過濾，最後呈現 C.過濾完task清單(顯示在下拉是選單)、D.已選擇task清單(呈現在下面跟右邊的面板)
+    // //A.原已選擇task清單，從api取得已選擇的工項執行task清單, 還沒過濾之前
+    // const [apiSelectedTask, setApiSelectedTask] = useState(null);
+    // //B 在useEffect取得後直接做處理因此沒有另外儲存
+    // //C.過濾完task清單
+    // const [constructionTaskList, setConstructionTaskList] = useState(null);
+    // //D.此施工清單已選擇的工項執行task清單，list呈現的部分
+    // const [selectedTasks, setSelectedTasks] = useState([]);
+    // //新增加的但減去D的部分
 
+    // const [selectedTask, setSelectedTask] = useState("");
+    // 用來儲存求得的 api Data
+    const [jobList, setJobList] = useState([]);
+    const [taskList, setTaskList] = useState([]);
+
+    // 用來處理跳出dialog並編輯工項執行
+    const [taskEditOpen, setTaskEditOpen] = useState(false);
+    const [deliverTaskInfo, setDeliverTaskInfo] = useState(null);
+
+    // 用來選擇執行前置，要先選類別跟項目
+    const [selectedType, setSelectedType] = useState("");
+    const [selectedJob, setSelectedJob] = useState("");
     const [selectedTask, setSelectedTask] = useState("");
 
+    // 用來儲存已經存在於施工清單內的工項執行 ex [53, 83, 89, 139]
+    const [taskIdInSummaryList, setTaskIdInSummaryList] = useState([]);
+    const [taskIdExist, setTaskIdExist] = useState([]);
+    // 已經存在=不能再選擇的taskList 下面陣列用來渲染右邊表格
+    const [existedTaskList, setExistedTaskList] = useState([]);
+    // 下列的清單是刪除已經有的/已經被選的，剩下能選的執行清單
+    const [optionableTaskList, setOptionableTaskList] = useState([]);
+    const [onlyNewSelected, setOnlyNewSelected] = useState([]);
     const [sendBackFlag, setSendBackFlag] = useState(false);
 
-    const summarySince = new Date(deliverInfo?.since);
-    const summaryUntil = new Date(deliverInfo?.until);
-
+    const summarySince = deliverInfo?.since
+      ? new Date(deliverInfo.since)
+      : null;
+    const summaryUntil = deliverInfo?.until
+      ? new Date(deliverInfo.until)
+      : null;
+    // console.log(summarySince)
     const showNotification = useNotification();
 
-    const getApiSelectedTask = useCallback((id) => {
-      const seledtedTaskUrl = `constructionSummary/${id}/tasks`;
-      getData(seledtedTaskUrl).then((result) => {
-        setApiSelectedTask(result.result);
-      });
-    }, []);
+    // const getApiSelectedTask = useCallback((id) => {
+    //   const seledtedTaskUrl = `constructionSummary/${id}/tasks`;
+    //   getData(seledtedTaskUrl).then((result) => {
+    //     setApiSelectedTask(result.result);
+    //   });
+    // }, []);
 
-    useEffect(() => {
-      if (deliverInfo === null) {
-        setSelectedTasks([]);
-        setOnlyNewSelected([]);
-        setSelectedTask([]);
-        setApiSelectedTask(null);
-      }
-    }, [deliverInfo]);
+    // useEffect(() => {
+    //   if (deliverInfo === null) {
+    //     setSelectedTasks([]);
+    //     setOnlyNewSelected([]);
+    //     setSelectedTask([]);
+    //     setApiSelectedTask(null);
+    //   }
+    // }, [deliverInfo]);
 
     const schema = yup.object().shape({
       fields: yup.array().of(
@@ -113,165 +137,268 @@ const TaskModal = React.memo(
       control,
       handleSubmit,
       watch,
-      formState: { errors, },
+      formState: { errors },
     } = methods;
     const { remove } = useFieldArray({
       control,
       name: "fields",
     });
-    const estimatedSinceDay = (index) => {return watch(`fields[${index}].estimatedSince`)}
+    const estimatedSinceDay = (index) => {
+      return watch(`fields[${index}].estimatedSince`);
+    };
     // 檢查表單是否汙染
 
-    //取得工程項目執行並設定已選擇及剩下能選擇的清單
+    // 一但有了deliveryInfo資料，就求得那些工項已有 setTaskIdInSummaryList
     useEffect(() => {
-      setIsLoading(true);
-      if (!!apiSelectedTask) {
-        const taskurl = `constructionJob/${deliverInfo.constructionJob.id}/task`;
-        getData(taskurl).then((result) => {
-          setIsLoading(false);
-          const data = result.result;
-          const contains = [];
-
-          for (const t of apiSelectedTask) {
-            const matchTask = data.find(
-              (d) => d.id === t.constructionJobTask.id
-            );
-            if (matchTask) {
-              contains.push(t);
-            }
-          }
-          const notMatchingTasks = data.filter((d) => {
-            return !apiSelectedTask.some(
-              (t) => t.constructionJobTask.id === d.id
-            );
-          });
-          setSelectedTasks(contains);
-          setConstructionTaskList(notMatchingTasks);
+      console.log("AAA");
+      let TaskIsInSummary = [];
+      deliverInfo.summaryJobTasks &&
+        deliverInfo.summaryJobTasks.map((jt) => {
+          return TaskIsInSummary.push(jt.constructionJobTask.id);
         });
-      }
-    }, [apiSelectedTask]);
-
-    useEffect(() => {
-      if (!!deliverInfo.id && apiSelectedTask === null) {
-        getApiSelectedTask(deliverInfo.id);
-      }
-    }, [deliverInfo]);
-
-    // 選擇新增移除御三家  //紀錄被選擇的工項執行id  -> selected 只有id
-    const handleTaskChange = useCallback((event) => {
-      const selected = event.target.value;
-      setSelectedTask(selected);
+      setTaskIdInSummaryList(TaskIsInSummary); //這個到時候用來過濾 只有id
+      setExistedTaskList(deliverInfo?.summaryJobTasks);
     }, []);
 
-    // 選擇新增移除御三家
-    const handleAddTask = useCallback(() => {
-      if (!jobTaskDirty) setJobTaskDirty(true);
-      // 當選擇並記錄id,
-      if (selectedTask) {
-        const newAddSeletedTask = [
-          ...onlyNewSelected,
-          {
-            constructionJobTask: constructionTaskList.find(
-              (p) => p.id === selectedTask
-            ),
-            id: "",
-          },
-        ];
-        const handleSeletedTask = [
-          {
-            constructionJobTask: constructionTaskList.find(
-              (p) => p.id === selectedTask
-            ),
-            id: "",
-          },
-          ...selectedTasks,
-        ];
-
-        setOnlyNewSelected(
-          newAddSeletedTask.sort((a, b) => {
-            // 先檢查 estimatedSince 是否为非空字符串
-            if (a.estimatedSince && !b.estimatedSince) {
-              return -1; // a 在前
-            } else if (!a.estimatedSince && b.estimatedSince) {
-              return 1; // b 在前
-            } else if (a.estimatedSince && b.estimatedSince) {
-              // estimatedSince 都非空，按日期排序
-              if (a.estimatedSince < b.estimatedSince) {
-                return -1;
-              } else if (a.estimatedSince > b.estimatedSince) {
-                return 1;
-              }
-            }
-            if (a.estimatedUntil < b.estimatedUntil) {
-              return -1;
-            } else if (a.estimatedUntil > b.estimatedUntil) {
-              return 1;
-            }
-
-            return 0; // a 和 b 相等
-          })
-        );
-        setSelectedTasks(
-          handleSeletedTask.sort((a, b) => {
-            // 先檢查 estimatedSince 是否为非空字符串
-            if (a.estimatedSince && !b.estimatedSince) {
-              return -1; // a 在前
-            } else if (!a.estimatedSince && b.estimatedSince) {
-              return 1; // b 在前
-            } else if (a.estimatedSince && b.estimatedSince) {
-              // estimatedSince 都非空，按日期排序
-              if (a.estimatedSince < b.estimatedSince) {
-                return -1;
-              } else if (a.estimatedSince > b.estimatedSince) {
-                return 1;
-              }
-            }
-            if (a.estimatedUntil < b.estimatedUntil) {
-              return -1;
-            } else if (a.estimatedUntil > b.estimatedUntil) {
-              return 1;
-            }
-            return 0; // a 和 b 相等
-          })
-        );
-
-        setConstructionTaskList(
-          constructionTaskList
-            .filter((p) => p.id !== selectedTask)
-            .sort((a, b) => a.ordinal - b.ordinal)
-        );
-        setSelectedTask("");
+    // 一旦選擇了工程類別，api 求工程項目的
+    useEffect(() => {
+      setIsLoading(true);
+      if (!!selectedType) {
+        const typeurl = `constructionType/${selectedType}/job`;
+        getData(typeurl).then((result) => {
+          setJobList(result.result);
+          setIsLoading(false);
+        });
       }
-    }, [selectedTask, constructionTaskList, selectedTasks, onlyNewSelected]);
+    }, [selectedType]);
+
+    // 一旦選擇了工程類別，求工項執行 task 的 api
+    useEffect(() => {
+      getApiTaskList();
+    }, [selectedJob]);
+
+    const getApiTaskList = useCallback(() => {
+      setIsLoading(true);
+      if (!!selectedJob) {
+        const typeurl = `constructionJob/${selectedJob}/task`;
+        getData(typeurl).then((result) => {
+          setTaskList(result.result);
+          setIsLoading(false);
+        });
+      }
+    }, [selectedJob]);
+
+    useEffect(() => {
+      if (taskList) {
+        // console.log("taskIdInSummaryList", taskIdInSummaryList);
+        const filteredArray = taskList.filter((task) => {
+          return !taskIdInSummaryList.includes(task.id);
+        });
+        setOptionableTaskList(filteredArray);
+        // console.log("filteredArray", filteredArray);
+      }
+    }, [taskList, taskIdInSummaryList]);
+
+    // 新增
+    const handleAddTask = () => {
+      if (!jobTaskDirty) setJobTaskDirty(true);
+      if (selectedTask) {
+        console.log("");
+        console.log("selectedTask", selectedTask);
+        const pickdata = optionableTaskList
+          .filter((i) => i.id === selectedTask)
+          .map((t) => {
+            return {
+              constructionJobTask: { id: t.id, name: t.name },
+              id: "",
+              remark: "",
+              estimatedSince: "",
+              estimatedUntil: "",
+              location: "",
+            };
+          });
+        const newTaskIdList = [...taskIdInSummaryList];
+        console.log("newTaskIdList", newTaskIdList);
+        newTaskIdList.push(selectedTask);
+        console.log("newTaskIdList", newTaskIdList);
+        setOnlyNewSelected([...onlyNewSelected, ...pickdata]); // 要顯示在新增加可編輯的部分，權資料
+        setTaskIdInSummaryList(newTaskIdList); //要用來過濾的，已經存在的，僅id
+        setExistedTaskList([...existedTaskList, ...pickdata]); // 已經在清單中+剛剛已增加的
+        setSelectedTask(""); // 清除選擇欄
+      }
+    };
+
+    // 移除
+    const handleRemoveTask = (task, index) => {
+      if (!jobTaskDirty) setJobTaskDirty(true);
+      const newOnlyNewSelected = onlyNewSelected.filter(
+        (i) => i.constructionJobTask.id !== task
+      );
+      setOnlyNewSelected(newOnlyNewSelected);
+      // console.log("newExistedTaskList",newOnlyNewSelected)
+      const newTaskIdList = taskIdInSummaryList.filter((i) => i !== task);
+      setTaskIdInSummaryList(newTaskIdList);
+      remove(index);
+    };
+
+    // 開啟edit dialog
+    // const handleEditTask = useCallback((task) => {
+    //   setTaskEditOpen(true);
+    //   setDeliverTaskInfo(task);
+    // }, []);
+
+    // edit dialo傳回來的data統合
+    const sendDataToTaskEdit = (data) => {
+      if (!jobTaskDirty) setJobTaskDirty(true);
+      console.log(data);
+      // const upDateListIndex = existedTaskList.findIndex(
+      //   (i) => i.constructionJobTask.id === data.constructionJobTask.id
+      // );
+      // console.log(upDateListIndex);
+      // const newExistedTaskList = [...existedTaskList];
+      // newExistedTaskList[upDateListIndex] = data;
+      // setExistedTaskList(newExistedTaskList);
+    };
+
+    //取得工程項目執行並設定已選擇及剩下能選擇的清單
+    // useEffect(() => {
+    //   setIsLoading(true);
+    //   if (!!apiSelectedTask) {
+    //     const taskurl = `constructionJob/${deliverInfo.constructionJob.id}/task`;
+    //     getData(taskurl).then((result) => {
+    //       setIsLoading(false);
+    //       const data = result.result;
+    //       const contains = [];
+
+    //       for (const t of apiSelectedTask) {
+    //         const matchTask = data.find(
+    //           (d) => d.id === t.constructionJobTask.id
+    //         );
+    //         if (matchTask) {
+    //           contains.push(t);
+    //         }
+    //       }
+    //       const notMatchingTasks = data.filter((d) => {
+    //         return !apiSelectedTask.some(
+    //           (t) => t.constructionJobTask.id === d.id
+    //         );
+    //       });
+    //       setSelectedTasks(contains);
+    //       setConstructionTaskList(notMatchingTasks);
+    //     });
+    //   }
+    // }, [apiSelectedTask]);
+
+    // useEffect(() => {
+    //   // if (!!deliverInfo.id && apiSelectedTask === null) {
+    //   //   getApiSelectedTask(deliverInfo.id);
+    //   // }
+    // }, [deliverInfo]);
+
+    // // 選擇新增移除御三家
+    // const handleAddTask = () => {
+    //   // if (!jobTaskDirty) setJobTaskDirty(true);
+    //   // // 當選擇並記錄id,
+    //   // if (selectedTask) {
+    //   //   const newAddSeletedTask = [
+    //   //     ...onlyNewSelected,
+    //   //     {
+    //   //       constructionJobTask: constructionTaskList.find(
+    //   //         (p) => p.id === selectedTask
+    //   //       ),
+    //   //       id: "",
+    //   //     },
+    //   //   ];
+    //   //   const handleSeletedTask = [
+    //   //     {
+    //   //       constructionJobTask: constructionTaskList.find(
+    //   //         (p) => p.id === selectedTask
+    //   //       ),
+    //   //       id: "",
+    //   //     },
+    //   //     ...selectedTasks,
+    //   //   ];
+    //   //   setOnlyNewSelected(
+    //   //     newAddSeletedTask.sort((a, b) => {
+    //   //       // 先檢查 estimatedSince 是否为非空字符串
+    //   //       if (a.estimatedSince && !b.estimatedSince) {
+    //   //         return -1; // a 在前
+    //   //       } else if (!a.estimatedSince && b.estimatedSince) {
+    //   //         return 1; // b 在前
+    //   //       } else if (a.estimatedSince && b.estimatedSince) {
+    //   //         // estimatedSince 都非空，按日期排序
+    //   //         if (a.estimatedSince < b.estimatedSince) {
+    //   //           return -1;
+    //   //         } else if (a.estimatedSince > b.estimatedSince) {
+    //   //           return 1;
+    //   //         }
+    //   //       }
+    //   //       if (a.estimatedUntil < b.estimatedUntil) {
+    //   //         return -1;
+    //   //       } else if (a.estimatedUntil > b.estimatedUntil) {
+    //   //         return 1;
+    //   //       }
+    //   //       return 0; // a 和 b 相等
+    //   //     })
+    //   //   );
+    //   //   setSelectedTasks(
+    //   //     handleSeletedTask.sort((a, b) => {
+    //   //       // 先檢查 estimatedSince 是否为非空字符串
+    //   //       if (a.estimatedSince && !b.estimatedSince) {
+    //   //         return -1; // a 在前
+    //   //       } else if (!a.estimatedSince && b.estimatedSince) {
+    //   //         return 1; // b 在前
+    //   //       } else if (a.estimatedSince && b.estimatedSince) {
+    //   //         // estimatedSince 都非空，按日期排序
+    //   //         if (a.estimatedSince < b.estimatedSince) {
+    //   //           return -1;
+    //   //         } else if (a.estimatedSince > b.estimatedSince) {
+    //   //           return 1;
+    //   //         }
+    //   //       }
+    //   //       if (a.estimatedUntil < b.estimatedUntil) {
+    //   //         return -1;
+    //   //       } else if (a.estimatedUntil > b.estimatedUntil) {
+    //   //         return 1;
+    //   //       }
+    //   //       return 0; // a 和 b 相等
+    //   //     })
+    //   //   );
+    //   //   setConstructionTaskList(
+    //   //     constructionTaskList
+    //   //       .filter((p) => p.id !== selectedTask)
+    //   //       .sort((a, b) => a.ordinal - b.ordinal)
+    //   //   );
+    //   //   setSelectedTask("");
+    //   // }
+    // };
 
     // 選擇新增移除御三家
-    const handleRemoveTask = useCallback(
-      (taskId, index) => {
-        if (!jobTaskDirty) setJobTaskDirty(true);
-        const selectedTask = selectedTasks.find(
-          (task) => task.constructionJobTask.id === taskId
-        );
-        if (selectedTask) {
-          const updatedConstructionTaskList = [
-            ...constructionTaskList,
-            selectedTask.constructionJobTask,
-          ];
-          setConstructionTaskList(updatedConstructionTaskList);
-        }
-        const forSelectedTasks = selectedTasks.filter(
-          (p) => p.constructionJobTask.id !== taskId
-        );
-        setSelectedTasks(forSelectedTasks);
-        const forOnlyNewSelected = onlyNewSelected.filter(
-          (p) => p.constructionJobTask.id !== taskId
-        );
-        setOnlyNewSelected(forOnlyNewSelected);
-        remove(index);
-      },
-      [selectedTasks, constructionTaskList, onlyNewSelected]
-    );
+    // const handleRemoveTask = (taskId, index) => {
+    //   // if (!jobTaskDirty) setJobTaskDirty(true);
+    //   // const selectedTask = selectedTasks.find(
+    //   //   (task) => task.constructionJobTask.id === taskId
+    //   // );
+    //   // if (selectedTask) {
+    //   //   const updatedConstructionTaskList = [
+    //   //     ...constructionTaskList,
+    //   //     selectedTask.constructionJobTask,
+    //   //   ];
+    //   //   setConstructionTaskList(updatedConstructionTaskList);
+    //   // }
+    //   // const forSelectedTasks = selectedTasks.filter(
+    //   //   (p) => p.constructionJobTask.id !== taskId
+    //   // );
+    //   // setSelectedTasks(forSelectedTasks);
+    //   // const forOnlyNewSelected = onlyNewSelected.filter(
+    //   //   (p) => p.constructionJobTask.id !== taskId
+    //   // );
+    //   // setOnlyNewSelected(forOnlyNewSelected);
+    //   // remove(index);
+    // };
 
     const onSubmit = (data) => {
+      console.log(data);
       setSendBackFlag(true);
       const convertData = [];
       for (var task of data.fields) {
@@ -314,10 +441,83 @@ const TaskModal = React.memo(
             {deliverInfo.name} - 新增工項執行
           </span>{" "}
         </div>
+
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="relative">
-              <div className="inline-flex gap-3  w-full ">
+              <div className="inline-flex gap-x-3 w-full mb-3">
+                {/* 選擇工程類別 Type */}
+                <FormControl
+                  size="small"
+                  className="inputPadding relative"
+                  fullWidth
+                >
+                  <Select
+                    labelId="task-select-label"
+                    value={selectedType}
+                    onChange={(e) => {
+                      setJobList([]);
+                      setSelectedType(e.target.value);
+                      setSelectedJob("");
+                      setSelectedTask("");
+                    }}
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      <span className="text-neutral-400 font-light">
+                        工程類別
+                      </span>
+                    </MenuItem>
+                    {constructionTypeList?.map((type) => (
+                      <MenuItem key={type.ordinal} value={type.name}>
+                        {type.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {false && (
+                    <span className="absolute flex items-center right-10 top-0 bottom-0">
+                      <CircularProgress color="primary" size={20} />
+                    </span>
+                  )}
+                </FormControl>
+                {/* 選擇工程項目 Job */}
+                <FormControl
+                  size="small"
+                  className="inputPadding relative"
+                  fullWidth
+                >
+                  <Select
+                    disabled={!!selectedType && jobList.length === 0}
+                    labelId="task-select-label"
+                    value={selectedJob}
+                    onChange={(e) => {
+                      setOptionableTaskList([]);
+                      setSelectedJob(e.target.value);
+                      setSelectedTask("");
+                    }}
+                    displayEmpty
+                    // MenuProps={MenuProps}
+                  >
+                    <MenuItem value="" disabled>
+                      <span className="text-neutral-400 font-light">
+                        工程項目
+                      </span>
+                    </MenuItem>
+                    {jobList?.map((job) => (
+                      <MenuItem key={job.id} value={job.id}>
+                        {job.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {!!selectedType && jobList.length === 0 && (
+                    <span className="absolute flex items-center right-8 top-0 bottom-0">
+                      <CircularProgress color="primary" size={18} />
+                    </span>
+                  )}
+                </FormControl>
+              </div>
+              {/* 選擇工項執行 Task */}
+              <div className="inline-flex gap-x-3 w-full">
                 <FormControl
                   size="small"
                   className="inputPadding relative"
@@ -327,7 +527,7 @@ const TaskModal = React.memo(
                     disabled={isLoading}
                     labelId="task-select-label"
                     value={selectedTask}
-                    onChange={handleTaskChange}
+                    onChange={(e) => setSelectedTask(e.target.value)}
                     displayEmpty
                     //MenuProps={MenuProps}
                   >
@@ -336,19 +536,18 @@ const TaskModal = React.memo(
                         請選擇工項執行
                       </span>
                     </MenuItem>
-                    {constructionTaskList?.map((task) => (
-                      <MenuItem key={"select" + task.id} value={task.id}>
+                    {optionableTaskList?.map((task) => (
+                      <MenuItem key={task.id} value={task.id}>
                         {task.name}
                       </MenuItem>
                     ))}
                   </Select>
-                  {isLoading && (
-                    <span className="absolute flex items-center right-10 top-0 bottom-0">
-                      <CircularProgress color="primary" size={20} />
+                  {!!selectedJob && optionableTaskList.length === 0 && isLoading && (
+                    <span className="absolute flex items-center right-8 top-0 bottom-0">
+                      <CircularProgress color="primary" size={18} />
                     </span>
                   )}
                 </FormControl>
-
                 <Button
                   variant="contained"
                   color="dark"

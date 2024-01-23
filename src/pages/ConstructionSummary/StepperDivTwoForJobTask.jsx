@@ -36,9 +36,9 @@ import { format } from "date-fns";
 import InputTitle from "../../components/Guideline/InputTitle";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 import HelpQuestion from "../../components/HelpQuestion/HelpQuestion";
-
+import constructionTypeList from "../../datas/constructionTypes";
 // step-2 的 div，編修工項執行，會用主面板拿到的summaryID重求API後設為deliveryInfo傳進來
-const EditJobTaskDiv = React.memo(
+const StepperDivTwoForJobTask = React.memo(
   ({
     deliverInfo,
     sendDataToBackend,
@@ -50,24 +50,29 @@ const EditJobTaskDiv = React.memo(
     setDeliverInfoFromList,
     isLoading,
     setIsLoading,
+    setActiveStep,
   }) => {
     // Alert 開關
 
-    // const [isLoading, setIsLoading] = useState(true);
-    // 會有 A.原已選擇task清單，B.原總task清單，然後過濾，最後呈現 C.過濾完task清單(顯示在下拉是選單)、D.已選擇task清單(呈現在下面跟右邊的面板)
-    //A.原已選擇task清單，從api取得已選擇的工項執行task清單, 還沒過濾之前
-    const [apiSelectedTask, setApiSelectedTask] = useState(null);
-    //B 在useEffect取得後直接做處理因此沒有另外儲存
-    //C.過濾完task清單
-    const [constructionTaskList, setConstructionTaskList] = useState(null);
-    //D.此施工清單已選擇的工項執行task清單，list呈現的部分
-    const [selectedTasks, setSelectedTasks] = useState([]);
-    //新增加的但減去D的部分
-    const [selectedTask, setSelectedTask] = useState("");
+    // 用來儲存求得的 api Data
+    const [jobList, setJobList] = useState([]);
+    const [taskList, setTaskList] = useState([]);
 
     // 用來處理跳出dialog並編輯工項執行
     const [taskEditOpen, setTaskEditOpen] = useState(false);
     const [deliverTaskInfo, setDeliverTaskInfo] = useState(null);
+
+    // 用來選擇執行前置，要先選類別跟項目
+    const [selectedType, setSelectedType] = useState("");
+    const [selectedJob, setSelectedJob] = useState("");
+    const [selectedTask, setSelectedTask] = useState("");
+
+    // 用來儲存已經存在於施工清單內的工項執行 ex [53, 83, 89, 139]
+    const [taskIdInSummaryList, setTaskIdInSummaryList] = useState([]);
+    // 已經存在=不能再選擇的taskList 下面陣列用來渲染右邊表格
+    const [existedTaskList, setExistedTaskList] = useState([]);
+    // 下列的清單是刪除已經有的/已經被選的，剩下能選的執行清單
+    const [optionableTaskList, setOptionableTaskList] = useState([]);
 
     const summarySince = deliverInfo?.since
       ? new Date(deliverInfo.since)
@@ -85,125 +90,96 @@ const EditJobTaskDiv = React.memo(
       }
     }, [padScreen]);
 
-    // 先用id求得清單中有的工項執行
+    // 先把清單中已經有的工項執行找出
     useEffect(() => {
-      setIsLoading(true);
-      if (apiSelectedTask === null) {
-        getApiSelectedTask(deliverInfo?.id);
-      }
+      // console.log(deliverInfo);
+      let TaskIsInSummary = [];
+      console.log("deliverInfo",deliverInfo)
+      deliverInfo.constructionSummaryJobTasks &&
+        deliverInfo.constructionSummaryJobTasks.map((jt) => {
+          return TaskIsInSummary.push(jt.constructionJobTask.id);
+        });
+      setTaskIdInSummaryList(TaskIsInSummary); //這個到時候用來過濾
+      setExistedTaskList(
+        deliverInfo?.constructionSummaryJobTasks
+          ? deliverInfo.constructionSummaryJobTasks
+          : []
+      );
     }, [deliverInfo]);
 
-    const getApiSelectedTask = (id) => {
-      const seledtedTaskUrl = `constructionSummary/${id}/tasks`;
-      getData(seledtedTaskUrl).then((result) => {
-        setApiSelectedTask(result.result);
-        // console.log("ApiSelectedTask,", result.result);
-      });
-    };
-
-    //取得工程項目執行並設定已選擇及剩下能選擇的清單
+    // 一旦選擇了工程類別，api 求工程項目的
     useEffect(() => {
-      if (!!apiSelectedTask) {
-        setIsLoading(true);
-        const taskurl = `constructionJob/${deliverInfo.constructionJob.id}/task`;
-        getData(taskurl).then((result) => {
-          // setIsLoading(false);
-          const data = result.result;
-          const contains = [];
-
-          for (const t of apiSelectedTask) {
-            const matchTask = data.find(
-              (d) => d.id === t.constructionJobTask.id
-            );
-            if (matchTask) {
-              contains.push(t);
-            }
-          }
-          const notMatchingTasks = data.filter((d) => {
-            return !apiSelectedTask.some(
-              (t) => t.constructionJobTask.id === d.id
-            );
-          });
-          setSelectedTasks(contains);
-          setConstructionTaskList(notMatchingTasks);
-          setTimeout(() => {
-            setIsLoading(false);
-          }, 100);
+      setIsLoading(true);
+      if (!!selectedType) {
+        const typeurl = `constructionType/${selectedType}/job`;
+        getData(typeurl).then((result) => {
+          setJobList(result.result);
+          setIsLoading(false);
         });
       }
-    }, [apiSelectedTask]);
+    }, [selectedType]);
 
-    // 選擇新增移除御三家  //紀錄被選擇的工項執行id  -> selected 只有id
-    const handleTaskChange = useCallback((event) => {
-      const selected = event.target.value;
-      setSelectedTask(selected);
-    }, []);
+    // 一旦選擇了工程類別，求工程執行的 api
+    useEffect(() => {
+      getApiTaskList();
+    }, [selectedJob]);
 
-    // 選擇新增移除御三家
-    const handleAddTask = useCallback(() => {
+    const getApiTaskList = useCallback(() => {
+      setIsLoading(true);
+      if (!!selectedJob) {
+        const typeurl = `constructionJob/${selectedJob}/task`;
+        getData(typeurl).then((result) => {
+          setTaskList(result.result);
+          setIsLoading(false);
+        });
+      }
+    }, [selectedJob]);
+
+    useEffect(() => {
+      if (taskList) {
+        const filteredArray = taskList.filter((task) => {
+          return !taskIdInSummaryList.includes(task.id);
+        });
+        setOptionableTaskList(filteredArray);
+      }
+    }, [taskList, taskIdInSummaryList]);
+
+    // 新增
+    const handleAddTask = () => {
       if (!isDivDirty) setIsDivDirty(true);
       if (selectedTask) {
-        const handleSeletedTask = [
-          {
-            constructionJobTask: constructionTaskList.find(
-              (p) => p.id === selectedTask
-            ),
-            id: "",
-          },
-          ...selectedTasks,
-        ];
-
-        setSelectedTasks(
-          handleSeletedTask.sort((a, b) => {
-            // 先檢查 estimatedSince 是否为非空字符串
-            if (a.estimatedSince && !b.estimatedSince) {
-              return -1; // a 在前
-            } else if (!a.estimatedSince && b.estimatedSince) {
-              return 1; // b 在前
-            } else if (a.estimatedSince && b.estimatedSince) {
-              // estimatedSince 都非空，按日期排序
-              if (a.estimatedSince < b.estimatedSince) {
-                return -1;
-              } else if (a.estimatedSince > b.estimatedSince) {
-                return 1;
-              }
-            }
-            if (a.estimatedUntil < b.estimatedUntil) {
-              return -1;
-            } else if (a.estimatedUntil > b.estimatedUntil) {
-              return 1;
-            }
-
-            return 0; // a 和 b 相等
-          })
-        );
-        setConstructionTaskList(
-          constructionTaskList
-            .filter((p) => p.id !== selectedTask)
-            .sort((a, b) => a.ordinal - b.ordinal)
-        );
+        const pickdata = optionableTaskList
+          .filter((i) => i.id === selectedTask)
+          .map((t) => {
+            return {
+              constructionJobTask: { id: t.id, name: t.name },
+              id: "",
+              remark: "",
+              estimatedSince: "",
+              estimatedUntil: "",
+              location: "",
+            };
+          });
+        const newTaskIdList = [...taskIdInSummaryList];
+        newTaskIdList.push(selectedTask);
+        setTaskIdInSummaryList(newTaskIdList);
+        console.log(newTaskIdList)
+        setExistedTaskList([...existedTaskList, ...pickdata]);
         setSelectedTask("");
       }
-    }, [selectedTask, constructionTaskList, selectedTasks]);
+    };
 
-    // 選擇新增移除御三家
-    const handleRemoveTask = useCallback(
-      (task) => {
-        if (!isDivDirty) setIsDivDirty(true);
-        setConstructionTaskList(
-          [
-            selectedTasks.find((p) => p.constructionJobTask.id === task)
-              .constructionJobTask,
-            ...constructionTaskList,
-          ].sort((a, b) => a.ordinal - b.ordinal)
-        );
-        setSelectedTasks(
-          selectedTasks.filter((p) => p.constructionJobTask.id !== task)
-        );
-        // getApiSelectedTask(deliverInfo.id);
-      },
-      [selectedTasks, constructionTaskList]
-    );
+    // 移除
+    const handleRemoveTask = (task) => {
+      if (!isDivDirty) setIsDivDirty(true);
+      const newExistedTaskList = existedTaskList.filter(
+        (i) => i.constructionJobTask.id !== task
+      );
+      setExistedTaskList(newExistedTaskList);
+      const newTaskIdList = taskIdInSummaryList.filter((i) => i !== task);
+      setTaskIdInSummaryList(newTaskIdList);
+    };
+
     // 開啟edit dialog
     const handleEditTask = useCallback((task) => {
       setTaskEditOpen(true);
@@ -213,37 +189,14 @@ const EditJobTaskDiv = React.memo(
     // edit dialo傳回來的data統合
     const sendDataToTaskEdit = (data) => {
       if (!isDivDirty) setIsDivDirty(true);
-      const checkListIndex = selectedTasks.findIndex(
+      console.log(data);
+      const upDateListIndex = existedTaskList.findIndex(
         (i) => i.constructionJobTask.id === data.constructionJobTask.id
       );
-      if (checkListIndex !== -1) {
-        const updatedSelectedTasks = [...selectedTasks];
-        updatedSelectedTasks[checkListIndex] = data;
-        setSelectedTasks(
-          updatedSelectedTasks.sort((a, b) => {
-            // 先检查 estimatedSince 是否為空
-            if (a.estimatedSince && !b.estimatedSince) {
-              return -1;
-            } else if (!a.estimatedSince && b.estimatedSince) {
-              return 1;
-            } else if (a.estimatedSince && b.estimatedSince) {
-              if (a.estimatedSince < b.estimatedSince) {
-                return -1;
-              } else if (a.estimatedSince > b.estimatedSince) {
-                return 1;
-              }
-            }
-
-            if (a.estimatedUntil < b.estimatedUntil) {
-              return -1;
-            } else if (a.estimatedUntil > b.estimatedUntil) {
-              return 1;
-            }
-
-            return 0; // a 和 b 相等
-          })
-        );
-      }
+      console.log(upDateListIndex);
+      const newExistedTaskList = [...existedTaskList];
+      newExistedTaskList[upDateListIndex] = data;
+      setExistedTaskList(newExistedTaskList);
     };
 
     const onTaskEditClose = () => {
@@ -253,12 +206,12 @@ const EditJobTaskDiv = React.memo(
 
     const onSubmit = async (activeStep) => {
       const convertData = [];
-      for (var task of selectedTasks) {
+      for (var task of existedTaskList) {
         const tempTask = {
           id: task?.id ? task.id : "",
           constructionJobTask: task.constructionJobTask.id,
-          estimatedSince: task.estimatedSince ? task.estimatedSince : "",
-          estimatedUntil: task.estimatedUntil ? task.estimatedUntil : "",
+          estimatedSince: task?.estimatedSince ? task.estimatedSince : "",
+          estimatedUntil: task?.estimatedUntil ? task.estimatedUntil : "",
           location: task?.location ? task.location : "",
           remark: task?.remark ? task.remark : "",
         };
@@ -267,11 +220,11 @@ const EditJobTaskDiv = React.memo(
         }
         convertData.push(tempTask);
       }
-      sendDataToBackend(convertData, "task", [deliverInfo.id, activeStep]);
+      console.log(convertData);
       setDeliverInfoFromList(deliverInfo.id);
+      sendDataToBackend(convertData, "task", [deliverInfo.id, activeStep]);
     };
 
-    // console.log(deliverInfo);
     return (
       <>
         {/* 除了按鈕以外的主內容顯示 */}
@@ -282,7 +235,13 @@ const EditJobTaskDiv = React.memo(
             ${!currentDivIndex ? "flex" : "hidden"}`}
           >
             <div className="mt-2">
-              <p className="font-extrabold text-lg text-center">
+              <p
+                className="font-extrabold text-lg text-center"
+                onClick={() => {
+                  console.log("selectedType", selectedType);
+                  console.log("Joblist", jobList);
+                }}
+              >
                 {deliverInfo?.name ? deliverInfo.name : ""}
               </p>
               <p className=" text-sm text-center">
@@ -302,10 +261,79 @@ const EditJobTaskDiv = React.memo(
                 fullWidth
               >
                 <Select
+                  labelId="task-select-label"
+                  value={selectedType}
+                  onChange={(e) => {
+                    setJobList([]);
+                    setSelectedType(e.target.value);
+                    setSelectedJob("");
+                    setSelectedTask("");
+                  }}
+                  displayEmpty
+                >
+                  <MenuItem value="" disabled>
+                    <span className="text-neutral-400 font-light">
+                      工程類別
+                    </span>
+                  </MenuItem>
+                  {constructionTypeList?.map((type) => (
+                    <MenuItem key={type.ordinal} value={type.name}>
+                      {type.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {false && (
+                  <span className="absolute flex items-center right-10 top-0 bottom-0">
+                    <CircularProgress color="primary" size={20} />
+                  </span>
+                )}
+              </FormControl>
+              <FormControl
+                size="small"
+                className="inputPadding relative"
+                fullWidth
+              >
+                <Select
+                  disabled={!!selectedType && jobList.length === 0}
+                  labelId="task-select-label"
+                  value={selectedJob}
+                  onChange={(e) => {
+                    setOptionableTaskList([]);
+                    setSelectedJob(e.target.value);
+                    setSelectedTask("");
+                  }}
+                  displayEmpty
+                  // MenuProps={MenuProps}
+                >
+                  <MenuItem value="" disabled>
+                    <span className="text-neutral-400 font-light">
+                      工程項目
+                    </span>
+                  </MenuItem>
+                  {jobList?.map((job) => (
+                    <MenuItem key={job.id} value={job.id}>
+                      {job.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {!!selectedType && jobList.length === 0 && (
+                  <span className="absolute flex items-center right-8 top-0 bottom-0">
+                    <CircularProgress color="primary" size={18} />
+                  </span>
+                )}
+              </FormControl>
+            </div>
+            <div className="inline-flex gap-x-3 w-full">
+              <FormControl
+                size="small"
+                className="inputPadding relative"
+                fullWidth
+              >
+                <Select
                   disabled={isLoading}
                   labelId="task-select-label"
                   value={selectedTask}
-                  onChange={handleTaskChange}
+                  onChange={(e) => setSelectedTask(e.target.value)}
                   displayEmpty
                   //MenuProps={MenuProps}
                 >
@@ -314,15 +342,15 @@ const EditJobTaskDiv = React.memo(
                       請選擇工項執行
                     </span>
                   </MenuItem>
-                  {constructionTaskList?.map((task) => (
-                    <MenuItem key={"select" + task.id} value={task.id}>
+                  {optionableTaskList?.map((task) => (
+                    <MenuItem key={task.id} value={task.id}>
                       {task.name}
                     </MenuItem>
                   ))}
                 </Select>
-                {isLoading && (
-                  <span className="absolute flex items-center right-10 top-0 bottom-0">
-                    <CircularProgress color="primary" size={20} />
+                {!!selectedJob && optionableTaskList.length === 0 && (
+                  <span className="absolute flex items-center right-8 top-0 bottom-0">
+                    <CircularProgress color="primary" size={18} />
                   </span>
                 )}
               </FormControl>
@@ -337,11 +365,11 @@ const EditJobTaskDiv = React.memo(
               </Button>
             </div>
             <List className="overflow-y-scroll border border-neutral-300 rounded h-full">
-              {!isLoading ? (
+              {true ? (
                 <TransitionGroup>
-                  {selectedTasks.length > 0 ? (
-                    selectedTasks.map((task) => (
-                      <Collapse key={"selected" + task.constructionJobTask?.id}>
+                  {existedTaskList.length > 0 ? (
+                    existedTaskList.map((task, i) => (
+                      <Collapse key={task.constructionJobTask.id}>
                         <ListItem>
                           <ListItemText
                             secondary={task.constructionJobTask?.name}
@@ -388,11 +416,11 @@ const EditJobTaskDiv = React.memo(
             className={`${currentDivIndex ? "block" : "hidden"} 
               block flex-1 my-2 md:block md:w-full right-0 left-0 top-0 bottom-0 z-10 border-2 overflow-y-scroll rounded-md bg-slate-50 `}
           >
-            {!!selectedTasks.length ? (
-              selectedTasks.map((task, index) => (
+            {!!existedTaskList.length ? (
+              existedTaskList.map((task, index) => (
                 <Card
                   className="m-2 mb-0 shadow-sm !p-0 !pb-2 h-fit"
-                  key={index + task.constructionJobTask.name}
+                  key={task.constructionJobTask.id}
                   onClick={() => {
                     handleEditTask(task);
                   }}
@@ -449,7 +477,11 @@ const EditJobTaskDiv = React.memo(
               className="!text-base !h-10 !mt-1 "
               fullWidth
               onClick={() => {
-                onSubmit(0);
+                if (isDivDirty) {
+                  onSubmit(0);
+                } else {
+                  setActiveStep(0);
+                }
               }}
             >
               上一步
@@ -473,8 +505,11 @@ const EditJobTaskDiv = React.memo(
               className={`!text-base !h-10 !mt-1`}
               fullWidth
               onClick={() => {
-                onSubmit(2);
-                // setActiveStep(2);
+                if (isDivDirty) {
+                  onSubmit(2);
+                } else {
+                  setActiveStep(2);
+                }
               }}
             >
               下一步
@@ -533,7 +568,6 @@ const TaskEditDialog = React.memo(
           message: "结束日期不能早於施工日期",
           test: function (estimatedUntil) {
             const estimatedSince = this.parent.estimatedSince;
-
             // 只有在 estimatedSince 和 estimatedUntil 都有值時才驗證
             // 下面的用意是如果從後端拿到日期為了載入日期選擇器，會轉成00:08:00 GMT+0800的時區，但如果本地端選擇的話會是00:00:00 GMT+0800，
             // 會導致選同一天卻顯示結束比開始早而報錯。
@@ -580,11 +614,7 @@ const TaskEditDialog = React.memo(
         onClose();
       }
       setAlertOpen(false);
-      // setAlertDateChangeOpen(false);
     };
-
-    // deliverTaskInfo 傳進來的 {id: '7056078833492952896', constructionJobTask: {…}, estimatedSince: null, estimatedUntil: null, location: '', …}
-    // 格式 {id: '', constructionJobTask:1 , estimatedSince: '', estimatedUntil: '', location: '', remarK:''}
 
     //將外面傳進來的資料deliverInfo代入到每個空格之中 OK
     useEffect(() => {
@@ -606,12 +636,8 @@ const TaskEditDialog = React.memo(
       }
     }, [deliverTaskInfo, reset]);
 
-    // useEffect(()=>{
-
-    // },[data.estimatedSince])
-
     const onSubmit = (data) => {
-      //console.log("要送出的", data);
+      console.log("要送出的", data);
       const convertData = {
         id: deliverTaskInfo?.id ? deliverTaskInfo?.id : "",
         constructionJobTask: {
@@ -627,7 +653,7 @@ const TaskEditDialog = React.memo(
         location: data?.location ? data.location : "",
         remark: data?.remark ? data.remark : "",
       };
-
+      console.log("轉換完的", convertData);
       sendDataToTaskEdit(convertData);
       onClose();
     };
@@ -649,18 +675,32 @@ const TaskEditDialog = React.memo(
                     <div className="flex items-center">
                       <InputTitle title={"預計施工日期"} required={false} />
                       <HelpQuestion
-                        content="在未選專案日期的情況下無法選擇工項日期"
+                        iconColor={(!summarySince || !summaryUntil)? "error":"inherit"}
+                        content={
+                          <>
+                            <span className="flex flex-col">
+                              <span className="flex">
+                                1.
+                                <span className="ms-2">
+                                  在未選專案日期的情況下無法選擇工項日期。
+                                </span>
+                              </span>
+                              <span className="flex">
+                                2.
+                                <span className="ms-2">
+                                  日期選擇範圍限於此清單的施工日期~完工日期區間內。
+                                </span>
+                              </span>
+                            </span>
+                          </>
+                        }
+                        // content="在未選專案日期的情況下無法選擇工項日期。"
                         className="mb-1.5 ms-2"
                       />
                       {/* <Quiz /> */}
                     </div>
-                    {console.log(
-                      "summarySince",
-                      summarySince,
-                      "summaryUntil",
-                      summaryUntil
-                    )}
                     <ControlledDatePicker
+                      
                       name="estimatedSince"
                       disabled={!summarySince || !summaryUntil}
                       minDate={summarySince}
@@ -670,6 +710,7 @@ const TaskEditDialog = React.memo(
                   <div className="flex flex-col gap-1.5 mt-3">
                     <InputTitle title={"預計完工日期"} required={false} />
                     <ControlledDatePicker
+                      
                       name="estimatedUntil"
                       disabled={!summarySince || !summaryUntil}
                       minDate={!!estimatedSince ? estimatedSince : summarySince}
@@ -764,4 +805,4 @@ const TaskEditDialog = React.memo(
   }
 );
 
-export default EditJobTaskDiv;
+export default StepperDivTwoForJobTask;

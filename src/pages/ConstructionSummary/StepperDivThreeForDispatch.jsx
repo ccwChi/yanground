@@ -24,7 +24,7 @@ import { TransitionGroup } from "react-transition-group";
 import HelpQuestion from "../../components/HelpQuestion/HelpQuestion";
 
 // step-3 的 div，編修派工人員，想要正常執行 EditDispatchDiv，一定要傳一個 summaryID進去
-const EditDispatchDiv = React.memo(
+const StepperDivThreeForDispatch = React.memo(
   ({
     deliverInfo,
     setActiveStep,
@@ -60,7 +60,7 @@ const EditDispatchDiv = React.memo(
 
     // 打開面板先取得工務人員清單跟工項執行列表
     useEffect(() => {
-      // if (deliverInfo) {
+      console.log(deliverInfo)
       if (!!deliverInfo) {
         getTaskList();
       }
@@ -515,4 +515,4 @@ const EditDispatchDiv = React.memo(
   }
 );
 
-export default EditDispatchDiv;
+export default StepperDivThreeForDispatch;

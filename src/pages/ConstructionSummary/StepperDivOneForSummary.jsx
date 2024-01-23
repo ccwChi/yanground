@@ -21,15 +21,13 @@ const currentYear = new Date().toLocaleDateString("zh-TW-u-ca-roc", {
 });
 
 // step-1 的 div，編修施工清單本人
-const EditSummaryDiv = React.memo(
+const StepperDivOneForSummary = React.memo(
   ({
     deliverInfo,
     projectsList,
     setIsDivDirty,
     sendDataToBackend,
-    constructionTypeList,
-    constructionJobList,
-    getConstructionTypeList,
+    setActiveStep,
     isLoading,
     onClose,
   }) => {
@@ -60,11 +58,11 @@ const EditSummaryDiv = React.memo(
           /^[0-9]{3}$/.test(val.toString())
         )
         .typeError("應填寫民國年 ex: 112"),
-      type: yup.string().required("需選擇工程類別!"),
-      job: yup
-        .number()
-        .required("需選擇工程項目!")
-        .typeError("需選擇工程項目!"),
+      // type: yup.string().required("需選擇工程類別!"),
+      // job: yup
+      //   .number()
+      //   .required("需選擇工程項目!")
+      //   .typeError("需選擇工程項目!"),
       project: yup.string().required("需選擇所屬專案！"),
       since: yup.date().nullable(),
       until: yup
@@ -105,8 +103,6 @@ const EditSummaryDiv = React.memo(
       control,
       handleSubmit,
       watch,
-      setValue,
-
       formState: { errors, isDirty },
     } = methods;
     // 用來替until時間設置最小日期
@@ -118,24 +114,25 @@ const EditSummaryDiv = React.memo(
 
     // 提交表單資料到後端並執行相關操作
     const onSubmit = (data) => {
-      const convertData = {
-        ...data,
-        since: data?.since ? format(data.since, "yyyy-MM-dd") : "",
-        until: data?.until ? format(data.until, "yyyy-MM-dd") : "",
-      };
-      delete convertData.type;
+      if (isDirty) {
+        const convertData = {
+          ...data,
+          since: data?.since ? format(data.since, "yyyy-MM-dd") : "",
+          until: data?.until ? format(data.until, "yyyy-MM-dd") : "",
+        };
+        delete convertData.type;
 
-      const fd = new FormData();
-      for (let key in convertData) {
-        fd.append(key, convertData[key]);
-      }
-      // console.log(convertData);
-      if (deliverInfo) {
-        // console.log("deliverInfoFromList");
-        sendDataToBackend(fd, "edit", deliverInfo.id);
+        const fd = new FormData();
+        for (let key in convertData) {
+          fd.append(key, convertData[key]);
+        }
+        if (deliverInfo) {
+          sendDataToBackend(fd, "edit", deliverInfo.id);
+        } else {
+          sendDataToBackend(fd, "create");
+        }
       } else {
-        // console.log("create");
-        sendDataToBackend(fd, "create");
+        setActiveStep(1);
       }
     };
 
@@ -152,7 +149,7 @@ const EditSummaryDiv = React.memo(
                 // style={{ maxHeight: "60vh" }}
               >
                 {/* 所屬專案 */}
-                <div className="">
+                <div className="sm:mt-2">
                   <InputTitle title={"所屬專案"} />
                   <Controller
                     name="project"
@@ -203,8 +200,8 @@ const EditSummaryDiv = React.memo(
                   </FormHelperText>
                 </div>
 
-                {/* 專案名稱 */}
-                <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-0  sm:mb-0">
+                {/* 專案名稱 / 年度 */}
+                <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-0  sm:mb-0 sm:mt-2">
                   <div className="w-full">
                     <InputTitle title={"施工清單標題"} />
                     <Controller
@@ -254,123 +251,8 @@ const EditSummaryDiv = React.memo(
                     </FormHelperText>
                   </div>
                 </div>
-                <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-0 sm:mb-0">
-                  {/* 工程類別 */}
-                  <div className="w-full">
-                    <InputTitle title={"工程類別"} />
-                    <Controller
-                      name="type"
-                      control={control}
-                      render={({ field: { value, onChange } }) => (
-                        <FormControl
-                          size="small"
-                          className="inputPadding"
-                          fullWidth
-                        >
-                          {value === "" ? (
-                            <InputLabel
-                              id="type-select-label"
-                              disableAnimation
-                              shrink={false}
-                              focused={false}
-                            >
-                              請選擇工程類別
-                            </InputLabel>
-                          ) : null}
-                          <Select
-                            readOnly={false}
-                            labelId="type-select-label"
-                            MenuProps={{
-                              PaperProps: {
-                                style: { maxHeight: "250px" },
-                              },
-                            }}
-                            disabled={
-                              deliverInfo?.constructionSummaryJobTasks?.length >
-                              0
-                            }
-                            value={value}
-                            onChange={(e) => {
-                              onChange(e);
-                              getConstructionTypeList(e.target.value);
-                              setValue("job", ""); //選了別種類別就要把項目選擇欄位清空
-                            }}
-                          >
-                            {constructionTypeList?.map((type) => (
-                              <MenuItem
-                                key={"select" + type.ordinal}
-                                value={type.name}
-                              >
-                                {type.label}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      )}
-                    />
-                    <FormHelperText
-                      className="!text-red-600 break-words !text-right !mt-0"
-                      sx={{ minHeight: "1.25rem" }}
-                    >
-                      {errors["type"]?.message}
-                    </FormHelperText>
-                  </div>
 
-                  {/* 工程項目 */}
-                  <div className="w-full">
-                    <InputTitle title={"工程項目"} />
-                    <Controller
-                      name="job"
-                      control={control}
-                      render={({ field: { value, onChange } }) => (
-                        <FormControl
-                          size="small"
-                          className="inputPadding relative"
-                          fullWidth
-                        >
-                          <Select
-                            disabled={
-                              deliverInfo?.constructionSummaryJobTasks?.length >
-                                0 || isLoading
-                            }
-                            labelId="task-select-label"
-                            value={value}
-                            onChange={onChange}
-                            displayEmpty
-                            //MenuProps={MenuProps}
-                          >
-                            <MenuItem value="" disabled>
-                              <span className="text-neutral-400 font-light">
-                                請選擇工程項目
-                              </span>
-                            </MenuItem>
-                            {!!constructionJobList &&
-                              constructionJobList?.map((type) => (
-                                <MenuItem
-                                  key={"select" + type.id}
-                                  value={type.id}
-                                >
-                                  {type.name}
-                                </MenuItem>
-                              ))}
-                          </Select>
-                          {isLoading && (
-                            <span className="absolute flex items-center right-10 top-0 bottom-0">
-                              <CircularProgress color="primary" size={20} />
-                            </span>
-                          )}
-                        </FormControl>
-                      )}
-                    />
-                    <FormHelperText
-                      className="!text-red-600 break-words !text-right !mt-0"
-                      sx={{ minHeight: "1.25rem" }}
-                    >
-                      {errors["job"]?.message}
-                    </FormHelperText>
-                  </div>
-                </div>
-                <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-0  sm:mb-0">
+                <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-0  sm:mb-0 sm:mt-2">
                   {/* 施工日期 */}
                   <div className="w-full  mt-1">
                     <InputTitle title={"施工日期"} required={false} />
@@ -390,6 +272,13 @@ const EditSummaryDiv = React.memo(
                     </FormHelperText>
                   </div>
                 </div>
+                <p className="!my-0 text-rose-400 font-bold text-xs">
+                  * 建議先填寫粗估時間，後續派工事項都會被限制在該時間區段之間；
+                </p>
+                <p className="!my-0 text-rose-400 font-bold text-xs">
+                  *
+                  若無先粗估時間則無法對後續派工項目進行新增處理，可先建立後後續再修改。
+                </p>
               </div>
             </div>
 
@@ -426,4 +315,4 @@ const EditSummaryDiv = React.memo(
   }
 );
 
-export default EditSummaryDiv;
+export default StepperDivOneForSummary;

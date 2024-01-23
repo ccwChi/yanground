@@ -12,7 +12,7 @@ import { useNotification } from "../../hooks/useNotification";
 import { LoadingThree } from "../../components/Loader/Loading";
 import Calendar from "../../components/Calendar/Calendar";
 import { Backdrop, Tooltip, useMediaQuery } from "@mui/material";
-import { UpdatedModal } from "./NewSummaryModal";
+import { UpdatedModal } from "./CalendarCreateSummaryModel";
 import { calendarColorList } from "../../datas/calendarColorList";
 
 const today = new Date();
@@ -167,11 +167,6 @@ const DispatchCalendar = () => {
 
             return {
               id,
-              constructionJob: {
-                id: constructionJob.id,
-                constructionType: constructionJob.constructionType,
-                name: constructionJob.name,
-              },
               name,
               project: {
                 id: project.id,
@@ -271,7 +266,7 @@ const DispatchCalendar = () => {
       setReGetSummaryListData(null);
       setIsEventModalOpen(true);
       setEvents(events);
-      console.log(events)
+      // console.log(events)
       setIsLoading(false);
     });
   };
@@ -466,7 +461,7 @@ const DispatchCalendar = () => {
           handleEventClick(e.event.startStr);
         }}
         eventContent={(eventInfo) => {
-          console.log(eventInfo)
+          // console.log(eventInfo)
           return <CustomEventContent event={eventInfo.event} />;
         }}
         eventColor={isTargetScreen ? "transparent" : "#F48A64"}
@@ -517,9 +512,7 @@ const CustomEventContent = ({ event }) => {
               }`}
             >
               <span className=" w-full rounded-md">
-                {extendedProps.project.name +
-                  "-" +
-                  extendedProps.constructionJob.name}
+                {extendedProps.project.name}
               </span>
             </div>
             {!noDispatched &&

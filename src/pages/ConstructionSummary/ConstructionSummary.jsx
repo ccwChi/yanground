@@ -30,9 +30,9 @@ const ConstructionSummary = () => {
   //   const [cat, setCat] = useState(null);
   // API List Data
   const [summaryList, setSummaryList] = useState(null);
-
   const [projectsList, setProjectsList] = useState(null);
   const [departMemberList, setDepartMemberList] = useState(null);
+
   // isLoading 等待請求 api
   const [isLoading, setIsLoading] = useState(true);
   // Page 頁數設置
@@ -57,6 +57,7 @@ const ConstructionSummary = () => {
   // 傳送額外資訊給 Modal
   const [deliverInfo, setDeliverInfo] = useState(null);
   // 如果要打開下一個面板
+
   //   const [nextModalOpen, setNextModalOpen] = useState(null);
 
   // Tab 列表對應 api 搜尋參數
@@ -83,20 +84,16 @@ const ConstructionSummary = () => {
   // 對照 api table 所顯示 key
   const columnsPC = [
     { key: "name", label: "名稱" },
-    // { key: "rocYear", label: "年度" },
     { key: ["project", "name"], label: "專案" },
-    { key: ["constructionJob", "typeName"], label: "類別" },
-    { key: ["constructionJob", "name"], label: "項目" },
+    { key: "rocYear", label: "年度" },
     { key: "since", label: "起始日期" },
+    { key: "until", label: "結束日期" },
   ];
 
   const columnsMobile = [
-    { key: "id", label: "系統ID" },
     { key: "name", label: "名稱" },
     { key: ["project", "name"], label: "專案" },
     { key: "rocYear", label: "年度" },
-    { key: ["constructionJob", "typeName"], label: "類別" },
-    { key: ["constructionJob", "name"], label: "項目" },
     { key: "since", label: "起始日期" },
     { key: "until", label: "結束日期" },
   ];
@@ -109,7 +106,7 @@ const ConstructionSummary = () => {
 
   // 取得列表資料
   useEffect(() => {
-    getSummaryList(apiUrl, constructionTypeList);
+    getSummaryList(apiUrl);
     //getConstructionTypeList();
     getProjecstList();
     getDepartMemberList(11);
@@ -117,44 +114,27 @@ const ConstructionSummary = () => {
 
   //取得清單資料
   const getSummaryList = useCallback(
-    (url, typesList) => {
-      // console.log("getSummaryList")
+    (url) => {
       setIsLoading(true);
       getData(url).then((result) => {
-        //console.log(result)
+        // console.log(result);
         setIsLoading(false);
         const data = result.result;
-        // setApiData(data);
         if (page >= data?.totalPages) {
           setPage(0);
           setRowsPerPage(10);
           navigate(`?p=1&s=10`);
         }
 
-        // console.log(result.result);
-        // 将第一个数组中的 "constructionType" 映射到相应的 "name" 值
         if (result.result?.content.length > 0) {
-          const convertTypeData = result?.result?.content.map((item) => {
-            const constructionType = item.constructionJob.constructionType;
-            const correspondingName = typesList?.find(
-              (t) => t.name === constructionType
-            );
-            if (correspondingName) {
-              item.constructionJob.typeName = correspondingName.label;
-            }
-            // console.log(item)
-            return item;
-          });
-          const updateTask = { content: convertTypeData, ...data };
-
-          // 取得全部施工清單，並將資料的"CIVIL_CONSTRUCTION"轉變為新增 typename:土木
-          setSummaryList(updateTask);
+          setSummaryList(result.result?.content);
         }
       });
     },
     [page]
   );
 
+  // 獲取專案 api
   const getProjecstList = () => {
     setIsLoading(true);
     getData("project").then((result) => {
@@ -163,6 +143,7 @@ const ConstructionSummary = () => {
       setIsLoading(false);
     });
   };
+  // 獲取部門清單 api
   const getDepartMemberList = useCallback((id) => {
     const departMemberList = `department/${id}/staff`;
     getData(departMemberList).then((result) => {
@@ -254,7 +235,7 @@ const ConstructionSummary = () => {
       {/* Table */}
       <div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
         <RWDTable
-          data={summaryList?.content ? summaryList.content : []}
+          data={summaryList ? summaryList : []}
           columnsPC={columnsPC}
           columnsMobile={columnsMobile}
           actions={actions}
