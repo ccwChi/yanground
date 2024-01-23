@@ -182,7 +182,7 @@ const Calendar = ({
 				ref={calendarRef}
 				plugins={
 					viewOptions.includes("multiMonthYear")
-						? [dayGridPlugin, listPlugin, multiMonthPlugin]
+						? [dayGridPlugin, listPlugin, interactionPlugin, multiMonthPlugin]
 						: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, multiMonthPlugin]
 				}
 				initialView={customInitialView && !isIOS ? defaultViews : isTargetScreen ? "listMonth" : defaultViews}
