@@ -266,7 +266,6 @@ const DispatchCalendar = () => {
       setReGetSummaryListData(null);
       setIsEventModalOpen(true);
       setEvents(events);
-      // console.log(events)
       setIsLoading(false);
     });
   };
@@ -409,7 +408,6 @@ const DispatchCalendar = () => {
   const getProjecstList = () => {
     getData("project").then((result) => {
       const projectsList = result.result.content;
-      //console.log(projectsList);
       setProjectsList(projectsList);
     });
   };
@@ -461,7 +459,7 @@ const DispatchCalendar = () => {
           handleEventClick(e.event.startStr);
         }}
         eventContent={(eventInfo) => {
-          // console.log(eventInfo)
+
           return <CustomEventContent event={eventInfo.event} />;
         }}
         eventColor={isTargetScreen ? "transparent" : "#F48A64"}

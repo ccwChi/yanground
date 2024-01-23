@@ -37,27 +37,13 @@ const TaskModal = React.memo(
     setJobTaskDirty,
   }) => {
     // Alert 開關
-    // console.log(deliverInfo);
-    const [isLoading, setIsLoading] = useState(false);
 
-    // // 會有 A.原已選擇task清單，B.原總task清單，然後過濾，最後呈現 C.過濾完task清單(顯示在下拉是選單)、D.已選擇task清單(呈現在下面跟右邊的面板)
-    // //A.原已選擇task清單，從api取得已選擇的工項執行task清單, 還沒過濾之前
-    // const [apiSelectedTask, setApiSelectedTask] = useState(null);
-    // //B 在useEffect取得後直接做處理因此沒有另外儲存
-    // //C.過濾完task清單
-    // const [constructionTaskList, setConstructionTaskList] = useState(null);
-    // //D.此施工清單已選擇的工項執行task清單，list呈現的部分
-    // const [selectedTasks, setSelectedTasks] = useState([]);
-    // //新增加的但減去D的部分
+    const [isLoading, setIsLoading] = useState(false);
 
     // const [selectedTask, setSelectedTask] = useState("");
     // 用來儲存求得的 api Data
     const [jobList, setJobList] = useState([]);
     const [taskList, setTaskList] = useState([]);
-
-    // 用來處理跳出dialog並編輯工項執行
-    const [taskEditOpen, setTaskEditOpen] = useState(false);
-    const [deliverTaskInfo, setDeliverTaskInfo] = useState(null);
 
     // 用來選擇執行前置，要先選類別跟項目
     const [selectedType, setSelectedType] = useState("");
@@ -66,9 +52,10 @@ const TaskModal = React.memo(
 
     // 用來儲存已經存在於施工清單內的工項執行 ex [53, 83, 89, 139]
     const [taskIdInSummaryList, setTaskIdInSummaryList] = useState([]);
-    const [taskIdExist, setTaskIdExist] = useState([]);
+
     // 已經存在=不能再選擇的taskList 下面陣列用來渲染右邊表格
     const [existedTaskList, setExistedTaskList] = useState([]);
+
     // 下列的清單是刪除已經有的/已經被選的，剩下能選的執行清單
     const [optionableTaskList, setOptionableTaskList] = useState([]);
     const [onlyNewSelected, setOnlyNewSelected] = useState([]);
@@ -80,7 +67,6 @@ const TaskModal = React.memo(
     const summaryUntil = deliverInfo?.until
       ? new Date(deliverInfo.until)
       : null;
-    // console.log(summarySince)
     const showNotification = useNotification();
 
     // const getApiSelectedTask = useCallback((id) => {
@@ -150,7 +136,6 @@ const TaskModal = React.memo(
 
     // 一但有了deliveryInfo資料，就求得那些工項已有 setTaskIdInSummaryList
     useEffect(() => {
-      console.log("AAA");
       let TaskIsInSummary = [];
       deliverInfo.summaryJobTasks &&
         deliverInfo.summaryJobTasks.map((jt) => {
@@ -190,12 +175,10 @@ const TaskModal = React.memo(
 
     useEffect(() => {
       if (taskList) {
-        // console.log("taskIdInSummaryList", taskIdInSummaryList);
         const filteredArray = taskList.filter((task) => {
           return !taskIdInSummaryList.includes(task.id);
         });
         setOptionableTaskList(filteredArray);
-        // console.log("filteredArray", filteredArray);
       }
     }, [taskList, taskIdInSummaryList]);
 
@@ -203,8 +186,6 @@ const TaskModal = React.memo(
     const handleAddTask = () => {
       if (!jobTaskDirty) setJobTaskDirty(true);
       if (selectedTask) {
-        console.log("");
-        console.log("selectedTask", selectedTask);
         const pickdata = optionableTaskList
           .filter((i) => i.id === selectedTask)
           .map((t) => {
@@ -218,9 +199,7 @@ const TaskModal = React.memo(
             };
           });
         const newTaskIdList = [...taskIdInSummaryList];
-        console.log("newTaskIdList", newTaskIdList);
         newTaskIdList.push(selectedTask);
-        console.log("newTaskIdList", newTaskIdList);
         setOnlyNewSelected([...onlyNewSelected, ...pickdata]); // 要顯示在新增加可編輯的部分，權資料
         setTaskIdInSummaryList(newTaskIdList); //要用來過濾的，已經存在的，僅id
         setExistedTaskList([...existedTaskList, ...pickdata]); // 已經在清單中+剛剛已增加的
@@ -235,170 +214,12 @@ const TaskModal = React.memo(
         (i) => i.constructionJobTask.id !== task
       );
       setOnlyNewSelected(newOnlyNewSelected);
-      // console.log("newExistedTaskList",newOnlyNewSelected)
       const newTaskIdList = taskIdInSummaryList.filter((i) => i !== task);
       setTaskIdInSummaryList(newTaskIdList);
       remove(index);
     };
 
-    // 開啟edit dialog
-    // const handleEditTask = useCallback((task) => {
-    //   setTaskEditOpen(true);
-    //   setDeliverTaskInfo(task);
-    // }, []);
-
-    // edit dialo傳回來的data統合
-    const sendDataToTaskEdit = (data) => {
-      if (!jobTaskDirty) setJobTaskDirty(true);
-      console.log(data);
-      // const upDateListIndex = existedTaskList.findIndex(
-      //   (i) => i.constructionJobTask.id === data.constructionJobTask.id
-      // );
-      // console.log(upDateListIndex);
-      // const newExistedTaskList = [...existedTaskList];
-      // newExistedTaskList[upDateListIndex] = data;
-      // setExistedTaskList(newExistedTaskList);
-    };
-
-    //取得工程項目執行並設定已選擇及剩下能選擇的清單
-    // useEffect(() => {
-    //   setIsLoading(true);
-    //   if (!!apiSelectedTask) {
-    //     const taskurl = `constructionJob/${deliverInfo.constructionJob.id}/task`;
-    //     getData(taskurl).then((result) => {
-    //       setIsLoading(false);
-    //       const data = result.result;
-    //       const contains = [];
-
-    //       for (const t of apiSelectedTask) {
-    //         const matchTask = data.find(
-    //           (d) => d.id === t.constructionJobTask.id
-    //         );
-    //         if (matchTask) {
-    //           contains.push(t);
-    //         }
-    //       }
-    //       const notMatchingTasks = data.filter((d) => {
-    //         return !apiSelectedTask.some(
-    //           (t) => t.constructionJobTask.id === d.id
-    //         );
-    //       });
-    //       setSelectedTasks(contains);
-    //       setConstructionTaskList(notMatchingTasks);
-    //     });
-    //   }
-    // }, [apiSelectedTask]);
-
-    // useEffect(() => {
-    //   // if (!!deliverInfo.id && apiSelectedTask === null) {
-    //   //   getApiSelectedTask(deliverInfo.id);
-    //   // }
-    // }, [deliverInfo]);
-
-    // // 選擇新增移除御三家
-    // const handleAddTask = () => {
-    //   // if (!jobTaskDirty) setJobTaskDirty(true);
-    //   // // 當選擇並記錄id,
-    //   // if (selectedTask) {
-    //   //   const newAddSeletedTask = [
-    //   //     ...onlyNewSelected,
-    //   //     {
-    //   //       constructionJobTask: constructionTaskList.find(
-    //   //         (p) => p.id === selectedTask
-    //   //       ),
-    //   //       id: "",
-    //   //     },
-    //   //   ];
-    //   //   const handleSeletedTask = [
-    //   //     {
-    //   //       constructionJobTask: constructionTaskList.find(
-    //   //         (p) => p.id === selectedTask
-    //   //       ),
-    //   //       id: "",
-    //   //     },
-    //   //     ...selectedTasks,
-    //   //   ];
-    //   //   setOnlyNewSelected(
-    //   //     newAddSeletedTask.sort((a, b) => {
-    //   //       // 先檢查 estimatedSince 是否为非空字符串
-    //   //       if (a.estimatedSince && !b.estimatedSince) {
-    //   //         return -1; // a 在前
-    //   //       } else if (!a.estimatedSince && b.estimatedSince) {
-    //   //         return 1; // b 在前
-    //   //       } else if (a.estimatedSince && b.estimatedSince) {
-    //   //         // estimatedSince 都非空，按日期排序
-    //   //         if (a.estimatedSince < b.estimatedSince) {
-    //   //           return -1;
-    //   //         } else if (a.estimatedSince > b.estimatedSince) {
-    //   //           return 1;
-    //   //         }
-    //   //       }
-    //   //       if (a.estimatedUntil < b.estimatedUntil) {
-    //   //         return -1;
-    //   //       } else if (a.estimatedUntil > b.estimatedUntil) {
-    //   //         return 1;
-    //   //       }
-    //   //       return 0; // a 和 b 相等
-    //   //     })
-    //   //   );
-    //   //   setSelectedTasks(
-    //   //     handleSeletedTask.sort((a, b) => {
-    //   //       // 先檢查 estimatedSince 是否为非空字符串
-    //   //       if (a.estimatedSince && !b.estimatedSince) {
-    //   //         return -1; // a 在前
-    //   //       } else if (!a.estimatedSince && b.estimatedSince) {
-    //   //         return 1; // b 在前
-    //   //       } else if (a.estimatedSince && b.estimatedSince) {
-    //   //         // estimatedSince 都非空，按日期排序
-    //   //         if (a.estimatedSince < b.estimatedSince) {
-    //   //           return -1;
-    //   //         } else if (a.estimatedSince > b.estimatedSince) {
-    //   //           return 1;
-    //   //         }
-    //   //       }
-    //   //       if (a.estimatedUntil < b.estimatedUntil) {
-    //   //         return -1;
-    //   //       } else if (a.estimatedUntil > b.estimatedUntil) {
-    //   //         return 1;
-    //   //       }
-    //   //       return 0; // a 和 b 相等
-    //   //     })
-    //   //   );
-    //   //   setConstructionTaskList(
-    //   //     constructionTaskList
-    //   //       .filter((p) => p.id !== selectedTask)
-    //   //       .sort((a, b) => a.ordinal - b.ordinal)
-    //   //   );
-    //   //   setSelectedTask("");
-    //   // }
-    // };
-
-    // 選擇新增移除御三家
-    // const handleRemoveTask = (taskId, index) => {
-    //   // if (!jobTaskDirty) setJobTaskDirty(true);
-    //   // const selectedTask = selectedTasks.find(
-    //   //   (task) => task.constructionJobTask.id === taskId
-    //   // );
-    //   // if (selectedTask) {
-    //   //   const updatedConstructionTaskList = [
-    //   //     ...constructionTaskList,
-    //   //     selectedTask.constructionJobTask,
-    //   //   ];
-    //   //   setConstructionTaskList(updatedConstructionTaskList);
-    //   // }
-    //   // const forSelectedTasks = selectedTasks.filter(
-    //   //   (p) => p.constructionJobTask.id !== taskId
-    //   // );
-    //   // setSelectedTasks(forSelectedTasks);
-    //   // const forOnlyNewSelected = onlyNewSelected.filter(
-    //   //   (p) => p.constructionJobTask.id !== taskId
-    //   // );
-    //   // setOnlyNewSelected(forOnlyNewSelected);
-    //   // remove(index);
-    // };
-
     const onSubmit = (data) => {
-      console.log(data);
       setSendBackFlag(true);
       const convertData = [];
       for (var task of data.fields) {

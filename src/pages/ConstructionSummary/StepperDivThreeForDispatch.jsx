@@ -60,7 +60,6 @@ const StepperDivThreeForDispatch = React.memo(
 
     // 打開面板先取得工務人員清單跟工項執行列表
     useEffect(() => {
-      console.log(deliverInfo)
       if (!!deliverInfo) {
         getTaskList();
       }
@@ -80,10 +79,8 @@ const StepperDivThreeForDispatch = React.memo(
 
     const getTaskList = () => {
       if (!!deliverInfo) {
-        // console.log("deliverInfo", deliverInfo);
         const seledtedTaskUrl = `constructionSummary/${deliverInfo?.id}/tasks`;
         getData(seledtedTaskUrl).then((result) => {
-          //console.log("taskList", result.result);
           setTaskList(result.result);
           if (!!activeCard) {
             const matchCard = result.result.findIndex(
@@ -163,7 +160,6 @@ const StepperDivThreeForDispatch = React.memo(
             clearTimeout(timerId);
           }
           postData(postUrl, params).then((result) => {
-            //console.log(result);
             if (result.status) {
               showNotification(
                 "新增成功，目前人員有" +

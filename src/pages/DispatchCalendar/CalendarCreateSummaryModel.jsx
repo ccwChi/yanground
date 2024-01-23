@@ -14,7 +14,6 @@ import {
   InputLabel,
   FormHelperText,
   Backdrop,
-  CircularProgress,
 } from "@mui/material";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import { useForm, Controller, FormProvider } from "react-hook-form";
@@ -111,7 +110,6 @@ const UpdatedModal = React.memo(
 
     // 提交表單資料到後端並執行相關操作
     const onSubmit = (data) => {
-      console.log(data)
       const convertData = {
         ...data,
         since: data?.since ? format(data.since, "yyyy-MM-dd") : "",

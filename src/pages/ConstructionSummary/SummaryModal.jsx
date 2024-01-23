@@ -87,7 +87,6 @@ const SummaryModal = React.memo(
     // 為了避免同步不同不問題，如果是點擊編輯，就用deliveryInfo的summaryID來重新取得清單資料
     // 然後再把這個新的deliveryInfo傳給對應面板
     useEffect(() => {
-      console.log(deliverInfoFromList);
       if (!!deliverInfoFromList) {
         getSummaryApi(deliverInfoFromList);
       }
@@ -133,7 +132,6 @@ const SummaryModal = React.memo(
 
     // 傳遞給後端資料
     const sendDataToBackend = (fd, mode, otherData) => {
-      console.log(fd, mode);
       setSendBackFlag(true);
       let url = "";
       let message = [];
@@ -171,7 +169,6 @@ const SummaryModal = React.memo(
             setIsDivDirty(false);
             RefleshMainList();
           } else {
-            //console.log(result.result);
             showNotification(
               result.result.reason
                 ? result.result.reason

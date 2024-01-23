@@ -32,7 +32,6 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TaskModal } from "./AddJobTask";
-import HelpQuestion from "../../components/HelpQuestion/HelpQuestion";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
@@ -83,12 +82,7 @@ const EventModal = React.memo(
     DisableEditdate.setDate(today.getDate() + datesBeforeDisable);
     const transDate = new Date(DisableEditdate.toISOString().slice(0, 10)); //變成yyyy-mm-dd
     const reSetTransDate = new Date(transDate); //再變回日期原始碼，這樣做的用意是要把日期的時間重製成+8:00UTC
-    // console.log(deliverInfo);
 
-    // 用來儲存求得的 api Data
-    const [jobList, setJobList] = useState([]);
-    const [taskList, setTaskList] = useState([]);
-    // console.log(deliverInfo);
     // 設置不能編輯的日子參數 true or false
     useEffect(() => {
       if (!!deliverInfo?.date) {
@@ -98,7 +92,6 @@ const EventModal = React.memo(
           setIsEditableDate(false);
         }
       }
-      // console.log(deliverInfo);
     }, [deliverInfo]);
 
     const generateDateRange = (since, until) => {
@@ -242,7 +235,6 @@ const EventModal = React.memo(
 
     //僅提交工項執行的資料上傳
     const onSubmit = (data) => {
-      console.log(data);
       setSendBackFlag(true);
 
       const convertData = [

@@ -92,9 +92,7 @@ const StepperDivTwoForJobTask = React.memo(
 
     // 先把清單中已經有的工項執行找出
     useEffect(() => {
-      // console.log(deliverInfo);
       let TaskIsInSummary = [];
-      console.log("deliverInfo",deliverInfo)
       deliverInfo.constructionSummaryJobTasks &&
         deliverInfo.constructionSummaryJobTasks.map((jt) => {
           return TaskIsInSummary.push(jt.constructionJobTask.id);
@@ -163,7 +161,6 @@ const StepperDivTwoForJobTask = React.memo(
         const newTaskIdList = [...taskIdInSummaryList];
         newTaskIdList.push(selectedTask);
         setTaskIdInSummaryList(newTaskIdList);
-        console.log(newTaskIdList)
         setExistedTaskList([...existedTaskList, ...pickdata]);
         setSelectedTask("");
       }
@@ -189,11 +186,9 @@ const StepperDivTwoForJobTask = React.memo(
     // edit dialo傳回來的data統合
     const sendDataToTaskEdit = (data) => {
       if (!isDivDirty) setIsDivDirty(true);
-      console.log(data);
       const upDateListIndex = existedTaskList.findIndex(
         (i) => i.constructionJobTask.id === data.constructionJobTask.id
       );
-      console.log(upDateListIndex);
       const newExistedTaskList = [...existedTaskList];
       newExistedTaskList[upDateListIndex] = data;
       setExistedTaskList(newExistedTaskList);
@@ -220,7 +215,6 @@ const StepperDivTwoForJobTask = React.memo(
         }
         convertData.push(tempTask);
       }
-      console.log(convertData);
       setDeliverInfoFromList(deliverInfo.id);
       sendDataToBackend(convertData, "task", [deliverInfo.id, activeStep]);
     };
@@ -237,10 +231,6 @@ const StepperDivTwoForJobTask = React.memo(
             <div className="mt-2">
               <p
                 className="font-extrabold text-lg text-center"
-                onClick={() => {
-                  console.log("selectedType", selectedType);
-                  console.log("Joblist", jobList);
-                }}
               >
                 {deliverInfo?.name ? deliverInfo.name : ""}
               </p>
@@ -637,7 +627,6 @@ const TaskEditDialog = React.memo(
     }, [deliverTaskInfo, reset]);
 
     const onSubmit = (data) => {
-      console.log("要送出的", data);
       const convertData = {
         id: deliverTaskInfo?.id ? deliverTaskInfo?.id : "",
         constructionJobTask: {
@@ -653,7 +642,6 @@ const TaskEditDialog = React.memo(
         location: data?.location ? data.location : "",
         remark: data?.remark ? data.remark : "",
       };
-      console.log("轉換完的", convertData);
       sendDataToTaskEdit(convertData);
       onClose();
     };

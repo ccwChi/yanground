@@ -117,7 +117,6 @@ const ConstructionSummary = () => {
     (url) => {
       setIsLoading(true);
       getData(url).then((result) => {
-        // console.log(result);
         setIsLoading(false);
         const data = result.result;
         if (page >= data?.totalPages) {
@@ -148,7 +147,6 @@ const ConstructionSummary = () => {
     const departMemberList = `department/${id}/staff`;
     getData(departMemberList).then((result) => {
       setDepartMemberList(result.result);
-      //console.log("departMemberList", result.result);
     });
   }, []);
   // // 傳遞給後端資料
@@ -190,9 +188,6 @@ const ConstructionSummary = () => {
     setDeliverInfo(null);
   };
 
-  // useEffect(() => {
-  //   console.log("點擊主面板的deliverInfo", deliverInfo);
-  // }, [deliverInfo]);
   // modal 開啟參數與顯示標題
   const modalConfig = [
     {
