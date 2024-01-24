@@ -89,7 +89,7 @@ const router = createBrowserRouter([
 				element: <AttendanceCalendar />,
 			},
 			{
-				path: "/anomaly_report",
+				path: "/anomalyreport",
 				element: <AnomalyReport />,
 			},
 			{
