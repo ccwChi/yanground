@@ -67,6 +67,23 @@ const App = () => {
 		},
 	];
 
+	const handleVisibilityChange = () => {
+		// 如果用戶回到頁面，重新整理頁面
+		if (!document.hidden) {
+			window.location.reload();
+		}
+	};
+
+	useEffect(() => {
+		// 監聽 visibilitychange 事件
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+
+		// 清理事件監聽器，以避免在 component 卸載時還執行
+		return () => {
+			document.removeEventListener("visibilitychange", handleVisibilityChange);
+		};
+	}, []);
+
 	useEffect(() => {
 		initLine();
 	}, []);
