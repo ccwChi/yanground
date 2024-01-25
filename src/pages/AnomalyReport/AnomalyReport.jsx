@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 // MUI
 import TextField from "@mui/material/TextField";
@@ -16,13 +16,13 @@ import Calendar from "../../components/Calendar/Calendar";
 import InputTitle from "../../components/Guideline/InputTitle";
 import DatePicker from "../../components/DatePicker/DatePicker";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
-import { LoadingTwo } from "../../components/Loader/Loading";
+import { LoadingFour, LoadingTwo } from "../../components/Loader/Loading";
 
 // Utils
 import { getData } from "../../utils/api";
 // Others
 import TableTabbar from "../../components/Tabbar/TableTabbar";
-import { Tooltip, useMediaQuery } from "@mui/material";
+import { TablePagination, Tooltip, useMediaQuery } from "@mui/material";
 // Table 及 Table 所需按鈕、頁數
 import RWDTable from "../../components/RWDTable/RWDTable";
 import EditIcon from "@mui/icons-material/Edit";
@@ -44,6 +44,7 @@ const AnomalyReport = () => {
   const tabCat = queryParams.get("cat");
 
   // Page 頁數設置
+  // Page 頁數設置
   const [page, setPage] = useState(
     queryParams.has("p") && !isNaN(+queryParams.get("p"))
       ? +queryParams.get("p") - 1
@@ -53,10 +54,17 @@ const AnomalyReport = () => {
   const [rowsPerPage, setRowsPerPage] = useState(
     queryParams.has("s") && !isNaN(+queryParams.get("s"))
       ? +queryParams.get("s")
-      : 10
+      : 50
   );
-  const today = new Date().toISOString().slice(0, 10); // 會得到2024-01-16這樣的格式
 
+  const day = new Date();
+  const today = new Date(day).toISOString().slice(0, 10); // 會得到2024-01-16這樣的格式
+  //60天前
+  const daysAgo = new Date(day);
+  daysAgo.setDate(day.getDate() - 60);
+
+  // console.log(untilDate)
+  const [currentPageData, setCurrentPageData] = useState([]);
   const modeValue = queryParams.get("mode");
   // API List Data
   const [apiData, setApiData] = useState([]);
@@ -72,32 +80,18 @@ const AnomalyReport = () => {
   // cat = Category 設置 tab 分類
   const [cat, setCat] = useState("table");
   // 搜尋日期
-  const [dates, setDates] = useState(null);
+  const [since, setSince] = useState(day);
+  const [until, setUntil] = useState(null);
   // 設定日期條件
-  const [dateCondition, setDateCondition] = useState(2);
-  // 切換畫面大小時，月曆的切換
-  const [isAldreadyRender, setIsAldreadyRender] = useState(false);
 
   const isTargetScreen = useMediaQuery("(max-width:991.98px)");
   const navigateWithParams = useNavigateWithParams();
-  const dateConList = [
-    {
-      id: 1,
-      text: "依據年, 月, 日進行搜尋",
-      views: ["year", "month", "day"],
-      formatOne: "yyyy 年 MM 月 dd 日",
-      formatTwo: "yyyy-MM-dd",
-      formatThree: "yyyy/MM/dd",
-    },
-    {
-      id: 2,
-      text: "依據年, 月進行搜尋",
-      views: ["month", "year"],
-      formatOne: "yyyy 年 MM 月",
-      formatTwo: "yyyy-MM",
-      formatThree: "yyyy/MM",
-    },
-  ];
+
+  useEffect(() => {
+    setSince(daysAgo);
+    setUntil(day);
+  }, []);
+
   const anomalyList = [
     {
       id: 1,
@@ -169,6 +163,7 @@ const AnomalyReport = () => {
     }
   }, [depValue, departmentList]);
 
+  // 用全部的資料來過濾網址已有的篩選條件
   useEffect(() => {
     setEvents(apiData);
     let tempShowData = apiData;
@@ -190,43 +185,42 @@ const AnomalyReport = () => {
       });
     }
 
-    if (dateValue !== null) {
-      if (dateCondition === 1) {
-        tempShowData = tempShowData.filter((event) => {
-          return event.date === dateValue;
-        });
-      }
-      if (dateCondition === 2) {
-        tempShowData = tempShowData.filter((event) => {
-          const startOfMonth = event.date.slice(0, 7);
-          return startOfMonth === dateValue;
-        });
-      }
-    }
     setEvents(tempShowData);
-    setIsLoading(false);
-  }, [depValue, userValue, stateValue, dateValue, apiData]);
+    const TempCurrentPageData = tempShowData.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+    setCurrentPageData(TempCurrentPageData);
+  }, [depValue, userValue, stateValue, dateValue, apiData, page, rowsPerPage]);
+
+  useEffect(() => {
+    if (currentPageData.length > 0) {
+      setIsLoading(false);
+    }
+  }, [currentPageData]);
 
   // 取得日曆資料
   useEffect(() => {
     setIsLoading(true);
     // Define the API calls
     const type = "ATTENDANCE";
-    const since = "2023-12-01";
-    const until = today;
+    const fromDay = since.toISOString().slice(0, 10);
+    const toDay = today;
+    navigateWithParams(0, 0, { since: fromDay }, false);
+    navigateWithParams(0, 0, { until: toDay }, false);
     const anomaly = "";
     getData(
-      `attendance?type=${type}&since=${since}&anomaly=${anomaly}&until=${until}&s=5000&p=1`
+      `attendance?type=${type}&since=${fromDay}&until=${toDay}&anomaly=${anomaly}&s=5000&p=1`
     ).then((result) => {
       const rawData = result.result.content.map(
-        ({ anomaly, date, id, since, until, user }) => ({
+        ({ anomaly, date, id, since, until, user }, i) => ({
           title: user.department.name + " - " + user.nickname,
           anomaly: anomaly
             ? { text: "異常", id: "2" }
             : anomaly === false
             ? { text: "已修正", id: "3" }
             : { text: "正常", id: "4" },
-          date,
+          date: date,
           id,
           since: since ? since.slice(11, 19) : "-",
           until: until ? until.slice(11, 19) : "-",
@@ -252,7 +246,7 @@ const AnomalyReport = () => {
         })
       );
     });
-  }, []);
+  }, [since, until]);
 
   useEffect(() => {
     if (tabCat === "calendar") {
@@ -267,11 +261,6 @@ const AnomalyReport = () => {
   const handleCloseSearch = () => {
     setSearchDialogOpen(false);
   };
-
-  // 變動日期格式
-  const selectedDateCon =
-    dateConList.find((dc) => dateCondition === dc.id) || {};
-  // 使用了 || {}，這是為了防止 selectedDateCon 為 undefined 時解構賦值產生錯誤。
 
   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
@@ -316,42 +305,15 @@ const AnomalyReport = () => {
     { value: "edit", icon: <EditIcon />, title: "編輯個人資料" },
   ];
 
-  useEffect(() => {
-    if (dates) {
-      const dateObject = new Date(dates);
-      const year = dateObject.getFullYear();
-      const month = (dateObject.getMonth() + 1).toString().padStart(2, "0"); // 加1是因为getMonth返回的是0-11
-      const day = dateObject.getDate().toString().padStart(2, "0");
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
 
-      if (dateCondition === 2) {
-        navigateWithParams(0, 0, { date: `${year}-${month}` }, false);
-      } else if (dateCondition === 1) {
-        navigateWithParams(0, 0, { date: `${year}-${month}-${day}` }, false);
-      }
-    }
-  }, [dates]);
-
-  // const onTabChange = (value) => {
-  //   const newParams = new URLSearchParams(window.location.search);
-  //   newParams.set("date", `${year}-${month}`);
-  // }
-  // 設置頁數
-  // const handleChangePage = useCallback(
-  //   (event, newPage) => {
-  //     setPage(newPage);
-  //     navigateWithParams(newPage + 1, rowsPerPage);
-  //   },
-  //   [rowsPerPage]
-  // );
-
-  // // 設置每頁顯示並返回第一頁
-  // const handleChangeRowsPerPage = (event) => {
-  //   const targetValue = parseInt(event.target.value, 10);
-  //   setRowsPerPage(targetValue);
-  //   setPage(0);
-  //   navigateWithParams(1, targetValue);
-  // };
-
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+  
   // -----------------------------------------------------
   return (
     <>
@@ -374,180 +336,6 @@ const AnomalyReport = () => {
           // 	|| !dataCAList.some((item) => item.value === modeValue)
           // 	)
         }
-        // 說明顯示
-        // quizMode
-        // // 下面參數前提都是 quizMode = true
-        // quizContent={
-        //   <div className="pt-3">
-        //     <div
-        //       className="flex flex-col items-center"
-        //       style={{
-        //         height: 255,
-        //         maxWidth: 400,
-        //         width: "100%",
-        //         overflowY: "auto",
-        //       }}
-        //     >
-        //       {(() => {
-        //         switch (activeStep) {
-        //           case 0:
-        //             return (
-        //               <p className="font-bold text-primary-900 pb-3">
-        //                 〔畫面元素介紹〕
-        //               </p>
-        //             );
-        //           case 1:
-        //             return (
-        //               <p className="font-bold text-primary-900 pb-3">
-        //                 〔更新頻率概述〕
-        //               </p>
-        //             );
-        //           case 2:
-        //             return (
-        //               <p className="font-bold text-primary-900 pb-3">
-        //                 〔考勤顏色說明〕
-        //               </p>
-        //             );
-        //           default:
-        //             return null;
-        //         }
-        //       })()}
-        //       {(() => {
-        //         switch (activeStep) {
-        //           case 0:
-        //             return (
-        //               <div className="flex flex-col items-center h-full text-sm">
-        //                 <img
-        //                   className="border mt-3 mb-6 rounded"
-        //                   src={ARimg}
-        //                   alt="考勤與打卡圖片示意"
-        //                 />
-        //                 <p>
-        //                   上方為
-        //                   <span className="text-base font-bold text-primary-800">
-        //                     「考勤紀錄」
-        //                   </span>
-        //                 </p>
-        //                 <p>
-        //                   下方為
-        //                   <span className="text-base font-bold text-primary-800">
-        //                     「打卡紀錄」
-        //                   </span>
-        //                 </p>
-        //               </div>
-        //             );
-        //           case 1:
-        //             return (
-        //               <div className="flex flex-col items-start h-full text-sm gap-3">
-        //                 <div className="inline-flex">
-        //                   <span className="whitespace-nowrap">考勤紀錄：</span>
-        //                   <p>
-        //                     <span className="text-base font-bold text-primary-800">
-        //                       每日隔日凌晨 12:00 更新考勤數據。
-        //                     </span>
-        //                   </p>
-        //                 </div>
-        //                 <div className="inline-flex">
-        //                   <span className="whitespace-nowrap">打卡紀錄：</span>
-        //                   <p>
-        //                     <span className="text-base font-bold text-primary-800">
-        //                       即時更新
-        //                     </span>
-        //                     ，立即刷新頁面即可查看最新紀錄。
-        //                   </p>
-        //                 </div>
-        //                 <p>情境範例：</p>
-        //                 <ul>
-        //                   <li>
-        //                     1/1 大明 8:00 打卡上班，17:00
-        //                     打卡下班，地理位置正常，打卡紀錄會即時更新至資料庫。
-        //                   </li>
-        //                   <li>
-        //                     1/2 凌晨 12:00 系統更新資訊，會顯示
-        //                     <span className="font-bold">「考勤正常」</span>。
-        //                   </li>
-        //                 </ul>
-        //               </div>
-        //             );
-        //           case 2:
-        //             return (
-        //               <div className="flex flex-col w-full h-full text-sm gap-3">
-        //                 <div className="inline-flex flex-col gap-1">
-        //                   <span className="px-2 py-0.5 bg-[#F03355] rounded text-white w-fit">
-        //                     考勤異常
-        //                   </span>
-        //                   <p>考勤資料異常狀況：</p>
-        //                   <ul>
-        //                     <li>
-        //                       1. <span className="font-bold">上班時間異常</span>
-        //                     </li>
-        //                     <li>
-        //                       2. <span className="font-bold">下班時間異常</span>
-        //                     </li>
-        //                     <li>
-        //                       3. <span className="font-bold">打卡範圍異常</span>
-        //                     </li>
-        //                     <li>
-        //                       4. <span className="font-bold">工時異常</span>{" "}
-        //                       (上下班/請假時間不滿 8 小時)
-        //                     </li>
-        //                   </ul>
-        //                 </div>
-        //                 <div className="inline-flex flex-col gap-1">
-        //                   <span className="px-2 py-0.5 bg-[#FFA516] rounded text-white w-fit">
-        //                     考勤已修正
-        //                   </span>
-        //                   <p>
-        //                     代表
-        //                     <span className="font-bold">已經進行編輯修正</span>
-        //                     的情況。
-        //                   </p>
-        //                 </div>
-        //               </div>
-        //             );
-        //           default:
-        //             return activeStep;
-        //         }
-        //       })()}
-        //     </div>
-        //     <MobileStepper
-        //       variant="dots"
-        //       steps={maxSteps}
-        //       position="static"
-        //       activeStep={activeStep}
-        //       sx={{ maxWidth: 400, flexGrow: 1, px: 0, pb: 0 }}
-        //       backButton={
-        //         <Button
-        //           size="small"
-        //           onClick={handleBack}
-        //           disabled={activeStep === 0}
-        //         >
-        //           {theme.direction === "rtl" ? (
-        //             <KeyboardArrowRight />
-        //           ) : (
-        //             <KeyboardArrowLeft />
-        //           )}
-        //           上一頁
-        //         </Button>
-        //       }
-        //       nextButton={
-        //         <Button
-        //           size="small"
-        //           onClick={handleNext}
-        //           disabled={activeStep === maxSteps - 1}
-        //         >
-        //           下一頁
-        //           {theme.direction === "rtl" ? (
-        //             <KeyboardArrowLeft />
-        //           ) : (
-        //             <KeyboardArrowRight />
-        //           )}
-        //         </Button>
-        //       }
-        //     />
-        //   </div>
-        // }
-        // quizModalClose={() => setActiveStep(0)}
       >
         <div className="relative flex flex-col item-start sm:items-center gap-3">
           <div className="inline-flex items-center w-full gap-2">
@@ -654,7 +442,6 @@ const AnomalyReport = () => {
             />
           </div>
           <div className="inline-flex items-center w-full gap-2">
-            {/* /////////////////////////////////////////////////////////// */}
             <InputTitle
               title={"狀態"}
               pb={false}
@@ -688,49 +475,52 @@ const AnomalyReport = () => {
               ))}
             </Select>
           </div>
-          <div className="inline-flex items-center w-full gap-2">
+          <div className="w-full text-left flex mt-1">
             <InputTitle
-              title={"條件"}
+              title={"選擇日期"}
               pb={false}
               required={false}
               classnames="whitespace-nowrap"
             />
-            <Select
-              value={dateCondition}
-              onChange={(event) => {
-                setDateCondition(event.target.value);
-                setDates(null);
-                const newParams = new URLSearchParams(window.location.search);
-                newParams.delete("date");
-                navigate(`?${newParams.toString()}`);
-              }}
-              className="inputPadding !pe-5"
-              displayEmpty
-              fullWidth
-            >
-              {dateConList.map((dc) => (
-                <MenuItem key={dc.id} value={dc.id}>
-                  {dc.text}
-                </MenuItem>
-              ))}
-            </Select>
+            <div className="flex ms-2 mt-1">
+              <p className="!my-0 text-rose-400 font-bold text-xs !me-1">＊</p>
+              <p className="!my-0 text-rose-400 font-bold text-xs">
+                預設選擇日期為今日往前推算60天
+              </p>
+            </div>
           </div>
           <div className="inline-flex items-center w-full gap-2">
             <InputTitle
-              title={"日期"}
+              title={"起"}
               pb={false}
               required={false}
               classnames="whitespace-nowrap"
             />
             <DatePicker
-              mode="moblie"
               defaultValue={null}
-              value={dates}
-              setDates={setDates}
+              value={since}
+              setDates={setSince}
               // date的網址param在上面用useEffect來進行處理
-              views={selectedDateCon.views}
-              format={selectedDateCon.formatOne}
+              views={["year", "month", "day"]}
+              format={"yyyy 年 MM 月 dd 日"}
               minDate={new Date("2023-11")}
+            />
+          </div>{" "}
+          <div className="inline-flex items-center w-full gap-2">
+            <InputTitle
+              title={"迄"}
+              pb={false}
+              required={false}
+              classnames="whitespace-nowrap"
+            />
+            <DatePicker
+              defaultValue={null}
+              value={until}
+              setDates={setUntil}
+              // date的網址param在上面用useEffect來進行處理
+              views={["year", "month", "day"]}
+              format={"yyyy 年 MM 月 dd 日"}
+              minDate={since ? new Date(since) : new Date("2023-11")}
             />
           </div>
         </div>
@@ -741,26 +531,32 @@ const AnomalyReport = () => {
 
       {/* Calendar */}
       {cat === "table" ? (
-        <div className="overflow-y-auto flex-1 h-full order-3 sm:order-1">
-          <RWDTable
-            data={events}
-            columnsPC={columnsPC}
-            columnsMobile={columnsMobile}
-            // actions={actions}
-            cardTitleKey={"title"}
-            tableMinWidth={800}
-            isLoading={isLoading}
-            // handleActionClick={handleActionClick}
-          />
+        <>
+          <div className="overflow-y-auto flex-1 h-full order-3 sm:order-1">
+            <RWDTable
+              data={currentPageData}
+              columnsPC={columnsPC}
+              columnsMobile={columnsMobile}
+              // actions={actions}
+              cardTitleKey={"title"}
+              tableMinWidth={800}
+              isLoading={isLoading}
+              // handleActionClick={handleActionClick}
+            />{" "}
+          </div>
           {/* Pagination */}
-          {/* <Pagination
-            totalElement={showData ? events.length : 0}
-            page={page}
-            onPageChange={handleChangePage}
+          <TablePagination
+            className="order-2"
+            rowsPerPageOptions={[50, 100, 250]}
+            component="div"
+            count={events ? events.length : 0}
             rowsPerPage={rowsPerPage}
+            page={page}
+            labelRowsPerPage={"每頁行數:"}
+            onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-          /> */}
-        </div>
+          />
+        </>
       ) : (
         <Calendar
           data={events}
@@ -776,10 +572,8 @@ const AnomalyReport = () => {
         btnGroup={btnGroup}
         handleActionClick={handleOpenSearch}
       />
-
-      {/* Backdrop */}
-      <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={isLoading}>
-        <LoadingTwo />
+      <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={tabCat === "calendar" && isLoading}>
+        <LoadingFour />
       </Backdrop>
     </>
   );
@@ -789,7 +583,9 @@ export default AnomalyReport;
 
 const CustomEventContent = ({ event, isTargetScreen }) => {
   const extendedProps = event._def.extendedProps;
-
+  // if (isTargetScreen) {
+  //   return null;
+  // }
   return (
     <>
       <div>
@@ -828,3 +624,178 @@ const CustomEventContent = ({ event, isTargetScreen }) => {
     </>
   );
 };
+
+// 說明顯示
+// quizMode
+// // 下面參數前提都是 quizMode = true
+// quizContent={
+//   <div className="pt-3">
+//     <div
+//       className="flex flex-col items-center"
+//       style={{
+//         height: 255,
+//         maxWidth: 400,
+//         width: "100%",
+//         overflowY: "auto",
+//       }}
+//     >
+//       {(() => {
+//         switch (activeStep) {
+//           case 0:
+//             return (
+//               <p className="font-bold text-primary-900 pb-3">
+//                 〔畫面元素介紹〕
+//               </p>
+//             );
+//           case 1:
+//             return (
+//               <p className="font-bold text-primary-900 pb-3">
+//                 〔更新頻率概述〕
+//               </p>
+//             );
+//           case 2:
+//             return (
+//               <p className="font-bold text-primary-900 pb-3">
+//                 〔考勤顏色說明〕
+//               </p>
+//             );
+//           default:
+//             return null;
+//         }
+//       })()}
+//       {(() => {
+//         switch (activeStep) {
+//           case 0:
+//             return (
+//               <div className="flex flex-col items-center h-full text-sm">
+//                 <img
+//                   className="border mt-3 mb-6 rounded"
+//                   src={ARimg}
+//                   alt="考勤與打卡圖片示意"
+//                 />
+//                 <p>
+//                   上方為
+//                   <span className="text-base font-bold text-primary-800">
+//                     「考勤紀錄」
+//                   </span>
+//                 </p>
+//                 <p>
+//                   下方為
+//                   <span className="text-base font-bold text-primary-800">
+//                     「打卡紀錄」
+//                   </span>
+//                 </p>
+//               </div>
+//             );
+//           case 1:
+//             return (
+//               <div className="flex flex-col items-start h-full text-sm gap-3">
+//                 <div className="inline-flex">
+//                   <span className="whitespace-nowrap">考勤紀錄：</span>
+//                   <p>
+//                     <span className="text-base font-bold text-primary-800">
+//                       每日隔日凌晨 12:00 更新考勤數據。
+//                     </span>
+//                   </p>
+//                 </div>
+//                 <div className="inline-flex">
+//                   <span className="whitespace-nowrap">打卡紀錄：</span>
+//                   <p>
+//                     <span className="text-base font-bold text-primary-800">
+//                       即時更新
+//                     </span>
+//                     ，立即刷新頁面即可查看最新紀錄。
+//                   </p>
+//                 </div>
+//                 <p>情境範例：</p>
+//                 <ul>
+//                   <li>
+//                     1/1 大明 8:00 打卡上班，17:00
+//                     打卡下班，地理位置正常，打卡紀錄會即時更新至資料庫。
+//                   </li>
+//                   <li>
+//                     1/2 凌晨 12:00 系統更新資訊，會顯示
+//                     <span className="font-bold">「考勤正常」</span>。
+//                   </li>
+//                 </ul>
+//               </div>
+//             );
+//           case 2:
+//             return (
+//               <div className="flex flex-col w-full h-full text-sm gap-3">
+//                 <div className="inline-flex flex-col gap-1">
+//                   <span className="px-2 py-0.5 bg-[#F03355] rounded text-white w-fit">
+//                     考勤異常
+//                   </span>
+//                   <p>考勤資料異常狀況：</p>
+//                   <ul>
+//                     <li>
+//                       1. <span className="font-bold">上班時間異常</span>
+//                     </li>
+//                     <li>
+//                       2. <span className="font-bold">下班時間異常</span>
+//                     </li>
+//                     <li>
+//                       3. <span className="font-bold">打卡範圍異常</span>
+//                     </li>
+//                     <li>
+//                       4. <span className="font-bold">工時異常</span>{" "}
+//                       (上下班/請假時間不滿 8 小時)
+//                     </li>
+//                   </ul>
+//                 </div>
+//                 <div className="inline-flex flex-col gap-1">
+//                   <span className="px-2 py-0.5 bg-[#FFA516] rounded text-white w-fit">
+//                     考勤已修正
+//                   </span>
+//                   <p>
+//                     代表
+//                     <span className="font-bold">已經進行編輯修正</span>
+//                     的情況。
+//                   </p>
+//                 </div>
+//               </div>
+//             );
+//           default:
+//             return activeStep;
+//         }
+//       })()}
+//     </div>
+//     <MobileStepper
+//       variant="dots"
+//       steps={maxSteps}
+//       position="static"
+//       activeStep={activeStep}
+//       sx={{ maxWidth: 400, flexGrow: 1, px: 0, pb: 0 }}
+//       backButton={
+//         <Button
+//           size="small"
+//           onClick={handleBack}
+//           disabled={activeStep === 0}
+//         >
+//           {theme.direction === "rtl" ? (
+//             <KeyboardArrowRight />
+//           ) : (
+//             <KeyboardArrowLeft />
+//           )}
+//           上一頁
+//         </Button>
+//       }
+//       nextButton={
+//         <Button
+//           size="small"
+//           onClick={handleNext}
+//           disabled={activeStep === maxSteps - 1}
+//         >
+//           下一頁
+//           {theme.direction === "rtl" ? (
+//             <KeyboardArrowLeft />
+//           ) : (
+//             <KeyboardArrowRight />
+//           )}
+//         </Button>
+//       }
+//     />
+//   </div>
+// }
+// quizModalClose={() => setActiveStep(0)}
