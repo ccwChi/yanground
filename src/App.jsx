@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "./components/Layout/Header";
 import Sidebar from "./components/Layout/Sidebar";
@@ -67,10 +67,20 @@ const App = () => {
 		},
 	];
 
+	const lastActiveTimeRef = useRef(Date.now());
+
 	const handleVisibilityChange = () => {
-		// 如果用戶回到頁面，重新整理頁面
 		if (!document.hidden) {
-			window.location.reload();
+			const currentTime = Date.now();
+			const elapsedTime = currentTime - lastActiveTimeRef.current;
+
+			// 1hr
+			if (elapsedTime > 60 * 60 * 1000) {
+				window.location.reload();
+			}
+
+			// 更新最後活動時間
+			lastActiveTimeRef.current = currentTime;
 		}
 	};
 
@@ -147,17 +157,21 @@ const App = () => {
 
 	// Liff 登入 Line
 	const initLine = () => {
-		liff.init(
-			{ liffId: LINE_ID },
-			() => {
-				if (liff.isLoggedIn()) {
-					runApp();
-				} else {
+		liff.init({
+				liffId: LINE_ID,
+			})
+			.then(() => {
+				if (!liff.isLoggedIn()) {
+					// alert("你還沒登入Line哦！");
 					liff.login();
+				} else {
+					// alert("你已經登入Line哦！");
+					runApp();
 				}
-			},
-			(err) => console.error(err)
-		);
+			})
+			.catch((err) => {
+				console.log("初始化失敗", err);
+			});
 	};
 
 	// 設置憑證與從後端讀取用戶資料

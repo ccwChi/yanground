@@ -141,7 +141,7 @@ const ApplicationFormSection = React.memo(({}) => {
 						case "completePunchIO":
 							return <CompletePunchIO userProfile={userProfile} />;
 						case "workOvertime":
-							return <WorkOverTime />;
+							return <WorkOverTime userProfile={userProfile} />;
 						case "auditLog":
 							return <AuditLog />;
 						default:
