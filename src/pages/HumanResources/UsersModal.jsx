@@ -51,6 +51,10 @@ const EditModal = ({
   const theme = useTheme();
   const factorySite = [
     {
+      value: "",
+      chinese: "暫無廠別",
+    },
+    {
       value: "SHA_LUN_SITE",
       chinese: "沙崙廠",
       latitude: 23.069121600640166,
@@ -78,6 +82,11 @@ const EditModal = ({
 
   const workDayType = [
     {
+      value: "",
+      chinese: "暫無班制",
+      workCalendar: true,
+    },
+    {
       value: "SHIFT",
       chinese: "排班",
       workCalendar: false,
@@ -96,6 +105,10 @@ const EditModal = ({
 
   const WorkHourType = [
     {
+      value: "",
+      chinese: "暫無班制",
+    },
+    {
       value: "EIGHT_TO_SEVENTEEN",
       chinese: "早八晚五",
       since: "08:00:00",
@@ -108,77 +121,6 @@ const EditModal = ({
       until: "18:00:00",
     },
   ];
-
-  const apiDataA = {
-    id: "7010653361489839129",
-    userId: "Ubf72e8ad26c8ecee9ad2742fd3b36eba",
-    displayName: "照錡",
-    statusMessage: "(stocking)(gingerbread man)(beers)(gingerbread man)",
-    pictureUrl:
-      "https://profile.line-scdn.net/0hWnpk_3TMCEFdEiFEbbt2Pi1CCyt-Y1FTc31ALzgTXyUwcRoScXNGd2FCU3EzcE5CI3BEL2oTV3ZRAX8nQ0T0dVoiVnZkJkYTdnxGoA",
-    language: "zh-TW",
-    nickname: "照錡",
-    createdAt: "2023-08-31T16:36:46+08",
-    startedOn: "2023-08-24",
-    lastname: "王",
-    firstname: "照錡",
-    gender: true,
-    employeeId: null,
-    nationalIdentityCardNumber: "R124104395",
-    birthDate: "1990-12-09",
-    department: {
-      id: "23",
-      superior: null,
-      name: "資訊部",
-    },
-    capital: false,
-    factorySite: {
-      value: "SHA_LUN_SITE",
-      chinese: "沙崙廠",
-      latitude: 23.069121600640166,
-      longitude: 120.20386688401683,
-      radius: 100,
-      fullAddress: "745台南市安定區中沙里沙崙24-1號",
-    },
-    workDayType: {
-      value: "WEEKDAYS",
-      chinese: "週休二日",
-      workCalendar: true,
-    },
-    workHourType: {
-      value: "EIGHT_TO_SEVENTEEN",
-      chinese: "早八晚五",
-      since: "08:00:00",
-      until: "17:00:00",
-    },
-    authorities: [
-      {
-        id: 2,
-        role: "ROLE_INSIDER",
-        name: "內部人員",
-      },
-      {
-        id: 3,
-        role: "ROLE_ADMINISTRATION",
-        name: "行政",
-      },
-      {
-        id: 5,
-        role: "ROLE_HUMAN_RESOURCES",
-        name: "人資",
-      },
-      {
-        id: 13,
-        role: "ROLE_FOREMAN",
-        name: "工務",
-      },
-      {
-        id: 47,
-        role: "ROLE_FOREMAN_SUPERVISING",
-        name: "工務(管理)",
-      },
-    ],
-  };
 
   // 使用 Yup 來定義表單驗證規則
   const schema = yup.object().shape({
@@ -654,10 +596,6 @@ const EditModal = ({
                         value={value}
                         onChange={onChange}
                       >
-                        
-											<MenuItem value="" disabled>
-												<span className="text-neutral-400 font-light">請選擇廠別</span>
-											</MenuItem>
                         {factorySite?.map((fac, i) => (
                           <MenuItem key={"select" + i} value={fac.value}>
                             {fac.chinese}
@@ -690,9 +628,6 @@ const EditModal = ({
                         value={value}
                         onChange={onChange}
                       >
-											<MenuItem value="" disabled>
-												<span className="text-neutral-400 font-light">請選擇班制</span>
-											</MenuItem>
                         {workDayType?.map((work, i) => (
                           <MenuItem key={"select" + i} value={work.value}>
                             {work.chinese}
@@ -723,9 +658,6 @@ const EditModal = ({
                         value={value}
                         onChange={onChange}
                       >
-											<MenuItem value="" disabled>
-												<span className="text-neutral-400 font-light">請選擇工時</span>
-											</MenuItem>
                         {WorkHourType?.map((depart, i) => (
                           <MenuItem key={"select" + i} value={depart.value}>
                             {depart.chinese}
