@@ -684,13 +684,7 @@ const EventModal = React.memo(
                     {/* 派工div */}
                     <div className="mt-2 relative">
                       <div className="my-2 flex items-center">
-                        選擇{" "}
-                        <span
-                          className={`${dateInRange ? "" : "text-red-500"}`}
-                        >
-                          {" "}
-                          {deliverInfo.date}{" "}
-                        </span>
+                        選擇 <span> {deliverInfo.date} </span>
                         派工人員
                       </div>
 
@@ -703,7 +697,7 @@ const EventModal = React.memo(
                         groupBy={(taskSelectLabouerList) =>
                           taskSelectLabouerList.department.name
                         }
-                        disabled={!dateInRange}
+                        // disabled={!dateInRange}
                         disableCloseOnSelect
                         getOptionLabel={(taskSelectLabouerList) =>
                           taskSelectLabouerList.nickname
@@ -741,7 +735,7 @@ const EventModal = React.memo(
                       <Button
                         variant="contained"
                         color="success"
-                        disabled={isEditableDate}
+                        // disabled={isEditableDate}
                         className="!mb-2 !ease-in-out !duration-300 !-mt-2 !min-w-[150px] h-fit"
                         style={{ transform: "translateY(1rem)" }}
                         onClick={handleDispatchOnly}
@@ -749,18 +743,17 @@ const EventModal = React.memo(
                         僅修改人員/儲存
                       </Button>
                     </div>
-                    <div>
+                    {/* <div>
                       {!dateInRange && (
-                        <span className="inline-flex justify-start mt-3 text-red-500">
-                          <span className="flex flex-col">
-                            <span className="">
-                              {deliverInfo.date}{" "}
-                              不在工項時間範圍內，欲在當日派工請調整施工日期區間。
-                            </span>
+                        <span className="flex justify-start mt-4 text-rose-400 font-bold text-sm">
+                          <span>*</span>
+                          <span className="ms-1">
+                            {deliverInfo.date}{" "}
+                            不在工項時間範圍內，欲在當日派工請調整施工日期區間。
                           </span>
                         </span>
                       )}
-                    </div>
+                    </div> */}
                     <hr className="mt-5 bg-slate-800" />
                     {/* 清單div */}
                     <FormProvider {...methods}>

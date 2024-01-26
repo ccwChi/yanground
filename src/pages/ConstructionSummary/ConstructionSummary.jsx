@@ -136,7 +136,7 @@ const ConstructionSummary = () => {
   // 獲取專案 api
   const getProjecstList = () => {
     setIsLoading(true);
-    getData("project").then((result) => {
+    getData("project?p=1&s=5000").then((result) => {
       const projectsList = result.result.content;
       setProjectsList(projectsList);
       setIsLoading(false);
