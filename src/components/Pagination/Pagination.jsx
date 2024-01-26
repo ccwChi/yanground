@@ -12,7 +12,7 @@ const Pagination = ({
 	onPageChange,
 	rowsPerPage,
 	onRowsPerPageChange,
-	rowsPerPageOptions = [10, 25, 50],
+	rowsPerPageOptions = [10, 25, 50, 100],
 	classnames = "",
 }) => {
 	// 計算 rowsPerPage 是否為預期之外數值，插入 rowsPerPageOptions 並排序

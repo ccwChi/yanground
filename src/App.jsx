@@ -163,10 +163,10 @@ const App = () => {
 			})
 			.then(() => {
 				if (!liff.isLoggedIn()) {
-					// alert("你還沒登入Line哦！");
+					alert("你還沒登入Line哦！");
 					liff.login();
 				} else {
-					// alert("你已經登入Line哦！");
+					alert("你已經登入Line哦！");
 					runApp();
 				}
 			})

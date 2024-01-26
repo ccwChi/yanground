@@ -135,6 +135,19 @@ const RWDTable = ({
 																	) : (
 																		<span className="italic text-neutral-500 text-sm">(無)</span>
 																	);
+																case "lastname+firstname":
+																	const hasLastname = item.lastname && item.lastname.trim() !== "";
+																	const hasFirstname = item.firstname && item.firstname.trim() !== "";
+
+																	if (hasLastname && hasFirstname) {
+																		return item.lastname + item.firstname;
+																	} else if (hasLastname) {
+																		return item.lastname;
+																	} else if (hasFirstname) {
+																		return item.firstname;
+																	} else {
+																		return <span className="italic text-neutral-500 text-sm">(無)</span>;
+																	}
 																default:
 																	const columnData = columnsMobile.find((col) => col.key === column.key);
 																	if (columnData) {
@@ -286,6 +299,19 @@ const RWDTable = ({
 																) : (
 																	<span className="italic text-neutral-500 text-sm">(無)</span>
 																);
+															case "lastname+firstname":
+																const hasLastname = item.lastname && item.lastname.trim() !== "";
+																const hasFirstname = item.firstname && item.firstname.trim() !== "";
+
+																if (hasLastname && hasFirstname) {
+																	return item.lastname + item.firstname;
+																} else if (hasLastname) {
+																	return item.lastname;
+																} else if (hasFirstname) {
+																	return item.firstname;
+																} else {
+																	return <span className="italic text-neutral-500 text-sm">(無)</span>;
+																}
 															default: {
 																const columnData = columnsPC.find((col) => col.key === column.key);
 																if (columnData) {

@@ -191,16 +191,18 @@ const Users = () => {
 	// 對照 api table 所顯示 key
 	const columnsPC = [
 		{ key: "pictureUrl", label: "", size: "120px" },
-		{ key: "displayName", label: "LINE 顯示名稱", size: "16%", align: "left" },
-		{ key: "nickname", label: "暱稱", size: "14%" },
-		{ key: "gender", label: "性別", size: "10%" },
-		{ key: ["department", "name"], label: "部門", size: "14%" },
-		{ key: "startedOn", label: "到職日", size: "16%" },
+		{ key: "employeeId", label: "員工編號", size: "8%", align: "left" },
+		{ key: "displayName", label: "LINE 顯示名稱", align: "left" },
+		{ key: "lastname+firstname", label: "姓名", size: "10%" },
+		{ key: "nickname", label: "暱稱", size: "10%" },
+		{ key: "gender", label: "性別", size: "8%" },
+		{ key: ["department", "name"], label: "部門", size: "12%" },
+		{ key: "startedOn", label: "到職日", size: "14%" },
 	];
 	const columnsMobile = [
+		{ key: "employeeId", label: "員工編號" },
 		{ key: "displayName", label: "LINE 顯示名稱" },
-		{ key: "lastname", label: "姓氏" },
-		{ key: "firstname", label: "名字" },
+		{ key: "lastname+firstname", label: "姓名" },
 		{ key: "nickname", label: "暱稱" },
 		{ key: ["department", "name"], label: "部門" },
 		{ key: "gender", label: "性別" },
@@ -623,7 +625,7 @@ const Users = () => {
 					columnsMobile={columnsMobile}
 					actions={actions}
 					cardTitleKey={"displayName"}
-					tableMinWidth={800}
+					tableMinWidth={1140}
 					isLoading={isLoading}
 					handleActionClick={handleActionClick}
 				/>
