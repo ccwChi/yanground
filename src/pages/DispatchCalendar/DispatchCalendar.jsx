@@ -406,7 +406,7 @@ const DispatchCalendar = () => {
   };
 
   const getProjecstList = () => {
-    getData("project").then((result) => {
+    getData("project?p=1&s=5000").then((result) => {
       const projectsList = result.result.content;
       setProjectsList(projectsList);
     });
