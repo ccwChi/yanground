@@ -52,7 +52,7 @@ const App = () => {
 				{ text: "考勤紀錄", href: "attendancecalendar" },
 				{ text: "異常考勤", href: "anomalyreport" },
 				{ text: "辦公行事曆", href: "workcalendar" },
-				// { text: "月薪結算", href: "salarycalculation" },
+				// { text: "考勤報表", href: "attendancereport" },
 			],
 		},
 		{
@@ -157,15 +157,16 @@ const App = () => {
 
 	// Liff 登入 Line
 	const initLine = () => {
-		liff.init({
+		liff
+			.init({
 				liffId: LINE_ID,
 			})
 			.then(() => {
 				if (!liff.isLoggedIn()) {
-					alert("你還沒登入Line哦！");
+					// alert("你還沒登入Line哦！");
 					liff.login();
 				} else {
-					alert("你已經登入Line哦！");
+					// alert("你已經登入Line哦！");
 					runApp();
 				}
 			})
