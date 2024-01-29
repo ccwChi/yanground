@@ -5,12 +5,14 @@ import Tab from "@mui/material/Tab";
 // Hooks
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 
-const TableTabbar = ({ tabGroup, cat, setCat, classnames = "", onTabChange, ...otherProps }) => {
+const TableTabbar = ({ tabGroup, cat, setCat, classnames = "", onTabChange, dontnavigate = false, ...otherProps }) => {
 	const navigateWithParams = useNavigateWithParams();
 
 	const handleChange = (event, newValue) => {
 		setCat(newValue);
-		navigateWithParams(0, 0, { cat: newValue }, false);
+		if (!dontnavigate) {
+			navigateWithParams(0, 0, { cat: newValue }, false);
+		}
 
 		if (onTabChange) {
 			onTabChange(newValue);
