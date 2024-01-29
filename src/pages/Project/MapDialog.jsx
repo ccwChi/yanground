@@ -153,7 +153,13 @@ const MapDialog = ({ open, handleClose, pos, r }) => {
 					doubleClickZoom={false}
 					attributionControl={false}>
 					<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-					<Marker position={position} draggable={true} eventHandlers={eventHandlers} ref={markerRef} icon={customIcon}>
+					<Marker
+						position={position}
+						attributionControl={false}
+						draggable={true}
+						eventHandlers={eventHandlers}
+						ref={markerRef}
+						icon={customIcon}>
 						<Popup minWidth={90}>
 							<div className="flex flex-col gap-2">
 								<p className="!my-0 text-sm">當前座標：</p>

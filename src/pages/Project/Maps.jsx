@@ -87,7 +87,12 @@ const Maps = () => {
 
 	return position.lat !== 0 && position.lng !== 0 ? (
 		<>
-			<MapContainer center={position} zoom={15} className="absolute top-14 inset-0 lg:inset-0" doubleClickZoom={false}>
+			<MapContainer
+				center={position}
+				zoom={15}
+				attributionControl={false}
+				className="absolute top-14 inset-0 lg:inset-0"
+				doubleClickZoom={false}>
 				<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 				{isWorking && (
 					<Marker position={position} icon={customIcon}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 // Leaflet
 import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -27,10 +27,6 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 	const [punchLog, setPunchLog] = useState(deliverInfo[punchInOutButtons[0].value]);
 	// Tab 選擇 (active 概念)
 	const [alignment, setAlignment] = useState(punchInOutButtons[0].value);
-
-	useEffect(() => {
-		console.log(punchLog);
-	}, [punchLog]);
 
 	// Tab 切換
 	const handleChange = (event, newAlignment) => {
@@ -106,6 +102,7 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 							<MapContainer
 								center={[punchLog.latitude, punchLog.longitude]}
 								zoom={15}
+								attributionControl={false}
 								className="absolute inset-0"
 								doubleClickZoom={false}>
 								<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
