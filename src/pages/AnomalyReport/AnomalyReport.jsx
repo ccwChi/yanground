@@ -97,9 +97,7 @@ const AnomalyReport = () => {
 
   useEffect(() => {
     setSince(daysAgo);
-    console.log(daysAgo);
     setUntil(day);
-    console.log(day);
   }, []);
 
   const anomalyList = [
