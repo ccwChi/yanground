@@ -192,9 +192,9 @@ const Users = () => {
 	const columnsPC = [
 		{ key: "pictureUrl", label: "", size: "120px" },
 		{ key: "employeeId", label: "員工編號", size: "8%", align: "left" },
-		{ key: "displayName", label: "LINE 顯示名稱", align: "left" },
-		{ key: "lastname+firstname", label: "姓名", size: "10%" },
-		{ key: "nickname", label: "暱稱", size: "10%" },
+		{ key: "displayName", label: "LINE 顯示名稱", size: "14%", align: "left" },
+		{ key: "lastname+firstname", label: "姓名", size: "12%" },
+		{ key: "nickname", label: "暱稱", size: "12%" },
 		{ key: "gender", label: "性別", size: "8%" },
 		{ key: ["department", "name"], label: "部門", size: "12%" },
 		{ key: "startedOn", label: "到職日", size: "14%" },

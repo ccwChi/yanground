@@ -1,14 +1,19 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+// FontAwesome
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMapLocationDot } from "@fortawesome/free-solid-svg-icons";
 // MUI
+import { TablePagination, Tooltip, useMediaQuery } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import Backdrop from "@mui/material/Backdrop";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import TuneIcon from "@mui/icons-material/Tune";
 import { useTheme } from "@mui/material/styles";
+import TuneIcon from "@mui/icons-material/Tune";
+import EditIcon from "@mui/icons-material/Edit";
 
 // Components
 import PageTitle from "../../components/Guideline/PageTitle";
@@ -17,112 +22,111 @@ import InputTitle from "../../components/Guideline/InputTitle";
 import DatePicker from "../../components/DatePicker/DatePicker";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 import { LoadingFour, LoadingTwo } from "../../components/Loader/Loading";
+import TableTabbar from "../../components/Tabbar/TableTabbar";
 
 // Utils
 import { getData } from "../../utils/api";
 // Others
-import TableTabbar from "../../components/Tabbar/TableTabbar";
-import { TablePagination, Tooltip, useMediaQuery } from "@mui/material";
+import { PunchLocationModal } from "./AnomalyModal";
 // Table 及 Table 所需按鈕、頁數
 import RWDTable from "../../components/RWDTable/RWDTable";
-import EditIcon from "@mui/icons-material/Edit";
 import Pagination from "../../components/Pagination/Pagination";
 
 // 用網址傳參數
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 
 const AnomalyReport = () => {
-  const navigate = useNavigate();
+	const navigate = useNavigate();
 
-  // 解析網址取得參數
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const depValue = queryParams.get("dep");
-  const userValue = queryParams.get("user");
-  const stateValue = queryParams.get("state");
-  const dateValue = queryParams.get("date");
-  const tabCat = queryParams.get("cat");
+	// 解析網址取得參數
+	const location = useLocation();
+	const queryParams = new URLSearchParams(location.search);
+	const depValue = queryParams.get("dep");
+	const userValue = queryParams.get("user");
+	const stateValue = queryParams.get("state");
+	const dateValue = queryParams.get("date");
+	const tabCat = queryParams.get("cat");
 
-  // Page 頁數設置
-  // Page 頁數設置
-  const [page, setPage] = useState(
-    queryParams.has("p") && !isNaN(+queryParams.get("p"))
-      ? +queryParams.get("p") - 1
-      : 0
-  );
-  // rows per Page 多少筆等同於一頁
-  const [rowsPerPage, setRowsPerPage] = useState(
-    queryParams.has("s") && !isNaN(+queryParams.get("s"))
-      ? +queryParams.get("s")
-      : 50
-  );
+	// Page 頁數設置
+	// Page 頁數設置
+	const [page, setPage] = useState(
+		queryParams.has("p") && !isNaN(+queryParams.get("p")) ? +queryParams.get("p") - 1 : 0
+	);
+	// rows per Page 多少筆等同於一頁
+	const [rowsPerPage, setRowsPerPage] = useState(
+		queryParams.has("s") && !isNaN(+queryParams.get("s")) ? +queryParams.get("s") : 50
+	);
 
-  const day = new Date();
-  const today = new Date(day).toISOString().slice(0, 10); // 會得到2024-01-16這樣的格式
-  //60天前
-  const daysAgo = new Date(day);
-  daysAgo.setDate(day.getDate() - 60);
+	const day = new Date();
+	const today = new Date(day).toISOString().slice(0, 10); // 會得到2024-01-16這樣的格式
+	//60天前
+	const daysAgo = new Date(day);
+	daysAgo.setDate(day.getDate() - 60);
 
-  // console.log(untilDate)
-  const [currentPageData, setCurrentPageData] = useState([]);
-  const modeValue = queryParams.get("mode");
-  // API List Data
-  const [apiData, setApiData] = useState([]);
-  const [events, setEvents] = useState([]);
-  // 部門
-  const [departmentList, setDepartmentList] = useState([]);
-  // 人員
-  const [usersList, setUsersList] = useState([]);
-  // isLoading 等待請求 API
-  const [isLoading, setIsLoading] = useState(false);
-  // SearchDialog Switch
-  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
-  // cat = Category 設置 tab 分類
-  const [cat, setCat] = useState("table");
-  // 搜尋日期
-  const [since, setSince] = useState(day);
-  const [until, setUntil] = useState(null);
-  // 設定日期條件
+	// console.log(untilDate)
+	const [currentPageData, setCurrentPageData] = useState([]);
+	const modeValue = queryParams.get("mode");
+	// API List Data
+	const [apiData, setApiData] = useState([]);
+	const [events, setEvents] = useState([]);
+	// 部門
+	const [departmentList, setDepartmentList] = useState([]);
+	// ModalValue 控制開啟的是哪一個 Modal
+	const [modalValue, setModalValue] = useState(false);
+	// 傳送額外資訊給 Modal
+	const [deliverInfo, setDeliverInfo] = useState(null);
+	// 人員
+	const [usersList, setUsersList] = useState([]);
+	// isLoading 等待請求 API
+	const [isLoading, setIsLoading] = useState(false);
+	// SearchDialog Switch
+	const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+	// cat = Category 設置 tab 分類
+	const [cat, setCat] = useState("table");
+	// 搜尋日期
+	const [since, setSince] = useState(day);
+	const [until, setUntil] = useState(null);
+	// 設定日期條件
 
-  const isTargetScreen = useMediaQuery("(max-width:991.98px)");
-  const navigateWithParams = useNavigateWithParams();
+	const isTargetScreen = useMediaQuery("(max-width:991.98px)");
+	const navigateWithParams = useNavigateWithParams();
 
-  useEffect(() => {
-    setSince(daysAgo);
-    setUntil(day);
-  }, []);
+	useEffect(() => {
+		setSince(daysAgo);
+		setUntil(day);
+	}, []);
 
-  const anomalyList = [
-    {
-      id: 1,
-      text: "全部",
-    },
-    {
-      id: 2,
-      text: "異常",
-    },
-    {
-      id: 3,
-      text: "已修正",
-    },
-    {
-      id: 4,
-      text: "正常",
-    },
-  ];
+	const anomalyList = [
+		{
+			id: 1,
+			text: "全部",
+		},
+		{
+			id: 2,
+			text: "異常",
+		},
+		{
+			id: 3,
+			text: "已修正",
+		},
+		{
+			id: 4,
+			text: "正常",
+		},
+	];
 
-  // 區塊功能按鈕清單
-  const btnGroup = [
-    {
-      mode: "filter",
-      icon: null, // 設為 null 就可以避免 PC 出現
-      text: "篩選",
-      variant: "contained",
-      color: "secondary",
-      fabVariant: "secondary",
-      fab: <TuneIcon fontSize="large" />,
-    },
-  ];
+	// 區塊功能按鈕清單
+	const btnGroup = [
+		{
+			mode: "filter",
+			icon: null, // 設為 null 就可以避免 PC 出現
+			text: "篩選",
+			variant: "contained",
+			color: "secondary",
+			fabVariant: "secondary",
+			fab: <TuneIcon fontSize="large" />,
+		},
+	];
 
 	const getflagColorandText = (anomaly) => {
 		if (anomaly === null) {
@@ -132,494 +136,455 @@ const AnomalyReport = () => {
 		} else {
 			return null;
 		}
-	}
+	};
 
-  // 取得部門資料
-  useEffect(() => {
-    getData("department").then((result) => {
-      const data = result.result.content;
-      const formattedDep = data.map((dep) => ({ label: dep.name, id: dep.id }));
-      setDepartmentList(formattedDep);
-    });
-  }, []);
+	// 取得部門資料
+	useEffect(() => {
+		getData("department").then((result) => {
+			const data = result.result.content;
+			const formattedDep = data.map((dep) => ({ label: dep.name, id: dep.id }));
+			setDepartmentList(formattedDep);
+		});
+	}, []);
 
-  // 取得人員資料
-  useEffect(() => {
-    if (depValue) {
-      getData(`department/${depValue}/staff`).then((result) => {
-        const data = result.result;
-        const formattedUser = data.map((us) => ({
-          label:
-            us.lastname && us.firstname
-              ? us.lastname + us.firstname
-              : us.displayName,
-          id: us.id,
-        }));
-        setUsersList(formattedUser);
-      });
-    }
-  }, [depValue, departmentList]);
+	// 取得人員資料
+	useEffect(() => {
+		if (depValue) {
+			getData(`department/${depValue}/staff`).then((result) => {
+				const data = result.result;
+				const formattedUser = data.map((us) => ({
+					label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName,
+					id: us.id,
+				}));
+				setUsersList(formattedUser);
+			});
+		}
+	}, [depValue, departmentList]);
 
-  // 用全部的資料來過濾網址已有的篩選條件
-  useEffect(() => {
-    setEvents(apiData);
-    let tempShowData = apiData;
-    if (depValue !== null) {
-      tempShowData = tempShowData.filter((event) => {
-        return event.user.departmentId === depValue;
-      });
-    }
-    if (userValue !== null) {
-      tempShowData = tempShowData.filter((event) => {
-        return event.user.id === userValue;
-      });
-    }
-    if (stateValue !== null) {
-      if (stateValue === 1) {
-      }
-      tempShowData = tempShowData.filter((event) => {
-        return event.anomaly.id === stateValue;
-      });
-    }
+	// 用全部的資料來過濾網址已有的篩選條件
+	useEffect(() => {
+		setEvents(apiData);
+		let tempShowData = apiData;
+		if (depValue !== null) {
+			tempShowData = tempShowData.filter((event) => {
+				return event.user.departmentId === depValue;
+			});
+		}
+		if (userValue !== null) {
+			tempShowData = tempShowData.filter((event) => {
+				return event.user.id === userValue;
+			});
+		}
+		if (stateValue !== null) {
+			if (stateValue === 1) {
+			}
+			tempShowData = tempShowData.filter((event) => {
+				return event.anomaly.id === stateValue;
+			});
+		}
 
-    setEvents(tempShowData);
-    const TempCurrentPageData = tempShowData.slice(
-      page * rowsPerPage,
-      page * rowsPerPage + rowsPerPage
-    );
-    setCurrentPageData(TempCurrentPageData);
-  }, [depValue, userValue, stateValue, dateValue, apiData, page, rowsPerPage]);
+		setEvents(tempShowData);
+		const TempCurrentPageData = tempShowData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+		setCurrentPageData(TempCurrentPageData);
+	}, [depValue, userValue, stateValue, dateValue, apiData, page, rowsPerPage]);
 
-  useEffect(() => {
-    if (currentPageData.length > 0) {
-      setIsLoading(false);
-    }
-  }, [currentPageData]);
+	useEffect(() => {
+		if (currentPageData.length > 0) {
+			setIsLoading(false);
+		}
+	}, [currentPageData]);
 
-  // 取得日曆資料
-  useEffect(() => {
-    setIsLoading(true);
-    // Define the API calls
-    const type = "ATTENDANCE";
-    const fromDay = since.toISOString().slice(0, 10);
-    const toDay = today;
-    navigateWithParams(0, 0, { since: fromDay }, false);
-    navigateWithParams(0, 0, { until: toDay }, false);
-    const anomaly = "";
-    getData(
-      `attendance?type=${type}&since=${fromDay}&until=${toDay}&anomaly=${anomaly}&s=5000&p=1`
-    ).then((result) => {
-      const rawData = result.result.content.map(
-        ({ anomaly, date, id, since, until, user }, i) => ({
-          title: user.department.name + " - " + user.nickname,
-          anomaly: anomaly
-            ? { text: "異常", id: "2" }
-            : anomaly === false
-            ? { text: "已修正", id: "3" }
-            : { text: "正常", id: "4" },
-          date: date,
-          id,
-          since: since ? since.slice(11, 19) : "-",
-          until: until ? until.slice(11, 19) : "-",
-          color: getflagColorandText(anomaly).color,
-          user: {
-            id: user.id,
-            nickname: user.nickname,
-            fullName: user.lastname + user.firstname,
-            department: user.department.name,
-            departmentId: user.department.id,
-          },
-        })
-      );
-      setApiData(
-        rawData.sort((a, b) => {
-          if (a.date < b.date) {
-            return 1;
-          }
-          if (a.date > b.date) {
-            return -1;
-          }
-          return 0;
-        })
-      );
-    });
-  }, [since, until]);
+	// 取得日曆資料
+	useEffect(() => {
+		setIsLoading(true);
+		// Define the API calls
+		const type = "ATTENDANCE";
+		const fromDay = since.toISOString().slice(0, 10);
+		const toDay = today;
+		navigateWithParams(0, 0, { since: fromDay }, false);
+		navigateWithParams(0, 0, { until: toDay }, false);
+		const anomaly = "";
+		getData(`attendance?type=${type}&since=${fromDay}&until=${toDay}&anomaly=${anomaly}&s=5000&p=1`).then((result) => {
+			const rawData = result.result.content.map(
+				({ anomaly, date, id, since, until, user, clockPunchIn, clockPunchOut }, i) => ({
+					title: user.department.name + " - " + user.nickname,
+					anomaly: anomaly
+						? { text: "異常", id: "2" }
+						: anomaly === false
+						? { text: "已修正", id: "3" }
+						: { text: "正常", id: "4" },
+					date: date,
+					id,
+					since: since ? since.slice(11, 19) : "-",
+					until: until ? until.slice(11, 19) : "-",
+					color: getflagColorandText(anomaly).color,
+					user: {
+						id: user.id,
+						nickname: user.nickname,
+						fullName: user.lastname + user.firstname,
+						department: user.department.name,
+						departmentId: user.department.id,
+					},
+					clockPunchIn,
+					clockPunchOut,
+				})
+			);
+			setApiData(
+				rawData.sort((a, b) => {
+					if (a.date < b.date) {
+						return 1;
+					}
+					if (a.date > b.date) {
+						return -1;
+					}
+					return 0;
+				})
+			);
+		});
+	}, [since, until]);
 
-  useEffect(() => {
-    if (tabCat === "calendar") {
-      setCat("calendar");
-    }
-  }, [tabCat]);
-  // 開啟 SearchDialog
-  const handleOpenSearch = () => {
-    setSearchDialogOpen(true);
-  };
-  // 關閉 SearchDialog
-  const handleCloseSearch = () => {
-    setSearchDialogOpen(false);
-  };
+	useEffect(() => {
+		if (tabCat === "calendar") {
+			setCat("calendar");
+		}
+	}, [tabCat]);
+	// 開啟 SearchDialog
+	const handleOpenSearch = () => {
+		setSearchDialogOpen(true);
+	};
+	// 關閉 SearchDialog
+	const handleCloseSearch = () => {
+		setSearchDialogOpen(false);
+	};
 
-  const theme = useTheme();
-  const [activeStep, setActiveStep] = useState(0);
-  const maxSteps = 3;
+	const theme = useTheme();
+	const [activeStep, setActiveStep] = useState(0);
+	const maxSteps = 3;
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
+	const handleNext = () => {
+		setActiveStep((prevActiveStep) => prevActiveStep + 1);
+	};
 
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+	const handleBack = () => {
+		setActiveStep((prevActiveStep) => prevActiveStep - 1);
+	};
 
-  // Tab 列表對應 api 搜尋參數
-  const tabGroup = [
-    { f: "table", text: "列表" },
-    { f: "calendar", text: "月曆" },
-  ];
-  // -----------------------------------------------------
-  // 對照 api table 所顯示 key
-  const columnsPC = [
-    { key: ["user", "fullName"], label: "姓名", size: "180px" },
-    { key: ["user", "department"], label: "部門", size: "180px" },
-    { key: "date", label: "日期", size: "190px" },
-    { key: ["anomaly", "text"], label: "狀態", size: "170px" },
-    { key: "since", label: "上班時間", size: "180px" },
-    { key: "until", label: "下班時間", size: "180px" },
-    // { key: "until", label: "補單狀況", size: "14%" },
-  ];
-  const columnsMobile = [
-    // { key: "displayName", label: "LINE 顯示名稱" },
-    { key: ["user", "fullName"], label: "姓名" },
-    { key: ["user", "nickname"], label: "暱稱" },
-    { key: ["user", "department"], label: "部門" },
-    { key: "date", label: "日期" },
-    { key: ["anomaly", "text"], label: "狀態" },
-    { key: "since", label: "上班時間" },
-    { key: "until", label: "下班時間" },
-  ];
-  // edit = 編輯名稱
-  const actions = [
-    { value: "edit", icon: <EditIcon />, title: "編輯個人資料" },
-  ];
+	// Tab 列表對應 api 搜尋參數
+	const tabGroup = [
+		{ f: "table", text: "列表" },
+		{ f: "calendar", text: "月曆" },
+	];
+	// -----------------------------------------------------
+	// 對照 api table 所顯示 key
+	const columnsPC = [
+		{ key: ["user", "fullName"], label: "姓名", size: "180px" },
+		{ key: ["user", "department"], label: "部門", size: "180px" },
+		{ key: "date", label: "日期", size: "190px" },
+		{ key: ["anomaly", "text"], label: "狀態", size: "170px" },
+		{ key: "since", label: "上班時間", size: "180px" },
+		{ key: "until", label: "下班時間", size: "180px" },
+		// { key: "until", label: "補單狀況", size: "14%" },
+	];
+	const columnsMobile = [
+		// { key: "displayName", label: "LINE 顯示名稱" },
+		{ key: ["user", "fullName"], label: "姓名" },
+		{ key: ["user", "nickname"], label: "暱稱" },
+		{ key: ["user", "department"], label: "部門" },
+		{ key: "date", label: "日期" },
+		{ key: ["anomaly", "text"], label: "狀態" },
+		{ key: "since", label: "上班時間" },
+		{ key: "until", label: "下班時間" },
+	];
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
+	const actions = [
+		{ value: "location", icon: <FontAwesomeIcon icon={faMapLocationDot} size={"lg"} />, title: "打卡地點" },
+	];
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
-  
-  // -----------------------------------------------------
-  return (
-    <>
-      {/* PageTitle & Search */}
-      <PageTitle
-        title={"異常考勤"}
-        // 搜尋模式
-        searchMode
-        // 下面參數前提都是 searchMode = true
-        searchDialogOpen={searchDialogOpen}
-        handleOpenDialog={handleOpenSearch}
-        handleCloseDialog={handleCloseSearch}
-        handleCloseText={"關閉"}
-        haveValue={
-          !depValue &&
-          !userValue &&
-          (stateValue === 1 || stateValue === null) &&
-          !dateValue
-          // && (modeValue === dataCAList[0].value
-          // 	|| !dataCAList.some((item) => item.value === modeValue)
-          // 	)
-        }
-      >
-        <div className="relative flex flex-col item-start sm:items-center gap-3">
-          <div className="inline-flex items-center w-full gap-2">
-            <InputTitle
-              title={"部門"}
-              pb={false}
-              required={false}
-              classnames="whitespace-nowrap"
-            />
-            <Autocomplete
-              options={departmentList}
-              className="flex-1"
-              value={departmentList?.find((obj) => obj.id === depValue) || null}
-              onChange={(event, newValue, reason) => {
-                if (reason === "clear") {
-                  if (
-                    window.confirm("清空部門欄位會連帶清空選擇人員，確定清空？")
-                  ) {
-                    const newParams = new URLSearchParams(
-                      window.location.search
-                    );
-                    newParams.delete("dep");
-                    newParams.delete("user");
-                    navigate(`?${newParams.toString()}`);
-                    // setUsersList([]);
-                    // navigate(`/anomaly_report`);
-                  }
-                } else {
-                  setUsersList([]);
-                  navigateWithParams(0, 0, { dep: newValue.id }, false);
-                }
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  className="inputPadding bg-white"
-                  placeholder="請選擇部門"
-                  sx={{ "& > div": { padding: "0 !important" } }}
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {departmentList.length <= 0 ? (
-                          <CircularProgress
-                            className="absolute right-[2.325rem]"
-                            size={20}
-                          />
-                        ) : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              loading={departmentList.length <= 0}
-              loadingText={"載入中..."}
-            />
-          </div>
-          <div className="inline-flex items-center w-full gap-2">
-            <InputTitle
-              title={"人員"}
-              pb={false}
-              required={false}
-              classnames="whitespace-nowrap"
-            />
-            <Autocomplete
-              options={usersList}
-              className="flex-1"
-              value={usersList?.find((obj) => obj.id === userValue) || null}
-              onChange={(event, newValue, reason) => {
-                if (reason === "clear") {
-                  const newParams = new URLSearchParams(window.location.search);
-                  newParams.delete("user");
-                  navigate(`?${newParams.toString()}`);
-                } else {
-                  navigateWithParams(0, 0, { user: newValue.id }, false);
-                }
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  className="inputPadding bg-white"
-                  placeholder="請選擇人員"
-                  sx={{ "& > div": { padding: "0 !important" } }}
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {depValue && usersList.length <= 0 ? (
-                          <CircularProgress
-                            className="absolute right-[2.325rem]"
-                            size={20}
-                          />
-                        ) : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              loading={usersList.length <= 0}
-              loadingText={"載入中..."}
-              disabled={!depValue}
-            />
-          </div>
-          <div className="inline-flex items-center w-full gap-2">
-            <InputTitle
-              title={"狀態"}
-              pb={false}
-              required={false}
-              classnames="whitespace-nowrap"
-            />
-            <Select
-              value={stateValue ? stateValue : 1}
-              onChange={(event) => {
-                const newParams = new URLSearchParams(window.location.search);
-                if (event.target.value === 1) {
-                  newParams.delete("state");
-                  navigate(`?${newParams.toString()}`);
-                } else if (event.target.value) {
-                  navigateWithParams(
-                    0,
-                    0,
-                    { state: event.target.value },
-                    false
-                  );
-                }
-              }}
-              className="inputPadding !pe-5"
-              displayEmpty
-              fullWidth
-            >
-              {anomalyList.map((dc) => (
-                <MenuItem key={dc.id} value={dc.id}>
-                  {dc.text}
-                </MenuItem>
-              ))}
-            </Select>
-          </div>
-          <div className="w-full text-left flex mt-1">
-            <InputTitle
-              title={"選擇日期"}
-              pb={false}
-              required={false}
-              classnames="whitespace-nowrap"
-            />
-            <div className="flex ms-2 mt-1">
-              <p className="!my-0 text-rose-400 font-bold text-xs !me-1">＊</p>
-              <p className="!my-0 text-rose-400 font-bold text-xs">
-                預設選擇日期為今日往前推算60天
-              </p>
-            </div>
-          </div>
-          <div className="inline-flex items-center w-full gap-2">
-            <InputTitle
-              title={"起"}
-              pb={false}
-              required={false}
-              classnames="whitespace-nowrap"
-            />
-            <DatePicker
-              defaultValue={null}
-              value={since}
-              setDates={setSince}
-              // date的網址param在上面用useEffect來進行處理
-              views={["year", "month", "day"]}
-              format={"yyyy 年 MM 月 dd 日"}
-              minDate={new Date("2023-11")}
-            />
-          </div>{" "}
-          <div className="inline-flex items-center w-full gap-2">
-            <InputTitle
-              title={"迄"}
-              pb={false}
-              required={false}
-              classnames="whitespace-nowrap"
-            />
-            <DatePicker
-              defaultValue={null}
-              value={until}
-              setDates={setUntil}
-              // date的網址param在上面用useEffect來進行處理
-              views={["year", "month", "day"]}
-              format={"yyyy 年 MM 月 dd 日"}
-              minDate={since ? new Date(since) : new Date("2023-11")}
-            />
-          </div>
-        </div>
-      </PageTitle>
+	const handleChangePage = (event, newPage) => {
+		setPage(newPage);
+	};
 
-      {/* TabBar */}
-      <TableTabbar tabGroup={tabGroup} setCat={setCat} cat={cat} />
+	const handleChangeRowsPerPage = (event) => {
+		setRowsPerPage(+event.target.value);
+		setPage(0);
+	};
 
-      {/* Calendar */}
-      {cat === "table" ? (
-        <>
-          <div className="overflow-y-auto flex-1 h-full order-3 sm:order-1">
-            <RWDTable
-              data={currentPageData}
-              columnsPC={columnsPC}
-              columnsMobile={columnsMobile}
-              // actions={actions}
-              cardTitleKey={"title"}
-              tableMinWidth={800}
-              isLoading={isLoading}
-              // handleActionClick={handleActionClick}
-            />{" "}
-          </div>
-          {/* Pagination */}
-          <TablePagination
-            className="order-2"
-            rowsPerPageOptions={[50, 100, 250]}
-            component="div"
-            count={events ? events.length : 0}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            labelRowsPerPage={"每頁行數:"}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
-        </>
-      ) : (
-        <Calendar
-          data={events}
-          viewOptions={["dayGridMonth", "dayGridWeek"]}
-          _dayMaxEvents={3}
-          navLinkDayClick={(date, jsEvent) => {}}
-          eventContent={(e) => CustomEventContent(e, isTargetScreen)}
-        />
-      )}
+	// 當活動按鈕點擊時開啟 modal 並進行動作
+	const handleActionClick = (event) => {
+		event.stopPropagation();
+		const dataMode = event.currentTarget.getAttribute("data-mode");
+		const dataValue = event.currentTarget.getAttribute("data-value");
+		setModalValue(dataMode);
+		setDeliverInfo(dataValue ? apiData?.find((item) => item.id === dataValue) : null);
+	};
 
-      {/* Floating Action Button */}
-      <FloatingActionButton
-        btnGroup={btnGroup}
-        handleActionClick={handleOpenSearch}
-      />
-      <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={tabCat === "calendar" && isLoading}>
-        <LoadingFour />
-      </Backdrop>
-    </>
-  );
+	// 關閉 Modal 清除資料
+	const onClose = () => {
+		setModalValue(false);
+		setDeliverInfo(null);
+	};
+
+	// modal 開啟參數與顯示標題
+	const modalConfig = [
+		{
+			modalValue: "location",
+			modalComponent: <PunchLocationModal title={"打卡地點"} deliverInfo={deliverInfo} onClose={onClose} />,
+		},
+	];
+	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
+
+	// -----------------------------------------------------
+	return (
+		<>
+			{/* PageTitle & Search */}
+			<PageTitle
+				title={"異常考勤"}
+				// 搜尋模式
+				searchMode
+				// 下面參數前提都是 searchMode = true
+				searchDialogOpen={searchDialogOpen}
+				handleOpenDialog={handleOpenSearch}
+				handleCloseDialog={handleCloseSearch}
+				handleCloseText={"關閉"}
+				haveValue={
+					!depValue && !userValue && (stateValue === 1 || stateValue === null) && !dateValue
+					// && (modeValue === dataCAList[0].value
+					// 	|| !dataCAList.some((item) => item.value === modeValue)
+					// 	)
+				}>
+				<div className="relative flex flex-col item-start sm:items-center gap-3">
+					<div className="inline-flex items-center w-full gap-2">
+						<InputTitle title={"部門"} pb={false} required={false} classnames="whitespace-nowrap" />
+						<Autocomplete
+							options={departmentList}
+							className="flex-1"
+							value={departmentList?.find((obj) => obj.id === depValue) || null}
+							onChange={(event, newValue, reason) => {
+								if (reason === "clear") {
+									if (window.confirm("清空部門欄位會連帶清空選擇人員，確定清空？")) {
+										const newParams = new URLSearchParams(window.location.search);
+										newParams.delete("dep");
+										newParams.delete("user");
+										navigate(`?${newParams.toString()}`);
+										// setUsersList([]);
+										// navigate(`/anomaly_report`);
+									}
+								} else {
+									setUsersList([]);
+									navigateWithParams(0, 0, { dep: newValue.id }, false);
+								}
+							}}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									className="inputPadding bg-white"
+									placeholder="請選擇部門"
+									sx={{ "& > div": { padding: "0 !important" } }}
+									InputProps={{
+										...params.InputProps,
+										endAdornment: (
+											<>
+												{departmentList.length <= 0 ? (
+													<CircularProgress className="absolute right-[2.325rem]" size={20} />
+												) : null}
+												{params.InputProps.endAdornment}
+											</>
+										),
+									}}
+								/>
+							)}
+							loading={departmentList.length <= 0}
+							loadingText={"載入中..."}
+						/>
+					</div>
+					<div className="inline-flex items-center w-full gap-2">
+						<InputTitle title={"人員"} pb={false} required={false} classnames="whitespace-nowrap" />
+						<Autocomplete
+							options={usersList}
+							className="flex-1"
+							value={usersList?.find((obj) => obj.id === userValue) || null}
+							onChange={(event, newValue, reason) => {
+								if (reason === "clear") {
+									const newParams = new URLSearchParams(window.location.search);
+									newParams.delete("user");
+									navigate(`?${newParams.toString()}`);
+								} else {
+									navigateWithParams(0, 0, { user: newValue.id }, false);
+								}
+							}}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									className="inputPadding bg-white"
+									placeholder="請選擇人員"
+									sx={{ "& > div": { padding: "0 !important" } }}
+									InputProps={{
+										...params.InputProps,
+										endAdornment: (
+											<>
+												{depValue && usersList.length <= 0 ? (
+													<CircularProgress className="absolute right-[2.325rem]" size={20} />
+												) : null}
+												{params.InputProps.endAdornment}
+											</>
+										),
+									}}
+								/>
+							)}
+							loading={usersList.length <= 0}
+							loadingText={"載入中..."}
+							disabled={!depValue}
+						/>
+					</div>
+					<div className="inline-flex items-center w-full gap-2">
+						<InputTitle title={"狀態"} pb={false} required={false} classnames="whitespace-nowrap" />
+						<Select
+							value={stateValue ? stateValue : 1}
+							onChange={(event) => {
+								const newParams = new URLSearchParams(window.location.search);
+								if (event.target.value === 1) {
+									newParams.delete("state");
+									navigate(`?${newParams.toString()}`);
+								} else if (event.target.value) {
+									navigateWithParams(0, 0, { state: event.target.value }, false);
+								}
+							}}
+							className="inputPadding !pe-5"
+							displayEmpty
+							fullWidth>
+							{anomalyList.map((dc) => (
+								<MenuItem key={dc.id} value={dc.id}>
+									{dc.text}
+								</MenuItem>
+							))}
+						</Select>
+					</div>
+					<div className="w-full text-left flex mt-1">
+						<InputTitle title={"選擇日期"} pb={false} required={false} classnames="whitespace-nowrap" />
+						<div className="flex ms-2 mt-1">
+							<p className="!my-0 text-rose-400 font-bold text-xs !me-1">＊</p>
+							<p className="!my-0 text-rose-400 font-bold text-xs">預設選擇日期為今日往前推算60天</p>
+						</div>
+					</div>
+					<div className="inline-flex items-center w-full gap-2">
+						<InputTitle title={"起"} pb={false} required={false} classnames="whitespace-nowrap" />
+						<DatePicker
+							defaultValue={null}
+							value={since}
+							setDates={setSince}
+							// date的網址param在上面用useEffect來進行處理
+							views={["year", "month", "day"]}
+							format={"yyyy 年 MM 月 dd 日"}
+							minDate={new Date("2023-11")}
+						/>
+					</div>{" "}
+					<div className="inline-flex items-center w-full gap-2">
+						<InputTitle title={"迄"} pb={false} required={false} classnames="whitespace-nowrap" />
+						<DatePicker
+							defaultValue={null}
+							value={until}
+							setDates={setUntil}
+							// date的網址param在上面用useEffect來進行處理
+							views={["year", "month", "day"]}
+							format={"yyyy 年 MM 月 dd 日"}
+							minDate={since ? new Date(since) : new Date("2023-11")}
+						/>
+					</div>
+				</div>
+			</PageTitle>
+
+			{/* TabBar */}
+			<TableTabbar tabGroup={tabGroup} setCat={setCat} cat={cat} />
+
+			{/* Calendar */}
+			{cat === "table" ? (
+				<>
+					<div className="overflow-y-auto flex-1 h-full order-3 sm:order-1">
+						<RWDTable
+							data={currentPageData}
+							columnsPC={columnsPC}
+							columnsMobile={columnsMobile}
+							actions={actions}
+							cardTitleKey={"title"}
+							tableMinWidth={800}
+							isLoading={isLoading}
+							handleActionClick={handleActionClick}
+						/>
+					</div>
+					{/* Pagination */}
+					<TablePagination
+						className="order-2"
+						rowsPerPageOptions={[50, 100, 250]}
+						component="div"
+						count={events ? events.length : 0}
+						rowsPerPage={rowsPerPage}
+						page={page}
+						labelRowsPerPage={"每頁行數:"}
+						onPageChange={handleChangePage}
+						onRowsPerPageChange={handleChangeRowsPerPage}
+					/>
+				</>
+			) : (
+				<Calendar
+					data={events}
+					viewOptions={["dayGridMonth", "dayGridWeek"]}
+					_dayMaxEvents={3}
+					navLinkDayClick={(date, jsEvent) => {}}
+					eventContent={(e) => CustomEventContent(e, isTargetScreen)}
+				/>
+			)}
+
+			{/* Floating Action Button */}
+			<FloatingActionButton btnGroup={btnGroup} handleActionClick={handleOpenSearch} />
+			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={tabCat === "calendar" && isLoading}>
+				<LoadingFour />
+			</Backdrop>
+
+			{/* Modal */}
+			{config && config.modalComponent}
+		</>
+	);
 };
 
 export default AnomalyReport;
 
 const CustomEventContent = ({ event, isTargetScreen }) => {
-  const extendedProps = event._def.extendedProps;
-  // if (isTargetScreen) {
-  //   return null;
-  // }
-  return (
-    <>
-      <div>
-        <Tooltip
-          describeChild={true}
-          className="z-[3000]"
-          componentsProps={{
-            tooltip: {
-              sx: {
-                padding: "0",
-                zIndex: "3000",
-              },
-            },
-          }}
-          placement="right-start"
-          title={
-            <div className="p-2">
-              <p className="text-xl">{extendedProps.user.nickname}</p>
-              <p className="text-base">{event.startStr}</p>
-              <p className="text-base">
-                異常狀態 :{" "}
-                {extendedProps.anomaly.id === "2"
-                  ? "異常"
-                  : extendedProps.anomaly.id === "3"
-                  ? "已補單"
-                  : "正常"}
-              </p>
-              <p className="text-base">上班時間 : {extendedProps.since}</p>
-              <p className="text-base">下班時間 : {extendedProps.until}</p>
-            </div>
-          }
-        >
-          <span>{event.title}</span>
-        </Tooltip>
-      </div>
-    </>
-  );
+	const extendedProps = event._def.extendedProps;
+	// if (isTargetScreen) {
+	//   return null;
+	// }
+	return (
+		<>
+			<div>
+				<Tooltip
+					describeChild={true}
+					className="z-[3000]"
+					componentsProps={{
+						tooltip: {
+							sx: {
+								padding: "0",
+								zIndex: "3000",
+							},
+						},
+					}}
+					placement="right-start"
+					title={
+						<div className="p-2">
+							<p className="text-xl">{extendedProps.user.nickname}</p>
+							<p className="text-base">{event.startStr}</p>
+							<p className="text-base">
+								異常狀態 :{" "}
+								{extendedProps.anomaly.id === "2" ? "異常" : extendedProps.anomaly.id === "3" ? "已補單" : "正常"}
+							</p>
+							<p className="text-base">上班時間 : {extendedProps.since}</p>
+							<p className="text-base">下班時間 : {extendedProps.until}</p>
+						</div>
+					}>
+					<span>{event.title}</span>
+				</Tooltip>
+			</div>
+		</>
+	);
 };
 
 // 說明顯示
