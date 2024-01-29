@@ -48,7 +48,9 @@ const ConstructionSummary = () => {
       : 10
   );
 
-  const apiUrl = `constructionSummary?p=${page + 1}&s=${rowsPerPage}`;
+  // ApiUrl
+  const furl = "constructionSummary";
+  const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
 
   const [activeStep, setActiveStep] = useState(0);
 
@@ -85,9 +87,9 @@ const ConstructionSummary = () => {
   const columnsPC = [
     { key: "name", label: "名稱" },
     { key: ["project", "name"], label: "專案" },
-    { key: "rocYear", label: "年度" },
-    { key: "since", label: "起始日期" },
-    { key: "until", label: "結束日期" },
+    { key: "rocYear", label: "年度", size: "60px" },
+    { key: "since", label: "起始日期", size: "120px" },
+    { key: "until", label: "結束日期", size: "120px" },
   ];
 
   const columnsMobile = [
@@ -126,7 +128,7 @@ const ConstructionSummary = () => {
         }
 
         if (result.result?.content.length > 0) {
-          setSummaryList(result.result?.content);
+          setSummaryList(result.result);
         }
       });
     },
@@ -154,13 +156,10 @@ const ConstructionSummary = () => {
   // };
 
   // 設置頁數
-  const handleChangePage = useCallback(
-    (event, newPage) => {
-      setPage(newPage);
-      navigate(`?p=${newPage + 1}&s=${rowsPerPage}`);
-    },
-    [rowsPerPage]
-  );
+  const handleChangePage = useCallback((event, newPage) => {
+    setPage(newPage);
+    navigate(`?p=${newPage + 1}&s=${rowsPerPage}`);
+  }, []);
 
   // 設置每頁顯示並返回第一頁
   const handleChangeRowsPerPage = (event) => {
@@ -230,7 +229,7 @@ const ConstructionSummary = () => {
       {/* Table */}
       <div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
         <RWDTable
-          data={summaryList ? summaryList : []}
+          data={summaryList?.content ? summaryList.content : []}
           columnsPC={columnsPC}
           columnsMobile={columnsMobile}
           actions={actions}

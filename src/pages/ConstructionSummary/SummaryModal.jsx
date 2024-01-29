@@ -213,7 +213,7 @@ const SummaryModal = React.memo(
         <ModalTemplete
           title={<ForSummaryStepper activeStep={activeStep} steps={steps} />}
           show={!!deliverInfo ? true : !deliverInfoFromList && true}
-          maxWidth={"640px"}
+          maxWidth={"700px"}
           onClose={onCheckDirty}
         >
           <div className="h-[500px] min-h-[50vh]">

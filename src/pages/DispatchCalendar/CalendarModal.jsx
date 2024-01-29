@@ -493,7 +493,7 @@ const EventModal = React.memo(
           <ModalTemplete
             title={deliverInfo.date}
             show={isOpen}
-            maxWidth={"700px"}
+            maxWidth={"800px"}
             onClose={onCheckDirty}
             className="!border-none "
           >
@@ -515,6 +515,9 @@ const EventModal = React.memo(
                 className={`w-full md:block border rounded-md bg-slate-100
                 ${currentDivIndex === 0 ? "block" : "hidden"} 
                   h-[70vh] bg-slate-5 overflow-y-scroll p-2 mt-4`}
+                onClick={() => {
+                  console.log(deliverInfo);
+                }}
               >
                 {deliverInfo.summaries.map((summary, index) => (
                   <Accordion key={index}>
@@ -528,8 +531,12 @@ const EventModal = React.memo(
                         borderTop: 0,
                       }}
                     >
-                      <span className="text-lg w-full ps-2 text-left flex items-center h-full  justify-between  ">
-                        {summary.project.name + "-" + summary.name}
+                      <span className="text-lg w-full ps-2 text-left flex items-center h-full  justify-between ">
+                        <span className="flex flex-col">
+                          <span className="font-bold">{summary.name}</span>
+
+                          {summary.project.name}
+                        </span>
                         <span
                           className={`text-xs inline-block ms-4 min-w-fit `}
                         >
