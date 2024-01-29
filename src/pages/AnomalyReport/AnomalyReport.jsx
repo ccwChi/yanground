@@ -124,18 +124,15 @@ const AnomalyReport = () => {
     },
   ];
 
-  const getflagColorandText = (flag) => {
-    switch (flag) {
-      case true:
-        return { color: "#F03355", text: "考勤異常" };
-      case false:
-        return { color: "#FFA516", text: "考勤已修正" };
-      case null:
-        return { color: "#25B09B", text: "考勤正常" };
-      default:
-        break;
-    }
-  };
+	const getflagColorandText = (anomaly) => {
+		if (anomaly === null) {
+			return { color: "#25B09B", text: "考勤正常" };
+		} else if (typeof anomaly === "object") {
+			return { color: "#F03355", text: anomaly.chinese };
+		} else {
+			return null;
+		}
+	}
 
   // 取得部門資料
   useEffect(() => {
