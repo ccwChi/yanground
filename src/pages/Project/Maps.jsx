@@ -30,6 +30,7 @@ const circleConfig = [
 const Maps = () => {
 	// 座標位置
 	const [position, setPosition] = useState({ lat: 0, lng: 0 });
+	const [isWorking, setIsWorking] = useState(true);
 	// 半徑範圍
 	const [radius, setRadius] = useState(0);
 	// 取得 id 參數
@@ -37,14 +38,19 @@ const Maps = () => {
 	const queryParams = new URLSearchParams(location.search);
 
 	useEffect(() => {
-		if (queryParams.has("id")) {
-			const id_ = queryParams.get("id");
-			getData(`project/${id_}`).then((result) => {
-				const data = result.result;
-				setPosition({ lat: data.latitude, lng: data.longitude });
-				setRadius(data.radius);
-			});
+		if (queryParams.has("lat") && queryParams.has("lng")) {
+			setIsWorking(true);
+			const _lat = queryParams.get("lat");
+			const _lng = queryParams.get("lng");
+			setPosition({ lat: _lat, lng: _lng });
+			// const id_ = queryParams.get("id");
+			// getData(`project/${id_}`).then((result) => {
+			// 	const data = result.result;
+			// 	setPosition({ lat: data.latitude, lng: data.longitude });
+			// 	setRadius(data.radius);
+			// });
 		} else {
+			setIsWorking(false);
 			navigator.geolocation.getCurrentPosition((location) => {
 				const { latitude, longitude } = location.coords;
 				setPosition({ lat: latitude, lng: longitude });
@@ -80,22 +86,34 @@ const Maps = () => {
 	}, [radius, position]);
 
 	return position.lat !== 0 && position.lng !== 0 ? (
-		<MapContainer center={position} zoom={15} className="absolute top-14 inset-0 lg:inset-0" doubleClickZoom={false}>
-			<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-			<Marker position={position} icon={customIcon}>
-				<Popup minWidth={90}>
-					<div className="flex flex-col items-center gap-2">
-						<p className="!my-0 text-sm">座標</p>
-						<span>
-							{position.lat}, {position.lng}
-						</span>
-						<p className="!my-0 text-sm">範圍半徑</p>
-						<span>{radius} 公尺</span>
+		<>
+			<MapContainer center={position} zoom={15} className="absolute top-14 inset-0 lg:inset-0" doubleClickZoom={false}>
+				<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+				{isWorking && (
+					<Marker position={position} icon={customIcon}>
+						<Popup minWidth={90}>
+							<div className="flex flex-col items-center gap-2">
+								<p className="!my-0 text-sm">座標</p>
+								<span>
+									{position.lat}, {position.lng}
+								</span>
+								{/* <p className="!my-0 text-sm">範圍半徑</p>
+								<span>{radius} 公尺</span> */}
+							</div>
+						</Popup>
+					</Marker>
+				)}
+				{renderCircles()}
+			</MapContainer>
+			{!isWorking && (
+				<>
+					<div className="absolute inset-0 flex items-center justify-center z-[1050] bg-black opacity-60"></div>
+					<div className="absolute inset-0 flex items-center justify-center z-[1050] text-white tracking-wider font-bold text-3xl">
+						無座標顯示
 					</div>
-				</Popup>
-			</Marker>
-			{renderCircles()}
-		</MapContainer>
+				</>
+			)}
+		</>
 	) : null;
 };
 
