@@ -30,6 +30,8 @@ const ConstructionTypes = () => {
 		"https://www.yuanrong-tech.com.tw/WebFiles/img/3e63d586-7595-4305-80cc-58fa20da805c/eccdb80b-6779-44ad-b3c0-dfc3200a905d.jpg",
 		"https://www.yuanrong-tech.com.tw/WebFiles/img/3e63d586-7595-4305-80cc-58fa20da805c/01216c45-6866-4edb-9ee9-6f1c1fbfcfc6.jpg",
 		"https://www.yuanrong-tech.com.tw/WebFiles/img/3e63d586-7595-4305-80cc-58fa20da805c/7a52f936-49f6-45de-9f32-e98a5ac6e0ef.jpg",
+		"https://www.yuanrong-tech.com.tw/WebFiles/img/3e63d586-7595-4305-80cc-58fa20da805c/01216c45-6866-4edb-9ee9-6f1c1fbfcfc6.jpg",
+		"https://www.yuanrong-tech.com.tw/WebFiles/img/ae2e51a4-544a-4a9e-b360-52160586dd41/b3c232d2-6895-4f92-a322-9be0adf49e3f.jpg"
 	];
 
 	// 取得列表資料

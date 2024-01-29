@@ -83,7 +83,7 @@ const DispatchCalendar = () => {
   }, [dateList, constructionSummaryList, reGetCalendarData]);
 
   useEffect(() => {
-    getDepartMemberList("11");
+    getDepartMemberList();
     getProjecstList();
   }, []);
 
@@ -270,7 +270,7 @@ const DispatchCalendar = () => {
     });
   };
 
-  const getDepartMemberList = useCallback((id) => {
+  const getDepartMemberList = useCallback(() => {
     const idArray = [11, 13, 17, 19];
     const promises = idArray.map((id) => {
       const departMemberListEndpoint = `department/${id}/staff`;
