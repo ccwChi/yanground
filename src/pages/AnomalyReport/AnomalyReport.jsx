@@ -301,8 +301,10 @@ const AnomalyReport = () => {
     { key: ["user", "fullName"], label: "姓名", size: "180px" },
     { key: ["user", "department"], label: "部門", size: "180px" },
     { key: "date", label: "日期", size: "190px" },
-    { key: ["anomalyState", "text"], label: "狀態", size: "170px" },
-    { key: ["anomaly", "chinese"], label: "異常原因", size: "180px" },
+    { key: ["anomalyState", "text"], label: "狀態", size: "100px" },
+    { key: ["anomaly", "chinese"], label: "異常原因", size: "310px" },
+    { key: "since", label: "上班時間", size: "160px" },
+    { key: "until", label: "下班時間", size: "160px" },
 
     // { key: "until", label: "補單狀況", size: "14%" },
   ];

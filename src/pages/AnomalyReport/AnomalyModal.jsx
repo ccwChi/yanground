@@ -68,15 +68,14 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
             </p>
           </div>
           <div className="flex sm:flex-row flex-col gap-2 text-sm sm:text-base">
-            <p className="w-full">
+            {/* <p className="w-full">
               打卡時間：
               <span className="font-bold">
-                {/* {deliverInfo.date} {deliverInfo.since} */}
                 {punchLog?.occurredAt
                   ? punchLog.occurredAt.split(/[T+]/).slice(0, 2).join(" ")
                   : "-"}
               </span>
-            </p>
+            </p> */}
             <p className="w-full">
               打卡狀態：
               <span className="font-bold">{deliverInfo.anomalyState.text}</span>
