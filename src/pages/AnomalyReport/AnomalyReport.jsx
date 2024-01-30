@@ -67,7 +67,6 @@ const AnomalyReport = () => {
   const daysAgo = new Date(day);
   daysAgo.setDate(day.getDate() - 30);
 
-  // console.log(untilDate)
   const [currentPageData, setCurrentPageData] = useState([]);
   const modeValue = queryParams.get("mode");
   // API List Data
@@ -182,7 +181,7 @@ const AnomalyReport = () => {
       if (stateValue === 1) {
       }
       tempShowData = tempShowData.filter((event) => {
-        return event.anomaly.id === stateValue;
+        return event.anomalyState.id === stateValue;
       });
     }
 
@@ -207,7 +206,7 @@ const AnomalyReport = () => {
       // Define the API calls
       const type = "ATTENDANCE";
       const sinceForApi = since.toISOString().slice(0, 10);
-      const untilForApi = until.toISOString().slice(0, 10);;
+      const untilForApi = until.toISOString().slice(0, 10);
       navigateWithParams(0, 0, { since: sinceForApi }, false);
       navigateWithParams(0, 0, { until: untilForApi }, false);
       const anomaly = "";
@@ -229,14 +228,15 @@ const AnomalyReport = () => {
             i
           ) => ({
             title: user.department.name + " - " + user.nickname,
-            anomaly:
+            anomalyState:
               anomaly === null
                 ? { text: "正常", id: "3" }
                 : { text: "異常", id: "2" },
-            date: date,
+            anomaly,
+            date,
             id,
-            since: since ? since.slice(11, 19) : "-",
-            until: until ? until.slice(11, 19) : "-",
+            since: clockPunchIn ? clockPunchIn.occurredAt.slice(11, 19) : "-",
+            until: clockPunchOut ? clockPunchOut.occurredAt.slice(11, 19) : "-",
             color: getflagColorandText(anomaly).color,
             user: {
               id: user.id,
@@ -301,9 +301,9 @@ const AnomalyReport = () => {
     { key: ["user", "fullName"], label: "姓名", size: "180px" },
     { key: ["user", "department"], label: "部門", size: "180px" },
     { key: "date", label: "日期", size: "190px" },
-    { key: ["anomaly", "text"], label: "狀態", size: "170px" },
-    { key: "since", label: "上班時間", size: "180px" },
-    { key: "until", label: "下班時間", size: "180px" },
+    { key: ["anomalyState", "text"], label: "狀態", size: "170px" },
+    { key: ["anomaly", "chinese"], label: "異常原因", size: "180px" },
+
     // { key: "until", label: "補單狀況", size: "14%" },
   ];
   const columnsMobile = [
@@ -312,7 +312,8 @@ const AnomalyReport = () => {
     { key: ["user", "nickname"], label: "暱稱" },
     { key: ["user", "department"], label: "部門" },
     { key: "date", label: "日期" },
-    { key: ["anomaly", "text"], label: "狀態" },
+    { key: ["anomalyState", "text"], label: "狀態" },
+    { key: ["anomaly", "chinese"], label: "異常原因" },
     { key: "since", label: "上班時間" },
     { key: "until", label: "下班時間" },
   ];
@@ -575,7 +576,7 @@ const AnomalyReport = () => {
               views={["year", "month", "day"]}
               format={"yyyy 年 MM 月 dd 日"}
               minDate={since ? new Date(since) : new Date("2023-11")}
-			  maxDate={new Date(today)}
+              maxDate={new Date(today)}
             />
           </div>
         </div>
@@ -667,15 +668,12 @@ const CustomEventContent = ({ event, isTargetScreen }) => {
               <p className="text-xl">{extendedProps.user.nickname}</p>
               <p className="text-base">{event.startStr}</p>
               <p className="text-base">
-                異常狀態 :{" "}
-                {extendedProps.anomaly.id === "2"
-                  ? "異常"
-                  : extendedProps.anomaly.id === "3"
-                  ? "已補單"
-                  : "正常"}
+                異常狀態 : {extendedProps.anomalyState.id === "2" && "異常"}
+                {extendedProps.anomalyState.id === "3" && "正常"}
               </p>
               <p className="text-base">上班時間 : {extendedProps.since}</p>
               <p className="text-base">下班時間 : {extendedProps.until}</p>
+              <p className="text-base">異常原因 : {extendedProps?.anomaly ? extendedProps?.anomaly.chinese : "-"}</p>
             </div>
           }
         >
