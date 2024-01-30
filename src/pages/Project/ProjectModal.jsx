@@ -417,15 +417,17 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 						</div>
 
 						{/* MapDialog */}
-						<MapDialog
-							open={mapDialog}
-							handleClose={() => setMapDialog(false)}
-							pos={{
-								lat: getValues("latitude") ? +getValues("latitude") : 0,
-								lng: getValues("longitude") ? +getValues("longitude") : 0,
-							}}
-							r={getValues("radius") ? +getValues("radius") : 500}
-						/>
+						{mapDialog && (
+							<MapDialog
+								open={mapDialog}
+								handleClose={() => setMapDialog(false)}
+								pos={{
+									lat: getValues("latitude") ? +getValues("latitude") : 0,
+									lng: getValues("longitude") ? +getValues("longitude") : 0,
+								}}
+								r={getValues("radius") ? +getValues("radius") : 500}
+							/>
+						)}
 					</form>
 				</FormProvider>
 			</ModalTemplete>

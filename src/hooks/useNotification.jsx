@@ -9,8 +9,8 @@ export const useNotification = () => {
 		enqueueSnackbar(message, {
 			variant: isSuccess ? "success" : "error",
 			anchorOrigin: {
-				vertical: "bottom",       // 垂直，可選：'top', 'bottom'
-				horizontal: "center",     // 水平，可選：'left', 'center', 'right'
+				vertical: "bottom", // 垂直，可選：'top', 'bottom'
+				horizontal: "center", // 水平，可選：'left', 'center', 'right'
 			},
 			autoHideDuration: time,
 		});
@@ -20,6 +20,7 @@ export const useNotification = () => {
 };
 
 //****** How To Use ? ******//
+// import { useNotification } from "./hooks/useNotification";
 // const showNotification = useNotification();
 // showNotification('操作成功', true);
 // showNotification('操作失敗', false);
