@@ -1,17 +1,24 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
+// FontAwesome
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRightToBracket, faArrowRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+// Leaflet
 import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
-import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 import "leaflet/dist/leaflet.css";
+// MUI
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import AlarmOnIcon from "@mui/icons-material/AlarmOn";
 import AlarmOffIcon from "@mui/icons-material/AlarmOff";
+// Hooks
+import useLocalStorageValue from "../../hooks/useLocalStorageValue";
+// Utils
 import { postData } from "../../utils/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRightToBracket, faArrowRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+// Customs
 import profileIcon from "../../assets/icons/Profile.png";
 
+// 預設座標
 const COMPANYLOC = [23.069138196461633, 120.20386275455343];
 
 // Marker
@@ -24,6 +31,7 @@ const LocationMarker = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [punchTime, setPunchTime] = useState("");
 	const [punchIO, setPunchIO] = useState(null);
+	// 是否抓不到位置
 	const markerRef = useRef(null);
 
 	// 需要把 Marker 的 icon 弄出來，不然會顯示錯誤圖片
@@ -83,9 +91,15 @@ const LocationMarker = () => {
 		map.locate({
 			setView: false,
 			watch: true, // 是否要一直監測使用者位置
-			// enableHighAccuracy: true, // 是否要高精準度的抓位置
+			enableHighAccuracy: true, // 是否要高精準度的抓位置
 			// timeout: 10000, // 觸發 locationerror 事件之前等待的毫秒數
 		});
+
+		// map.on("locationfound", (e) => {
+		// });
+
+		// map.on("locationerror", (e) => {
+		// });
 	}, [map]);
 
 	// 提交打卡按鈕
@@ -122,7 +136,20 @@ const LocationMarker = () => {
 	};
 
 	return position === null ? (
-		<Marker position={COMPANYLOC} icon={customIcon}></Marker>
+		<Marker position={COMPANYLOC} icon={customIcon}>
+			<Popup open={true} closeButton={false} className="custom_punch_popup">
+				<div className={`flex ${punchState === 1 ? "" : "hidden"}`}>
+					<p className="!my-0 text-rose-400 font-bold text-lg !me-1">＊</p>
+					<div className="inline-flex flex-col gap-2">
+						<p className="!my-0 text-rose-400 font-bold text-lg">打卡需開啟定位服務！請確保您的定位功能已啟用。</p>
+						<p className="!my-0 text-rose-400 font-bold text-lg">
+							若曾經拒絕開啟或提供定位功能，請至後台重新啟用定位。
+						</p>
+						<p className="!my-0 text-rose-400 font-bold text-lg">如有不明，請聯繫人資部門尋求協助。謝謝！</p>
+					</div>
+				</div>
+			</Popup>
+		</Marker>
 	) : (
 		<Marker ref={markerRef} position={position} icon={customIcon}>
 			<Popup open={true} closeButton={false} className="custom_punch_popup">

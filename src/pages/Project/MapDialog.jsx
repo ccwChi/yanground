@@ -1,6 +1,10 @@
 import React, { useEffect, useState, forwardRef, useRef, useMemo, useCallback } from "react";
+import { useFormContext } from "react-hook-form";
+// Leaflet
 import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
+// MUI
+import Alert from "@mui/material/Alert";
 import AppBar from "@mui/material/AppBar";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -10,8 +14,9 @@ import Typography from "@mui/material/Typography";
 import Slide from "@mui/material/Slide";
 import Slider from "@mui/material/Slider";
 import CloseIcon from "@mui/icons-material/Close";
+import Snackbar from "@mui/material/Snackbar";
+// Customs
 import MapsIcon from "../../assets/icons/Map_pin_icon.png";
-import { useFormContext } from "react-hook-form";
 
 const Transition = forwardRef(function Transition(props, ref) {
 	return <Slide direction="up" ref={ref} {...props} />;
@@ -61,19 +66,30 @@ const circleConfig = [
 // 	{ radius: 150, fillColor: "#e5b1a2" },
 // 	{ radius: 100, fillColor: "#f7ceb9" },
 // ];
+const COMPANYLOC = [23.069138196461633, 120.20386275455343];
 
 const MapDialog = ({ open, handleClose, pos, r }) => {
 	const { setValue } = useFormContext();
 	const [position, setPosition] = useState({ lat: 0, lng: 0 });
 	const [radius, setRadius] = useState(r);
+	// 是否抓不到位置
+	const [isError, setIsError] = useState(true);
 	const markerRef = useRef(null);
 
 	useEffect(() => {
 		if (pos.lat === 0 && pos.lng === 0) {
-			navigator.geolocation.getCurrentPosition((location) => {
-				const { latitude, longitude } = location.coords;
-				setPosition({ lat: latitude, lng: longitude });
-			});
+			navigator.geolocation.getCurrentPosition(
+				(location) => {
+					const { latitude, longitude } = location.coords;
+					setPosition({ lat: latitude, lng: longitude });
+					setIsError(false);
+				},
+				(error) => {
+					console.error("無法獲取位置", error);
+					setPosition({ lat: COMPANYLOC[0], lng: COMPANYLOC[1] });
+					setIsError(true);
+				}
+			);
 		} else {
 			setPosition({ lat: pos.lat, lng: pos.lng });
 		}
@@ -134,59 +150,73 @@ const MapDialog = ({ open, handleClose, pos, r }) => {
 	}, [radius, position]);
 
 	return (
-		<Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
-			<AppBar sx={{ position: "relative" }} color="dark">
-				<Toolbar>
-					<IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
-						<CloseIcon />
-					</IconButton>
-					<Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-						選取案場範圍
-					</Typography>
-				</Toolbar>
-			</AppBar>
-			{position.lat !== 0 && position.lng !== 0 ? (
-				<MapContainer
-					center={position}
-					zoom={15}
-					style={{ height: "100vh", height: "100dvh" }}
-					doubleClickZoom={false}
-					attributionControl={false}>
-					<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-					<Marker
-						position={position}
-						attributionControl={false}
-						draggable={true}
-						eventHandlers={eventHandlers}
-						ref={markerRef}
-						icon={customIcon}>
-						<Popup minWidth={90}>
-							<div className="flex flex-col gap-2">
-								<p className="!my-0 text-sm">當前座標：</p>
-								<span>
-									{position.lat}, {position.lng}
-								</span>
-								<p className="!my-0 text-sm">範圍半徑：</p>
-								<Slider
-									value={radius}
-									min={minRadius}
-									max={maxRadius}
-									step={50}
-									onChange={(event, newValue) => setRadius(newValue)}
-									valueLabelDisplay="auto"
-									valueLabelFormat={(value) => `${value} 公尺`}
-								/>
+		<>
+			<Dialog fullScreen open={open} onClose={onClose} TransitionComponent={Transition}>
+				<AppBar sx={{ position: "relative" }} color="dark">
+					<Toolbar>
+						<IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
+							<CloseIcon />
+						</IconButton>
+						<Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+							選取案場範圍
+						</Typography>
+					</Toolbar>
+				</AppBar>
+				{position.lat !== 0 && position.lng !== 0 ? (
+					<MapContainer
+						center={position}
+						zoom={15}
+						style={{ height: "100vh", height: "100dvh" }}
+						doubleClickZoom={false}
+						attributionControl={false}>
+						<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+						<Marker
+							position={position}
+							attributionControl={false}
+							draggable={true}
+							eventHandlers={eventHandlers}
+							ref={markerRef}
+							icon={customIcon}>
+							<Popup minWidth={90}>
+								<div className="flex flex-col gap-2">
+									<p className="!my-0 text-sm">當前座標：</p>
+									<span>
+										{position.lat}, {position.lng}
+									</span>
+									<p className="!my-0 text-sm">範圍半徑：</p>
+									<Slider
+										value={radius}
+										min={minRadius}
+										max={maxRadius}
+										step={50}
+										onChange={(event, newValue) => setRadius(newValue)}
+										valueLabelDisplay="auto"
+										valueLabelFormat={(value) => `${value} 公尺`}
+									/>
 
-								<Button variant="contained" color="success" className="!text-base !h-12" fullWidth onClick={handleSave}>
-									確定
-								</Button>
-							</div>
-						</Popup>
-					</Marker>
-					{renderCircles()}
-				</MapContainer>
-			) : null}
-		</Dialog>
+									<Button
+										variant="contained"
+										color="success"
+										className="!text-base !h-12"
+										fullWidth
+										onClick={handleSave}>
+										確定
+									</Button>
+								</div>
+							</Popup>
+						</Marker>
+						{renderCircles()}
+					</MapContainer>
+				) : null}
+				{isError && (
+					<Snackbar open={true} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+						<Alert severity="error" variant="filled" sx={{ width: "100%" }}>
+							無法獲取位置，請開啟定位功能
+						</Alert>
+					</Snackbar>
+				)}
+			</Dialog>
+		</>
 	);
 };
 
