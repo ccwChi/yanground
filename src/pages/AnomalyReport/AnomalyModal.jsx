@@ -62,12 +62,12 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 						</p>
 					</div>
 					<div className="flex sm:flex-row flex-col gap-2 text-sm sm:text-base">
-						<p className="w-full">
+						{/* <p className="w-full">
 							打卡時間：
 							<span className="font-bold">
 								{deliverInfo.date} {deliverInfo.since}
 							</span>
-						</p>
+						</p> */}
 						<p className="w-full">
 							打卡狀態：
 							<span className="font-bold">{deliverInfo.anomaly.text}</span>
@@ -109,10 +109,26 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 								<Marker position={[punchLog.latitude, punchLog.longitude]} icon={customIcon}>
 									<Popup minWidth={90}>
 										<div className="flex flex-col items-center gap-2">
-											<p className="!my-0 text-sm">座標</p>
-											<span>
-												{punchLog.latitude}, {punchLog.longitude}
-											</span>
+											<p className="!my-0 w-full text-sm text-left px-1.5">
+												打卡日期：
+												<span className="font-bold text-base">
+													{punchLog.occurredAt.replace("+08", "").split("T")[0]}
+												</span>
+											</p>
+											<p className="!my-0 w-full text-sm text-left px-1.5">
+												打卡時間：
+												<span className="font-bold text-base">
+													{punchLog.occurredAt.replace("+08", "").split("T")[1]}
+												</span>
+											</p>
+											<p className="!my-0 w-full text-sm text-left px-1.5">
+												緯度座標：
+												<span className="font-bold text-base">{punchLog.latitude}</span>
+											</p>
+											<p className="!my-0 w-full text-sm text-left px-1.5">
+												經度座標：
+												<span className="font-bold text-base">{punchLog.longitude}</span>
+											</p>
 										</div>
 									</Popup>
 								</Marker>

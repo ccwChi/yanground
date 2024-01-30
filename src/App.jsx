@@ -163,14 +163,8 @@ const App = () => {
 			})
 			.then(() => {
 				if (!liff.isLoggedIn()) {
-					if (window.location.href.includes("https://erp.yuanrong.goog1e.app")) {
-						alert("你還沒登入Line哦！");
-					}
 					liff.login();
 				} else {
-					if (window.location.href.includes("https://erp.yuanrong.goog1e.app")) {
-						alert("你已經登入Line哦！");
-					}
 					runApp();
 				}
 			})
