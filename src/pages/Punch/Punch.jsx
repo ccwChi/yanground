@@ -31,7 +31,6 @@ const LocationMarker = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [punchTime, setPunchTime] = useState("");
 	const [punchIO, setPunchIO] = useState(null);
-	// 是否抓不到位置
 	const markerRef = useRef(null);
 
 	// 需要把 Marker 的 icon 弄出來，不然會顯示錯誤圖片

@@ -46,9 +46,9 @@ const Home = () => {
 							const { project, constructionSummaryJobTasks } = summary;
 
 							projectMap.set(project.name, {
-									name: summary.name,
-									constructionSummaryJobTasks: [],
-								});
+								name: summary.name,
+								constructionSummaryJobTasks: [],
+							});
 
 							const existingProject = projectMap.get(project.name);
 
@@ -81,8 +81,9 @@ const Home = () => {
 						};
 					});
 
-					// console.log(transformedData);
-					setConstSummaryApiList(transformedData);
+					const sortedData = transformedData.sort((a, b) => new Date(b.date) - new Date(a.date));
+					setConstSummaryApiList(sortedData);
+
 					setIsLoading(false);
 				});
 			}, 1200);
@@ -212,10 +213,9 @@ const Home = () => {
 												{summary.date}
 											</p>
 											{summary.summaries.map((s) => (
-												
 												<div className="inline-flex flex-col gap-1.5" key={s.name}>
 													<p className="pt-1 text-primary-800">
-														<span className="text-neutral-500 pe-2" onClick={()=>{console.log(summary)}}>案場：</span>
+														<span className="text-neutral-500 pe-2">案場：</span>
 														{s.name}
 													</p>
 													<span className="text-neutral-500 pe-2">人員分配：</span>
