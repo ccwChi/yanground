@@ -58,7 +58,7 @@ const UserInfo = () => {
 		} else {
 			return null;
 		}
-	}
+	};
 
 	// 取得用戶資料
 	useEffect(() => {
@@ -72,12 +72,8 @@ const UserInfo = () => {
 		if (userProfile) {
 			const parsedData = [
 				{
-					title: "姓氏",
-					content: userProfile.lastname,
-				},
-				{
-					title: "名字",
-					content: userProfile.firstname,
+					title: "姓名",
+					content: userProfile.lastname + userProfile.firstname,
 				},
 				{
 					title: "暱稱",
@@ -98,6 +94,12 @@ const UserInfo = () => {
 				{ title: "生日", content: userProfile.birthDate },
 				{ title: "入職日期", content: userProfile.startedOn },
 				{ title: "加入日期", content: userProfile.createdAt?.slice(0, 10) },
+				{ title: "廠別", content: `${userProfile.factorySite.chinese} (${userProfile.factorySite.fullAddress})` },
+				{ title: "班制", content: userProfile.workDayType.chinese },
+				{
+					title: "工時",
+					content: `${userProfile.workHourType.since.slice(0, -3)} ~ ${userProfile.workHourType.until.slice(0, -3)}`,
+				},
 				{
 					title: "權限",
 					content: userProfile.authorities ? userProfile.authorities : "無權限",

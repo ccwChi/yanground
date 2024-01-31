@@ -326,12 +326,13 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 								</div>
 								<div className="inline-flex sm:gap-2 gap-1">
 									<div className="w-full">
+										<InputTitle title={"緯度"} required={false} />
 										<Controller
 											name="latitude"
 											control={control}
 											render={({ field }) => (
 												<TextField
-													label="緯度"
+													placeholder="請選擇地點"
 													error={!!errors["latitude"]?.message}
 													variant="outlined"
 													size="small"
@@ -352,12 +353,13 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 										</FormHelperText> */}
 									</div>
 									<div className="w-full">
+										<InputTitle title={"經度"} required={false} />
 										<Controller
 											name="longitude"
 											control={control}
 											render={({ field }) => (
 												<TextField
-													label="經度"
+													placeholder="請選擇地點"
 													error={!!errors["longitude"]?.message}
 													variant="outlined"
 													size="small"
@@ -378,12 +380,13 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 										</FormHelperText> */}
 									</div>
 									<div className="w-full">
+										<InputTitle title={"半徑"} required={false} />
 										<Controller
 											name="radius"
 											control={control}
 											render={({ field }) => (
 												<TextField
-													label="半徑"
+													placeholder="請選擇地點"
 													error={!!errors["radius"]?.message}
 													variant="outlined"
 													size="small"
