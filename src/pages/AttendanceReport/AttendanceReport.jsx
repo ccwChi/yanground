@@ -134,7 +134,7 @@ const SalaryCalculation = () => {
 														<TextField
 															{...params}
 															className="inputPadding bg-white"
-															placeholder="請選擇部門"
+															placeholder="請選擇部門 (默認全部)"
 															// sx={{ "& > div": { padding: "0 !important" } }}
 															InputProps={{
 																...params.InputProps,
