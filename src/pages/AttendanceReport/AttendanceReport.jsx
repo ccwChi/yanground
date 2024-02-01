@@ -18,8 +18,10 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import PageTitle from "../../components/Guideline/PageTitle";
 import InputTitle from "../../components/Guideline/InputTitle";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
+// Hooks
+import { useNotification } from "../../hooks/useNotification";
 // Utils
-import { getData } from "../../utils/api";
+import { getData, getDownloadData } from "../../utils/api";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -29,15 +31,21 @@ const SalaryCalculation = () => {
 	const [departmentList, setDepartmentList] = useState([]);
 	// const isTargetScreen = useMediaQuery("(max-width:767.98px)");
 	// const fixedOptions = { label: "全部", id: "" };
+	// 提示消息框
+	const showNotification = useNotification();
 
 	// 取得部門資料
 	useEffect(() => {
 		getData("department").then((result) => {
-			const data = result.result.content;
-			const formattedDep = data.map((dep) => ({ label: dep.name, id: dep.id }));
-			// const optionsWithAll = [fixedOptions, ...formattedDep];
-			// setDepartmentList(optionsWithAll);
-			setDepartmentList(formattedDep);
+			if (result.result) {
+				const data = result.result.content;
+				const formattedDep = data.map((dep) => ({ label: dep.name, id: dep.id }));
+				// const optionsWithAll = [fixedOptions, ...formattedDep];
+				// setDepartmentList(optionsWithAll);
+				setDepartmentList(formattedDep);
+			} else {
+				setDepartmentList([]);
+			}
 		});
 	}, []);
 
@@ -64,18 +72,22 @@ const SalaryCalculation = () => {
 
 	// 提交表單資料到後端並執行相關操作
 	const onSubmit = (data) => {
-		const fd = new FormData();
-
+		// 下面有部門時就會開放
 		// 使用 map 函數將每個對象的 id 提取出來, 並將空字符串過濾掉
-		const idList = data["department"].map((item) => item.id);
-		const filteredIdList = idList.filter((id) => id !== "");
+		// const idList = data["department"].map((item) => item.id);
+		// const filteredIdList = idList.filter((id) => id !== "");
 
-		fd.append("department", filteredIdList);
-		fd.append("date", format(data["date"], "yyyy-MM"));
+		// console.log(filteredIdList);
+		// console.log(format(data["date"], "yyyy/MM"));
 
-		for (var pair of fd.entries()) {
-			console.log(pair[0] + ", " + pair[1]);
-		}
+		getDownloadData(`attendance/${format(data["date"], "yyyy/MM")}/report`).then((result) => {
+			if (!!result) {
+				showNotification(result.reason, false);
+			} else {
+				showNotification("下載成功", true);
+			}
+		});
+
 		// sendDataToBackend(fd, "temporaryannouncement", _date);
 	};
 
@@ -91,7 +103,7 @@ const SalaryCalculation = () => {
 							<Divider className="!border-[1px] !mb-6" />
 							<div className="flex flex-col gap-3 mb-2">
 								{/* 部門 */}
-								<div className="inline-flex flex-col w-full">
+								{/* <div className="inline-flex flex-col w-full">
 									<InputTitle classnames="whitespace-nowrap" title={"部門"} required={false} />
 									<Controller
 										control={control}
@@ -156,7 +168,7 @@ const SalaryCalculation = () => {
 											);
 										}}
 									/>
-								</div>
+								</div> */}
 								{/* 日期 */}
 								<div className="inline-flex flex-col">
 									<InputTitle classnames="whitespace-nowrap" title={"日期"} required={false} />
@@ -166,6 +178,7 @@ const SalaryCalculation = () => {
 										views={["month", "year"]}
 										format={"yyyy 年 MM 月"}
 										minDate={new Date("2023-11")}
+										closeOnSelect={false}
 										// sx={{ width: isTargetScreen ? "100%" : "max-content" }}
 									/>
 								</div>
@@ -179,10 +192,10 @@ const SalaryCalculation = () => {
 									</Button>
 								</div>
 							</div>
-							<div className="flex mt-2">
+							{/* <div className="flex mt-2">
 								<p className="!my-0 text-rose-400 font-bold text-xs !me-1">＊</p>
 								<p className="!my-0 text-rose-400 font-bold text-xs">若無選擇部門，則默認全部。</p>
-							</div>
+							</div> */}
 							<div className="flex mt-2">
 								<p className="!my-0 text-rose-400 font-bold text-xs !me-1">＊</p>
 								<p className="!my-0 text-rose-400 font-bold text-xs">

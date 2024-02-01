@@ -105,7 +105,7 @@ const ApplicationFormSection = React.memo(({}) => {
 
 	return (
 		<div className="flex sm:flex-row flex-col sm:p-5 p-3 sm:gap-4 gap-3 overflow-auto pb-16">
-			<div className="flex sm:flex-col justify-start !px-4 gap-5 sm:gap-8 panel bg-white sm:w-min !mb-0 !overflow-auto">
+			<div className="flex sm:flex-col sm:h-max justify-start !px-4 gap-5 sm:gap-8 panel bg-white sm:w-min !mb-0 !overflow-auto">
 				{applicationBtns.map((item) => (
 					<div key={item.id} className="inline-flex flex-col items-center gap-2">
 						<Button

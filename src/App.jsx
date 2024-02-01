@@ -52,7 +52,7 @@ const App = () => {
 				{ text: "考勤紀錄", href: "attendancecalendar" },
 				{ text: "異常考勤", href: "anomalyreport" },
 				{ text: "辦公行事曆", href: "workcalendar" },
-				// { text: "考勤報表", href: "attendancereport" },
+				{ text: "考勤報表", href: "attendancereport" },
 			],
 		},
 		{

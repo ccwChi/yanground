@@ -2,7 +2,7 @@
 import React from "react";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { MobileDateTimePicker } from "@mui/x-date-pickers/MobileDateTimePicker";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { Controller, useFormContext } from "react-hook-form";
 import zhTW from "date-fns/locale/zh-TW";
 
@@ -16,7 +16,7 @@ const ControlledTimePicker = ({ name, format = "yyyy-MM-dd", ...otherProps }) =>
 				control={control}
 				defaultValue={null}
 				render={({ field }) => (
-					<MobileDateTimePicker
+					<DateTimePicker
 						slotProps={{ textField: { size: "small" } }}
 						className="inputPadding"
 						format={format}
