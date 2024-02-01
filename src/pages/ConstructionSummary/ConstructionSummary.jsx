@@ -129,6 +129,7 @@ const ConstructionSummary = () => {
 
         if (result.result?.content.length > 0) {
           setSummaryList(result.result);
+          
         }
       });
     },
@@ -187,6 +188,8 @@ const ConstructionSummary = () => {
     setDeliverInfo(null);
   };
 
+
+
   // modal 開啟參數與顯示標題
   const modalConfig = [
     {
@@ -206,6 +209,7 @@ const ConstructionSummary = () => {
           getSummaryList={getSummaryList}
           apiUrl={apiUrl}
           constructionTypeList={constructionTypeList}
+          
         />
       ),
     },
