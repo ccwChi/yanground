@@ -6,6 +6,9 @@
 	padding-left: 1rem;
 	padding-right: 1rem;
 	height: 100%;
+	.fc-popover {
+		z-index: 1050;
+	}
 	.fc-timegrid-slot-label {
 		font-size: 0.875rem !important;
 	}
@@ -65,7 +68,7 @@
 		}
 	}
 	&.fc-multiMonthYear-view {
-		padding-bottom: 8.5rem;
+		// padding-bottom: 8.5rem;
 		table {
 			thead tr th {
 				padding: 8px 0 !important;
