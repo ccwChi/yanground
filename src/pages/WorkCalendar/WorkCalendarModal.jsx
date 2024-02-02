@@ -294,13 +294,15 @@ const TemporaryAnnouncementModal = React.memo(
 								</div>
 
 								<div className="flex sm:flex-row flex-col gap-3">
-									<Button
-										variant="contained"
-										color="secondary"
-										className="!text-base !h-12 sm:w-max w-full"
-										onClick={() => setAlertOpen(2)}>
-										刪除
-									</Button>
+									{deliverInfo && (
+										<Button
+											variant="contained"
+											color="secondary"
+											className="!text-base !h-12 sm:w-max w-full"
+											onClick={() => setAlertOpen(2)}>
+											刪除
+										</Button>
+									)}
 									<Button type="submit" variant="contained" color="success" className="!text-base !h-12" fullWidth>
 										儲存
 									</Button>
