@@ -70,25 +70,6 @@ const getDownloadData = async (
 			if (!response.ok) {
 				const statusCode = response.status;
 				console.error("HTTP Error: Status Code", statusCode);
-				if (statusCode === 403) {
-					if (customParam) {
-						forbiddenFunc();
-					} else {
-						window.location.href = "/forbidden";
-					}
-				} else if (statusCode === 401) {
-					if (customParam) {
-						unauthorizedFunc();
-					} else {
-						window.location.href = "/unauthorized";
-					}
-				} else if (statusCode === 500) {
-					if (customParam) {
-						internalservererrorFunc();
-					} else {
-						window.location.href = "/internalservererror";
-					}
-				}
 			}
 
 			if (response.headers.get("Content-Disposition")) {

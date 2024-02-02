@@ -14,7 +14,7 @@ import { LoadingTwo, LoadingFour } from "../../components/Loader/Loading";
 // Hooks
 import { useNotification } from "../../hooks/useNotification";
 // Utils
-import { getData, postData } from "../../utils/api";
+import { getData, postData, deleteData } from "../../utils/api";
 // Custom
 import { AdminCalendarUrlModal, TemporaryAnnouncementModal } from "./WorkCalendarModal";
 
@@ -36,6 +36,8 @@ const WorkCalendar = () => {
 	const [dayOffTypeList, setDayOffTypeList] = useState(null);
 	// isLoading 等待請求 API
 	const [isLoading, setIsLoading] = useState(false);
+	// 傳送額外資訊給 Modal
+	const [deliverInfo, setDeliverInfo] = useState(null);
 	// API URL
 	const apiUrl = "workCalendar";
 
@@ -84,8 +86,9 @@ const WorkCalendar = () => {
 				const formattedEvents = data.map((event) => ({
 					id: event.id,
 					title: event.cause,
-					color: event.type !== "SUSPENDED" ? "#F48A64" : "#FFA516",
+					color: event.type.value !== "SUSPENDED" ? "#F48A64" : "#FFA516",
 					start: format(new Date(event.date), "yyyy-MM-dd", { timeZone: "Asia/Taipei" }),
+					type: event.type,
 					// start: format(new Date(`${event.date[0]}-${String(event.date[1]).padStart(2, "0")}-${String(event.date[2]).padStart(2, "0")}T00:00:00.000Z`), "yyyy-MM-dd", { timeZone: "Asia/Taipei" }),
 				}));
 				setApiData(formattedEvents);
@@ -104,7 +107,6 @@ const WorkCalendar = () => {
 				setDayOffTypeList(data);
 			} else {
 				setDayOffTypeList(null);
-				console.log("Error");
 			}
 		});
 	}, []);
@@ -117,11 +119,13 @@ const WorkCalendar = () => {
 	};
 
 	// 傳遞給後端資料
-	const sendDataToBackend = (fd, mode, mdate = "") => {
+	const sendDataToBackend = (fd, mode, mdate = "", otherData = null) => {
 		// for (var pair of fd.entries()) {
 		// 	console.log(pair[0] + ", " + pair[1]);
 		// }
 		setSendBackFlag(true);
+
+		// url & message
 		let url = "workCalendar";
 		let message = [];
 		switch (mode) {
@@ -129,29 +133,57 @@ const WorkCalendar = () => {
 				message = ["行事曆上傳成功！"];
 				break;
 			case "temporaryannouncement":
-				url += `/${mdate}`;
-				message = ["特殊假期上傳成功！"];
+				if (otherData) {
+					url += `/${otherData}`;
+					message = ["假期編輯成功！"];
+				} else {
+					url += `/${mdate}`;
+					message = ["特殊假期上傳成功！"];
+				}
+				break;
+			case "deleteTA":
+				url += `/${otherData}`;
+				message = ["假期刪除成功！"];
 				break;
 			default:
 				break;
 		}
-		postData(url, fd).then((result) => {
+
+		// 共用的處理 API 回應邏輯
+		const handleApiResponse = (result) => {
 			if (result.status) {
+				// 如果 API 呼叫成功，顯示成功通知，刷新列表，關閉模態框
 				showNotification(message[0], true);
 				getApiList(calendaryears);
 				onClose();
-				setSendBackFlag(false);
 			} else {
+				// 如果 API 呼叫失敗，顯示錯誤通知
 				showNotification(result?.result.reason || "出現錯誤。", false);
-				setSendBackFlag(false);
 			}
-		});
+			setSendBackFlag(false);
+		};
+
+		// 處理 API 呼叫的函數，接受一個執行 API 呼叫的函數作為參數
+		const handleApiCall = (apiFunction) => {
+			apiFunction(url, fd).then((result) => {
+				// 呼叫通用的處理 API 回應邏輯
+				handleApiResponse(result);
+			});
+		};
+
+		// 根據模式選擇呼叫 deleteData 或 postData
+		if (mode === "deleteTA") {
+			handleApiCall(deleteData);
+		} else {
+			handleApiCall(postData);
+		}
 	};
 
 	// 關閉 Modal 清除資料
 	const onClose = () => {
 		setModalValue(false);
 		setSelectedDate("");
+		setDeliverInfo(null);
 	};
 
 	// modal 開啟參數與顯示標題
@@ -166,7 +198,8 @@ const WorkCalendar = () => {
 			modalValue: "configureSpecialHoliday",
 			modalComponent: (
 				<TemporaryAnnouncementModal
-					title={"設定特殊假期"}
+					title={deliverInfo ? "編輯特殊假期" : "設定特殊假期"}
+					deliverInfo={deliverInfo}
 					sendDataToBackend={sendDataToBackend}
 					onClose={onClose}
 					selectedDate={selectedDate}
@@ -178,7 +211,7 @@ const WorkCalendar = () => {
 	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
 
 	return (
-		<div className="flex-1 overflow-hidden mb-4 sm:mb-0">
+		<>
 			{/* PageTitle */}
 			<PageTitle title="辦公行事曆" btnGroup={btnGroup} handleActionClick={handleActionClick} />
 
@@ -195,10 +228,21 @@ const WorkCalendar = () => {
 					setSelectedDate(selected.startStr);
 					setModalValue("configureSpecialHoliday");
 				}}
+				// 事件點擊事件
+				eventClick={(info) => {
+					setDeliverInfo({
+						date: new Date(info.event.start),
+						id: info.event.id,
+						cause: info.event.title,
+						type: info.event._def.extendedProps.type.value,
+						springFestival: info.event._def.extendedProps.springFestival,
+					});
+					setModalValue("configureSpecialHoliday");
+				}}
 				eventContent={(eventInfo) => {
 					return (
 						<Tooltip title={eventInfo.event._def.title}>
-							<div className="px-1.5 py-0.5 text-ellipsis whitespace-nowrap overflow-hidden">
+							<div className="px-1.5 py-0.5 text-ellipsis whitespace-nowrap overflow-hidden cursor-pointer">
 								{eventInfo.event._def.title}
 							</div>
 						</Tooltip>
@@ -216,7 +260,7 @@ const WorkCalendar = () => {
 
 			{/* Modal */}
 			{config && config.modalComponent}
-		</div>
+		</>
 	);
 };
 

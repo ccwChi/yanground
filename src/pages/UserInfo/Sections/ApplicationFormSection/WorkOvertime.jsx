@@ -196,7 +196,7 @@ const WorkOvertime = React.memo(({ userProfile }) => {
 									name="sinceDate"
 									format="yyyy-MM-dd a h:m"
 									minDateTime={new Date("2023-11")}
-									minutesStep={"30"}
+									minutesStep={30}
 									views={["year", "day", "hours", "minutes"]}
 								/>
 							</div>

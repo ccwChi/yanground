@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -9,8 +9,8 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
-// import useMediaQuery from "@mui/material/useMediaQuery";
 import CircularProgress from "@mui/material/CircularProgress";
+// import useMediaQuery from "@mui/material/useMediaQuery";
 import Divider from "@mui/material/Divider";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
@@ -29,10 +29,13 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const SalaryCalculation = () => {
 	// 部門清單
 	const [departmentList, setDepartmentList] = useState([]);
+	// isLoading 等待請求 API
+	const [isLoading, setIsLoading] = useState(false);
 	// const isTargetScreen = useMediaQuery("(max-width:767.98px)");
 	// const fixedOptions = { label: "全部", id: "" };
 	// 提示消息框
 	const showNotification = useNotification();
+	const timer = useRef();
 
 	// 取得部門資料
 	useEffect(() => {
@@ -47,6 +50,12 @@ const SalaryCalculation = () => {
 				setDepartmentList([]);
 			}
 		});
+	}, []);
+
+	useEffect(() => {
+		return () => {
+			clearTimeout(timer.current);
+		};
 	}, []);
 
 	// 初始預設 default 值
@@ -72,6 +81,7 @@ const SalaryCalculation = () => {
 
 	// 提交表單資料到後端並執行相關操作
 	const onSubmit = (data) => {
+		setIsLoading(true);
 		// 下面有部門時就會開放
 		// 使用 map 函數將每個對象的 id 提取出來, 並將空字符串過濾掉
 		// const idList = data["department"].map((item) => item.id);
@@ -82,8 +92,18 @@ const SalaryCalculation = () => {
 
 		getDownloadData(`attendance/${format(data["date"], "yyyy/MM")}/report`).then((result) => {
 			if (!!result) {
-				showNotification(result.reason, false);
+				timer.current = window.setTimeout(() => {
+					setIsLoading(false);
+				}, 2000);
+				if (result.reason) {
+					showNotification(result.reason, false);
+				} else {
+					showNotification(result || "系統錯誤", false);
+				}
 			} else {
+				timer.current = window.setTimeout(() => {
+					setIsLoading(false);
+				}, 2000);
 				showNotification("下載成功", true);
 			}
 		});
@@ -182,14 +202,27 @@ const SalaryCalculation = () => {
 										// sx={{ width: isTargetScreen ? "100%" : "max-content" }}
 									/>
 								</div>
-								<div className="inline-flex">
+								<div className="relative inline-flex md:w-max">
 									<Button
 										type="submit"
 										variant="contained"
 										color="dark"
+										disabled={isLoading}
 										className="!text-base !h-12 whitespace-nowrap md:w-max w-full">
 										生成報表
 									</Button>
+									{isLoading && (
+										<CircularProgress
+											size={24}
+											sx={{
+												position: "absolute",
+												top: "50%",
+												left: "50%",
+												marginTop: "-12px",
+												marginLeft: "-12px",
+											}}
+										/>
+									)}
 								</div>
 							</div>
 							{/* <div className="flex mt-2">
