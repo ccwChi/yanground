@@ -377,6 +377,7 @@ const AnomalyReport = () => {
       {/* PageTitle & Search */}
       <PageTitle
         title={"異常考勤"}
+        description="此頁面是用於查看整個部門或全體員工的考勤資訊與狀態，提供列表與月曆形式，同時可檢視員工上下班打卡地點。"
         // 搜尋模式
         searchMode
         // 下面參數前提都是 searchMode = true

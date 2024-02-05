@@ -102,7 +102,7 @@ const AttendanceCalendar = () => {
 		} else {
 			return null;
 		}
-	}
+	};
 
 	// 取得部門資料
 	useEffect(() => {
@@ -220,6 +220,7 @@ const AttendanceCalendar = () => {
 						  }考勤紀錄
 						  `
 				}`}
+				description="此頁面是以月曆形式呈現，用於查看單一人員的考勤資訊，包括打卡紀錄，以協助時間確認。"
 				// 搜尋模式
 				searchMode
 				// 下面參數前提都是 searchMode = true

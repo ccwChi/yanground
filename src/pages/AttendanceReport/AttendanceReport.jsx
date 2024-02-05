@@ -26,7 +26,7 @@ import { getData, getDownloadData } from "../../utils/api";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const SalaryCalculation = () => {
+const AttendanceReport = () => {
 	// 部門清單
 	const [departmentList, setDepartmentList] = useState([]);
 	// isLoading 等待請求 API
@@ -84,13 +84,13 @@ const SalaryCalculation = () => {
 		setIsLoading(true);
 		// 下面有部門時就會開放
 		// 使用 map 函數將每個對象的 id 提取出來, 並將空字符串過濾掉
-		// const idList = data["department"].map((item) => item.id);
-		// const filteredIdList = idList.filter((id) => id !== "");
+		const idList = data["department"].map((item) => item.id);
+		const filteredIdList = idList.filter((id) => id !== "");
+		const idListString = filteredIdList.toString();
 
-		// console.log(filteredIdList);
-		// console.log(format(data["date"], "yyyy/MM"));
-
-		getDownloadData(`attendance/${format(data["date"], "yyyy/MM")}/report`).then((result) => {
+		getDownloadData(
+			`attendance/${format(data["date"], "yyyy/MM")}/report${!!idListString ? `?departments=${idListString}` : ""}`
+		).then((result) => {
 			if (!!result) {
 				timer.current = window.setTimeout(() => {
 					setIsLoading(false);
@@ -114,16 +114,19 @@ const SalaryCalculation = () => {
 	return (
 		<div className="flex-1 overflow-hidden mb-4 sm:mb-0">
 			{/* PageTitle */}
-			<PageTitle title="考勤報表" />
+			<PageTitle
+				title="考勤報表"
+				description="此頁面是用於選擇部門或全體員工以及指定月份，以生成並輸出 Excel 格式的月考勤報表。"
+			/>
 			<div className="mx-[2%] bg-white rounded-lg shadow-md px-4 py-5">
 				<FormProvider {...methods}>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div className="flex flex-col">
-							<p className="mb-4">選擇您要查看的年份和月份，然後點擊『生成報表』按鈕，以載出當月考勤結算的報表。</p>
+							<p className="mb-4">選擇您要查看的部門或年月份，然後點擊『生成報表』按鈕，以載出當月考勤結算的報表。</p>
 							<Divider className="!border-[1px] !mb-6" />
 							<div className="flex flex-col gap-3 mb-2">
 								{/* 部門 */}
-								{/* <div className="inline-flex flex-col w-full">
+								<div className="inline-flex flex-col w-full">
 									<InputTitle classnames="whitespace-nowrap" title={"部門"} required={false} />
 									<Controller
 										control={control}
@@ -188,7 +191,7 @@ const SalaryCalculation = () => {
 											);
 										}}
 									/>
-								</div> */}
+								</div>
 								{/* 日期 */}
 								<div className="inline-flex flex-col">
 									<InputTitle classnames="whitespace-nowrap" title={"日期"} required={false} />
@@ -225,10 +228,10 @@ const SalaryCalculation = () => {
 									)}
 								</div>
 							</div>
-							{/* <div className="flex mt-2">
+							<div className="flex mt-2">
 								<p className="!my-0 text-rose-400 font-bold text-xs !me-1">＊</p>
 								<p className="!my-0 text-rose-400 font-bold text-xs">若無選擇部門，則默認全部。</p>
-							</div> */}
+							</div>
 							<div className="flex mt-2">
 								<p className="!my-0 text-rose-400 font-bold text-xs !me-1">＊</p>
 								<p className="!my-0 text-rose-400 font-bold text-xs">
@@ -244,4 +247,4 @@ const SalaryCalculation = () => {
 	);
 };
 
-export default SalaryCalculation;
+export default AttendanceReport;
