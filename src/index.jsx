@@ -26,6 +26,7 @@ import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
 import ClientQuestionnaire from "./pages/Client/ClientQuestionnaire";
 import EducationTrainging from "./pages/EducationTraining/EducationTraining";
+import SupervisorApproval from "./pages/SupervisorApproval/SupervisorApproval";
 import MDWorkspace from "./pages/MDWorkspace/MDWorkspace";
 // Error
 import ErrorMessage from "./pages/Error/ErrorMessage";
@@ -107,6 +108,10 @@ const router = createBrowserRouter([
 			{
 				path: "/userInfo",
 				element: <UserInfo />,
+			},
+			{
+				path: "/supervisorapproval",
+				element: <SupervisorApproval />,
 			},
 			{
 				path: "/mdworkspace",

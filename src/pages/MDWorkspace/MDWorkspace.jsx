@@ -101,7 +101,12 @@ const MDWorkspace = () => {
 		<>
 			{/* PageTitle */}
 			<input type="file" ref={fileInputRef} style={{ display: "none" }} accept=".md" onChange={handleFileInputChange} />
-			<PageTitle title="MD 文稿工作區" btnGroup={btnGroup} handleActionClick={handleActionClick} />
+			<PageTitle
+				title="MD 文稿工作區"
+				description="此頁面是用於協助編輯 Markdown 文稿的工作區，提供預留的功能，方便使用者進行文檔編輯。"
+				btnGroup={btnGroup}
+				handleActionClick={handleActionClick}
+			/>
 			{/* <button onClick={handleClick}>Get value</button> */}
 
 			{/* Markdown */}
@@ -114,7 +119,7 @@ const MDWorkspace = () => {
 				// plugins={PLUGINS}
 				renderHTML={(text) => <MarkdownView text={text} />}
 			/>
-			
+
 			{/* FAB */}
 			<MultipleFAB btnGroup={btnGroup} handleActionClick={handleActionClick} />
 		</>

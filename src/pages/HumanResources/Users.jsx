@@ -472,6 +472,7 @@ const Users = () => {
 			{/* PageTitle */}
 			<PageTitle
 				title="人事管理"
+				description="此頁面主要功能包括員工資訊查詢、編輯，以及查看考勤紀錄，同時支援激活 Line 圖文選單。"
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
 				isLoading={!isLoading}

@@ -51,8 +51,8 @@ const App = () => {
 				{ text: "人事管理", href: "users" },
 				{ text: "考勤紀錄", href: "attendancecalendar" },
 				{ text: "異常考勤", href: "anomalyreport" },
-				{ text: "辦公行事曆", href: "workcalendar" },
 				{ text: "考勤報表", href: "attendancereport" },
+				{ text: "辦公行事曆", href: "workcalendar" },
 			],
 		},
 		{
@@ -62,6 +62,7 @@ const App = () => {
 			subMenuItems: [
 				{ text: "帳戶資訊", href: "userinfo" },
 				{ text: "教育訓練", href: "educationtraining" },
+				// { text: "主管審核", href: "supervisorapproval" },
 				{ text: "MD 文稿工作區", href: "mdworkspace" },
 			],
 		},

@@ -213,7 +213,12 @@ const WorkCalendar = () => {
 	return (
 		<>
 			{/* PageTitle */}
-			<PageTitle title="辦公行事曆" btnGroup={btnGroup} handleActionClick={handleActionClick} />
+			<PageTitle
+				title="辦公行事曆"
+				description="此頁面是用於輸入政府文件網址以建立例假日行事曆，同時提供自訂特殊假期（如颱風天）。"
+				btnGroup={btnGroup}
+				handleActionClick={handleActionClick}
+			/>
 
 			{/* Calendar */}
 			<Calendar
