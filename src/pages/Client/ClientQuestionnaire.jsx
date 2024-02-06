@@ -44,7 +44,7 @@ const clientquestionnaire = React.memo(() => {
 
   // 提交表單資料到後端並執行相關操作
   const onSubmit = (data) => {
-    console.log("data", data);
+    // console.log("data", data);
   };
 
   return (

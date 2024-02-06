@@ -85,8 +85,8 @@ const ConstructionSummary = () => {
 
   // 對照 api table 所顯示 key
   const columnsPC = [
-    { key: "name", label: "名稱" },
-    { key: ["project", "name"], label: "專案" },
+    { key: "name", label: "名稱", size: "150x", align: "left" },
+    { key: ["project", "name"], label: "專案", align: "left" },
     { key: "rocYear", label: "年度", size: "60px" },
     { key: "since", label: "起始日期", size: "120px" },
     { key: "until", label: "結束日期", size: "120px" },
@@ -129,7 +129,6 @@ const ConstructionSummary = () => {
 
         if (result.result?.content.length > 0) {
           setSummaryList(result.result);
-          
         }
       });
     },
@@ -188,8 +187,6 @@ const ConstructionSummary = () => {
     setDeliverInfo(null);
   };
 
-
-
   // modal 開啟參數與顯示標題
   const modalConfig = [
     {
@@ -209,7 +206,6 @@ const ConstructionSummary = () => {
           getSummaryList={getSummaryList}
           apiUrl={apiUrl}
           constructionTypeList={constructionTypeList}
-          
         />
       ),
     },
@@ -238,7 +234,7 @@ const ConstructionSummary = () => {
           columnsMobile={columnsMobile}
           actions={actions}
           cardTitleKey={"name"}
-          tableMinWidth={700}
+          tableMinWidth={1024}
           isLoading={isLoading}
           handleActionClick={handleActionClick}
         />

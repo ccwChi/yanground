@@ -94,11 +94,11 @@ const UserInfo = () => {
 				{ title: "生日", content: userProfile.birthDate },
 				{ title: "入職日期", content: userProfile.startedOn },
 				{ title: "加入日期", content: userProfile.createdAt?.slice(0, 10) },
-				{ title: "廠別", content: `${userProfile.factorySite.chinese} (${userProfile.factorySite.fullAddress})` },
-				{ title: "班制", content: userProfile.workDayType.chinese },
+				{ title: "廠別", content: `${userProfile.factorySite?.chinese ? userProfile.factorySite?.chinese : "-" } (${userProfile.factorySite?.fullAddress ? userProfile.factorySite.fullAddress : ""})` },
+				{ title: "班制", content: userProfile.workDayType?.chinese ? userProfile.workDayType.chinese : "-" },
 				{
 					title: "工時",
-					content: `${userProfile.workHourType.since.slice(0, -3)} ~ ${userProfile.workHourType.until.slice(0, -3)}`,
+					content: `${userProfile.workHourType?.since.slice(0, -3)} ~ ${userProfile.workHourType?.until.slice(0, -3)}`,
 				},
 				{
 					title: "權限",

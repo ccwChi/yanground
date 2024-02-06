@@ -152,7 +152,7 @@ const AdminCalendarUrlModal = React.memo(({ title, sendDataToBackend, onClose })
 // 臨時公告假期 Modal
 const TemporaryAnnouncementModal = React.memo(
 	({ title, deliverInfo, sendDataToBackend, onClose, selectedDate, dayOffTypeList }) => {
-		console.log(deliverInfo);
+		// console.log(deliverInfo);
 		// Alert 開關
 		/**
 		 * 0: 關閉

@@ -555,6 +555,7 @@ const StepperDivThreeForDispatch = React.memo(
                     setSelectedDate(event.target.value);
                   }}
                   displayEmpty
+                  className="!bg-white"
                 >
                   <MenuItem value="" disabled>
                     <span className="text-neutral-400 font-light">
@@ -588,6 +589,7 @@ const StepperDivThreeForDispatch = React.memo(
                     disabled={!selectedDate}
                     onChange={handleChange}
                     value={dispatchForApi}
+                    className="!bg-white"
                     noOptionsText="當天已無可派人員"
                     renderOption={
                       (props, taskSelectLabouerList, { selected }) => (
