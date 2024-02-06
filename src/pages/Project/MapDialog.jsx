@@ -211,7 +211,7 @@ const MapDialog = ({ open, handleClose, pos, r }) => {
 				{isError && (
 					<Snackbar open={true} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
 						<Alert severity="error" variant="filled" sx={{ width: "100%" }}>
-							無法獲取位置，請開啟定位功能
+							若須獲取當前位置，請開啟定位功能
 						</Alert>
 					</Snackbar>
 				)}

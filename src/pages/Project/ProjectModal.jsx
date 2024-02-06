@@ -337,10 +337,10 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 													variant="outlined"
 													size="small"
 													className="inputPadding"
-													InputProps={{
-														readOnly: true,
-													}}
-													disabled={!getValues("latitude")}
+													// InputProps={{
+													// 	readOnly: true,
+													// }}
+													// disabled={!getValues("latitude")}
 													fullWidth
 													{...field}
 												/>
@@ -364,10 +364,10 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 													variant="outlined"
 													size="small"
 													className="inputPadding"
-													InputProps={{
-														readOnly: true,
-													}}
-													disabled={!getValues("longitude")}
+													// InputProps={{
+													// 	readOnly: true,
+													// }}
+													// disabled={!getValues("longitude")}
 													fullWidth
 													{...field}
 												/>
@@ -391,10 +391,10 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 													variant="outlined"
 													size="small"
 													className="inputPadding"
-													InputProps={{
-														readOnly: true,
-													}}
-													disabled={!getValues("radius")}
+													// InputProps={{
+													// 	readOnly: true,
+													// }}
+													// disabled={!getValues("radius")}
 													fullWidth
 													{...field}
 												/>
