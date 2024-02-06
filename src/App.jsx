@@ -96,7 +96,7 @@ const App = () => {
 	}, []);
 
 	useEffect(() => {
-		// initLine();
+		initLine();
 	}, []);
 
 	useEffect(() => {
