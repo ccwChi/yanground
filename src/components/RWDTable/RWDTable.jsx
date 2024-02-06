@@ -38,6 +38,7 @@ const RWDTable = ({
 	isLoading,
 	handleActionClick,
 	actionSpec = false,
+	attendanceWaiverList = null,
 }) => {
 	const isSmallScreen = useMediaQuery("(max-width:575.98px)");
 
@@ -64,7 +65,7 @@ const RWDTable = ({
 										expandIcon={<ExpandMoreIcon className="text-text opacity-75" sx={{ fontSize: "1.85rem" }} />}
 										sx={[
 											{
-												alignItems: "flex-start",
+												// alignItems: "flex-start",
 												"&.Mui-expanded": {
 													minHeight: "50px",
 												},
@@ -76,7 +77,36 @@ const RWDTable = ({
 													? cardTitleKey.reduce((item, key) => item[key], item)
 													: item[cardTitleKey]}
 											</Typography>
-											<div className="flex gap-2 ms-2">
+											<div className="flex items-center gap-2">
+												{attendanceWaiverList &&
+													(item.approveState === true ? (
+														<Chip
+															variant="outlined"
+															label={"審核通過"}
+															size="small"
+															color="success"
+															// icon={<DoneIcon />}
+															sx={{ fontWeight: "700", borderRadius: "4px", backgroundColor: "#21AA9C19" }}
+														/>
+													) : item.approveState === false ? (
+														<Chip
+															variant="outlined"
+															label={"審核不通過"}
+															size="small"
+															color="error"
+															// icon={<CloseIcon />}
+															sx={{ fontWeight: "700", borderRadius: "4px", backgroundColor: "#D52F2F19" }}
+														/>
+													) : (
+														<Chip
+															variant="outlined"
+															label={"待審核"}
+															size="small"
+															color="warning"
+															// icon={<WarningIcon />}
+															sx={{ fontWeight: "700", borderRadius: "4px", backgroundColor: "#ED6C0219" }}
+														/>
+													))}
 												{actionSpec && (
 													<div className="whitespace-nowrap">
 														{actionSpec[1].map((action, index) => (
@@ -348,6 +378,19 @@ const RWDTable = ({
 																color="warning"
 																// icon={<WarningIcon />}
 																sx={{ fontWeight: "700", borderRadius: "4px", backgroundColor: "#ED6C0219" }}
+															/>
+														);
+													case "attendanceWaivertype":
+														return (
+															<Chip
+																label={item.attendanceWaivertype}
+																size="small"
+																sx={{
+																	backgroundColor: attendanceWaiverList.find(
+																		(type) => type.chinese === item.attendanceWaivertype
+																	).color,
+																	color: "white",
+																}}
 															/>
 														);
 													default: {
