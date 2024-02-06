@@ -14,14 +14,16 @@ import Calendar from "../../components/Calendar/Calendar";
 import { Backdrop, Tooltip, useMediaQuery } from "@mui/material";
 import { UpdatedModal } from "./CalendarCreateSummaryModel";
 import { calendarColorList } from "../../datas/calendarColorList";
+import { useLocation } from "react-router-dom";
+import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 
 const today = new Date();
 //明天
 const twoDaysLater = new Date(today);
-twoDaysLater.setDate(today.getDate() + 1);
+twoDaysLater.setDate(today.getDate() + 30);
 //五天前
 const fiveDaysBefore = new Date(today);
-fiveDaysBefore.setDate(today.getDate() - 5);
+fiveDaysBefore.setDate(today.getDate() - 20);
 // 生成日期區間
 const dates = [];
 let currentDateIterator = new Date(fiveDaysBefore);
@@ -61,6 +63,15 @@ const DispatchCalendar = () => {
   // 傳送額外資訊給 Modal
   const [deliverInfo, setDeliverInfo] = useState(null);
 
+  // 之後重構 lazy loading 後再使用
+  // const location = useLocation();
+  // const queryParams = new URLSearchParams(location.search);
+  // const yearValue = queryParams.get("calendaryears");
+  // const monthValue = queryParams.get("month");
+
+  // const [apiTimeSheetData, setApiTimeSheetData] = useState("");
+
+  const navigateWithParams = useNavigateWithParams();
   // 上方區塊功能按鈕清單
 
   const btnGroup = [
@@ -85,6 +96,13 @@ const DispatchCalendar = () => {
   useEffect(() => {
     getDepartMemberList();
     getProjecstList();
+    const currentDate = new Date();
+    const currentMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth()
+    );
+    const thisMonth = formatDate(currentMonth).slice(5, 7);
+    navigateWithParams(0, 0, { month: thisMonth }, false);
   }, []);
 
   useEffect(() => {
@@ -106,168 +124,221 @@ const DispatchCalendar = () => {
     }
     return summaryDates;
   };
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}/${month}/${day}`;
+  };
 
   const getCalendarData = () => {
-    getData("timesheet").then((result) => {
-      const data = result.result;
-      const transformData = (data) => {
-        return data.map((item) => {
-          //第一層是date, summaries
-          const { date, summaries } = item;
-          //從summaries可能有數個案場，任一個打開的第二層是下列五個屬性
-          const simplifiedSummaries = summaries.map((summary) => {
-            const {
-              id,
-              constructionJob,
-              name,
-              project,
-              constructionSummaryJobTasks,
-              since,
-              until,
-            } = summary;
-            //從constructionSummaryJobTasks打開的第三層是下列五個屬性
-            const simplifiedTasks = constructionSummaryJobTasks.map((task) => {
+    const currentDate = new Date();
+    const currentMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth()
+    );
+    const previousMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() - 1
+    );
+    const nextMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1
+    );
+    const monthArray = [
+      formatDate(currentMonth).slice(0, 7),
+      formatDate(previousMonth).slice(0, 7),
+      formatDate(nextMonth).slice(0, 7),
+    ];
+
+    const promises = monthArray.map((month) => {
+      const getThreeMonthDispatchLabourer = `timesheet/${month}`;
+      return getData(getThreeMonthDispatchLabourer).then((result) => {
+        const simplifyResult = result.result;
+        return simplifyResult;
+      });
+    });
+    // const timesheetPromise = getData("timesheet").then((result) => {
+    //   const simplifyResult = result.result;
+    //   return simplifyResult;
+    // });
+
+    // console.log("timesheetPromise",timesheetPromise)
+    Promise.all(promises)
+      .then((allResults) => {
+        console.log(allResults);
+        const data = allResults.flat();
+        // const uniqueTaskSelectLabouerList = Array.from(
+        //   new Set(data.map(JSON.stringify))
+        // ).map(JSON.parse);
+        console.log(data);
+        const transformData = (data) => {
+          return data.map((item) => {
+            //第一層是date, summaries
+            const { date, summaries } = item;
+            //從summaries可能有數個案場，任一個打開的第二層是下列五個屬性
+            const simplifiedSummaries = summaries.map((summary) => {
               const {
                 id,
-                constructionJobTask,
-                estimatedSince,
-                estimatedUntil,
-                location,
-                remark,
-                constructionSummaryJobTaskDispatches,
-              } = task;
+                constructionJob,
+                name,
+                project,
+                constructionSummaryJobTasks,
+                since,
+                until,
+              } = summary;
+              //從constructionSummaryJobTasks打開的第三層是下列五個屬性
+              const simplifiedTasks = constructionSummaryJobTasks.map(
+                (task) => {
+                  const {
+                    id,
+                    constructionJobTask,
+                    estimatedSince,
+                    estimatedUntil,
+                    location,
+                    remark,
+                    constructionSummaryJobTaskDispatches,
+                  } = task;
 
-              const simplifiedDispatches = constructionSummaryJobTaskDispatches
-                .filter((dispatch) => dispatch.date === date) // 过滤出 date 等于给定日期的项
-                .map((dispatch) => {
-                  const { id, labourer, date } = dispatch;
-                  const { id: labourerId, nickname } = labourer;
+                  const simplifiedDispatches =
+                    constructionSummaryJobTaskDispatches
+                      .filter((dispatch) => dispatch.date === date) // 过滤出 date 等于给定日期的项
+                      .map((dispatch) => {
+                        const { id, labourer, date } = dispatch;
+                        const { id: labourerId, nickname } = labourer;
+                        return {
+                          id,
+                          labourer: {
+                            id: labourerId,
+                            nickname,
+                          },
+                          date,
+                        };
+                      });
                   return {
                     id,
-                    labourer: {
-                      id: labourerId,
-                      nickname,
+                    constructionJobTask: {
+                      id: constructionJobTask.id,
+                      name: constructionJobTask.name,
                     },
-                    date,
+                    estimatedSince,
+                    estimatedUntil,
+                    location,
+                    remark,
+                    constructionSummaryJobTaskDispatches: simplifiedDispatches,
                   };
-                });
+                }
+              );
+
               return {
                 id,
-                constructionJobTask: {
-                  id: constructionJobTask.id,
-                  name: constructionJobTask.name,
+                name,
+                project: {
+                  id: project.id,
+                  name: project.name,
                 },
-                estimatedSince,
-                estimatedUntil,
-                location,
-                remark,
-                constructionSummaryJobTaskDispatches: simplifiedDispatches,
+                summaryJobTasks: simplifiedTasks.sort((a, b) => {
+                  if (a.estimatedSince && !b.estimatedSince) {
+                    return -1;
+                  } else if (!a.estimatedSince && b.estimatedSince) {
+                    return 1;
+                  } else if (a.estimatedSince && b.estimatedSince) {
+                    if (a.estimatedSince < b.estimatedSince) {
+                      return -1;
+                    } else if (a.estimatedSince > b.estimatedSince) {
+                      return 1;
+                    }
+                  }
+                  if (a.estimatedUntil < b.estimatedUntil) {
+                    return -1;
+                  } else if (a.estimatedUntil > b.estimatedUntil) {
+                    return 1;
+                  }
+
+                  return 0; // a 和 b 相等
+                }),
+                since,
+                until,
               };
             });
 
             return {
-              id,
-              name,
-              project: {
-                id: project.id,
-                name: project.name,
-              },
-              summaryJobTasks: simplifiedTasks.sort((a, b) => {
-                if (a.estimatedSince && !b.estimatedSince) {
-                  return -1;
-                } else if (!a.estimatedSince && b.estimatedSince) {
-                  return 1;
-                } else if (a.estimatedSince && b.estimatedSince) {
-                  if (a.estimatedSince < b.estimatedSince) {
-                    return -1;
-                  } else if (a.estimatedSince > b.estimatedSince) {
-                    return 1;
-                  }
-                }
-                if (a.estimatedUntil < b.estimatedUntil) {
-                  return -1;
-                } else if (a.estimatedUntil > b.estimatedUntil) {
-                  return 1;
-                }
-
-                return 0; // a 和 b 相等
-              }),
-              since,
-              until,
+              date,
+              summaries: simplifiedSummaries,
             };
           });
+        };
+        const transformedData = transformData(data);
+        const dateSummariesMap = dateList.map((date) => {
+          const existingData = transformedData.find(
+            (data) => data.date === date
+          );
 
-          return {
-            date,
-            summaries: simplifiedSummaries,
-          };
+          if (existingData) {
+            const newSummaries = existingData.summaries.slice();
+            constructionSummaryList.forEach((summary) => {
+              if (
+                !newSummaries.some(
+                  (existingSummary) => existingSummary.id === summary.id
+                )
+              ) {
+                newSummaries.push({ ...summary, dispatch: "none" });
+              }
+            });
+
+            return { date, summaries: newSummaries };
+          } else {
+            const newSummaries = constructionSummaryList.map((summary) => ({
+              ...summary,
+              dispatch: "none",
+            }));
+
+            return { date, summaries: newSummaries };
+          }
         });
-      };
-      const transformedData = transformData(data);
-      const dateSummariesMap = dateList.map((date) => {
-        const existingData = transformedData.find((data) => data.date === date);
 
-        if (existingData) {
-          const newSummaries = existingData.summaries.slice();
-          constructionSummaryList.forEach((summary) => {
-            if (
-              !newSummaries.some(
-                (existingSummary) => existingSummary.id === summary.id
-              )
-            ) {
-              newSummaries.push({ ...summary, dispatch: "none" });
-            }
+        const filterTransformedData = dateSummariesMap
+          .map((oneday) => {
+            return {
+              date: oneday.date,
+              summaries: oneday?.summaries?.filter((sum) =>
+                SummaryDatePeriod(sum.since, sum.until).includes(oneday.date)
+              ),
+            };
+          })
+          .filter((oneday) => oneday.summaries.length > 0);
+
+        const events = filterTransformedData.flatMap((item) => {
+          return item.summaries.map((summary) => {
+            return {
+              title: summary.project.name,
+              start: item.date,
+              extendedProps: summary,
+            };
           });
-
-          return { date, summaries: newSummaries };
-        } else {
-          const newSummaries = constructionSummaryList.map((summary) => ({
-            ...summary,
-            dispatch: "none",
-          }));
-
-          return { date, summaries: newSummaries };
-        }
-      });
-
-      const filterTransformedData = dateSummariesMap
-        .map((oneday) => {
-          return {
-            date: oneday.date,
-            summaries: oneday?.summaries?.filter((sum) =>
-              SummaryDatePeriod(sum.since, sum.until).includes(oneday.date)
-            ),
-          };
-        })
-        .filter((oneday) => oneday.summaries.length > 0);
-
-      const events = filterTransformedData.flatMap((item) => {
-        return item.summaries.map((summary) => {
-          return {
-            title: summary.project.name,
-            start: item.date,
-            extendedProps: summary,
-          };
         });
+
+        //這個就是取得7天派工的整理精華+ 全部清單清空派工人員
+        setConstSummaryApiList(filterTransformedData);
+
+        const oneDayTotal = filterTransformedData.filter(
+          (list) =>
+            list.date === reGetCalendarData ||
+            list.date === reGetSummaryListData
+        );
+        if (oneDayTotal.length > 0) {
+          setDeliverInfo(oneDayTotal[0]);
+        }
+
+        setReGetCalendarData(null);
+        setReGetSummaryListData(null);
+        setIsEventModalOpen(true);
+        setEvents(events);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
       });
-
-      //這個就是取得7天派工的整理精華+ 全部清單清空派工人員
-      setConstSummaryApiList(filterTransformedData);
-
-      const oneDayTotal = filterTransformedData.filter(
-        (list) =>
-          list.date === reGetCalendarData || list.date === reGetSummaryListData
-      );
-      if (oneDayTotal.length > 0) {
-        setDeliverInfo(oneDayTotal[0]);
-      }
-
-      setReGetCalendarData(null);
-      setReGetSummaryListData(null);
-      setIsEventModalOpen(true);
-      setEvents(events);
-      setIsLoading(false);
-    });
   };
 
   const getDepartMemberList = useCallback(() => {
@@ -437,6 +508,26 @@ const DispatchCalendar = () => {
     ? modalConfig.find((item) => item.modalValue === modalValue)
     : null;
 
+  const letParamWithMonth = (calendarRef) => {
+    const calendarApi = calendarRef.current.getApi();
+    const currentDate = calendarApi.getDate();
+    // 月份是從 0 開始的，所以要加 1
+    const currentMonth = (currentDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0");
+    navigateWithParams(0, 0, { month: currentMonth }, false);
+  };
+
+  const onNextClick = (calendarRef) => {
+    const calendarApi = calendarRef.current.getApi();
+    const currentDate = calendarApi.getDate();
+    // 月份是從 0 開始的，所以要加 1
+    const currentMonth = (currentDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0");
+    navigateWithParams(0, 0, { month: currentMonth }, false);
+  };
+
   return (
     <>
       {/* PageTitle */}
@@ -459,7 +550,6 @@ const DispatchCalendar = () => {
           handleEventClick(e.event.startStr);
         }}
         eventContent={(eventInfo) => {
-
           return <CustomEventContent event={eventInfo.event} />;
         }}
         eventColor={isTargetScreen ? "transparent" : "#F48A64"}
@@ -467,6 +557,9 @@ const DispatchCalendar = () => {
         eventBorderColor={"transparent"}
         eventBackgroundColor={"transparent"}
         eventOrder={""}
+        showMonth={true}
+        onPreviousClick={(calendarRef) => letParamWithMonth(calendarRef)}
+        onNextClick={(calendarRef) => letParamWithMonth(calendarRef)}
       />
       <Backdrop sx={{ color: "#fff", zIndex: 1050 }} open={isLoading}>
         <LoadingThree size={40} />

@@ -122,7 +122,7 @@ const Calendar = ({
 								<IconButton
 									onClick={() => {
 										calendarRef.current.getApi().prev();
-										onPreviousClick && onPreviousClick(); // Call the external function if provided
+										onPreviousClick && onPreviousClick(calendarRef); // Call the external function if provided
 									}}
 									sx={{ mr: 0.5 }}>
 									<ArrowBackIosNewIcon fontSize="small" />
@@ -132,7 +132,7 @@ const Calendar = ({
 								<IconButton
 									onClick={() => {
 										calendarRef.current.getApi().next();
-										onNextClick && onNextClick(); // Call the external function if provided
+										onNextClick && onNextClick(calendarRef); // Call the external function if provided
 									}}
 									sx={{ mr: 0.5 }}>
 									<ArrowForwardIosIcon fontSize="small" />

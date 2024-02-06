@@ -516,7 +516,7 @@ const EventModal = React.memo(
                 ${currentDivIndex === 0 ? "block" : "hidden"} 
                   h-[70vh] bg-slate-5 overflow-y-scroll p-2 mt-4`}
                 onClick={() => {
-                  console.log(deliverInfo);
+                  // console.log(deliverInfo);
                 }}
               >
                 {deliverInfo.summaries.map((summary, index) => (

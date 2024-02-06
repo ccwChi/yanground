@@ -205,6 +205,7 @@ const SummaryModal = React.memo(
 
     const RefleshMainList = () => {
       getSummaryList(apiUrl, constructionTypeList);
+      
     };
 
     return (
@@ -255,6 +256,12 @@ const SummaryModal = React.memo(
                 isLoading={isLoading}
                 setIsLoading={setIsLoading}
                 RefleshMainList={RefleshMainList}
+                setDeliverInfo={setDeliverInfo}
+                setSendBackFlag={setSendBackFlag}
+                isDivDirty={isDivDirty}
+                setIsDivDirty={setIsDivDirty}
+                onCheckDirty={onCheckDirty}
+                setAlertOpen={setAlertOpen}
               />
             )}
           </div>
