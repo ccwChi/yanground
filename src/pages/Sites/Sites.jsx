@@ -67,7 +67,6 @@ const Sites = () => {
 
   // 對照 api table 所顯示 key
   const columnsPC = [
-    { key: "id", label: "ID" },
     { key: "name", label: "案場" },
   ];
   const columnsMobile = [

@@ -66,7 +66,7 @@ const Project = () => {
 
 	// 對照 api table 所顯示 key
 	const columnsPC = [
-		{ key: "name", label: "專案名稱" },
+		{ key: "name", label: "專案名稱", align: "left" },
 		{ key: ["businessRepresentative", "nickname"], label: "負責人", size: "15%" },
 		{ key: "administrativeDivision", label: "地點", size: "22.5%" },
 	];
@@ -130,13 +130,9 @@ const Project = () => {
 				onClose();
 			} else {
 				showNotification(
-					result.result.reason
-					  ? result.result.reason
-					  : (result.result
-					  ? result.result
-					  : "權限不足"),
+					result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
 					false
-				  );
+				);
 			}
 			setSendBackFlag(false);
 		});
@@ -214,7 +210,7 @@ const Project = () => {
 					columnsMobile={columnsMobile}
 					actions={actions}
 					cardTitleKey={"name"}
-					tableMinWidth={540}
+					tableMinWidth={840}
 					isLoading={isLoading}
 					handleActionClick={handleActionClick}
 				/>
