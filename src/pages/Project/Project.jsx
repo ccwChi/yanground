@@ -200,7 +200,13 @@ const Project = () => {
 	return (
 		<>
 			{/* PageTitle */}
-			<PageTitle title="專案管理" btnGroup={btnGroup} handleActionClick={handleActionClick} isLoading={!isLoading} />
+			<PageTitle
+				title="專案管理"
+				description={"此頁面是用於新增、編輯專案，同時可以選擇案場範圍，提供方便管理專案的功能。"}
+				btnGroup={btnGroup}
+				handleActionClick={handleActionClick}
+				isLoading={!isLoading}
+			/>
 
 			{/* Table */}
 			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">

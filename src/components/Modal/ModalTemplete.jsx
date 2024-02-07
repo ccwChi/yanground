@@ -7,6 +7,12 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
 function ModalTemplete({ title, show, onClose, maxWidth = 439, children }) {
+	const handleKeyDown = (event) => {
+		if (event.key === "Escape") {
+			onClose();
+		}
+	};
+
 	const isSmallScreen = useMediaQuery("(max-width:575.98px)");
 	return (
 		<Modal
@@ -14,6 +20,7 @@ function ModalTemplete({ title, show, onClose, maxWidth = 439, children }) {
 			aria-describedby="transition-modal-description"
 			open={show}
 			// onClose={handleClose}
+			onKeyDown={handleKeyDown}
 			closeAfterTransition
 			slots={{ backdrop: Backdrop }}
 			slotProps={{
