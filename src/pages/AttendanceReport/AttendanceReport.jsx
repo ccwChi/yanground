@@ -23,9 +23,6 @@ import { useNotification } from "../../hooks/useNotification";
 // Utils
 import { getData, getDownloadData } from "../../utils/api";
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
-
 const AttendanceReport = () => {
 	// 部門清單
 	const [departmentList, setDepartmentList] = useState([]);
@@ -118,7 +115,7 @@ const AttendanceReport = () => {
 				title="考勤報表"
 				description="此頁面是用於選擇部門或全體員工以及指定月份，以生成並輸出 Excel 格式的月考勤報表。"
 			/>
-			<div className="mx-[2%] bg-white rounded-lg shadow-md px-4 py-5">
+			<div className="mx-[2%] bg-white rounded-lg shadow-md px-4 py-5 sm:flex-none flex-1 overflow-auto">
 				<FormProvider {...methods}>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div className="flex flex-col">
@@ -157,8 +154,8 @@ const AttendanceReport = () => {
 													renderOption={(props, option, { selected }) => (
 														<li {...props}>
 															<Checkbox
-																icon={icon}
-																checkedIcon={checkedIcon}
+																icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+																checkedIcon={<CheckBoxIcon fontSize="small" />}
 																style={{ marginRight: 8 }}
 																checked={selected}
 															/>
@@ -184,6 +181,7 @@ const AttendanceReport = () => {
 															}}
 														/>
 													)}
+													ListboxProps={{ style: { maxHeight: '12rem' } }}
 													loading={departmentList.length <= 0}
 													loadingText={"載入中..."}
 													fullWidth

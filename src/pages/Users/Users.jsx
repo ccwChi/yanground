@@ -20,6 +20,7 @@ import ViewTimelineIcon from "@mui/icons-material/ViewTimeline";
 import PunchClockIcon from "@mui/icons-material/PunchClock";
 import TuneIcon from "@mui/icons-material/Tune";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import DownloadIcon from "@mui/icons-material/Download";
 // Component
 import RWDTable from "../../components/RWDTable/RWDTable";
 import PageTitle from "../../components/Guideline/PageTitle";
@@ -35,7 +36,7 @@ import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 // Untils
 import { getData, postData } from "../../utils/api";
 // Customs
-import EditModal from "./UsersModal";
+import { EditModal, ExportModal } from "./UsersModal";
 
 // MenuItem 選單樣式調整
 const ITEM_HEIGHT = 36;
@@ -160,6 +161,15 @@ const Users = () => {
 	// 上方區塊功能按鈕清單
 	const btnGroup = [
 		{
+			mode: "download",
+			icon: <DownloadIcon fontSize="small" />,
+			text: "輸出人事資料",
+			variant: "contained",
+			color: "secondary",
+			fabVariant: "success",
+			fab: <DownloadIcon />,
+		},
+		{
 			mode: "richMenu",
 			icon: <AutoFixHighIcon fontSize="small" />,
 			text: "激活 Line 圖文選單",
@@ -210,7 +220,6 @@ const Users = () => {
 		{ key: "birthDate", label: "生日" },
 	];
 
-	// edit = 編輯名稱
 	const actions = [
 		{ value: "edit", icon: <EditIcon />, title: "編輯個人資料" },
 		{ value: "viewpunch", icon: <PunchClockIcon />, title: "個人考勤紀錄" },
@@ -384,6 +393,10 @@ const Users = () => {
 					authorityList={authorityList}
 				/>
 			),
+		},
+		{
+			modalValue: "download",
+			modalComponent: <ExportModal title="輸出人事資料" onClose={onClose} />,
 		},
 		// {
 		// 	modalValue: "attconf",
@@ -647,7 +660,7 @@ const Users = () => {
 			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
 				<LoadingFour />
 			</Backdrop>
-			
+
 			{/* Modal */}
 			{config && config.modalComponent}
 		</>

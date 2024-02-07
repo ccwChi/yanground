@@ -16,7 +16,7 @@ import Project from "./pages/Project/Project";
 import Maps from "./pages/Project/Maps";
 import DispatchList from "./pages/DispatchList/DispatchList";
 // HRM
-import Users from "./pages/HumanResources/Users";
+import Users from "./pages/Users/Users";
 import AttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
 import AnomalyReport from "./pages/AnomalyReport/AnomalyReport";
 import WorkCalendar from "./pages/WorkCalendar/WorkCalendar";
