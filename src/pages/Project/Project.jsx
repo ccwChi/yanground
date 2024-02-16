@@ -76,12 +76,14 @@ const Project = () => {
 	// 對照 api table 所顯示 key
 	const columnsPC = [
 		{ key: "name", label: "專案名稱", align: "left" },
-		{ key: ["businessRepresentative", "nickname"], label: "負責人", size: "15%" },
-		{ key: "administrativeDivision", label: "地點", size: "22.5%" },
+		{ key: ["businessRepresentative", "nickname"], label: "負責人", size: "12%" },
+		{ key: ["foremanRepresentative", "nickname"], label: "工務專管人員", size: '12%' },
+		{ key: "administrativeDivision", label: "地點", size: "15%" },
 	];
 	const columnsMobile = [
 		{ key: "name", label: "專案名稱" },
 		{ key: ["businessRepresentative", "nickname"], label: "負責人" },
+		{ key: ["foremanRepresentative", "nickname"], label: "工務專管人員" },
 		{ key: "administrativeDivision", label: "地點" },
 	];
 
@@ -255,7 +257,7 @@ const Project = () => {
 					columnsMobile={columnsMobile}
 					actions={actions}
 					cardTitleKey={"name"}
-					tableMinWidth={840}
+					tableMinWidth={1024}
 					isLoading={isLoading}
 					handleActionClick={handleActionClick}
 				/>

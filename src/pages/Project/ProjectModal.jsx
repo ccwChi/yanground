@@ -29,8 +29,10 @@ const MenuProps = {
 const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityList, onClose }) => {
 	// Alert 開關
 	const [alertOpen, setAlertOpen] = useState(false);
-	// 人員清單
-	const [userList, setUserList] = useState(null);
+	// 專責人員清單
+	const [bizRepList, setBizRepList] = useState(null);
+	// 工務專案人員清單
+	const [fRepList, setFRepList] = useState(null);
 	// 鄉鎮區清單
 	const [distList, setDistList] = useState(null);
 	// 是否為初始化時
@@ -52,6 +54,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 	const defaultValues = {
 		name: apiData ? apiData.name : "",
 		businessRepresentative: apiData ? apiData.businessRepresentative.id : "",
+		foremanRepresentative: apiData ? apiData.foremanRepresentative?.id || "" : "",
 		administrativeDivision_: apiData ? apiData.administrativeDivision.administeredBy.id : "",
 		administrativeDivision: apiData ? apiData.administrativeDivision.id : "",
 		street: apiData ? apiData.street : "",
@@ -96,7 +99,11 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 	useEffect(() => {
 		getData("department/5/staff").then((result) => {
 			const data = result.result;
-			setUserList(data);
+			setBizRepList(data);
+		});
+		getData("department/11/staff").then((result) => {
+			const data = result.result;
+			setFRepList(data);
 		});
 	}, []);
 
@@ -122,7 +129,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 
 		// delete data.administrativeDivision_;
 		for (let key in data) {
-			fd.append(key, data[key]);
+			fd.append(key, data[key] || "");
 		}
 
 		if (deliverInfo) {
@@ -154,14 +161,14 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 			{/* Modal */}
 			<ModalTemplete
 				title={title}
-				show={!!userList && (deliverInfo ? !!apiData : true)}
+				show={!!bizRepList && !!fRepList && (deliverInfo ? !!apiData : true)}
 				maxWidth={"640px"}
 				onClose={onCheckDirty}>
 				<FormProvider {...methods}>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div className="flex flex-col pt-4 gap-4">
-							<div className="flex flex-col overflow-y-auto px-1" style={{ maxHeight: "60vh" }}>
-								{/* 名稱 & 人員 */}
+							<div className="flex flex-col overflow-y-auto px-1 pb-1" style={{ maxHeight: "60vh" }}>
+								{/* 名稱 */}
 								<div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
 									<div className="w-full">
 										<InputTitle title={"專案名稱"} />
@@ -187,6 +194,9 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 											{errors["name"]?.message}
 										</FormHelperText>
 									</div>
+								</div>
+								{/* 業務人員 & 工務專管人員 */}
+								<div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
 									<div className="w-full">
 										<InputTitle title={"專責人員"} />
 										<Controller
@@ -201,9 +211,9 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 													fullWidth
 													MenuProps={MenuProps}>
 													<MenuItem value="" disabled>
-														<span className="text-neutral-400 font-light">請選擇專案人員</span>
+														<span className="text-neutral-400 font-light">請選擇專責人員</span>
 													</MenuItem>
-													{userList.map((user) => (
+													{bizRepList.map((user) => (
 														<MenuItem key={user.id} value={user.id}>
 															{user.nickname}
 														</MenuItem>
@@ -215,6 +225,36 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 											className="!text-red-600 break-words !text-right !mt-0"
 											sx={{ minHeight: "1.25rem" }}>
 											{errors["businessRepresentative"]?.message}
+										</FormHelperText>
+									</div>
+									<div className="w-full">
+										<InputTitle title={"工務專管人員"} required={false} />
+										<Controller
+											name="foremanRepresentative"
+											control={control}
+											render={({ field }) => (
+												<Select
+													error={!!errors["foremanRepresentative"]?.message}
+													className="inputPadding"
+													displayEmpty
+													{...field}
+													fullWidth
+													MenuProps={MenuProps}>
+													<MenuItem value="">
+														<span className="text-neutral-400 font-light">請選擇工務專管人員</span>
+													</MenuItem>
+													{fRepList.map((user) => (
+														<MenuItem key={user.id} value={user.id}>
+															{user.nickname}
+														</MenuItem>
+													))}
+												</Select>
+											)}
+										/>
+										<FormHelperText
+											className="!text-red-600 break-words !text-right !mt-0"
+											sx={{ minHeight: "1.25rem" }}>
+											{errors["foremanRepresentative"]?.message}
 										</FormHelperText>
 									</div>
 								</div>
@@ -449,7 +489,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 			{/* Backdrop */}
 			<Backdrop
 				sx={{ color: "#fff", zIndex: 1050 }}
-				open={!userList || (deliverInfo ? !apiData : false)}
+				open={!bizRepList || !fRepList || (deliverInfo ? !apiData : false)}
 				onClick={onCheckDirty}>
 				<LoadingTwo />
 			</Backdrop>
