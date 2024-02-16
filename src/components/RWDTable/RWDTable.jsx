@@ -449,7 +449,7 @@ const RWDTable = ({
 			{isLoading &&
 				Array.from({ length: SKELETONITEM }).map((_, index) => (
 					<Grow in={true} key={"Skeleton" + index}>
-						<div className="!flex items-center py-2">
+						<div className="flex items-center py-2" style={{ minWidth: `${tableMinWidth * 0.95}px` }}>
 							<Skeleton
 								animation="wave"
 								width={"15%"}
