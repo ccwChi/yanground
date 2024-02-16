@@ -25,14 +25,34 @@ import { getData, getDownloadData } from "../../utils/api";
 
 const AttendanceReport = () => {
 	// 部門清單
-	const [departmentList, setDepartmentList] = useState([]);
+	const [departmentsList, setDepartmentsList] = useState([]);
 	// isLoading 等待請求 API
 	const [isLoading, setIsLoading] = useState(false);
 	// const isTargetScreen = useMediaQuery("(max-width:767.98px)");
 	// const fixedOptions = { label: "全部", id: "" };
+	// 凍結時間
+	const [freezingTime, setFreezingTime] = useState(null);
 	// 提示消息框
 	const showNotification = useNotification();
 	const timer = useRef();
+
+	useEffect(() => {
+		// 取得當前的日期時間，使用台灣時區
+		const taiwanTimeNow = new Date().toLocaleString("en-US", { timeZone: "Asia/Taipei" });
+		const currentDate = new Date(taiwanTimeNow);
+
+		// 取得當前月份的第 10 天的日期
+		const tenthDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 10 + 1);
+
+		// 比較今天是否大於當月的第 10 天
+		if (currentDate >= tenthDayOfMonth) {
+			console.log("今天大於當月的第 10 天");
+			setFreezingTime(false);
+		} else {
+			console.log("今天小於當月的第 10 天");
+			setFreezingTime(true);
+		}
+	}, []);
 
 	// 取得部門資料
 	useEffect(() => {
@@ -41,10 +61,10 @@ const AttendanceReport = () => {
 				const data = result.result.content;
 				const formattedDep = data.map((dep) => ({ label: dep.name, id: dep.id }));
 				// const optionsWithAll = [fixedOptions, ...formattedDep];
-				// setDepartmentList(optionsWithAll);
-				setDepartmentList(formattedDep);
+				// setDepartmentsList(optionsWithAll);
+				setDepartmentsList(formattedDep);
 			} else {
-				setDepartmentList([]);
+				setDepartmentsList([]);
 			}
 		});
 	}, []);
@@ -57,7 +77,7 @@ const AttendanceReport = () => {
 
 	// 初始預設 default 值
 	const defaultValues = {
-		department: [],
+		departments: [],
 		date: new Date(),
 	};
 
@@ -74,14 +94,23 @@ const AttendanceReport = () => {
 		defaultValues,
 		resolver: yupResolver(schema),
 	});
-	const { control, handleSubmit } = methods;
+	const { control, watch, setValue, handleSubmit } = methods;
+	const dateValue = watch("date");
+	const panduan =
+		freezingTime ||
+		new Date(dateValue).getFullYear() * 12 + new Date(dateValue).getMonth() >=
+			new Date().getFullYear() * 12 + new Date().getMonth();
+
+	useEffect(() => {
+		setValue("departments", []);
+	}, [dateValue]);
 
 	// 提交表單資料到後端並執行相關操作
 	const onSubmit = (data) => {
 		setIsLoading(true);
 		// 下面有部門時就會開放
 		// 使用 map 函數將每個對象的 id 提取出來, 並將空字符串過濾掉
-		const idList = data["department"].map((item) => item.id);
+		const idList = data["departments"].map((item) => item.id);
 		const filteredIdList = idList.filter((id) => id !== "");
 		const idListString = filteredIdList.toString();
 
@@ -107,6 +136,7 @@ const AttendanceReport = () => {
 
 		// sendDataToBackend(fd, "temporaryannouncement", _date);
 	};
+	console.log(panduan);
 
 	return (
 		<div className="flex-1 overflow-hidden mb-4 sm:mb-0">
@@ -122,34 +152,45 @@ const AttendanceReport = () => {
 							<p className="mb-4">選擇您要查看的部門或年月份，然後點擊『生成報表』按鈕，以載出當月考勤結算的報表。</p>
 							<Divider className="!border-[1px] !mb-6" />
 							<div className="flex flex-col gap-3 mb-2">
+								{/* 日期 */}
+								<div className="inline-flex flex-col">
+									<InputTitle classnames="whitespace-nowrap" title={"日期"} required={false} />
+									<ControlledDatePicker
+										name="date"
+										mode="rwd"
+										views={["month", "year"]}
+										format={"yyyy 年 MM 月"}
+										minDate={new Date("2023-11")}
+										closeOnSelect={true}
+										// sx={{ width: isTargetScreen ? "100%" : "max-content" }}
+									/>
+								</div>
 								{/* 部門 */}
 								<div className="inline-flex flex-col w-full">
 									<InputTitle classnames="whitespace-nowrap" title={"部門"} required={false} />
 									<Controller
 										control={control}
-										name="department"
+										name="departments"
 										render={({ field }) => {
 											const { onChange, value } = field;
 											return (
 												<Autocomplete
 													multiple
-													// limitTags={2}
 													disableCloseOnSelect
-													options={departmentList}
+													// ={panduan ? true : false}
+													options={departmentsList}
 													value={value}
 													onChange={(event, selectedOptions) => {
-														onChange(selectedOptions);
-														// onChange([...[fixedOptions], ...selectedOptions.filter((option) => option.id !== "")]);
+														if (panduan) {
+															onChange(selectedOptions);
+														} else {
+															const newSelectedOptions = selectedOptions.slice(-1);
+															onChange(newSelectedOptions);
+														}
 													}}
 													isOptionEqualToValue={(option, value) => option.id === value.id}
 													renderTags={(tagValue, getTagProps) =>
-														tagValue.map((option, index) => (
-															<Chip
-																label={option.label}
-																{...getTagProps({ index })}
-																// disabled={option.id === ""}
-															/>
-														))
+														tagValue.map((option, index) => <Chip label={option.label} {...getTagProps({ index })} />)
 													}
 													renderOption={(props, option, { selected }) => (
 														<li {...props}>
@@ -166,13 +207,13 @@ const AttendanceReport = () => {
 														<TextField
 															{...params}
 															className="inputPadding bg-white"
-															placeholder="請選擇部門 (默認全部)"
+															placeholder="請選擇部門"
 															// sx={{ "& > div": { padding: "0 !important" } }}
 															InputProps={{
 																...params.InputProps,
 																endAdornment: (
 																	<>
-																		{departmentList.length <= 0 ? (
+																		{departmentsList.length <= 0 ? (
 																			<CircularProgress className="absolute right-[2.325rem]" size={20} />
 																		) : null}
 																		{params.InputProps.endAdornment}
@@ -181,8 +222,8 @@ const AttendanceReport = () => {
 															}}
 														/>
 													)}
-													ListboxProps={{ style: { maxHeight: '12rem' } }}
-													loading={departmentList.length <= 0}
+													ListboxProps={{ style: { maxHeight: "12rem" } }}
+													loading={departmentsList.length <= 0}
 													loadingText={"載入中..."}
 													fullWidth
 												/>
@@ -190,19 +231,7 @@ const AttendanceReport = () => {
 										}}
 									/>
 								</div>
-								{/* 日期 */}
-								<div className="inline-flex flex-col">
-									<InputTitle classnames="whitespace-nowrap" title={"日期"} required={false} />
-									<ControlledDatePicker
-										name="date"
-										mode="rwd"
-										views={["month", "year"]}
-										format={"yyyy 年 MM 月"}
-										minDate={new Date("2023-11")}
-										closeOnSelect={false}
-										// sx={{ width: isTargetScreen ? "100%" : "max-content" }}
-									/>
-								</div>
+								{/* 生成按鈕 */}
 								<div className="relative inline-flex md:w-max">
 									<Button
 										type="submit"
@@ -226,6 +255,7 @@ const AttendanceReport = () => {
 									)}
 								</div>
 							</div>
+
 							<div className="flex mt-2">
 								<p className="!my-0 text-rose-400 font-bold text-xs !me-1">＊</p>
 								<p className="!my-0 text-rose-400 font-bold text-xs">若無選擇部門，則默認全部。</p>
@@ -235,6 +265,12 @@ const AttendanceReport = () => {
 								<p className="!my-0 text-rose-400 font-bold text-xs">
 									每月的 10 號
 									23:59:59（台灣時區，UTC+08:00）後，將凍結上一個月的考勤，此後無法修改上個月的考勤記錄。確保在此截止日期之前完成任何必要的修改。
+								</p>
+							</div>
+							<div className="flex mt-2">
+								<p className="!my-0 text-rose-400 font-bold text-xs !me-1">＊</p>
+								<p className="!my-0 text-rose-400 font-bold text-xs">
+									凍結前可進行單選、多選與全選以動態產生報表，凍結後則僅提供單選與全選靜態產生報表。
 								</p>
 							</div>
 						</div>
