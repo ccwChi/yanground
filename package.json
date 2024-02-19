@@ -16,7 +16,7 @@
 		"@fullcalendar/react": "^6.1.10",
 		"@fullcalendar/timegrid": "^6.1.10",
 		"@hookform/resolvers": "^3.3.2",
-		"@line/liff": "^2.23.0",
+		"@line/liff": "^2.23.2",
 		"@mui/icons-material": "^5.14.19",
 		"@mui/material": "^5.14.19",
 		"@mui/x-date-pickers": "^6.18.3",
