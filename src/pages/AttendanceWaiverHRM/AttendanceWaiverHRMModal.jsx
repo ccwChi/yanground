@@ -10,7 +10,7 @@ import { LoadingTwo } from "../../components/Loader/Loading";
 // Hooks
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 
-const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }) => {
+const ViewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }) => {
 	// 取得當前用戶資訊
 	const userProfile = useLocalStorageValue("userProfile");
 	// 用於儲存文字欄位的值
@@ -148,4 +148,4 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 		</>
 	);
 });
-export { ReviewModal };
+export { ViewModal };

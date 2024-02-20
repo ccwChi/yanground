@@ -18,6 +18,7 @@ const nameMappings = [
 	{ name: "users", display: "人事管理" },
 	{ name: "attendancecalendar", display: "考勤紀錄" },
 	{ name: "anomalyreport", display: "異常考勤" },
+	{ name: "attendancewaiverhrm", display: "豁免出勤" },
 	{ name: "attendancereport", display: "考勤報表" },
 	{ name: "workcalendar", display: "辦公行事曆" },
 	// 會員中心

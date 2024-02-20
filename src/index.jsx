@@ -19,6 +19,7 @@ import DispatchList from "./pages/DispatchList/DispatchList";
 import Users from "./pages/Users/Users";
 import AttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
 import AnomalyReport from "./pages/AnomalyReport/AnomalyReport";
+import AttendanceWaiverHRM from "./pages/AttendanceWaiverHRM/AttendanceWaiverHRM";
 import WorkCalendar from "./pages/WorkCalendar/WorkCalendar";
 import AttendanceReport from "./pages/AttendanceReport/AttendanceReport";
 // Member Cencer
@@ -49,10 +50,12 @@ const router = createBrowserRouter([
 				index: true,
 				element: <Home />,
 			},
+			// For Trash
 			{
 				path: "/sites",
 				element: <Sites />,
 			},
+			// Fundation Data
 			{
 				path: "/constructiontypes",
 				element: <ConstructionTypes />,
@@ -65,6 +68,7 @@ const router = createBrowserRouter([
 				path: "/constructiontypes/:type/:job",
 				element: <ConstructionJob />,
 			},
+			// Task Manager
 			{
 				path: "/constructionsummary",
 				element: <ConstructionSummary />,
@@ -81,6 +85,7 @@ const router = createBrowserRouter([
 				path: "/dispatchList",
 				element: <DispatchList />,
 			},
+			// HRM
 			{
 				path: "/users",
 				element: <Users />,
@@ -94,6 +99,10 @@ const router = createBrowserRouter([
 				element: <AnomalyReport />,
 			},
 			{
+				path: "/attendancewaiverhrm",
+				element: <AttendanceWaiverHRM />,
+			},
+			{
 				path: "/workcalendar",
 				element: <WorkCalendar />,
 			},
@@ -101,6 +110,7 @@ const router = createBrowserRouter([
 				path: "/attendancereport",
 				element: <AttendanceReport />,
 			},
+			// Member Cencer
 			{
 				path: "/punch",
 				element: <Punch />,
@@ -129,6 +139,7 @@ const router = createBrowserRouter([
 				path: "/clientquestionnaire",
 				element: <ClientQuestionnaire />,
 			},
+			// Error
 			{
 				path: "/unauthorized",
 				element: <Error />,

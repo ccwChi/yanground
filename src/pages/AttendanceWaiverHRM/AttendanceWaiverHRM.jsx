@@ -19,9 +19,9 @@ import { useNotification } from "../../hooks/useNotification";
 import { getData, postData } from "../../utils/api";
 // Customs
 import attendanceWaiverList from "../../datas/attendanceWaiverType";
-import { ReviewModal } from "./SupervisorApprovalModal";
+import { ViewModal } from "./AttendanceWaiverHRMModal";
 
-const SupervisorApproval = () => {
+const AttendanceWaiverHRM = () => {
 	// 解析網址取得參數
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);
@@ -195,7 +195,7 @@ const SupervisorApproval = () => {
 		{
 			modalValue: "review",
 			modalComponent: (
-				<ReviewModal title={"審核"} deliverInfo={deliverInfo} sendDataToBackend={sendDataToBackend} onClose={onClose} />
+				<ViewModal title={"審核"} deliverInfo={deliverInfo} sendDataToBackend={sendDataToBackend} onClose={onClose} />
 			),
 		},
 	];
@@ -204,7 +204,7 @@ const SupervisorApproval = () => {
 	return (
 		<>
 			{/* PageTitle */}
-			<PageTitle title="主管審核" description="此頁面是供主管檢視部門成員的請假和考勤紀錄，以便審核和決定是否通過。" />
+			<PageTitle title="豁免出勤" description="此頁面是專為人資部門所設計，提供檢視其他同仁員工豁免出勤審核紀錄的功能。" />
 
 			{/* Table */}
 			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
@@ -241,4 +241,4 @@ const SupervisorApproval = () => {
 	);
 };
 
-export default SupervisorApproval;
+export default AttendanceWaiverHRM;

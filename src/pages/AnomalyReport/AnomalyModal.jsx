@@ -428,6 +428,20 @@ const LeaveApplicationModal = React.memo(({ title, departmentsList, attendanceTy
 										/>
 										<FormHelperText className="!text-red-600 h-5">{errors["attendanceType"]?.message}</FormHelperText>
 									</div>
+
+									{/* 日期 */}
+									<div className="inline-flex flex-col w-full">
+										<InputTitle classnames="whitespace-nowrap" title={"日期"} />
+										<ControlledDatePicker
+											name="date"
+											mode="rwd"
+											views={["month", "year"]}
+											format={"yyyy 年 MM 月 dd 日"}
+											minDate={new Date("2023-11")}
+											closeOnSelect={false}
+											// sx={{ width: isTargetScreen ? "100%" : "max-content" }}
+										/>
+									</div>
 								</div>
 								{/* 按鈕 Btn Group */}
 								<div className="flex sm:flex-row flex-col gap-2">
@@ -440,19 +454,6 @@ const LeaveApplicationModal = React.memo(({ title, departmentsList, attendanceTy
 										送出
 									</Button>
 								</div>
-								{/* 日期 */}
-								{/* <div className="inline-flex flex-col">
-									<InputTitle classnames="whitespace-nowrap" title={"日期"} required={false} />
-									<ControlledDatePicker
-										name="date"
-										mode="rwd"
-										views={["month", "year"]}
-										format={"yyyy 年 MM 月 dd 日"}
-										minDate={new Date("2023-11")}
-										closeOnSelect={false}
-										// sx={{ width: isTargetScreen ? "100%" : "max-content" }}
-									/>
-								</div> */}
 							</div>
 						</form>
 					</FormProvider>
