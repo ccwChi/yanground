@@ -10,6 +10,14 @@ import { LoadingTwo } from "../../components/Loader/Loading";
 // Hooks
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 
+/***
+ * 審核 Modal
+ * @param {string} title - Modal 標題名稱
+ * @param {Object} deliverInfo - 顯示資訊
+ * @param {Function} sendDataToBackend - 傳遞給後端的函式
+ * @param {Function} onClose - 關閉函式
+ * @returns
+ ***/
 const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }) => {
 	// 取得當前用戶資訊
 	const userProfile = useLocalStorageValue("userProfile");
@@ -27,8 +35,6 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 		fd.append("remark", textFieldValue);
 		sendDataToBackend(fd, "approval", [deliverInfo.id, userProfile.id]);
 	};
-
-	console.log(deliverInfo);
 
 	return (
 		<>
@@ -61,10 +67,10 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 						</div>
 						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">
 							<p className="w-full">
-								申請時間(起)：<span className="font-bold">{deliverInfo.since}</span>
+								申請區間(起)：<span className="font-bold">{deliverInfo.since}</span>
 							</p>
 							<p className="w-full">
-								申請時間(迄)：<span className="font-bold">{deliverInfo.until}</span>
+								申請區間(迄)：<span className="font-bold">{deliverInfo.until}</span>
 							</p>
 						</div>
 						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">

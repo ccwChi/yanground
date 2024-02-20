@@ -136,7 +136,6 @@ const AttendanceReport = () => {
 
 		// sendDataToBackend(fd, "temporaryannouncement", _date);
 	};
-	console.log(panduan);
 
 	return (
 		<div className="flex-1 overflow-hidden mb-4 sm:mb-0">
@@ -145,7 +144,7 @@ const AttendanceReport = () => {
 				title="考勤報表"
 				description="此頁面是用於選擇部門或全體員工以及指定月份，以生成並輸出 Excel 格式的月考勤報表。"
 			/>
-			<div className="mx-[2%] bg-white rounded-lg shadow-md px-4 py-5 sm:flex-none h-full overflow-y-auto">
+			<div className="mx-[2%] bg-white rounded-lg shadow-md px-4 py-5 sm:flex-none max-h-full overflow-y-auto">
 				<FormProvider {...methods}>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div className="flex flex-col">
