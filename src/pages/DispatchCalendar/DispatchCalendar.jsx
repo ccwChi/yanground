@@ -17,14 +17,13 @@ import { calendarColorList } from "../../datas/calendarColorList";
 import { useLocation } from "react-router-dom";
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 
-
 const today = new Date();
 //明天
 const twoDaysLater = new Date(today);
 twoDaysLater.setDate(today.getDate() + 30);
 //五天前
 const fiveDaysBefore = new Date(today);
-fiveDaysBefore.setDate(today.getDate() - 20);
+fiveDaysBefore.setDate(today.getDate() - 30);
 // 生成日期區間
 const dates = [];
 let currentDateIterator = new Date(fiveDaysBefore);
@@ -32,7 +31,6 @@ while (currentDateIterator <= twoDaysLater) {
   dates.push(currentDateIterator.toISOString().slice(0, 10));
   currentDateIterator.setDate(currentDateIterator.getDate() + 1);
 }
-
 
 const DispatchCalendar = () => {
   const isTargetScreen = useMediaQuery("(max-width:991.98px)");
@@ -528,22 +526,21 @@ const DispatchCalendar = () => {
   };
 
   return (
-    <div
-      className={`relative profile-section flex flex-col flex-1 overflow-hidden}`}
-    >
+    <>
       {isLoading ? (
         <>
           {" "}
           <LoadingTwo
-                  size={isSmallScreen ? 120 : 160}
-                  textSize={"text-lg sm:text-xl"}
-                />
+            size={isSmallScreen ? 120 : 160}
+            textSize={"text-lg sm:text-xl"}
+          />
         </>
       ) : (
         <>
           <PageTitle
             title="派工行事曆"
             btnGroup={btnGroup}
+            description="此頁面是用於派工，點擊日期及可派工，目前預設接下來30天都可派工及可觀看到前30天的派工。"
             handleActionClick={handleActionClick}
             isLoading={!isLoading}
           />
@@ -589,7 +586,7 @@ const DispatchCalendar = () => {
         </>
       )}
       {/* PageTitle */}
-    </div>
+    </>
   );
 };
 
