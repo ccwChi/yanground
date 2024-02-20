@@ -49,7 +49,7 @@ const App = () => {
 			href: "#",
 			subMenuItems: [
 				{ text: "人事管理", href: "users" },
-				{ text: "考勤紀錄", href: "attendancecalendar" },
+				// { text: "考勤紀錄", href: "attendancecalendar" },
 				{ text: "異常考勤", href: "anomalyreport" },
 				{ text: "豁免出勤", href: "attendancewaiverhrm" },
 				{ text: "考勤報表", href: "attendancereport" },
