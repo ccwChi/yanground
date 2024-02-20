@@ -94,6 +94,15 @@ const theme = createTheme({
 				},
 			},
 		},
+		MuiMultiSectionDigitalClock: {
+			styleOverrides: {
+				root: {
+					".Mui-disabled": {
+						display: "none",
+					},
+				},
+			},
+		},
 		// MuiTreeItem: {
 		// 	styleOverrides: {
 		// 		content: {

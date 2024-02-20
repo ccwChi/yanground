@@ -1,18 +1,23 @@
 import React, { useEffect, useState, useRef } from "react";
+import liff from "@line/liff";
 import { Outlet } from "react-router-dom";
+import { SnackbarProvider, enqueueSnackbar } from "notistack";
+// FontAwesome
+import { faHouse, faToolbox, faFileLines, faUsersGear, faAddressCard, faFolderTree } from "@fortawesome/free-solid-svg-icons";
+// MUI
+import { ThemeProvider } from "@mui/material/styles";
+// Components
 import Header from "./components/Layout/Header";
 import Sidebar from "./components/Layout/Sidebar";
 import Tabbar from "./components/Tabbar/Tabbar";
 import CustomBreadcrumbs from "./components/Breadcrumbs/CustomBreadcrumbs";
-import { faHouse, faToolbox, faFileLines, faUsersGear, faAddressCard } from "@fortawesome/free-solid-svg-icons";
-import { ThemeProvider } from "@mui/material/styles";
-import theme from "./utils/theme";
-import "./app.scss";
+// Hooks
 import useLocalStorageValue from "./hooks/useLocalStorageValue";
-// import { useNotification } from "./hooks/useNotification";
+// Utils
 import { getData } from "./utils/api";
-import liff from "@line/liff";
-import { SnackbarProvider, enqueueSnackbar } from "notistack";
+import theme from "./utils/theme";
+// Customs
+import "./app.scss";
 const LINE_ID = process.env.REACT_APP_LINEID;
 
 const App = () => {
@@ -39,6 +44,13 @@ const App = () => {
 			subMenuItems: [
 				{ text: "派工行事曆", href: "dispatchcalendar" },
 				{ text: "施工清單", href: "constructionsummary" },
+			],
+		},
+		{
+			icon: faFolderTree,
+			text: "專管系統",
+			href: "#",
+			subMenuItems: [
 				{ text: "專案管理", href: "project" },
 				// { text: "派工清單 (臨時)", href: "dispatchList" },
 			],
@@ -54,7 +66,7 @@ const App = () => {
 				{ text: "豁免出勤", href: "attendancewaiverhrm" },
 				{ text: "考勤報表", href: "attendancereport" },
 				{ text: "辦公行事曆", href: "workcalendar" },
-				{ text: "排班表", href: "StaffRoster" },
+				// { text: "排班表", href: "StaffRoster" },
 			],
 		},
 		{
@@ -63,8 +75,8 @@ const App = () => {
 			href: "#",
 			subMenuItems: [
 				{ text: "帳戶資訊", href: "userinfo" },
-				{ text: "教育訓練", href: "educationtraining" },
 				{ text: "主管審核", href: "supervisorapproval" },
+				{ text: "教育訓練", href: "educationtraining" },
 				{ text: "MD 文稿工作區", href: "mdworkspace" },
 			],
 		},

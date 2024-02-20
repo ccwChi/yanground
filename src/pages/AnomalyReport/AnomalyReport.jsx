@@ -21,8 +21,10 @@ import DatePicker from "../../components/DatePicker/DatePicker";
 import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
 import { LoadingFour } from "../../components/Loader/Loading";
 import TableTabbar from "../../components/Tabbar/TableTabbar";
+// Hooks
+import { useNotification } from "../../hooks/useNotification";
 // Utils
-import { getData } from "../../utils/api";
+import { getData, postData } from "../../utils/api";
 // Others
 import { PunchLocationModal, LeaveApplicationModal } from "./AnomalyModal";
 // Table 及 Table 所需按鈕、頁數
@@ -35,6 +37,7 @@ const AnomalyReport = () => {
 	const isTargetScreen = useMediaQuery("(max-width:991.98px)");
 	const navigateWithParams = useNavigateWithParams();
 	const navigate = useNavigate();
+	const showNotification = useNotification();
 
 	// 解析網址取得參數
 	const location = useLocation();
@@ -82,6 +85,8 @@ const AnomalyReport = () => {
 	const [searchDialogOpen, setSearchDialogOpen] = useState(false);
 	// cat = Category 設置 tab 分類
 	const [cat, setCat] = useState("table");
+	// 傳遞至後端是否完成 Flag
+	const [sendBackFlag, setSendBackFlag] = useState(false);
 	// 搜尋日期
 	const [since, setSince] = useState(null);
 	const [until, setUntil] = useState(null);
@@ -108,15 +113,15 @@ const AnomalyReport = () => {
 
 	// 區塊功能按鈕清單
 	const btnGroup = [
-		// {
-		// 	mode: "leaveapplication",
-		// 	icon: <AssignmentReturnIcon fontSize="small" />,
-		// 	text: "提出請假申請",
-		// 	variant: "contained",
-		// 	color: "primary",
-		// 	fabVariant: "success",
-		// 	fab: <AssignmentReturnIcon />,
-		// },
+		{
+			mode: "leaveapplication",
+			icon: <AssignmentReturnIcon fontSize="small" />,
+			text: "提出請假申請",
+			variant: "contained",
+			color: "primary",
+			fabVariant: "success",
+			fab: <AssignmentReturnIcon />,
+		},
 		{
 			mode: "filter",
 			icon: null, // 設為 null 就可以避免 PC 出現
@@ -208,9 +213,9 @@ const AnomalyReport = () => {
 	}, [depValue, userValue, stateValue, dateValue, apiData, page, rowsPerPage]);
 
 	// 只要有更改搜尋條件就讓頁數為1
-	useEffect(()=>{
-		setPage(1)
-	},[depValue, userValue, stateValue, dateValue, apiData])
+	useEffect(() => {
+		setPage(1);
+	}, [depValue, userValue, stateValue, dateValue, apiData]);
 
 	useEffect(() => {
 		if (currentPageData.length > 0) {
@@ -338,6 +343,32 @@ const AnomalyReport = () => {
 		setDeliverInfo(dataValue ? apiData?.find((item) => item.id === dataValue) : null);
 	};
 
+	// 傳遞給後端資料
+	const sendDataToBackend = (fd, mode, otherData) => {
+		setSendBackFlag(true);
+		let url = "supervisor/attendanceForm";
+		let message = [];
+		switch (mode) {
+			case "create":
+				message = [`「${otherData}」的假單建立成功！`];
+				break;
+			default:
+				break;
+		}
+		postData(url, fd).then((result) => {
+			if (result.status) {
+				showNotification(message[0], true);
+				onClose();
+			} else {
+				showNotification(
+					result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
+					false
+				);
+			}
+			setSendBackFlag(false);
+		});
+	};
+
 	// 關閉 Modal 清除資料
 	const onClose = () => {
 		setModalValue(false);
@@ -357,6 +388,7 @@ const AnomalyReport = () => {
 					title={"假單申請"}
 					departmentsList={departmentList}
 					attendanceTypesList={attendanceTypeList}
+					sendDataToBackend={sendDataToBackend}
 					onClose={onClose}
 				/>
 			),
@@ -571,7 +603,8 @@ const AnomalyReport = () => {
 
 			{/* Floating Action Button */}
 			<FloatingActionButton btnGroup={btnGroup} handleActionClick={handleOpenSearch} />
-			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={tabCat === "calendar" && isLoading}>
+
+			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={(tabCat === "calendar" && isLoading) || sendBackFlag}>
 				<LoadingFour />
 			</Backdrop>
 

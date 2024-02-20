@@ -46,10 +46,8 @@ const AttendanceReport = () => {
 
 		// 比較今天是否大於當月的第 10 天
 		if (currentDate >= tenthDayOfMonth) {
-			console.log("今天大於當月的第 10 天");
 			setFreezingTime(false);
 		} else {
-			console.log("今天小於當月的第 10 天");
 			setFreezingTime(true);
 		}
 	}, []);

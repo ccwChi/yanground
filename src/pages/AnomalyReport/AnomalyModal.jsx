@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+// data-fns
+import { format } from "date-fns";
 // Leaflet
 import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
@@ -18,6 +20,7 @@ import FormHelperText from "@mui/material/FormHelperText";
 import ModalTemplete from "../../components/Modal/ModalTemplete";
 import InputTitle from "../../components/Guideline/InputTitle";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
+import ControlledOnlyTimePicker from "../../components/DatePicker/ControlledOnlyTimePicker";
 // Utils
 import { getData } from "../../utils/api";
 
@@ -208,239 +211,294 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
  * @param {string} title - Modal 標題名稱
  * @param {Array} departmentsList - 部門清單
  * @param {Array} attendanceTypesList - 考勤別清單
+ * @param {Function} sendDataToBackend - 傳遞給後端的函式
  * @param {Function} onClose - 關閉函式
  * @returns
  ***/
-const LeaveApplicationModal = React.memo(({ title, departmentsList, attendanceTypesList, onClose }) => {
-	// 用戶清單
-	const [usersList, setUsersList] = useState([]);
-	// isLoading 等待請求 API
-	const [isLoading, setIsLoading] = useState(false);
+const LeaveApplicationModal = React.memo(
+	({ title, departmentsList, attendanceTypesList, sendDataToBackend, onClose }) => {
+		// 用戶清單
+		const [usersList, setUsersList] = useState([]);
+		// isLoading 等待請求 API
+		const [isLoading, setIsLoading] = useState(false);
 
-	// 初始預設 default 值
-	const defaultValues = {
-		department: null,
-		user: null,
-		attendanceType: null,
-		date: new Date(),
-	};
+		// 初始預設 default 值
+		const defaultValues = {
+			department: null,
+			user: null,
+			attendanceType: null,
+			date: new Date(),
+			since: null,
+			until: null,
+		};
 
-	// 使用 Yup 來定義表單驗證規則
-	const schema = yup.object().shape({
-		department: yup.object().required("不可為空值！"),
-		user: yup.object().required("不可為空值！"),
-		attendanceType: yup.object().required("不可為空值！"),
-	});
+		// 使用 Yup 來定義表單驗證規則
+		const schema = yup.object().shape({
+			attendanceType: yup.object().required("不可為空值！"),
+			department: yup.object().required("不可為空值！"),
+			user: yup.object().required("不可為空值！"),
+			date: yup.date().required("日期不可為空值！"),
+			since: yup.date().required("起始時間不可為空值！"),
+			until: yup
+				.date()
+				.required("結束時間不可為空值！")
+				.test("is-after-since", "結束時間必須大於起始時間", function (value) {
+					const { since } = this.parent;
+					return value > since;
+				}),
+		});
 
-	// 使用 useForm Hook 來管理表單狀態和驗證
-	const methods = useForm({
-		defaultValues,
-		resolver: yupResolver(schema),
-	});
-	const {
-		control,
-		watch,
-		setValue,
-		handleSubmit,
-		formState: { errors, isDirty },
-	} = methods;
-	const depValue = watch("department");
+		// 使用 useForm Hook 來管理表單狀態和驗證
+		const methods = useForm({
+			defaultValues,
+			resolver: yupResolver(schema),
+		});
+		const {
+			control,
+			watch,
+			setValue,
+			handleSubmit,
+			formState: { errors, isDirty },
+		} = methods;
+		const depValue = watch("department");
+		const sinceValue = watch("since");
 
-	// 取得人員資料
-	useEffect(() => {
-		if (depValue) {
-			setValue("user", null);
-			setUsersList([]);
+		// 取得人員資料
+		useEffect(() => {
+			if (depValue) {
+				setValue("user", null);
+				setUsersList([]);
 
-			getData(`department/${depValue.id}/staff`).then((result) => {
-				if (result.result) {
-					const data = result.result;
-					const formattedUser = data.map((us) => ({
-						label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName,
-						id: us.id,
-					}));
-					setUsersList(formattedUser);
-				} else {
-					setUsersList([]);
-				}
-			});
-		}
-	}, [depValue]);
+				getData(`department/${depValue.id}/staff`).then((result) => {
+					if (result.result) {
+						const data = result.result;
+						const formattedUser = data.map((us) => ({
+							label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName,
+							id: us.id,
+						}));
+						setUsersList(formattedUser);
+					} else {
+						setUsersList([]);
+					}
+				});
+			}
+		}, [depValue]);
 
-	// 提交表單資料到後端並執行相關操作
-	const onSubmit = (data) => {
-		console.log(data);
-	};
+		// 提交表單資料到後端並執行相關操作
+		const onSubmit = (data) => {
+			const formattedDate = format(new Date(data.date), "yyyy-MM-dd");
+			const formattedSinceTime = format(new Date(data.since), "HH:mm:ss");
+			const formattedUntilTime = format(new Date(data.until), "HH:mm:ss");
 
-	return (
-		<>
-			{/* Modal */}
-			<ModalTemplete title={title} show={true} maxWidth={"640px"} onClose={onClose}>
-				<div className="mt-3">
-					<FormProvider {...methods}>
-						<form onSubmit={handleSubmit(onSubmit)}>
-							<div className="flex flex-col gap-1">
-								{/* 部門 x 人員 */}
-								<div className="flex sm:flex-row flex-col gap-3">
-									{/* 部門 */}
-									<div className="inline-flex flex-col w-full">
-										<InputTitle classnames="whitespace-nowrap" title={"部門"} />
-										<Controller
-											control={control}
-											name="department"
-											render={({ field }) => {
-												const { onChange, value } = field;
-												return (
-													<Autocomplete
-														options={departmentsList}
-														value={value}
-														onChange={(event, selectedOptions, reason) => {
-															if (reason === "clear") {
-																if (window.confirm("是否確認清空部門欄位？")) {
-																	setValue("user", null);
-																	setValue("department", null);
-																	setUsersList([]);
-																}
-															} else {
-																onChange(selectedOptions);
-															}
-														}}
-														isOptionEqualToValue={(option, value) => option.label === value.label}
-														renderInput={(params) => (
-															<TextField
-																{...params}
-																className="inputPadding bg-white"
-																placeholder="請選擇部門"
-																sx={{ "& > div": { padding: "0 !important" } }}
-																InputProps={{
-																	...params.InputProps,
-																	endAdornment: (
-																		<>
-																			{departmentsList.length <= 0 ? (
-																				<CircularProgress className="absolute right-[2.325rem]" size={20} />
-																			) : null}
-																			{params.InputProps.endAdornment}
-																		</>
-																	),
-																}}
-															/>
-														)}
-														ListboxProps={{ style: { maxHeight: "12rem" } }}
-														loading={departmentsList.length <= 0}
-														loadingText={"載入中..."}
-														fullWidth
-													/>
-												);
-											}}
-										/>
-										<FormHelperText className="!text-red-600 h-5">{errors["department"]?.message}</FormHelperText>
-									</div>
-									{/* 人員 */}
-									<div className="inline-flex flex-col w-full">
-										<InputTitle classnames="whitespace-nowrap" title={"人員"} />
-										<Controller
-											control={control}
-											name="user"
-											render={({ field }) => {
-												const { onChange, value } = field;
-												return (
-													<Autocomplete
-														options={usersList}
-														value={value}
-														onChange={(event, selectedOptions) => {
-															onChange(selectedOptions);
-														}}
-														isOptionEqualToValue={(option, value) => option.label === value.label}
-														renderInput={(params) => (
-															<TextField
-																{...params}
-																className="inputPadding bg-white"
-																placeholder="請選擇人員"
-																sx={{ "& > div": { padding: "0 !important" } }}
-																InputProps={{
-																	...params.InputProps,
-																	endAdornment: (
-																		<>
-																			{usersList.length <= 0 && depValue !== null ? (
-																				<CircularProgress className="absolute right-[2.325rem]" size={20} />
-																			) : null}
-																			{params.InputProps.endAdornment}
-																		</>
-																	),
-																}}
-															/>
-														)}
-														ListboxProps={{ style: { maxHeight: "12rem" } }}
-														loading={usersList.length <= 0 && depValue !== null}
-														loadingText={"載入中..."}
-														fullWidth
-													/>
-												);
-											}}
-										/>
-										<FormHelperText className="!text-red-600 h-5">{errors["user"]?.message}</FormHelperText>
-									</div>
-								</div>
-								{/* 請假單 */}
-								<div className="flex sm:flex-row flex-col gap-3">
+			const fd = new FormData();
+			fd.append("id", data.user.id);
+			fd.append("type", data.attendanceType.id);
+			fd.append("date", formattedDate);
+			fd.append("since", `${formattedDate}T${formattedSinceTime}`);
+			fd.append("until", `${formattedDate}T${formattedUntilTime}`);
+
+			sendDataToBackend(fd, "create", data.user.label);
+
+			// for (const pair of fd.entries()) {
+			// 	console.log(pair[0], pair[1]);
+			// }
+		};
+
+		return (
+			<>
+				{/* Modal */}
+				<ModalTemplete title={title} show={true} maxWidth={"640px"} onClose={onClose}>
+					<div className="mt-3">
+						<FormProvider {...methods}>
+							<form onSubmit={handleSubmit(onSubmit)}>
+								{/* 表單區 */}
+								<div className="flex flex-col gap-1 max-h-[67vh] overflow-y-auto">
 									{/* 請假單 */}
-									<div className="inline-flex flex-col w-full">
-										<InputTitle classnames="whitespace-nowrap" title={"請假單類別"} />
-										<Controller
-											control={control}
-											name="attendanceType"
-											render={({ field }) => {
-												const { onChange, value } = field;
-												return (
-													<Autocomplete
-														options={attendanceTypesList}
-														value={value}
-														onChange={(event, selectedOptions) => {
-															onChange(selectedOptions);
-														}}
-														isOptionEqualToValue={(option, value) => option.label === value.label}
-														renderInput={(params) => (
-															<TextField
-																{...params}
-																className="inputPadding bg-white"
-																placeholder="請選擇請假單類別"
-																sx={{ "& > div": { padding: "0 !important" } }}
-																InputProps={{
-																	...params.InputProps,
-																	endAdornment: (
-																		<>
-																			{attendanceTypesList.length <= 0 && depValue !== null ? (
-																				<CircularProgress className="absolute right-[2.325rem]" size={20} />
-																			) : null}
-																			{params.InputProps.endAdornment}
-																		</>
-																	),
-																}}
-															/>
-														)}
-														ListboxProps={{ style: { maxHeight: "12rem" } }}
-														loading={attendanceTypesList.length <= 0 && depValue !== null}
-														loadingText={"載入中..."}
-														fullWidth
-													/>
-												);
-											}}
-										/>
-										<FormHelperText className="!text-red-600 h-5">{errors["attendanceType"]?.message}</FormHelperText>
+									<div className="flex sm:flex-row flex-col sm:gap-3">
+										{/* 請假單 */}
+										<div className="inline-flex flex-col w-full">
+											<InputTitle classnames="whitespace-nowrap" title={"請假類別"} />
+											<Controller
+												control={control}
+												name="attendanceType"
+												render={({ field }) => {
+													const { onChange, value } = field;
+													return (
+														<Autocomplete
+															options={attendanceTypesList}
+															value={value}
+															onChange={(event, selectedOptions) => {
+																onChange(selectedOptions);
+															}}
+															isOptionEqualToValue={(option, value) => option.label === value.label}
+															renderInput={(params) => (
+																<TextField
+																	{...params}
+																	className="inputPadding bg-white"
+																	placeholder="請選擇請假單類別"
+																	sx={{ "& > div": { padding: "0 !important" } }}
+																	InputProps={{
+																		...params.InputProps,
+																		endAdornment: (
+																			<>
+																				{attendanceTypesList.length <= 0 && depValue !== null ? (
+																					<CircularProgress className="absolute right-[2.325rem]" size={20} />
+																				) : null}
+																				{params.InputProps.endAdornment}
+																			</>
+																		),
+																	}}
+																/>
+															)}
+															ListboxProps={{ style: { maxHeight: "12rem" } }}
+															loading={attendanceTypesList.length <= 0 && depValue !== null}
+															loadingText={"載入中..."}
+															fullWidth
+														/>
+													);
+												}}
+											/>
+											<FormHelperText className="!text-red-600 h-5">{errors["attendanceType"]?.message}</FormHelperText>
+										</div>
 									</div>
-
+									{/* 部門 x 人員 */}
+									<div className="flex sm:flex-row flex-col sm:gap-3">
+										{/* 部門 */}
+										<div className="inline-flex flex-col w-full">
+											<InputTitle classnames="whitespace-nowrap" title={"部門"} />
+											<Controller
+												control={control}
+												name="department"
+												render={({ field }) => {
+													const { onChange, value } = field;
+													return (
+														<Autocomplete
+															options={departmentsList}
+															value={value}
+															onChange={(event, selectedOptions, reason) => {
+																if (reason === "clear") {
+																	if (window.confirm("是否確認清空部門欄位？")) {
+																		setValue("user", null);
+																		setValue("department", null);
+																		setUsersList([]);
+																	}
+																} else {
+																	onChange(selectedOptions);
+																}
+															}}
+															isOptionEqualToValue={(option, value) => option.label === value.label}
+															renderInput={(params) => (
+																<TextField
+																	{...params}
+																	className="inputPadding bg-white"
+																	placeholder="請選擇部門"
+																	sx={{ "& > div": { padding: "0 !important" } }}
+																	InputProps={{
+																		...params.InputProps,
+																		endAdornment: (
+																			<>
+																				{departmentsList.length <= 0 ? (
+																					<CircularProgress className="absolute right-[2.325rem]" size={20} />
+																				) : null}
+																				{params.InputProps.endAdornment}
+																			</>
+																		),
+																	}}
+																/>
+															)}
+															ListboxProps={{ style: { maxHeight: "12rem" } }}
+															loading={departmentsList.length <= 0}
+															loadingText={"載入中..."}
+															fullWidth
+														/>
+													);
+												}}
+											/>
+											<FormHelperText className="!text-red-600 h-5">{errors["department"]?.message}</FormHelperText>
+										</div>
+										{/* 人員 */}
+										<div className="inline-flex flex-col w-full">
+											<InputTitle classnames="whitespace-nowrap" title={"人員"} />
+											<Controller
+												control={control}
+												name="user"
+												render={({ field }) => {
+													const { onChange, value } = field;
+													return (
+														<Autocomplete
+															options={usersList}
+															value={value}
+															onChange={(event, selectedOptions) => {
+																onChange(selectedOptions);
+															}}
+															isOptionEqualToValue={(option, value) => option.label === value.label}
+															renderInput={(params) => (
+																<TextField
+																	{...params}
+																	className="inputPadding bg-white"
+																	placeholder="請選擇人員"
+																	sx={{ "& > div": { padding: "0 !important" } }}
+																	InputProps={{
+																		...params.InputProps,
+																		endAdornment: (
+																			<>
+																				{usersList.length <= 0 && depValue !== null ? (
+																					<CircularProgress className="absolute right-[2.325rem]" size={20} />
+																				) : null}
+																				{params.InputProps.endAdornment}
+																			</>
+																		),
+																	}}
+																/>
+															)}
+															ListboxProps={{ style: { maxHeight: "12rem" } }}
+															loading={usersList.length <= 0 && depValue !== null}
+															loadingText={"載入中..."}
+															fullWidth
+														/>
+													);
+												}}
+											/>
+											<FormHelperText className="!text-red-600 h-5">{errors["user"]?.message}</FormHelperText>
+										</div>
+									</div>
 									{/* 日期 */}
-									<div className="inline-flex flex-col w-full">
-										<InputTitle classnames="whitespace-nowrap" title={"日期"} />
-										<ControlledDatePicker
-											name="date"
-											mode="rwd"
-											views={["month", "year"]}
-											format={"yyyy 年 MM 月 dd 日"}
-											minDate={new Date("2023-11")}
-											closeOnSelect={false}
-											// sx={{ width: isTargetScreen ? "100%" : "max-content" }}
-										/>
+									<div className="flex sm:flex-row flex-col sm:gap-3">
+										{/* 日期 */}
+										<div className="inline-flex flex-col w-full">
+											<InputTitle classnames="whitespace-nowrap" title={"日期"} />
+											<ControlledDatePicker
+												name="date"
+												mode="rwd"
+												views={["year", "month", "day"]}
+												format={"yyyy 年 MM 月 dd 日 (EE)"}
+												minDate={new Date("2023-11")}
+												closeOnSelect={false}
+												// sx={{ width: isTargetScreen ? "100%" : "max-content" }}
+											/>
+											<FormHelperText className="!text-red-600 h-5">{errors["date"]?.message}</FormHelperText>
+										</div>
+									</div>
+									{/* 時間起迄 */}
+									<div className="flex sm:flex-row flex-col sm:gap-3">
+										{/* 時間(起) */}
+										<div className="inline-flex flex-col w-full">
+											<InputTitle classnames="whitespace-nowrap" title={"請假時間(起)"} />
+											<ControlledOnlyTimePicker name="since" minutesStep={30} />
+											<FormHelperText className="!text-red-600 h-5">{errors["since"]?.message}</FormHelperText>
+										</div>
+
+										{/* 時間(迄) */}
+										<div className="inline-flex flex-col w-full">
+											<InputTitle classnames="whitespace-nowrap" title={"請假時間(迄)"} />
+											<ControlledOnlyTimePicker
+												name="until"
+												minutesStep={30}
+												minTime={sinceValue}
+												disabled={!sinceValue}
+											/>
+											<FormHelperText className="!text-red-600 h-5">{errors["until"]?.message}</FormHelperText>
+										</div>
 									</div>
 								</div>
 								{/* 按鈕 Btn Group */}
@@ -449,18 +507,18 @@ const LeaveApplicationModal = React.memo(({ title, departmentsList, attendanceTy
 										type="submit"
 										variant="contained"
 										color="success"
-										className="!text-base !h-12 !mt-1"
+										className="!text-base !h-12 !mt-3"
 										fullWidth>
 										送出
 									</Button>
 								</div>
-							</div>
-						</form>
-					</FormProvider>
-				</div>
-			</ModalTemplete>
-		</>
-	);
-});
+							</form>
+						</FormProvider>
+					</div>
+				</ModalTemplete>
+			</>
+		);
+	}
+);
 
 export { PunchLocationModal, LeaveApplicationModal };
