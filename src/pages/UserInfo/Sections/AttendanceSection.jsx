@@ -5,43 +5,80 @@ import { zhTW } from "date-fns/locale";
 import { utcToZonedTime } from "date-fns-tz";
 import AttendanceSectionModal from "./AttendanceCalendarModal/AttendanceSectionModal";
 
-const alertText = "每天凌晨 12 點考勤系統會自動計算前一天的出勤狀況，檢查是否存在異常紀錄，包括缺勤和打卡情況。";
+import { getData } from "../../../utils/api";
 
-const AttendanceSection = React.memo(({ apiAttData }) => {
-	const [isOpen, setIsOpen] = useState(false);
-	const [deliverInfo, setDeliverInfo] = useState({});
+const alertText =
+  "每天凌晨 12 點考勤系統會自動計算前一天的出勤狀況，檢查是否存在異常紀錄，包括缺勤和打卡情況。";
 
-	const onClose = () => {
-		setDeliverInfo(null);
-		setIsOpen(false);
-	};
-	const handleClickEvent = (e) => {
-		if (apiAttData) {
-			const eventContent = apiAttData.filter((data) => data.start === e.event.startStr);
-			setDeliverInfo(eventContent[0]);
-		}
-	};
+const AttendanceSection = React.memo(({ apiAttData, setReflesh }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [deliverInfo, setDeliverInfo] = useState({});
 
-	return (
-		<>
-			{/* <div className="flex px-4 pt-2 text-rose-400 font-bold text-xs">
+  // 請假類別 List
+  const [attendanceTypeList, setAttendanceTypeList] = useState([]);
+
+  // 取得請假類別
+  useEffect(() => {
+    getData("attendanceType").then((result) => {
+      const data = result.result;
+      setAttendanceTypeList(data);
+    });
+  }, []);
+
+  const onClose = () => {
+    setDeliverInfo({});
+    setIsOpen(false);
+  };
+  const handleClickEvent = (date) => {
+    if (apiAttData) {
+      const eventContent = apiAttData.filter((data) => data.start === date);
+      if (!!eventContent[0]) {
+        setDeliverInfo(eventContent[0]);
+      } else {
+        setDeliverInfo({
+          color: "#4b5563",
+          id: null,
+          start: date,
+          title: "尚無考勤資料",
+        });
+      }
+      // console.log("eventContent[0]", eventContent[0]);
+      setIsOpen(true);
+    }
+  };
+
+  const handleDayClick = (e) => {
+    handleClickEvent(e.dateStr);
+    // console.log("handleDayClick", e);
+  };
+  return (
+    
+    <>
+      {/* <div className="flex px-4 pt-2 text-rose-400 font-bold text-xs">
 				<p className="me-1">＊</p>
 				<p>{alertText}</p>
 			</div> */}
-			<Calendar
-				data={apiAttData}
-				select={(selected) => {
-					//   console.log("Date selected ", selected);
-				}}
-				// eventClick={(info) => {
-				// 	//   console.log("Event clicked ", info);
-				// 	handleClickEvent(info);
-				// 	setIsOpen(true);
-				// }}
-			/>
-			<AttendanceSectionModal onClose={onClose} isOpen={isOpen} deliverInfo={deliverInfo} />
-		</>
-	);
+      <Calendar
+        data={apiAttData}
+        select={(selected) => {
+          //   console.log("Date selected ", selected);
+        }}
+        eventClick={(info) => {
+          handleClickEvent(info.event.startStr);
+        }}
+        dateClick={(e) => {
+          handleDayClick(e);
+        }}
+      />
+      <AttendanceSectionModal
+        onClose={onClose}
+        isOpen={isOpen}
+        deliverInfo={deliverInfo}
+        setReflesh={setReflesh}
+        attendanceTypeList={attendanceTypeList}
+      />
+    </>
+  );
 });
 
 export default AttendanceSection;

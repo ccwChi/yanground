@@ -9,13 +9,14 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { getData, postData } from "../../utils/api";
 import { EventModal } from "./CalendarModal";
 import { useNotification } from "../../hooks/useNotification";
-import { LoadingThree } from "../../components/Loader/Loading";
+import { LoadingThree, LoadingTwo } from "../../components/Loader/Loading";
 import Calendar from "../../components/Calendar/Calendar";
 import { Backdrop, Tooltip, useMediaQuery } from "@mui/material";
 import { UpdatedModal } from "./CalendarCreateSummaryModel";
 import { calendarColorList } from "../../datas/calendarColorList";
 import { useLocation } from "react-router-dom";
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
+
 
 const today = new Date();
 //明天
@@ -31,6 +32,7 @@ while (currentDateIterator <= twoDaysLater) {
   dates.push(currentDateIterator.toISOString().slice(0, 10));
   currentDateIterator.setDate(currentDateIterator.getDate() + 1);
 }
+
 
 const DispatchCalendar = () => {
   const isTargetScreen = useMediaQuery("(max-width:991.98px)");
@@ -62,7 +64,9 @@ const DispatchCalendar = () => {
   const [modalValue, setModalValue] = useState(false);
   // 傳送額外資訊給 Modal
   const [deliverInfo, setDeliverInfo] = useState(null);
-
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const isSmallScreen = useMediaQuery("(max-width:575.98px)");
   // 之後重構 lazy loading 後再使用
   // const location = useLocation();
   // const queryParams = new URLSearchParams(location.search);
@@ -166,12 +170,7 @@ const DispatchCalendar = () => {
     // console.log("timesheetPromise",timesheetPromise)
     Promise.all(promises)
       .then((allResults) => {
-        console.log(allResults);
         const data = allResults.flat();
-        // const uniqueTaskSelectLabouerList = Array.from(
-        //   new Set(data.map(JSON.stringify))
-        // ).map(JSON.parse);
-        console.log(data);
         const transformData = (data) => {
           return data.map((item) => {
             //第一層是date, summaries
@@ -427,6 +426,10 @@ const DispatchCalendar = () => {
     }
   };
 
+  const handleDayClick = (date) => {
+    handleEventClick(date);
+  };
+
   const sendDataToBackend = (fd, mode, otherData) => {
     setSendBackFlag(true);
     let url = "";
@@ -462,10 +465,6 @@ const DispatchCalendar = () => {
     // for (var pair of fd.entries()) {
     //   console.log(pair);
     // }
-  };
-
-  const handleDayClick = (date) => {
-    handleEventClick(date);
   };
 
   // 當活動按鈕點擊時開啟 modal 並進行動作
@@ -529,57 +528,68 @@ const DispatchCalendar = () => {
   };
 
   return (
-    <>
+    <div
+      className={`relative profile-section flex flex-col flex-1 overflow-hidden}`}
+    >
+      {isLoading ? (
+        <>
+          {" "}
+          <LoadingTwo
+                  size={isSmallScreen ? 120 : 160}
+                  textSize={"text-lg sm:text-xl"}
+                />
+        </>
+      ) : (
+        <>
+          <PageTitle
+            title="派工行事曆"
+            btnGroup={btnGroup}
+            handleActionClick={handleActionClick}
+            isLoading={!isLoading}
+          />
+
+          <Calendar
+            data={events}
+            viewOptions={["dayGridMonth", "dayGridWeek"]}
+            _dayMaxEvents={3}
+            dateClick={(e) => {
+              handleDayClick(e.dateStr);
+            }}
+            eventClick={(e) => {
+              handleEventClick(e.event.startStr);
+            }}
+            eventContent={(eventInfo) => {
+              return <CustomEventContent event={eventInfo.event} />;
+            }}
+            eventColor={isTargetScreen ? "transparent" : "#F48A64"}
+            displayEventTime={false} // 整天
+            eventBorderColor={"transparent"}
+            eventBackgroundColor={"transparent"}
+            eventOrder={""}
+            showMonth={true}
+            onPreviousClick={(calendarRef) => letParamWithMonth(calendarRef)}
+            onNextClick={(calendarRef) => letParamWithMonth(calendarRef)}
+          />
+
+          <EventModal
+            title="施工清單修改"
+            deliverInfo={deliverInfo}
+            departMemberList={departMemberList}
+            onClose={onClose}
+            constructionTypeList={constructionTypeList}
+            isOpen={isEventModalOpen}
+            setReGetCalendarData={setReGetCalendarData}
+            setReGetSummaryListData={setReGetSummaryListData}
+            constructionSummaryList={constructionSummaryList}
+            sendBackFlag={sendBackFlag}
+            setSendBackFlag={setSendBackFlag}
+          />
+          {/* Modal */}
+          {config && config.modalComponent}
+        </>
+      )}
       {/* PageTitle */}
-
-      <PageTitle
-        title="派工行事曆"
-        btnGroup={btnGroup}
-        handleActionClick={handleActionClick}
-        isLoading={!isLoading}
-      />
-
-      <Calendar
-        data={events}
-        viewOptions={["dayGridMonth", "dayGridWeek"]}
-        _dayMaxEvents={3}
-        dateClick={(e) => {
-          handleDayClick(e.dateStr);
-        }}
-        eventClick={(e) => {
-          handleEventClick(e.event.startStr);
-        }}
-        eventContent={(eventInfo) => {
-          return <CustomEventContent event={eventInfo.event} />;
-        }}
-        eventColor={isTargetScreen ? "transparent" : "#F48A64"}
-        displayEventTime={false} // 整天
-        eventBorderColor={"transparent"}
-        eventBackgroundColor={"transparent"}
-        eventOrder={""}
-        showMonth={true}
-        onPreviousClick={(calendarRef) => letParamWithMonth(calendarRef)}
-        onNextClick={(calendarRef) => letParamWithMonth(calendarRef)}
-      />
-      <Backdrop sx={{ color: "#fff", zIndex: 1050 }} open={isLoading}>
-        <LoadingThree size={40} />
-      </Backdrop>
-      <EventModal
-        title="施工清單修改"
-        deliverInfo={deliverInfo}
-        departMemberList={departMemberList}
-        onClose={onClose}
-        constructionTypeList={constructionTypeList}
-        isOpen={isEventModalOpen}
-        setReGetCalendarData={setReGetCalendarData}
-        setReGetSummaryListData={setReGetSummaryListData}
-        constructionSummaryList={constructionSummaryList}
-        sendBackFlag={sendBackFlag}
-        setSendBackFlag={setSendBackFlag}
-      />
-      {/* Modal */}
-      {config && config.modalComponent}
-    </>
+    </div>
   );
 };
 
