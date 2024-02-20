@@ -5,18 +5,15 @@ import { parseISO, format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { utcToZonedTime } from "date-fns-tz";
 // MUI
-import Backdrop from "@mui/material/Backdrop";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 // Components
 import PageTitle from "../../components/Guideline/PageTitle";
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
-import { LoadingFour } from "../../components/Loader/Loading";
 // Hooks
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
-import { useNotification } from "../../hooks/useNotification";
 // Utils
-import { getData, postData } from "../../utils/api";
+import { getData } from "../../utils/api";
 // Customs
 import attendanceWaiverList from "../../datas/attendanceWaiverType";
 import { ViewModal } from "./AttendanceWaiverHRMModal";
@@ -26,7 +23,6 @@ const AttendanceWaiverHRM = () => {
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);
 	const navigateWithParams = useNavigateWithParams();
-	const showNotification = useNotification();
 
 	// API List Data
 	const [apiData, setApiData] = useState(null);
@@ -44,8 +40,6 @@ const AttendanceWaiverHRM = () => {
 	const [modalValue, setModalValue] = useState(false);
 	// 傳送額外資訊給 Modal
 	const [deliverInfo, setDeliverInfo] = useState(null);
-	// 傳遞至後端是否完成 Flag
-	const [sendBackFlag, setSendBackFlag] = useState(false);
 	// ApiUrl
 	const furl = "attendanceWaiverForm";
 	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
@@ -128,35 +122,7 @@ const AttendanceWaiverHRM = () => {
 	];
 
 	// Table 操作按鈕
-	const actions = [{ value: "review", icon: <ReceiptLongIcon />, title: "審核" }];
-
-	// 傳遞給後端資料
-	const sendDataToBackend = (fd, mode, otherData) => {
-		setSendBackFlag(true);
-		let url = "attendanceWaiverForm";
-		let message = [];
-		switch (mode) {
-			case "approval":
-				url += `/${otherData[0]}/${otherData[1]}`;
-				message = ["審核成功！"];
-				break;
-			default:
-				break;
-		}
-		postData(url, fd).then((result) => {
-			if (result.status) {
-				showNotification(message[0], true);
-				getApiList(apiUrl);
-				onClose();
-			} else {
-				showNotification(
-					result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
-					false
-				);
-			}
-			setSendBackFlag(false);
-		});
-	};
+	const actions = [{ value: "review", icon: <VisibilityIcon />, title: "檢視" }];
 
 	// 設置頁數
 	const handleChangePage = useCallback(
@@ -195,7 +161,7 @@ const AttendanceWaiverHRM = () => {
 		{
 			modalValue: "review",
 			modalComponent: (
-				<ViewModal title={"審核"} deliverInfo={deliverInfo} sendDataToBackend={sendDataToBackend} onClose={onClose} />
+				<ViewModal title={"檢視審核資訊"} deliverInfo={deliverInfo} onClose={onClose} />
 			),
 		},
 	];
@@ -204,7 +170,10 @@ const AttendanceWaiverHRM = () => {
 	return (
 		<>
 			{/* PageTitle */}
-			<PageTitle title="豁免出勤" description="此頁面是專為人資部門所設計，提供檢視其他同仁員工豁免出勤審核紀錄的功能。" />
+			<PageTitle
+				title="豁免出勤"
+				description="此頁面為提供人資檢視其他同仁員工豁免出勤審核紀錄的功能。"
+			/>
 
 			{/* Table */}
 			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
@@ -232,11 +201,6 @@ const AttendanceWaiverHRM = () => {
 
 			{/* Modal */}
 			{config && config.modalComponent}
-
-			{/* Backdrop */}
-			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
-				<LoadingFour />
-			</Backdrop>
 		</>
 	);
 };

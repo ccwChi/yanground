@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 // MUI
 import Chip from "@mui/material/Chip";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 import Backdrop from "@mui/material/Backdrop";
 // Components
 import ModalTemplete from "../../components/Modal/ModalTemplete";
@@ -10,25 +8,16 @@ import { LoadingTwo } from "../../components/Loader/Loading";
 // Hooks
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 
-const ViewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }) => {
+/***
+ * 檢視審核 Modal
+ * @param {string} title - Modal 標題名稱
+ * @param {Object} deliverInfo - 顯示資訊
+ * @param {Function} onClose - 關閉函式
+ * @returns
+ ***/
+const ViewModal = React.memo(({ title, deliverInfo, onClose }) => {
 	// 取得當前用戶資訊
 	const userProfile = useLocalStorageValue("userProfile");
-	// 用於儲存文字欄位的值
-	const [textFieldValue, setTextFieldValue] = useState("");
-
-	// 當文字欄位的值改變時更新狀態
-	const handleTextFieldChange = (event) => {
-		setTextFieldValue(event.target.value);
-	};
-
-	// 按鈕點擊事件
-	const handleSubmit = () => {
-		const fd = new FormData();
-		fd.append("remark", textFieldValue);
-		sendDataToBackend(fd, "approval", [deliverInfo.id, userProfile.id]);
-	};
-
-	console.log(deliverInfo);
 
 	return (
 		<>
@@ -61,10 +50,10 @@ const ViewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }
 						</div>
 						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">
 							<p className="w-full">
-								申請時間(起)：<span className="font-bold">{deliverInfo.since}</span>
+								申請區間(起)：<span className="font-bold">{deliverInfo.since}</span>
 							</p>
 							<p className="w-full">
-								申請時間(迄)：<span className="font-bold">{deliverInfo.until}</span>
+								申請區間(迄)：<span className="font-bold">{deliverInfo.until}</span>
 							</p>
 						</div>
 						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">
@@ -92,20 +81,9 @@ const ViewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }
 								</p>
 							</>
 						) : (
-							<>
-								<TextField
-									multiline
-									rows={2}
-									className="inputPadding bg-white"
-									placeholder="請輸入備註 (可為空)"
-									value={textFieldValue}
-									onChange={handleTextFieldChange}
-									fullWidth
-								/>
-								<Button variant="contained" onClick={handleSubmit}>
-									送出
-								</Button>
-							</>
+							<div className="flex items-center justify-center">
+								<span className="italic text-neutral-500 text-sm">(尚未被審核，故無資料顯示)</span>
+							</div>
 						)}
 						<div className="absolute right-3 -top-9">
 							{deliverInfo.approveState === true ? (
