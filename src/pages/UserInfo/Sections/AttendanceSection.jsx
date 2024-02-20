@@ -8,7 +8,7 @@ import AttendanceSectionModal from "./AttendanceCalendarModal/AttendanceSectionM
 import { getData } from "../../../utils/api";
 
 const alertText =
-  "每天凌晨 12 點考勤系統會自動計算前一天的出勤狀況，檢查是否存在異常紀錄，包括缺勤和打卡情況。";
+  "點擊月曆上日期即可對當日進行請假單填寫。";
 
 const AttendanceSection = React.memo(({ apiAttData, setReflesh }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,7 +21,8 @@ const AttendanceSection = React.memo(({ apiAttData, setReflesh }) => {
   useEffect(() => {
     getData("attendanceType").then((result) => {
       const data = result.result;
-      setAttendanceTypeList(data);
+      const filterData = data.filter((i) => i.value !== "ATTENDANCE");
+      setAttendanceTypeList(filterData);
     });
   }, []);
 
@@ -52,12 +53,12 @@ const AttendanceSection = React.memo(({ apiAttData, setReflesh }) => {
     // console.log("handleDayClick", e);
   };
   return (
-    
     <>
-      {/* <div className="flex px-4 pt-2 text-rose-400 font-bold text-xs">
+      <div className="flex px-8 pt-2 text-rose-400 font-bold text-xs">
 				<p className="me-1">＊</p>
 				<p>{alertText}</p>
-			</div> */}
+			</div>
+      {/* <p>aaaaaaaaaaaaa</p> */}
       <Calendar
         data={apiAttData}
         select={(selected) => {

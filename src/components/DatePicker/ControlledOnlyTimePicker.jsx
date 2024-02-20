@@ -4,7 +4,12 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { Controller, useFormContext } from "react-hook-form";
 import zhTW from "date-fns/locale/zh-TW";
-import { TimePicker, renderTimeViewClock } from "@mui/x-date-pickers";
+import {
+  DesktopTimePicker,
+  MobileTimePicker,
+  TimePicker,
+  renderTimeViewClock,
+} from "@mui/x-date-pickers";
 
 const ControlledOnlyTimePicker = ({
   name,
@@ -21,11 +26,6 @@ const ControlledOnlyTimePicker = ({
         defaultValue={null}
         render={({ field }) => (
           <TimePicker
-            viewRenderers={{
-              hours: renderTimeViewClock,
-              minutes: renderTimeViewClock,
-              seconds: renderTimeViewClock,
-            }}
             slotProps={{ textField: { size: "small" } }}
             className="inputPadding"
             format={"aa hh:mm"}

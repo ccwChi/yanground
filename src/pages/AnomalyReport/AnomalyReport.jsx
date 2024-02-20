@@ -207,6 +207,11 @@ const AnomalyReport = () => {
 		setCurrentPageData(TempCurrentPageData);
 	}, [depValue, userValue, stateValue, dateValue, apiData, page, rowsPerPage]);
 
+	// 只要有更改搜尋條件就讓頁數為1
+	useEffect(()=>{
+		setPage(1)
+	},[depValue, userValue, stateValue, dateValue, apiData])
+
 	useEffect(() => {
 		if (currentPageData.length > 0) {
 			setIsLoading(false);

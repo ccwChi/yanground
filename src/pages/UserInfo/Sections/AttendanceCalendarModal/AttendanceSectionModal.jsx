@@ -305,6 +305,7 @@ const AttendanceSectionModal = ({
                       />
                       <ControlledOnlyTimePicker
                         minutesStep={30}
+                        closeOnSelect={false}
                         name="sinceDate"
                       />
                       <FormHelperText
