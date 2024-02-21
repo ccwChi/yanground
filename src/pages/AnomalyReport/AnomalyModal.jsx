@@ -44,17 +44,22 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 	const [punchLog, setPunchLog] = useState(deliverInfo[punchInOutButtons[0].value]);
 	// Tab 選擇 (active 概念)
 	const [alignment, setAlignment] = useState(punchInOutButtons[0].value);
+	// isLoading 等待請求 API
+	const [isLoading, setIsLoading] = useState(false);
 	// 建立 ref 儲存地圖實例
 	const mapRef = useRef(null);
 
 	// 取得用戶廠別的資料
 	useEffect(() => {
-		getData(`user/${deliverInfo.user.id}`).then((result) => {
+		getData(`attendance/${deliverInfo.user.id}/${format(new Date(), "yyyy/MM/dd")}`).then((result) => {
+			setIsLoading(true);
 			if (result.result) {
-				const data = result.result.factorySite;
+				const data = result.result;
 				setWorkingLoc(data);
+				setIsLoading(false);
 			} else {
 				setWorkingLoc(null);
+				setIsLoading(false);
 			}
 		});
 	}, []);
@@ -112,12 +117,8 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 							<span className="font-bold">{deliverInfo.anomalyState.text}</span>
 						</p>
 						<p className="w-full">
-							是否已設置廠別：
-							{/* /是否派工中： */}
-							<span className="font-bold">
-								{workingLoc === false ? "N" : workingLoc ? "Y" : "-"}
-								{/* /N */}
-							</span>
+							目前是否擁有打卡範圍：
+							<span className="font-bold">{isLoading ? "-" : workingLoc ? "Y" : "N"}</span>
 						</p>
 					</div>
 					{/* 切換顯示按鈕 Tabbar - Start */}
@@ -182,13 +183,13 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 								</Marker>
 								{workingLoc && (
 									<Circle
-										center={[workingLoc.latitude, workingLoc.longitude]}
+										center={[workingLoc.latitudeShouldBe, workingLoc.longitudeShouldBe]}
 										pathOptions={{
 											fillColor: "#8b96a6",
 											color: "#95B07E",
 											weight: 3,
 										}}
-										radius={workingLoc.radius}
+										radius={workingLoc.radiusShouldBe}
 										stroke={true}
 									/>
 								)}
