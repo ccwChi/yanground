@@ -21,6 +21,7 @@ const nameMappings = [
 	{ name: "attendancewaiverhrm", display: "豁免出勤" },
 	{ name: "attendancereport", display: "考勤報表" },
 	{ name: "workcalendar", display: "辦公行事曆" },
+	{ name: "StaffRoster", display: "排班表" },
 	// 會員中心
 	{ name: "userinfo", display: "帳戶資訊" },
 	{ name: "educationtraining", display: "教育訓練" },
