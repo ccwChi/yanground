@@ -16,6 +16,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import DriveFileMoveIcon from "@mui/icons-material/DriveFileMove";
 
 // Custom
 import { getData, postData, deleteData } from "../../utils/api";
@@ -77,7 +78,7 @@ const Project = () => {
 	const columnsPC = [
 		{ key: "name", label: "專案名稱", align: "left" },
 		{ key: ["businessRepresentative", "nickname"], label: "負責人", size: "12%" },
-		{ key: ["foremanRepresentative", "nickname"], label: "工務專管人員", size: '12%' },
+		{ key: ["foremanRepresentative", "nickname"], label: "工務專管人員", size: "12%" },
 		{ key: "administrativeDivision", label: "地點", size: "15%" },
 	];
 	const columnsMobile = [
@@ -89,7 +90,8 @@ const Project = () => {
 
 	const actions = [
 		{ value: "edit", icon: <EditIcon />, title: "編輯專案" },
-		{ value: "void", icon: <DeleteIcon />, title: "作廢專案" },
+		{ value: "void", icon: <DeleteIcon />, title: "刪除專案" },
+		// { value: "gotoFM", icon: <DriveFileMoveIcon />, title: "前往專管文件管理頁" },
 	];
 
 	// 取得列表資料
@@ -179,6 +181,8 @@ const Project = () => {
 		if (dataMode === "void") {
 			setDeliverInfo(dataValue);
 			setAlertOpen(1);
+		} else if (dataMode === "gotoFM") {
+			navigate(`documents`);
 		} else {
 			setModalValue(dataMode);
 			if (dataValue) {
@@ -198,7 +202,7 @@ const Project = () => {
 	const handleAlertClose = (agree) => {
 		if (agree) {
 			if (alertOpen === 1) {
-				let message = "作廢成功！";
+				let message = "刪除成功！";
 
 				deleteData(`project/${deliverInfo}`).then((result) => {
 					if (result.status) {
@@ -289,7 +293,7 @@ const Project = () => {
 				onClose={handleAlertClose}
 				icon={<ReportProblemIcon color="secondary" />}
 				title="注意"
-				content={"是否確認將此專案進行作廢處理？"}
+				content={"是否確認將此專案進行刪除處理？"}
 				disagreeText="取消"
 				agreeText="確定"
 			/>
