@@ -12,8 +12,10 @@ import ConstructionJob from "./pages/Construction/Jobs/ConstructionJob";
 // Task Manager
 import ConstructionSummary from "./pages/ConstructionSummary/ConstructionSummary";
 import DispatchCalendar from "./pages/DispatchCalendar/DispatchCalendar";
-import Project from "./pages/Project/Project";
 import Maps from "./pages/Project/Maps";
+// Project Manager
+import Project from "./pages/Project/Project";
+import ProjectDocumentsManagement from "./pages/Project/Documents/Doucuments";
 import DispatchList from "./pages/DispatchList/DispatchList";
 // HRM
 import Users from "./pages/Users/Users";
@@ -75,12 +77,17 @@ const router = createBrowserRouter([
 				element: <ConstructionSummary />,
 			},
 			{
+				path: "/maps",
+				element: <Maps />,
+			},
+			// Project Manager
+			{
 				path: "/project",
 				element: <Project />,
 			},
 			{
-				path: "/maps",
-				element: <Maps />,
+				path: "/project/documents",
+				element: <ProjectDocumentsManagement />,
 			},
 			{
 				path: "/dispatchList",

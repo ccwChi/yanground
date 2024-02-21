@@ -12,8 +12,9 @@ const nameMappings = [
 	{ name: "sites", display: "案場" },
 	{ name: "dispatchcalendar", display: "派工行事曆" },
 	{ name: "constructionsummary", display: "施工清單" },
-	{ name: "dispatchList", display: "派工清單" },
+	// 專管系統
 	{ name: "project", display: "專案管理" },
+	{ name: "dispatchList", display: "派工清單" },
 	// HRM
 	{ name: "users", display: "人事管理" },
 	{ name: "attendancecalendar", display: "考勤紀錄" },
@@ -38,10 +39,36 @@ const nameMappings = [
 	{ name: "internalservererror", display: "內部伺服器錯誤" },
 ];
 
-const CustomBreadcrumbs = React.memo(() => {
+const chineseNames = [{ name: "documents", displayName: "文檔" }];
+
+const CustomBreadcrumbs = () => {
 	const location = useLocation();
 	const pathnames = location.pathname.split("/").filter((x) => x);
 	const [displayText, setDisplayText] = useState(null);
+
+	/***
+	 * 替換第二個元素為中文名稱（如果存在）
+	 * @param {array} route - 要替換的路由陣列
+	 * @param {array} chineseNames - 包含中文名稱的陣列
+	 * @returns {array} 更新後的陣列
+	 ***/
+	const replaceWithChineseNames = (route, chineseNames) => {
+		// 如果 chineseNames 不是陣列，直接傳回原始路由
+		if (!Array.isArray(chineseNames)) {
+			return route;
+		}
+
+		// 取得第二個元素尋找對應的中文名稱
+		const secondElement = route[1];
+		const correspondingChineseName = chineseNames.find((item) => item.name === secondElement);
+
+		// 如果找到了對應的中文名稱，則取代第二個元素為中文名稱，否則保持不變
+		if (correspondingChineseName) {
+			return [route[0], correspondingChineseName.displayName];
+		} else {
+			return route;
+		}
+	};
 
 	useEffect(() => {
 		let fullName = [];
@@ -56,6 +83,7 @@ const CustomBreadcrumbs = React.memo(() => {
 			const displayText = mappedItem ? mappedItem.display : decodedName;
 			fullName.push(displayText);
 
+			fullName = replaceWithChineseNames(fullName, chineseNames);
 			if (isLast) setDisplayText(fullName);
 		});
 
@@ -89,6 +117,6 @@ const CustomBreadcrumbs = React.memo(() => {
 			})}
 		</Breadcrumbs>
 	);
-});
+};
 
 export default CustomBreadcrumbs;
