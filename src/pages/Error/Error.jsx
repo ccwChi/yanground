@@ -29,87 +29,104 @@ const Error = () => {
 	const data = errorMsg.find((obj) => obj.title === pathnames[0]);
 
 	return (
-		<div className={`${style.body} absolute inset-0`}>
-			<div
-				className={
-					"absolute flex flex-col items-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-bold uppercase text-text opacity-80 select-none z-10 w-full px-5 text-center"
-				}>
-				<p className="text-3xl">{data.content}</p>
-				<h3 className="leading-tight" style={{ fontSize: "clamp(10rem, 15vw, 20rem)" }}>
-					{data.httpcode}
-				</h3>
-				<p className="text-sm">{data.content_en}</p>
-			</div>
-			<div className={style.sun}></div>
-			<div className={style.clouds}>
-				<div></div>
-				<div></div>
-				<div></div>
-			</div>
-			<div className={style.birds}></div>
-			<div className={style.sea}>
-				<div className={`${style.wave} ${style.w_1}`}></div>
-				<div className={`${style.wave} ${style.w_2}`}></div>
-				<div className={style.fish}>
-					<span></span>
-					<span></span>
-					<span></span>
-				</div>
-			</div>
-			<div className={style.bottom}>
-				<div className={style.grass}>
-					<span> </span>
-					<span> </span>
-					<span> </span>
-				</div>
-				<div className={style.grass}>
-					<span> </span>
-					<span> </span>
-					<span> </span>
-				</div>
-				<div className={style.grass}>
-					<span> </span>
-					<span> </span>
-					<span> </span>
-				</div>
-				<div className={style.grass}>
-					<span> </span>
-					<span> </span>
-					<span> </span>
-				</div>
-				<div className={style.circle}>
-					<span></span>
-					<span></span>
-					<span></span>
-					<span></span>
-					<span></span>
-				</div>
-				<div className={style.circle}>
-					<span></span>
-					<span></span>
-					<span></span>
-					<span></span>
-					<span></span>
-				</div>
-				<div className={style.circle}>
-					<span></span>
-					<span></span>
-					<span></span>
-					<span></span>
-					<span></span>
-				</div>
-				<div className={style.circle}>
-					<span></span>
-					<span></span>
-					<span></span>
-					<span></span>
-					<span></span>
-				</div>
-				<div className={style.grass_tw}></div>
-				<div className={style.grass_tw}></div>
-				<div className={style.grass_tw}></div>
+		<div
+			className={`absolute inset-0 ${style.errorpages} flex items-center sm:justify-center text-center m-auto px-4 sm:pt-4 pt-[40%] sm:pb-4 pb-28 overflow-y-auto`}>
+			<div className="absolute inset-0 bg-[#E6E6E6] z-0"></div>
+			<div className="flex flex-col items-center z-10">
+				<img
+					src="https://i.imgur.com/qIufhof.png"
+					alt="Error Illustrations"
+					className="w-full max-w-[256px] max-h-[225px]"
+				/>
+
+				<h1 className="mt-2 text-3xl">
+					<span className="text-6xl">{data.httpcode}</span> <br />
+					{data.content}
+				</h1>
+				<p className="mt-4">{data.content_en}</p>
 			</div>
 		</div>
+		// <div className={`${style.body} absolute inset-0`}>
+		// 	<div
+		// 		className={
+		// 			"absolute flex flex-col items-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-bold uppercase text-text opacity-80 select-none z-10 w-full px-5 text-center"
+		// 		}>
+		// 		<p className="text-3xl">{data.content}</p>
+		// 		<h3 className="leading-tight" style={{ fontSize: "clamp(10rem, 15vw, 20rem)" }}>
+		// 			{data.httpcode}
+		// 		</h3>
+		// 		<p className="text-sm">{data.content_en}</p>
+		// 	</div>
+		// 	<div className={style.sun}></div>
+		// 	<div className={style.clouds}>
+		// 		<div></div>
+		// 		<div></div>
+		// 		<div></div>
+		// 	</div>
+		// 	<div className={style.birds}></div>
+		// 	<div className={style.sea}>
+		// 		<div className={`${style.wave} ${style.w_1}`}></div>
+		// 		<div className={`${style.wave} ${style.w_2}`}></div>
+		// 		<div className={style.fish}>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 		</div>
+		// 	</div>
+		// 	<div className={style.bottom}>
+		// 		<div className={style.grass}>
+		// 			<span> </span>
+		// 			<span> </span>
+		// 			<span> </span>
+		// 		</div>
+		// 		<div className={style.grass}>
+		// 			<span> </span>
+		// 			<span> </span>
+		// 			<span> </span>
+		// 		</div>
+		// 		<div className={style.grass}>
+		// 			<span> </span>
+		// 			<span> </span>
+		// 			<span> </span>
+		// 		</div>
+		// 		<div className={style.grass}>
+		// 			<span> </span>
+		// 			<span> </span>
+		// 			<span> </span>
+		// 		</div>
+		// 		<div className={style.circle}>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 		</div>
+		// 		<div className={style.circle}>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 		</div>
+		// 		<div className={style.circle}>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 		</div>
+		// 		<div className={style.circle}>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 			<span></span>
+		// 		</div>
+		// 		<div className={style.grass_tw}></div>
+		// 		<div className={style.grass_tw}></div>
+		// 		<div className={style.grass_tw}></div>
+		// 	</div>
+		// </div>
 	);
 };
 

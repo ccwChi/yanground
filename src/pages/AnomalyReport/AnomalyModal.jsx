@@ -6,11 +6,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { format } from "date-fns";
 // Leaflet
 import L from "leaflet";
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
 import MapsIcon from "../../assets/icons/Map_pin_icon.png";
 // MUI
 import Autocomplete from "@mui/material/Autocomplete";
 import Button from "@mui/material/Button";
+import Backdrop from "@mui/material/Backdrop";
 import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -19,6 +20,7 @@ import FormHelperText from "@mui/material/FormHelperText";
 // Component
 import ModalTemplete from "../../components/Modal/ModalTemplete";
 import InputTitle from "../../components/Guideline/InputTitle";
+import { LoadingTwo } from "../../components/Loader/Loading";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 import ControlledOnlyTimePicker from "../../components/DatePicker/ControlledOnlyTimePicker";
 // Utils
@@ -38,6 +40,8 @@ const punchInOutButtons = [
  * @returns
  ***/
 const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
+	// 上下班用戶廠別清單
+	const [workingLocList, setWorkingLocList] = useState(null);
 	// 用戶廠別的資料
 	const [workingLoc, setWorkingLoc] = useState(null);
 	// 打卡資訊
@@ -51,18 +55,46 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 
 	// 取得用戶廠別的資料
 	useEffect(() => {
-		getData(`attendance/${deliverInfo.user.id}/${format(new Date(), "yyyy/MM/dd")}`).then((result) => {
+		if (deliverInfo) {
+			let pl1 = deliverInfo[punchInOutButtons[0].value],
+				pl2 = deliverInfo[punchInOutButtons[1].value];
+
+			// 建立 Promise 陣列，用於存放非同步請求
+			let promises = [
+				getData(
+					`attendance/${deliverInfo.user.id}/${format(new Date(), "yyyy/MM/dd")}?latitude=${
+						pl1?.latitude || ""
+					}&longitude=${pl1?.longitude || ""}`
+				),
+				getData(
+					`attendance/${deliverInfo.user.id}/${format(new Date(), "yyyy/MM/dd")}?latitude=${
+						pl2?.latitude || ""
+					}&longitude=${pl2?.longitude || ""}`
+				),
+			];
+
 			setIsLoading(true);
-			if (result.result) {
-				const data = result.result;
-				setWorkingLoc(data);
-				setIsLoading(false);
-			} else {
-				setWorkingLoc(null);
-				setIsLoading(false);
-			}
-		});
-	}, []);
+
+			// 使用 Promise.all() 並行處理兩個非同步請求
+			Promise.all(promises).then((results) => {
+				// 如果兩個請求都成功
+				if (results.every((result) => result.result)) {
+					const data1 = results[0].result;
+					const data2 = results[1].result;
+
+					// 更新狀態
+					setWorkingLocList([data1, data2]);
+					setWorkingLoc(data1);
+					setIsLoading(false);
+				} else {
+					// 如果至少有一個請求失敗
+					setWorkingLocList(null);
+					setWorkingLoc(null);
+					setIsLoading(false);
+				}
+			});
+		}
+	}, [deliverInfo]);
 
 	// 發生變化時，設置新的地圖中心點
 	useEffect(() => {
@@ -75,6 +107,10 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 	const handleChange = (event, newAlignment) => {
 		if (newAlignment !== null) {
 			setAlignment(newAlignment);
+			if (workingLocList) {
+				setWorkingLoc(workingLocList[punchInOutButtons.findIndex((button) => button.value === newAlignment)]);
+			}
+
 			setPunchLog(deliverInfo[newAlignment]);
 		}
 	};
@@ -91,7 +127,14 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 	return (
 		<>
 			{/* Modal */}
-			<ModalTemplete title={title} show={true} maxWidth={"768px"} onClose={onClose}>
+			<ModalTemplete
+				title={title}
+				show={!isLoading}
+				maxWidth={"768px"}
+				onClose={() => {
+					setWorkingLoc(null);
+					onClose();
+				}}>
 				<div className="mt-3">
 					<div className="flex sm:flex-row flex-col gap-2 text-sm sm:text-base pb-2">
 						<p className="w-full">
@@ -117,8 +160,10 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 							<span className="font-bold">{deliverInfo.anomalyState.text}</span>
 						</p>
 						<p className="w-full">
-							目前是否擁有打卡範圍：
-							<span className="font-bold">{isLoading ? "-" : workingLoc ? "Y" : "N"}</span>
+							是否超出打卡範圍：
+							<span className="font-bold">
+								{workingLoc ? (workingLoc.overRange ? `超出 ${workingLoc.overRange} 公尺` : "否") : "-"}
+							</span>
 						</p>
 					</div>
 					{/* 切換顯示按鈕 Tabbar - Start */}
@@ -203,6 +248,11 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 					{/* 地圖 - End */}
 				</div>
 			</ModalTemplete>
+
+			{/* Backdrop */}
+			<Backdrop sx={{ color: "#fff", zIndex: 1050 }} open={isLoading} onClick={onClose}>
+				<LoadingTwo />
+			</Backdrop>
 		</>
 	);
 });

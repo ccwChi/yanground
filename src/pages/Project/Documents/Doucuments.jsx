@@ -4,7 +4,15 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Button from "@mui/material/Button";
 // FontAwesome
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBook, faDoorOpen, faFeather, faBuildingUser, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import {
+	faUserTie,
+	faTape,
+	faCompassDrafting,
+    faWarehouse,
+    faHelmetSafety,
+    faClipboardCheck,
+    faUserGear,
+} from "@fortawesome/free-solid-svg-icons";
 // Component
 import PageTitle from "../../../components/Guideline/PageTitle";
 // Hooks
@@ -16,43 +24,43 @@ import { getData } from "../../../utils/api";
 const applicationBtns = [
 	{
 		id: "a",
-		icon: faBook,
+		icon: faUserTie,
 		color: "#e95959",
 		text: "業務",
 	},
 	{
 		id: "b",
-		icon: faDoorOpen,
+		icon: faTape,
 		color: "#6262a7",
 		text: "測量",
 	},
 	{
 		id: "c",
-		icon: faFeather,
+		icon: faCompassDrafting,
 		color: "#547db7",
 		text: "設計",
 	},
 	{
 		id: "d",
-		icon: faBuildingUser,
+		icon: faWarehouse,
 		color: "#3a9fc0",
 		text: "倉庫",
 	},
 	{
 		id: "e",
-		icon: faPaperPlane,
+		icon: faHelmetSafety,
 		color: "#039E8E",
 		text: "工程",
 	},
 	{
 		id: "f",
-		icon: faPaperPlane,
+		icon: faClipboardCheck,
 		color: "#F7941D",
 		text: "品檢",
 	},
 	{
 		id: "g",
-		icon: faPaperPlane,
+		icon: faUserGear,
 		color: "#F03355",
 		text: "人事",
 	},
