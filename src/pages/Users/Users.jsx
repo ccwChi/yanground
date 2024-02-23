@@ -89,6 +89,9 @@ const Users = () => {
 	// 在主畫面先求得部門跟權限 list 再直接傳給面板
 	const [departmentList, setDepartmentList] = useState(null);
 	const [authorityList, setAuthorityList] = useState(null);
+	const [factorySiteList, setFactorySiteList] = useState([])
+	const [workDayTypeList, setWorkDayTypeList] = useState([])
+	const [WorkHourTypeList, setWorkHourTypeList] = useState([])
 	// ModalValue 控制開啟的是哪一個 Modal
 	const [modalValue, setModalValue] = useState(false);
 	// 傳送額外資訊給 Modal
@@ -202,12 +205,13 @@ const Users = () => {
 	const columnsPC = [
 		{ key: "pictureUrl", label: "", size: "120px" },
 		{ key: "employeeId", label: "員工編號", size: "8%", align: "left" },
-		{ key: "displayName", label: "LINE 顯示名稱", size: "14%", align: "left" },
-		{ key: "lastname+firstname", label: "姓名", size: "12%" },
-		{ key: "nickname", label: "暱稱", size: "12%" },
+		{ key: "displayName", label: "LINE 顯示名稱", size: "10%", align: "left" },
+		{ key: "lastname+firstname", label: "姓名", size: "10%" },
+		{ key: "nickname", label: "暱稱", size: "10%" },
 		{ key: "gender", label: "性別", size: "8%" },
-		{ key: ["department", "name"], label: "部門", size: "12%" },
-		{ key: "startedOn", label: "到職日", size: "14%" },
+		{ key: ["department", "name"], label: "部門", size: "10%" },
+		{ key: ["factorySite","chinese"], label: "廠別", size: "10%" },
+		{ key: "startedOn", label: "到職日", size: "12%" },
 	];
 	const columnsMobile = [
 		{ key: "employeeId", label: "員工編號" },
@@ -215,6 +219,8 @@ const Users = () => {
 		{ key: "lastname+firstname", label: "姓名" },
 		{ key: "nickname", label: "暱稱" },
 		{ key: ["department", "name"], label: "部門" },
+		{ key: ["factorySite","chinese"], label: "廠別" },
+		{ key: ["workHourType","chinese"], label: "廠別", size: "10%" },
 		{ key: "gender", label: "性別" },
 		{ key: "startedOn", label: "到職日" },
 		{ key: "birthDate", label: "生日" },
@@ -284,6 +290,33 @@ const Users = () => {
 			const sortedAuthorityList = data.slice().sort((a, b) => a.id - b.id);
 			setAuthorityList(sortedAuthorityList);
 		});
+		getData("factorySite").then((result)=>{
+			setIsLoading(false);
+			const data = result.result
+			setFactorySiteList([
+			{
+				value: "",
+				chinese: "暫無廠別",
+			},...data]);
+		})
+		getData("workDayType").then((result)=>{
+			setIsLoading(false);
+			const data = result.result
+			setWorkDayTypeList([			{
+				value: "",
+				chinese: "暫無班制",
+				workCalendar: true,
+			},...data]);
+		})
+		getData("workHourType").then((result)=>{
+			setIsLoading(false);
+			const data = result.result
+			setWorkHourTypeList([			{
+				value: "",
+				chinese: "暫無班制",
+			},...data]);
+		})
+
 	}, []);
 
 	// 傳遞給後端資料
@@ -391,6 +424,9 @@ const Users = () => {
 					onClose={onClose}
 					departmentList={departmentList}
 					authorityList={authorityList}
+					workDayTypeList={workDayTypeList} 
+					factorySiteList={factorySiteList}
+					WorkHourTypeList={WorkHourTypeList}
 				/>
 			),
 		},

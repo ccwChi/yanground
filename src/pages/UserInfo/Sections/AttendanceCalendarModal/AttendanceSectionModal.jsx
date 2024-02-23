@@ -7,8 +7,6 @@ import {
   Backdrop,
   Button,
   Card,
-  Divider,
-  FormControl,
   FormHelperText,
   MenuItem,
   Select,
@@ -23,10 +21,7 @@ import { useForm, FormProvider, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import InputTitle from "../../../../components/Guideline/InputTitle";
-/* 用於表單中的時間 */
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale";
-import ControlledTimePicker from "../../../../components/DatePicker/ControlledTimePicker";
+import ControlledTimeAutoComplete from "../../../../components/DatePicker/ControlledTimeAutoComplete";
 
 /* 用於警告視窗 */
 import AlertDialog from "../../../../components/Alert/AlertDialog";
@@ -35,15 +30,6 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 
 /* 載入中 */
 import { LoadingFour } from "../../../../components/Loader/Loading";
-
-import {
-  DateTimePicker,
-  LocalizationProvider,
-  TimePicker,
-  renderTimeViewClock,
-} from "@mui/x-date-pickers";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import ControlledOnlyTimePicker from "../../../../components/DatePicker/ControlledOnlyTimePicker";
 
 /**
  * 取得書本價格
@@ -67,9 +53,6 @@ const AttendanceSectionModal = ({
 
   /* 打 api 的載入時間用 */
   const [sendBackFlag, setSendBackFlag] = useState(false);
-
-  /* 給表單內的時間參考值 */
-  const choseDay = new Date(deliverInfo.start);
 
   /* 下面僅關閉汙染警告視窗 */
   const onCheckDirty = (value) => {
@@ -95,8 +78,14 @@ const AttendanceSectionModal = ({
       .string()
       .max(250, "原因最多只能輸入 250 個字符")
       .required("原因不可為空值！"),
-    sinceDate: yup.date().required("起始時間不可為空值！"),
-    endDate: yup.date().required("結束時間不可為空值！"),
+    sinceDate: yup.string().required("起始時間不可為空值！"),
+    endDate: yup
+      .string()
+      .required("結束時間不可為空值！")
+      .test("is-after-sinceDate", "結束時間必須晚於起始時間", function (value) {
+        const { sinceDate } = this.parent;
+        return value > sinceDate;
+      }),
   });
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -151,53 +140,36 @@ const AttendanceSectionModal = ({
     setSendBackFlag(true);
     let url = "attendance";
     let message = "送出表單成功";
-    if (data.sinceDate < data.endDate) {
-      const since =
-        deliverInfo.start +
-        "T" +
-        format(data.sinceDate, "HH:mm:ss", {
-          locale: zhTW,
-        });
-      const until =
-        deliverInfo.start +
-        "T" +
-        format(data.endDate, "HH:mm:ss", {
-          locale: zhTW,
-        });
 
-      let dataForApi = {
-        date: deliverInfo.start,
-        type: data.leave,
-        since: since,
-        until: until,
-      };
-
-      const fd = new FormData();
-      for (let key in dataForApi) {
-        fd.append(key, dataForApi[key]);
-      }
-
-      postData(url, fd).then((result) => {
-        if (result.status) {
-          showNotification(message, true);
-          reset();
-          onClose();
-          setReflesh(true);
-        } else {
-          showNotification(
-            result.result.reason
-              ? result.result.reason
-              : result.result
-              ? result.result
-              : "發生無法預期的錯誤，可能為已超過請假期限",
-            false
-          );
-        }
-        setSendBackFlag(false);
-      });
-    } else {
-      showNotification("時間起迄輸入錯誤", false);
+    let dataForApi = {
+      date: deliverInfo.start,
+      type: data.leave,
+      since: deliverInfo.start + "T" + data.sinceDate + ":01",
+      until: deliverInfo.start + "T" + data.endDate + ":00",
+    };
+    const fd = new FormData();
+    for (let key in dataForApi) {
+      fd.append(key, dataForApi[key]);
     }
+
+    postData(url, fd).then((result) => {
+      if (result.status) {
+        showNotification(message, true);
+        reset();
+        onClose();
+        setReflesh(true);
+      } else {
+        showNotification(
+          result.result.reason
+            ? result.result.reason
+            : result.result
+            ? result.result
+            : "發生無法預期的錯誤，可能為已超過請假期限",
+          false
+        );
+      }
+      setSendBackFlag(false);
+    });
   };
 
   return (
@@ -212,11 +184,7 @@ const AttendanceSectionModal = ({
         {/* ------------- 日期 考勤狀態 ------------- */}
         <div className="h-22 w-full flex gap-4 mt-3">
           <Card className="flex-1 p-3">
-            <p
-              onClick={() => {
-                console.log(deliverInfo);
-              }}
-            >
+            <p>
               日期：
               <span className="font-bold mb-2">
                 {deliverInfo.start}
@@ -230,9 +198,6 @@ const AttendanceSectionModal = ({
           <Card
             className="w-32 justify-center items-center hidden md:flex"
             sx={{ backgroundColor: deliverInfo.color, color: "white" }}
-            onClick={() => {
-              console.log(deliverInfo);
-            }}
           >
             {deliverInfo.title}
           </Card>
@@ -245,13 +210,13 @@ const AttendanceSectionModal = ({
               className="inline-flex flex-col flex-1  overflow-hidden"
               onSubmit={handleSubmit(onSubmit)}
             >
-              <div className="flex flex-col flex-1 gap-4 overflow-y-scroll">
+              <div className="flex flex-col flex-1 gap-4 overflow-y-auto">
                 {/* ------------- 請假類別 ------------- */}
                 <div className="w-full flex flex-col">
                   <div className="w-full  sm:mt-0">
                     <InputTitle
                       title={"請假類別"}
-                      classnames="whitespace-nowrap text-primary-800 font-bold"
+                      classnames="whitespace-nowrap "
                       pb={true}
                       required={true}
                     />
@@ -293,21 +258,15 @@ const AttendanceSectionModal = ({
                   </FormHelperText>
                 </div>
 
-                <Divider className="hidden sm:block" />
-
                 {/* ------------- 開始時間 x 結束時間 ------------- */}
                 <div className="flex flex-col">
                   <div className="flex sm:flex-row flex-col gap-4">
                     <div className="w-full flex flex-col">
                       <InputTitle
                         title={"請選擇請假時間"}
-                        classnames="whitespace-nowrap text-primary-800 font-bold"
+                        classnames="whitespace-nowrap "
                       />
-                      <ControlledOnlyTimePicker
-                        minutesStep={30}
-                        closeOnSelect={false}
-                        name="sinceDate"
-                      />
+                      <ControlledTimeAutoComplete name={"sinceDate"} />
                       <FormHelperText
                         className="!text-red-600 break-words !text-right !mt-0"
                         sx={{ minHeight: "1.25rem" }}
@@ -319,18 +278,16 @@ const AttendanceSectionModal = ({
                     <div className="w-full flex flex-col">
                       <InputTitle
                         title={"結束時間"}
-                        classnames="whitespace-nowrap text-primary-800 font-bold"
+                        classnames="whitespace-nowrap "
                       />
-                      <ControlledOnlyTimePicker
-                        name="endDate"
-                        minutesStep={30}
-                        minTime={watchSinceDate}
-                        disabled={!watchSinceDate}
-                        // views={["year", "day", "hours", "minutes"]}
+                      <ControlledTimeAutoComplete
+                        name={"endDate"}
+                        getOptionDisabled={(option) => {
+                          return option <= watchSinceDate;
+                        }}
                       />
-
                       <FormHelperText
-                        className="!text-red-600 break-words !text-right !mt-0"
+                        className="!text-red-600 break-words !text-right !mt-0 "
                         sx={{ minHeight: "1.25rem" }}
                       >
                         {errors["endDate"]?.message}
@@ -338,13 +295,13 @@ const AttendanceSectionModal = ({
                     </div>
                   </div>
                 </div>
-                <Divider className="hidden sm:block" />
+
                 {/* ------------- 原因 ------------- */}
                 <div className="w-full">
                   <InputTitle
                     title={"原因"}
                     required={true}
-                    classnames="whitespace-nowrap text-primary-800 font-bold -translate-y-px"
+                    classnames="whitespace-nowrap  -translate-y-px"
                   />
                   <Controller
                     name="reason"
@@ -361,14 +318,12 @@ const AttendanceSectionModal = ({
                     )}
                   />
                   <FormHelperText
-                    className="!text-red-600 break-words !text-right !mt-0"
+                    className="!text-red-600 break-words !text-right !mt-0 !mb-4"
                     sx={{ minHeight: "1.25rem" }}
                   >
                     {errors["reason"]?.message}
                   </FormHelperText>
                 </div>
-
-                <Divider />
               </div>
 
               {/* Footer */}

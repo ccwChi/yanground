@@ -8,7 +8,7 @@ import AttendanceSectionModal from "./AttendanceCalendarModal/AttendanceSectionM
 import { getData } from "../../../utils/api";
 
 const alertText =
-  "點擊月曆上日期即可對當日進行請假單填寫。";
+  "點擊日期即可對當日進行請假單填寫。";
 
 const AttendanceSection = React.memo(({ apiAttData, setReflesh }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,9 +54,8 @@ const AttendanceSection = React.memo(({ apiAttData, setReflesh }) => {
   };
   return (
     <>
-      <div className="flex px-8 pt-2 text-rose-400 font-bold text-xs">
-				<p className="me-1">＊</p>
-				<p>{alertText}</p>
+      <div className="flex px-8 pt-2 font-bold text-xs">
+				<p className="text-base">{alertText}</p>
 			</div>
       {/* <p>aaaaaaaaaaaaa</p> */}
       <Calendar

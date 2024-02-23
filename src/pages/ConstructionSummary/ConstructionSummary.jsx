@@ -219,6 +219,7 @@ const ConstructionSummary = () => {
       {/* PageTitle */}
       <PageTitle
         title="施工清單"
+        description="此頁面是用於 1、建立、修改施工清單，2、編輯工程項目、工項執行，3、進行派工的頁面。"
         btnGroup={btnGroup}
         handleActionClick={handleActionClick}
         isLoading={!isLoading}

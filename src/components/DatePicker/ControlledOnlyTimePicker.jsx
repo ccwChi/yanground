@@ -13,7 +13,7 @@ import {
 
 const ControlledOnlyTimePicker = ({
   name,
-  format = "yyyy-MM-dd",
+  format="aa hh:mm",
   ...otherProps
 }) => {
   const { control } = useFormContext();
@@ -28,7 +28,7 @@ const ControlledOnlyTimePicker = ({
           <TimePicker
             slotProps={{ textField: { size: "small" } }}
             className="inputPadding"
-            format={"aa hh:mm"}
+            format={format}
             dayOfWeekFormatter={(_day, weekday) => {
               console.log(); // AVOID BUG
             }}
