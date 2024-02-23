@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import useLocalStorageValue from "../../hooks/useLocalStorageValue";
-import Avatar from "@mui/material/Avatar";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import BadgeIcon from "@mui/icons-material/Badge";
-import Chip from "@mui/material/Chip";
-import GroupsIcon from "@mui/icons-material/Groups";
+// date-fns
+import { format } from "date-fns";
+import zhTW from "date-fns/locale/zh-TW";
+// MUI
 import Divider from "@mui/material/Divider";
 import Skeleton from "@mui/material/Skeleton";
 import PunchClockIcon from "@mui/icons-material/PunchClock";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import CampaignIcon from "@mui/icons-material/Campaign";
+// Hooks
+import useLocalStorageValue from "../../hooks/useLocalStorageValue";
+// Utils
 import { getData } from "../../utils/api";
+// Customs
 import constructionTypeList from "../../datas/constructionTypes";
 import "./home.scss";
-import liff from "@line/liff";
-const LINE_ID = process.env.REACT_APP_LINEID;
 
 const Home = () => {
 	// const [countNum, setCountNum] = useState({ staffNum: "-", depNum: "-" });
@@ -74,7 +73,7 @@ const Home = () => {
 							});
 						});
 						return {
-							date,
+							date: format(new Date(date), "yyyy-MM-dd (EE)", { locale: zhTW }),
 							summaries: Array.from(projectMap.values()).filter(
 								(project) => project.constructionSummaryJobTasks.length > 0
 							),
