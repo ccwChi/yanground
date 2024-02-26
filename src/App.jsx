@@ -3,7 +3,14 @@ import liff from "@line/liff";
 import { Outlet } from "react-router-dom";
 import { SnackbarProvider, enqueueSnackbar } from "notistack";
 // FontAwesome
-import { faHouse, faToolbox, faFileLines, faUsersGear, faAddressCard, faFolderTree } from "@fortawesome/free-solid-svg-icons";
+import {
+	faHouse,
+	faToolbox,
+	faFileLines,
+	faUsersGear,
+	faAddressCard,
+	faFolderTree,
+} from "@fortawesome/free-solid-svg-icons";
 // MUI
 import { ThemeProvider } from "@mui/material/styles";
 // Components
@@ -35,7 +42,10 @@ const App = () => {
 			icon: faFileLines,
 			text: "基礎資料",
 			href: "#",
-			subMenuItems: [{ text: "工程類別", href: "constructionTypes" }],
+			subMenuItems: [
+				{ text: "工程類別", href: "constructionTypes" },
+				{ text: "權限管理", href: "jobtitlemanagement" },
+			],
 		},
 		{
 			icon: faToolbox,

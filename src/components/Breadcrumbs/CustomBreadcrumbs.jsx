@@ -12,6 +12,7 @@ const nameMappings = [
 	{ name: "sites", display: "案場" },
 	{ name: "dispatchcalendar", display: "派工行事曆" },
 	{ name: "constructionsummary", display: "施工清單" },
+	{ name: "jobtitlemanagement", display: "權限管理" },
 	// 專管系統
 	{ name: "project", display: "專案管理" },
 	{ name: "dispatchList", display: "派工清單" },

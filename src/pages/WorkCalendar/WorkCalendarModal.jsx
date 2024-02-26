@@ -125,7 +125,7 @@ const AdminCalendarUrlModal = React.memo(({ title, sendDataToBackend, onClose })
 										/>
 									)}
 								/>
-								<FormHelperText className="!text-red-600 h-5">{errors["source"]?.message}</FormHelperText>
+								<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["source"]?.message}</FormHelperText>
 							</div>
 							<Button type="submit" variant="contained" color="success" className="!text-base !h-12" fullWidth>
 								儲存
@@ -242,7 +242,7 @@ const TemporaryAnnouncementModal = React.memo(
 								<div className="mb-1.5">
 									<InputTitle title={"日期"} required={false} />
 									<ControlledDatePicker name="date" />
-									<FormHelperText className="!text-red-600 h-5">{errors["date"]?.message}</FormHelperText>
+									<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["date"]?.message}</FormHelperText>
 								</div>
 								{/* 原因 */}
 								<div className="mb-1.5">
@@ -263,7 +263,7 @@ const TemporaryAnnouncementModal = React.memo(
 											/>
 										)}
 									/>
-									<FormHelperText className="!text-red-600 h-5">{errors["cause"]?.message}</FormHelperText>
+									<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["cause"]?.message}</FormHelperText>
 								</div>
 								{/* 假別 */}
 								<div className="mb-5">

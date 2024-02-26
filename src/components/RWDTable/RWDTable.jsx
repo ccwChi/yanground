@@ -223,7 +223,10 @@ const RWDTable = ({
 							</Grow>
 						))
 					) : (
-						<Empty />
+						<>
+							{data && data.length <= 0 && <Empty />}
+							{!data && <Empty word="資料請求失敗" />}
+						</>
 					)
 				) : (
 					Array.from({ length: SKELETONITEM }).map((_, index) => (
@@ -483,6 +486,7 @@ const RWDTable = ({
 					</Grow>
 				))}
 			{!isLoading && data && data.length <= 0 && <Empty />}
+			{!isLoading && !data && <Empty word="資料請求失敗" />}
 		</TableContainer>
 	);
 };

@@ -415,7 +415,7 @@ const LeaveApplicationModal = React.memo(
 													);
 												}}
 											/>
-											<FormHelperText className="!text-red-600 h-5">{errors["attendanceType"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["attendanceType"]?.message}</FormHelperText>
 										</div>
 									</div>
 									{/* 部門 x 人員 */}
@@ -471,7 +471,7 @@ const LeaveApplicationModal = React.memo(
 													);
 												}}
 											/>
-											<FormHelperText className="!text-red-600 h-5">{errors["department"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["department"]?.message}</FormHelperText>
 										</div>
 										{/* 人員 */}
 										<div className="inline-flex flex-col w-full">
@@ -516,7 +516,7 @@ const LeaveApplicationModal = React.memo(
 													);
 												}}
 											/>
-											<FormHelperText className="!text-red-600 h-5">{errors["user"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["user"]?.message}</FormHelperText>
 										</div>
 									</div>
 									{/* 日期 */}
@@ -533,7 +533,7 @@ const LeaveApplicationModal = React.memo(
 												closeOnSelect={false}
 												// sx={{ width: isTargetScreen ? "100%" : "max-content" }}
 											/>
-											<FormHelperText className="!text-red-600 h-5">{errors["date"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["date"]?.message}</FormHelperText>
 										</div>
 									</div>
 									{/* 時間起迄 */}
@@ -542,7 +542,7 @@ const LeaveApplicationModal = React.memo(
 										<div className="inline-flex flex-col w-full">
 											<InputTitle classnames="whitespace-nowrap" title={"請假時間(起)"} />
 											<ControlledOnlyTimePicker name="since" minutesStep={30} />
-											<FormHelperText className="!text-red-600 h-5">{errors["since"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["since"]?.message}</FormHelperText>
 										</div>
 
 										{/* 時間(迄) */}
@@ -554,7 +554,7 @@ const LeaveApplicationModal = React.memo(
 												minTime={sinceValue}
 												disabled={!sinceValue}
 											/>
-											<FormHelperText className="!text-red-600 h-5">{errors["until"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["until"]?.message}</FormHelperText>
 										</div>
 									</div>
 								</div>
