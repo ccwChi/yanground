@@ -162,7 +162,13 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 						<p className="w-full">
 							是否超出打卡範圍：
 							<span className="font-bold">
-								{workingLoc ? (workingLoc.overRange ? `超出 ${workingLoc.overRange} 公尺` : "否") : "-"}
+								{punchLog
+									? workingLoc
+										? workingLoc.overRange
+											? `超出 ${workingLoc.overRange} 公尺`
+											: "否"
+										: "(尚未指派打卡地點)"
+									: "(無打卡資訊)"}
 							</span>
 						</p>
 					</div>
