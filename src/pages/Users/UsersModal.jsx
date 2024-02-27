@@ -49,9 +49,10 @@ const EditModal = React.memo(
     onClose,
     departmentList,
     authorityList,
-    //   factorySite,
-    //   workDayType,
-    //   WorkHourType,
+    factorySiteList,
+    workDayTypeList,
+    WorkHourTypeList,
+    jobTitleList,
   }) => {
     // RWD Tabbar 當前位置
     const [cat, setCat] = useState("1");
@@ -60,91 +61,20 @@ const EditModal = React.memo(
     // Modal Data
     const [apiData, setApiData] = useState(null);
     const theme = useTheme();
-    const factorySite = [
-      {
-        value: "",
-        chinese: "暫無廠別",
-      },
-      {
-        value: "SHA_LUN_SITE",
-        chinese: "沙崙廠",
-        latitude: 23.069121600640166,
-        longitude: 120.20386688401683,
-        radius: 100,
-        fullAddress: "745台南市安定區中沙里沙崙24-1號",
-      },
-      {
-        value: "SHA_LUN_FARMHOUSE",
-        chinese: "沙崙農舍",
-        latitude: 23.06958882588633,
-        longitude: 120.20333562054202,
-        radius: 50,
-        fullAddress: "745台南市安定區中沙里沙崙24-1號",
-      },
-      {
-        value: "GONG_MING_SITE",
-        chinese: "工明廠",
-        latitude: 23.058398699378674,
-        longitude: 120.20833235409783,
-        radius: 100,
-        fullAddress: "709台南市安南區工明南三路52號",
-      },
-    ];
-
-    const workDayType = [
-      {
-        value: "",
-        chinese: "暫無班制",
-        workCalendar: true,
-      },
-      {
-        value: "SHIFT",
-        chinese: "排班",
-        workCalendar: false,
-      },
-      {
-        value: "TEMPORARY",
-        chinese: "臨時工",
-        workCalendar: false,
-      },
-      {
-        value: "WEEKDAYS",
-        chinese: "週休二日",
-        workCalendar: true,
-      },
-    ];
-
-    const WorkHourType = [
-      {
-        value: "",
-        chinese: "暫無班制",
-      },
-      {
-        value: "EIGHT_TO_SEVENTEEN",
-        chinese: "早八晚五",
-        since: "08:00:00",
-        until: "17:00:00",
-      },
-      {
-        value: "NINE_TO_EIGHTEEN",
-        chinese: "早九晚六",
-        since: "09:00:00",
-        until: "18:00:00",
-      },
-    ];
 
     // 使用 Yup 來定義表單驗證規則
     const schema = yup.object().shape({
       nickname: yup.string().required("暱稱不得為空白!"),
       nationalIdentityCardNumber: yup
         .mixed()
-        .test("is-national-id", "格式為第一字為英文 + 九個數字!", (value) => {
+        .test("is-national-id", "第一字為英文 + 九個數字!", (value) => {
           if (!value) {
             return true;
           }
           return /^[A-Za-z]\d{9}$/.test(value);
         }),
       department: yup.string().required("部門不得為空白!"),
+      jobTitle: yup.string().required("職稱不得為空白!"),
     });
 
     // 初始預設 default 值
@@ -171,6 +101,11 @@ const EditModal = React.memo(
       workHourType: apiData?.workHourType?.value
         ? apiData.workHourType.value
         : "",
+      jobTitle: apiData?.jobTitle ? apiData.jobTitle.id : "",
+      termination: apiData?.termination ? apiData.termination : null,
+      arrangedLeaveDays: apiData?.arrangedLeaveDays
+        ? apiData.arrangedLeaveDays
+        : 0,
     };
 
     // 使用 useForm Hook 來管理表單狀態和驗證
@@ -178,14 +113,20 @@ const EditModal = React.memo(
       defaultValues,
       resolver: yupResolver(schema),
     });
-
     const {
       control,
       handleSubmit,
       register,
+      watch,
       reset,
+      setValue,
       formState: { errors, isDirty },
     } = methods;
+    const watchWorkDayType = watch("workDayType");
+
+    useEffect(() => {
+      if (watchWorkDayType !== "SHIFT") setValue("arrangedLeaveDays", 0);
+    }, [watchWorkDayType]);
 
     // 取得 Modal 資料
     useEffect(() => {
@@ -205,6 +146,7 @@ const EditModal = React.memo(
 
     // 提交表單資料到後端並執行相關操作
     const onSubmit = (data) => {
+      // console.log("data", data);
       const fd = new FormData();
       const convertData = {
         ...data,
@@ -215,6 +157,9 @@ const EditModal = React.memo(
         nationalIdentityCardNumber: data?.nationalIdentityCardNumber
           ? data.nationalIdentityCardNumber.toUpperCase()
           : "",
+        arrangedLeaveDays: data?.arrangedLeaveDays
+          ? data.arrangedLeaveDays.toString()
+          : "0",
       };
       if (!convertData?.employeeId) {
         delete convertData.employeeId;
@@ -234,11 +179,18 @@ const EditModal = React.memo(
       if (!convertData?.factorySite) {
         delete convertData.factorySite;
       }
+      if (!convertData?.jobTitle) {
+        delete convertData.jobTitle;
+      }
+      if (!convertData?.termination) {
+        delete convertData.termination;
+      }
       for (let key in convertData) {
         fd.append(key, convertData[key]);
       }
       sendDataToBackend(fd, "edit", deliverInfo);
       resetModal();
+      // console.log("convertData", convertData);
     };
 
     const resetModal = () => {
@@ -280,19 +232,19 @@ const EditModal = React.memo(
         >
           <FormProvider {...methods}>
             {/* TabBar */}
-            <div className="md:hidden mt-3 mb-5 flex-1 ">
+            <div className="md:hidden mt-3 mb-5 flex-1 -m-3">
               <TableTabbar tabGroup={tabGroup} setCat={setCat} cat={cat} />
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)}>
               <div
-                className="flex-col relative columns-1 md:columns-3 md:!min-h-[520px] md:!max-h-[520px] md:py-5 px-3 gap-8 overflow-y-scroll"
+                className="flex-col relative columns-1 md:columns-3 md:!min-h-[520px] md:!max-h-[52px] md:py-4 px-3 h-fit gap-8 overflow-y-auto"
                 style={{ maxHeight: "65vh", scrollbarWidth: "thin" }}
               >
                 <div
                   className={`${
-                    cat === "1" ? "abolute" : "hidden"
-                  } space-y-4 md:relative md:inline-block w-full h-full md:max-h-full`}
+                    cat === "1" ? "static" : "hidden"
+                  } space-y-4 md:relative md:flex md:flex-col w-full overflow-y-scroll md:overflow-y-hidden max-h-[60vh] md:h-auto md:max-h-fit md:pb-4 px-2`}
                 >
                   {/* 員工編號 */}
                   <div className="w-full">
@@ -334,8 +286,8 @@ const EditModal = React.memo(
                       )}
                     />
                   </div>
-                  {/* 姓氏*/}
 
+                  {/* 姓氏 */}
                   <div className="w-full">
                     <InputTitle title={"姓氏"} required={false} />
                     <Controller
@@ -354,7 +306,7 @@ const EditModal = React.memo(
                     />
                   </div>
 
-                  {/* 名字*/}
+                  {/* 名字 */}
                   <div className="w-full">
                     <InputTitle title={"名字"} required={false} />
                     <Controller
@@ -373,9 +325,9 @@ const EditModal = React.memo(
                     />
                   </div>
 
-                  {/* 暱稱*/}
+                  {/* 暱稱 */}
                   <div className="w-full">
-                    <InputTitle title={"暱稱 / 別名"} required={false} />
+                    <InputTitle title={"暱稱 / 別名"} required={true} />
                     <Controller
                       name="nickname"
                       control={control}
@@ -398,7 +350,7 @@ const EditModal = React.memo(
                       )}
                     />
                     <FormHelperText
-                      className="!text-red-600 break-words  text-justify !mt-0 hidden md:flex justify-end"
+                      className="!text-red-600 break-words !mt-0 md:flex justify-end !-mb-5"
                       sx={{ minHeight: "1.25rem" }}
                     >
                       {errors.nickname && (
@@ -408,21 +360,21 @@ const EditModal = React.memo(
                       )}
                     </FormHelperText>
                   </div>
-                </div>
 
-                <div
-                  className={`${
-                    cat === "2" ? "static" : "hidden"
-                  } space-y-4 md:relative md:inline-block w-full max-h-[60vh] md:max-h-fit`}
-                >
+                  {/* 生日 */}
+                  <div className="w-full">
+                    <InputTitle title={"生日"} required={false} />
+                    <ControlledDatePicker name="birthDate" />
+                  </div>
+
                   {/* 性別 */}
-                  <div className="w-full md:!-mt-1">
+                  <div className="w-full ">
                     <InputTitle title={"性別"} required={false} />
                     <Controller
                       name="gender"
                       control={control}
                       render={({ field }) => (
-                        <FormControl>
+                        <FormControl className="h-11">
                           <RadioGroup
                             row
                             aria-labelledby="demo-row-radio-buttons-group-label"
@@ -455,8 +407,15 @@ const EditModal = React.memo(
                       )}
                     />
                   </div>
-                  {/* 身份證字號 */}
-                  <div className="w-full ">
+                </div>
+
+                <div
+                  className={`${
+                    cat === "2" ? "static" : "hidden"
+                  } space-y-4 md:relative md:flex md:flex-col w-full overflow-y-scroll md:overflow-y-hidden max-h-[60vh] md:h-auto md:max-h-fit md:pb-4 px-2`}
+                >
+                  {/* 身分證字號 */}
+                  <div className="w-full">
                     <InputTitle title={"身份證字號"} required={false} />
                     <Controller
                       name="nationalIdentityCardNumber"
@@ -469,11 +428,12 @@ const EditModal = React.memo(
                           placeholder="身分證字號"
                           fullWidth
                           {...field}
+                          inputProps={{ autoComplete: "off" }} // 讓他不會自己跳出自動填充框
                         />
                       )}
                     />
                     <FormHelperText
-                      className="!text-red-600 break-words  text-justify !mt-0 hidden md:flex justify-end"
+                      className="!text-red-600 break-words !mt-0 md:flex justify-end !-mb-5"
                       sx={{ minHeight: "1.25rem" }}
                     >
                       {errors.nationalIdentityCardNumber && (
@@ -482,18 +442,6 @@ const EditModal = React.memo(
                         </span>
                       )}
                     </FormHelperText>
-                  </div>
-
-                  {/* 生日 */}
-                  <div className="w-full md:!-mt-1">
-                    <InputTitle title={"生日"} required={false} />
-                    <ControlledDatePicker name="birthDate" />
-                  </div>
-
-                  {/* 到職日 */}
-                  <div className="w-full">
-                    <InputTitle title={"到職日"} />
-                    <ControlledDatePicker name="startedOn" />
                   </div>
 
                   {/* 部門 */}
@@ -505,12 +453,13 @@ const EditModal = React.memo(
                       //   defaultValue=""
                       render={({ field: { value, onChange } }) => (
                         <Select
-                          // size="small"
-                          fullWidth={true}
+                          size="small"
                           labelId="department-select-label"
+                          fullWidth
+                          className="!h-12"
                           MenuProps={{
                             PaperProps: {
-                              style: { maxHeight: "200px" },
+                              style: { maxHeight: "250px" },
                             },
                           }}
                           value={value}
@@ -528,7 +477,7 @@ const EditModal = React.memo(
                       )}
                     />
                     <FormHelperText
-                      className="!text-red-600 break-words  text-justify !mt-0 hidden md:flex justify-end"
+                      className="!text-red-600 break-words !mt-0 md:flex justify-end !-mb-5"
                       sx={{ minHeight: "1.25rem" }}
                     >
                       {errors.department && (
@@ -538,22 +487,147 @@ const EditModal = React.memo(
                       )}
                     </FormHelperText>
                   </div>
+
+                  {/* 職稱 */}
+                  <div className="w-full">
+                    <InputTitle title={"職稱"} required={true} />
+                    <Controller
+                      name="jobTitle"
+                      control={control}
+                      render={({ field: { value, onChange } }) => (
+                        <Select
+                          size="small"
+                          labelId="department-select-label"
+                          fullWidth
+                          className="!h-12"
+                          displayEmpty
+                          MenuProps={{
+                            PaperProps: {
+                              style: { maxHeight: "250px" },
+                            },
+                          }}
+                          value={value}
+                          onChange={onChange}
+                        >
+                          <MenuItem value="" disabled>
+                            <span className="text-neutral-400 font-light">
+                              尚無職稱
+                            </span>
+                          </MenuItem>
+                          {jobTitleList?.map((jobTitle) => (
+                            <MenuItem
+                              key={"select" + jobTitle.id}
+                              value={jobTitle.id}
+                            >
+                              {jobTitle.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      )}
+                    />
+                    <FormHelperText
+                      className="!text-red-600 break-words !mt-0 md:flex justify-end !-mb-5"
+                      sx={{ minHeight: "1.25rem" }}
+                    >
+                      {errors.jobTitle && (
+                        <span className={`text-red-700 m-0`}>
+                          {errors.jobTitle.message}
+                        </span>
+                      )}
+                    </FormHelperText>
+                  </div>
+
+                  {/* 廠別 */}
+                  <div className="w-full">
+                    <InputTitle title={"廠別"} required={false} />
+                    <Controller
+                      name="factorySite"
+                      control={control}
+                      //   defaultValue=""
+                      render={({ field: { value, onChange } }) => (
+                        <Select
+                          size="small"
+                          labelId="factorySite-select-label"
+                          displayEmpty
+                          className="h-12"
+                          fullWidth
+                          MenuProps={{
+                            PaperProps: {
+                              style: { maxHeight: "250px", width: "full" },
+                            },
+                          }}
+                          value={value}
+                          onChange={onChange}
+                        >
+                          {factorySiteList?.map((fac, i) => (
+                            <MenuItem key={"select" + i} value={fac.value}>
+                              {fac.chinese}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      )}
+                    />
+                  </div>
+
+                  {/* 工時 */}
+                  <div className="w-full">
+                    <InputTitle title={"工時"} required={false} />
+                    <Controller
+                      name="workHourType"
+                      control={control}
+                      //   defaultValue=""
+                      render={({ field: { value, onChange } }) => (
+                        <Select
+                          size="small"
+                          labelId="workHourType-select-label"
+                          className="h-12"
+                          displayEmpty
+                          fullWidth
+                          MenuProps={{
+                            PaperProps: {
+                              style: { maxHeight: "250px" },
+                            },
+                          }}
+                          value={value}
+                          onChange={onChange}
+                        >
+                          {WorkHourTypeList?.map((depart, i) => (
+                            <MenuItem key={"select" + i} value={depart.value}>
+                              {depart.chinese}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      )}
+                    />
+                  </div>
+
+                  {/* 到職日 */}
+                  <div className="w-full">
+                    <InputTitle title={"到職日"} />
+                    <ControlledDatePicker name="startedOn" />
+                  </div>
+
+                  {/* 離職日 */}
+                  <div className="w-full">
+                    <InputTitle title={"離職日"} required={false} />
+                    <ControlledDatePicker name="termination" />
+                  </div>
                 </div>
 
                 <div
                   className={`${
                     cat === "3" ? "static" : "hidden"
-                  } space-y-4 md:relative md:inline-block w-full max-h-[60vh] md:max-h-fit`}
+                  } space-y-4 md:relative md:flex md:flex-col w-full overflow-y-scroll md:overflow-y-hidden max-h-[60vh] md:h-auto md:max-h-fit md:pb-4 px-2`}
                 >
                   {/* 權限 */}
-                  <div className="full">
+                  <div className="w-full">
                     <InputTitle title={"權限"} required={false} />
                     <FormControl
                       component="fieldset"
                       variant="standard"
                       className="w-full"
                     >
-                      <Box className="w-full  overflow-y-auto h-[120px] border border-gray-300 rounded-md px-3">
+                      <Box className="w-full  overflow-y-auto h-[300px] border border-gray-300 rounded-md px-3">
                         <Controller
                           name="authorities"
                           control={control}
@@ -586,39 +660,8 @@ const EditModal = React.memo(
                     </FormControl>
                   </div>
 
-                  {/* 廠別 */}
-                  <div className="w-full">
-                    <InputTitle title={"廠別"} required={false} />
-                    <Controller
-                      name="factorySite"
-                      control={control}
-                      //   defaultValue=""
-                      render={({ field: { value, onChange } }) => (
-                        <Select
-                          size="small"
-                          labelId="factorySite-select-label"
-                          displayEmpty
-                          fullWidth={true}
-                          MenuProps={{
-                            PaperProps: {
-                              style: { maxHeight: "250px", width: "full" },
-                            },
-                          }}
-                          value={value}
-                          onChange={onChange}
-                        >
-                          {factorySite?.map((fac, i) => (
-                            <MenuItem key={"select" + i} value={fac.value}>
-                              {fac.chinese}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      )}
-                    />
-                  </div>
-
                   {/* 班制 */}
-                  <div className="w-full ">
+                  <div className="w-full">
                     <InputTitle title={"班制"} required={false} />
                     <Controller
                       name="workDayType"
@@ -629,7 +672,8 @@ const EditModal = React.memo(
                           size="small"
                           labelId="workDayType-select-label"
                           displayEmpty
-                          fullWidth={true}
+                          className="h-12"
+                          fullWidth
                           MenuProps={{
                             PaperProps: {
                               style: { maxHeight: "250px" },
@@ -638,7 +682,7 @@ const EditModal = React.memo(
                           value={value}
                           onChange={onChange}
                         >
-                          {workDayType?.map((work, i) => (
+                          {workDayTypeList?.map((work, i) => (
                             <MenuItem key={"select" + i} value={work.value}>
                               {work.chinese}
                             </MenuItem>
@@ -648,38 +692,28 @@ const EditModal = React.memo(
                     />
                   </div>
 
-                  {/* 工時 */}
+                  {/* 排休天數 */}
                   <div className="w-full">
-                    <InputTitle title={"工時"} required={false} />
+                    <InputTitle title={"排休人員月休日"} required={false} />
                     <Controller
-                      name="workHourType"
+                      name="arrangedLeaveDays"
                       control={control}
-                      //   defaultValue=""
-                      render={({ field: { value, onChange } }) => (
-                        <Select
+                      disabled={watchWorkDayType !== "SHIFT"}
+                      render={({ field }) => (
+                        <TextField
+                          variant="outlined"
                           size="small"
-                          labelId="workHourType-select-label"
-                          displayEmpty
-                          fullWidth={true}
-                          MenuProps={{
-                            PaperProps: {
-                              style: { maxHeight: "250px" },
-                            },
-                          }}
-                          value={value}
-                          onChange={onChange}
-                        >
-                          {WorkHourType?.map((depart, i) => (
-                            <MenuItem key={"select" + i} value={depart.value}>
-                              {depart.chinese}
-                            </MenuItem>
-                          ))}
-                        </Select>
+                          type="number"
+                          className="inputPadding"
+                          placeholder="請輸入天數"
+                          fullWidth
+                          {...field}
+                        />
                       )}
                     />
                   </div>
 
-                  {/* 考勤異常通知 */}
+                  {/* 異常考勤通知 */}
                   <div className="w-full inline-flex">
                     <InputTitle title={"考勤異常通知"} required={false} />
                     <Controller
@@ -696,7 +730,8 @@ const EditModal = React.memo(
                   </div>
                 </div>
               </div>
-              <div className="!mt-2 md:!mt-0">
+
+              <div className="md:!mt-3">
                 <FormHelperText
                   className="!text-red-600 break-words text-justify !mt-0 md:hidden"
                   sx={{ minHeight: "1.25rem" }}

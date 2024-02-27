@@ -76,7 +76,7 @@ const App = () => {
 				{ text: "豁免出勤", href: "attendancewaiverhrm" },
 				{ text: "考勤報表", href: "attendancereport" },
 				{ text: "辦公行事曆", href: "workcalendar" },
-				// { text: "排班表", href: "StaffRoster" },
+				// { text: "排班表", href: "staffRoster" },
 			],
 		},
 		{
@@ -120,7 +120,7 @@ const App = () => {
 	}, []);
 
 	useEffect(() => {
-		initLine();
+	    initLine();
 	}, []);
 
 	useEffect(() => {

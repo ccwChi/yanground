@@ -7,8 +7,7 @@ import AttendanceSectionModal from "./AttendanceCalendarModal/AttendanceSectionM
 
 import { getData } from "../../../utils/api";
 
-const alertText =
-  "點擊日期即可對當日進行請假單填寫。";
+const alertText = "點擊日期即可對當日進行請假單填寫。";
 
 const AttendanceSection = React.memo(({ apiAttData, setReflesh }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,7 +20,9 @@ const AttendanceSection = React.memo(({ apiAttData, setReflesh }) => {
   useEffect(() => {
     getData("attendanceType").then((result) => {
       const data = result.result;
-      const filterData = data.filter((i) => i.value !== "ATTENDANCE");
+      const filterData = data.filter(
+        (i) => i.value !== "ATTENDANCE" && i.value !== "ARRANGED_LEAVE"
+      );
       setAttendanceTypeList(filterData);
     });
   }, []);
@@ -55,8 +56,8 @@ const AttendanceSection = React.memo(({ apiAttData, setReflesh }) => {
   return (
     <>
       <div className="flex px-8 pt-2 font-bold text-xs">
-				<p className="text-base">{alertText}</p>
-			</div>
+        <p className="text-base">{alertText}</p>
+      </div>
       {/* <p>aaaaaaaaaaaaa</p> */}
       <Calendar
         data={apiAttData}

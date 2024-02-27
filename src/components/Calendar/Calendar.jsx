@@ -34,6 +34,7 @@ const Calendar = ({
 	viewOptions = ["dayGridMonth", "timeGridWeek", "listMonth"],
 	_dayMaxEvents = 2,
 	pnlive = true,
+	todayButton = true,
 	goto,
 	weekNumbers = true,
 	customInitialView = false,
@@ -140,11 +141,11 @@ const Calendar = ({
 							</Tooltip>
 						</>
 					)}
-					<Tooltip title="今日">
+					{todayButton &&	<Tooltip title="今日">
 						<IconButton onClick={() => calendarRef.current.getApi().today()} sx={{ mr: 0.5 }}>
 							<TodayIcon fontSize="small" />
 						</IconButton>
-					</Tooltip>
+					</Tooltip>}
 				</div>
 				{!isTargetScreenSm && (
 					<div className="sm:absolute left-0 right-0 mx-auto font-bold text-primary-900 lg:text-2xl md:text-xl text-lg opacity-80 tracking-wide w-fit">

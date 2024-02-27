@@ -74,10 +74,10 @@ const AttendanceSectionModal = ({
   /* 使用 useForm Hook 來管理表單狀態和驗證 */
   const schema = yup.object().shape({
     leave: yup.string().required("假別不得為空"),
-    reason: yup
-      .string()
-      .max(250, "原因最多只能輸入 250 個字符")
-      .required("原因不可為空值！"),
+    // reason: yup
+    //   .string()
+    //   .max(250, "原因最多只能輸入 250 個字符")
+    //   .required("原因不可為空值！"),
     sinceDate: yup.string().required("起始時間不可為空值！"),
     endDate: yup
       .string()
@@ -204,13 +204,13 @@ const AttendanceSectionModal = ({
         </div>
 
         {/* ------------- 表單 開始------------- */}
-        <div className="h-[470px] w-full flex flex-col pt-4">
+        <div className="h-[300px] w-full flex flex-col pt-4">
           <FormProvider {...methods}>
             <form
               className="inline-flex flex-col flex-1  overflow-hidden"
               onSubmit={handleSubmit(onSubmit)}
             >
-              <div className="flex flex-col flex-1 gap-4 overflow-y-auto">
+              <div className="flex flex-col flex-1 gap-4 overflow-y-auto mb-4">
                 {/* ------------- 請假類別 ------------- */}
                 <div className="w-full flex flex-col">
                   <div className="w-full  sm:mt-0">
@@ -260,7 +260,7 @@ const AttendanceSectionModal = ({
 
                 {/* ------------- 開始時間 x 結束時間 ------------- */}
                 <div className="flex flex-col">
-                  <div className="flex sm:flex-row flex-col gap-4">
+                  <div className="flex sm:flex-row flex-col sm:gap-4">
                     <div className="w-full flex flex-col">
                       <InputTitle
                         title={"請選擇請假時間"}
@@ -297,7 +297,7 @@ const AttendanceSectionModal = ({
                 </div>
 
                 {/* ------------- 原因 ------------- */}
-                <div className="w-full">
+                {/* <div className="w-full">
                   <InputTitle
                     title={"原因"}
                     required={true}
@@ -323,7 +323,7 @@ const AttendanceSectionModal = ({
                   >
                     {errors["reason"]?.message}
                   </FormHelperText>
-                </div>
+                </div> */}
               </div>
 
               {/* Footer */}
