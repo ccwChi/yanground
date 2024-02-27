@@ -74,7 +74,7 @@ const EditModal = React.memo(
           return /^[A-Za-z]\d{9}$/.test(value);
         }),
       department: yup.string().required("部門不得為空白!"),
-      jobTitle: yup.string().required("職稱不得為空白!"),
+      // jobTitle: yup.string().required("職稱不得為空白!"),
     });
 
     // 初始預設 default 值

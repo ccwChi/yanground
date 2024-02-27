@@ -284,7 +284,7 @@ const Users = () => {
   // 取得部門清單跟權限清單
   useEffect(() => {
     setIsLoading(true);
-    const departurl = "department";
+    const departurl = "department?p=1&s=500";
     const authorityurl = "authority";
     getData(departurl).then((result) => {
       setIsLoading(false);
