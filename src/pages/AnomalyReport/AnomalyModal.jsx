@@ -115,6 +115,18 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 		}
 	};
 
+	// 前往打卡範圍
+	// al: area or loc?
+	const handleGotoPunch = (al) => {
+		if (mapRef.current) {
+			if (al === "area") {
+				mapRef.current.setView([workingLoc.latitudeShouldBe, workingLoc.longitudeShouldBe], mapRef.current.getZoom());
+			} else if (al === "loc") {
+				mapRef.current.setView([punchLog.latitude, punchLog.longitude], mapRef.current.getZoom());
+			}
+		}
+	};
+
 	// Leaflet 地圖設置指標
 	let iconSize = 64;
 	const customIcon = new L.Icon({
@@ -198,53 +210,74 @@ const PunchLocationModal = React.memo(({ title, deliverInfo, onClose }) => {
 					{/* 地圖 - Start */}
 					<div className="relative w-full h-80">
 						{punchLog ? (
-							<MapContainer
-								ref={mapRef}
-								center={[punchLog.latitude, punchLog.longitude]}
-								zoom={15}
-								attributionControl={false}
-								className="absolute inset-0"
-								doubleClickZoom={false}>
-								<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-								<Marker position={[punchLog.latitude, punchLog.longitude]} icon={customIcon}>
-									<Popup minWidth={90}>
-										<div className="flex flex-col items-center gap-2">
-											<p className="!my-0 w-full text-sm text-left px-1.5">
-												打卡日期：
-												<span className="font-bold text-base">
-													{punchLog.occurredAt.replace("+08", "").split("T")[0]}
-												</span>
-											</p>
-											<p className="!my-0 w-full text-sm text-left px-1.5">
-												打卡時間：
-												<span className="font-bold text-base">
-													{punchLog.occurredAt.replace("+08", "").split("T")[1]}
-												</span>
-											</p>
-											<p className="!my-0 w-full text-sm text-left px-1.5">
-												緯度座標：
-												<span className="font-bold text-base">{punchLog.latitude}</span>
-											</p>
-											<p className="!my-0 w-full text-sm text-left px-1.5">
-												經度座標：
-												<span className="font-bold text-base">{punchLog.longitude}</span>
-											</p>
-										</div>
-									</Popup>
-								</Marker>
-								{workingLoc && (
-									<Circle
-										center={[workingLoc.latitudeShouldBe, workingLoc.longitudeShouldBe]}
-										pathOptions={{
-											fillColor: "#8b96a6",
-											color: "#95B07E",
-											weight: 3,
-										}}
-										radius={workingLoc.radiusShouldBe}
-										stroke={true}
-									/>
-								)}
-							</MapContainer>
+							<>
+								<MapContainer
+									ref={mapRef}
+									center={[punchLog.latitude, punchLog.longitude]}
+									zoom={14}
+									attributionControl={false}
+									className="absolute inset-0"
+									doubleClickZoom={false}>
+									<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+									<Marker position={[punchLog.latitude, punchLog.longitude]} icon={customIcon}>
+										<Popup minWidth={90}>
+											<div className="flex flex-col items-center gap-2">
+												<p className="!my-0 w-full text-sm text-left px-1.5">
+													打卡日期：
+													<span className="font-bold text-base">
+														{punchLog.occurredAt.replace("+08", "").split("T")[0]}
+													</span>
+												</p>
+												<p className="!my-0 w-full text-sm text-left px-1.5">
+													打卡時間：
+													<span className="font-bold text-base">
+														{punchLog.occurredAt.replace("+08", "").split("T")[1]}
+													</span>
+												</p>
+												<p className="!my-0 w-full text-sm text-left px-1.5">
+													緯度座標：
+													<span className="font-bold text-base">{punchLog.latitude}</span>
+												</p>
+												<p className="!my-0 w-full text-sm text-left px-1.5">
+													經度座標：
+													<span className="font-bold text-base">{punchLog.longitude}</span>
+												</p>
+											</div>
+										</Popup>
+									</Marker>
+									{workingLoc && (
+										<Circle
+											center={[workingLoc.latitudeShouldBe, workingLoc.longitudeShouldBe]}
+											pathOptions={{
+												fillColor: "#8b96a6",
+												color: "#95B07E",
+												weight: 3,
+											}}
+											radius={workingLoc.radiusShouldBe}
+											stroke={true}
+										/>
+									)}
+								</MapContainer>
+
+								<div className="absolute bottom-0 right-0 z-[400] p-2 flex gap-1.5">
+									{workingLoc && (
+										<Button
+											variant="contained"
+											color="secondary"
+											onClick={() => handleGotoPunch("area")}
+											className="!text-base !h-12 sm:!h-8 opacity-80">
+											前往打卡範圍
+										</Button>
+									)}
+									<Button
+										variant="contained"
+										color="primary"
+										onClick={() => handleGotoPunch("loc")}
+										className="!text-base !h-12 sm:!h-8 opacity-80">
+										前往實際打卡
+									</Button>
+								</div>
+							</>
 						) : (
 							<div className="absolute inset-0 flex items-center justify-center bg-slate-200">
 								<span className="italic text-neutral-500 text-sm sm:text-base">(無下班打卡紀錄)</span>
@@ -415,7 +448,9 @@ const LeaveApplicationModal = React.memo(
 													);
 												}}
 											/>
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["attendanceType"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">
+												{errors["attendanceType"]?.message}
+											</FormHelperText>
 										</div>
 									</div>
 									{/* 部門 x 人員 */}
@@ -471,7 +506,9 @@ const LeaveApplicationModal = React.memo(
 													);
 												}}
 											/>
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["department"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">
+												{errors["department"]?.message}
+											</FormHelperText>
 										</div>
 										{/* 人員 */}
 										<div className="inline-flex flex-col w-full">
@@ -516,7 +553,9 @@ const LeaveApplicationModal = React.memo(
 													);
 												}}
 											/>
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["user"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">
+												{errors["user"]?.message}
+											</FormHelperText>
 										</div>
 									</div>
 									{/* 日期 */}
@@ -533,7 +572,9 @@ const LeaveApplicationModal = React.memo(
 												closeOnSelect={false}
 												// sx={{ width: isTargetScreen ? "100%" : "max-content" }}
 											/>
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["date"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">
+												{errors["date"]?.message}
+											</FormHelperText>
 										</div>
 									</div>
 									{/* 時間起迄 */}
@@ -542,7 +583,9 @@ const LeaveApplicationModal = React.memo(
 										<div className="inline-flex flex-col w-full">
 											<InputTitle classnames="whitespace-nowrap" title={"請假時間(起)"} />
 											<ControlledOnlyTimePicker name="since" minutesStep={30} />
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["since"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">
+												{errors["since"]?.message}
+											</FormHelperText>
 										</div>
 
 										{/* 時間(迄) */}
@@ -554,7 +597,9 @@ const LeaveApplicationModal = React.memo(
 												minTime={sinceValue}
 												disabled={!sinceValue}
 											/>
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">{errors["until"]?.message}</FormHelperText>
+											<FormHelperText className="!text-red-600 break-words !text-right h-5">
+												{errors["until"]?.message}
+											</FormHelperText>
 										</div>
 									</div>
 								</div>
