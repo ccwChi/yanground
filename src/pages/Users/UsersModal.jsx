@@ -102,7 +102,7 @@ const EditModal = React.memo(
         ? apiData.workHourType.value
         : "",
       jobTitle: apiData?.jobTitle ? apiData.jobTitle.id : "",
-      termination: apiData?.termination ? apiData.termination : null,
+      termination: apiData?.termination ? new Date(apiData.termination) : null,
       arrangedLeaveDays: apiData?.arrangedLeaveDays
         ? apiData.arrangedLeaveDays
         : 0,
@@ -160,6 +160,9 @@ const EditModal = React.memo(
         arrangedLeaveDays: data?.arrangedLeaveDays
           ? data.arrangedLeaveDays.toString()
           : "0",
+        termination: data?.termination
+          ? format(data.termination, "yyyy-MM-dd")
+          : "",
       };
       if (!convertData?.employeeId) {
         delete convertData.employeeId;
