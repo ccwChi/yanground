@@ -124,7 +124,7 @@ const AttendanceSectionModal = ({ deliverInfo, onClose, isOpen, setReflesh, atte
 	/* 提交表單資料到後端並執行相關操作 */
 	const onSubmit = (data) => {
 		setSendBackFlag(true);
-		let url = "me/attendanceForm";
+		let url = "me/leave";
 		let message = "送出表單成功";
 
 		let dataForApi = {
