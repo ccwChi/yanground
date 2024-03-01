@@ -26,14 +26,14 @@ import { useNotification } from "../../hooks/useNotification";
 // Utils
 import { getData, postData } from "../../utils/api";
 // Others
-import { PunchLocationModal, LeaveApplicationModal } from "./AnomalyModal";
+import { PunchLocationModal, LeaveApplicationModal } from "./AttendanceViewModal";
 // Table 及 Table 所需按鈕、頁數
 import RWDTable from "../../components/RWDTable/RWDTable";
 
 // 用網址傳參數
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 
-const AnomalyReport = () => {
+const AttendanceView = () => {
 	const isTargetScreen = useMediaQuery("(max-width:991.98px)");
 	const navigateWithParams = useNavigateWithParams();
 	const navigate = useNavigate();
@@ -48,7 +48,6 @@ const AnomalyReport = () => {
 	const dateValue = queryParams.get("date");
 	const tabCat = queryParams.get("cat");
 
-	// Page 頁數設置
 	// Page 頁數設置
 	const [page, setPage] = useState(
 		queryParams.has("p") && !isNaN(+queryParams.get("p")) ? +queryParams.get("p") - 1 : 0
@@ -90,6 +89,7 @@ const AnomalyReport = () => {
 	// 搜尋日期
 	const [since, setSince] = useState(null);
 	const [until, setUntil] = useState(null);
+	const [type, setType] = useState("ATTENDANCE");
 
 	useEffect(() => {
 		setSince(daysAgo);
@@ -158,8 +158,7 @@ const AnomalyReport = () => {
 		getData("attendanceType").then((result) => {
 			if (result.result) {
 				const data = result.result;
-				const filteredData = data.filter((obj) => obj.value !== "ATTENDANCE");
-				const formattedList = filteredData.map((obj) => ({ label: obj.chinese, id: obj.value }));
+				const formattedList = data.map((obj) => ({ label: obj.chinese, id: obj.value }));
 				setAttendanceTypeList(formattedList);
 			} else {
 				setAttendanceTypeList([]);
@@ -200,8 +199,6 @@ const AnomalyReport = () => {
 			});
 		}
 		if (stateValue !== null) {
-			if (stateValue === 1) {
-			}
 			tempShowData = tempShowData.filter((event) => {
 				return event.anomalyState.id === stateValue;
 			});
@@ -217,18 +214,12 @@ const AnomalyReport = () => {
 		setPage(0);
 	}, [depValue, userValue, stateValue, dateValue, apiData]);
 
-	useEffect(() => {
-		if (currentPageData.length > 0) {
-			setIsLoading(false);
-		}
-	}, [currentPageData]);
-
 	// 取得日曆資料
 	useEffect(() => {
 		if (!!since && !!until) {
 			setIsLoading(true);
+			setApiData([]);
 			// Define the API calls
-			const type = "ATTENDANCE";
 			const sinceForApi = since.toISOString().slice(0, 10);
 			const untilForApi = until.toISOString().slice(0, 10);
 			navigateWithParams(0, 0, { since: sinceForApi }, false);
@@ -236,42 +227,48 @@ const AnomalyReport = () => {
 			const anomaly = "";
 			getData(`attendance?type=${type}&since=${sinceForApi}&until=${untilForApi}&anomaly=${anomaly}&s=5000&p=1`).then(
 				(result) => {
-					const rawData = result.result.content.map(
-						({ anomaly, date, id, since, until, user, clockPunchIn, clockPunchOut }, i) => ({
-							title: user.department.name + " - " + user.nickname,
-							anomalyState: anomaly === null ? { text: "正常", id: "3" } : { text: "異常", id: "2" },
-							anomaly,
-							date,
-							id,
-							since: clockPunchIn ? clockPunchIn.occurredAt.slice(11, 19) : "-",
-							until: clockPunchOut ? clockPunchOut.occurredAt.slice(11, 19) : "-",
-							color: getflagColorandText(anomaly).color,
-							user: {
-								id: user.id,
-								nickname: user.nickname,
-								fullName: user.lastname + user.firstname,
-								department: user.department.name,
-								departmentId: user.department.id,
-							},
-							clockPunchIn,
-							clockPunchOut,
-						})
-					);
-					setApiData(
-						rawData.sort((a, b) => {
-							if (a.date < b.date) {
-								return 1;
-							}
-							if (a.date > b.date) {
-								return -1;
-							}
-							return 0;
-						})
-					);
+					if (result.result) {
+						const rawData = result.result.content.map(
+							({ id, type, anomaly, date, since, until, user, clockPunchIn, clockPunchOut }) => ({
+								id,
+								type,
+								anomaly,
+								date,
+								title: user.department.name + " - " + user.nickname,
+								anomalyState: anomaly === null ? { text: "正常", id: "3" } : { text: "異常", id: "2" },
+								since: clockPunchIn ? clockPunchIn.occurredAt.slice(11, 19) : "-",
+								until: clockPunchOut ? clockPunchOut.occurredAt.slice(11, 19) : "-",
+								color: getflagColorandText(anomaly).color,
+								user: {
+									id: user.id,
+									nickname: user.nickname,
+									fullName: user.lastname + user.firstname,
+									department: user.department.name,
+									departmentId: user.department.id,
+								},
+								clockPunchIn,
+								clockPunchOut,
+							})
+						);
+						setApiData(
+							rawData.sort((a, b) => {
+								if (a.date < b.date) {
+									return 1;
+								}
+								if (a.date > b.date) {
+									return -1;
+								}
+								return 0;
+							})
+						);
+					} else {
+						setApiData([]);
+					}
+					setIsLoading(false);
 				}
 			);
 		}
-	}, [since, until]);
+	}, [since, until, type]);
 
 	useEffect(() => {
 		if (tabCat === "calendar") {
@@ -295,23 +292,22 @@ const AnomalyReport = () => {
 	// -----------------------------------------------------
 	// 對照 api table 所顯示 key
 	const columnsPC = [
-		{ key: ["user", "fullName"], label: "姓名", size: "180px" },
-		{ key: ["user", "department"], label: "部門", size: "180px" },
-		{ key: "date", label: "日期", size: "190px" },
-		{ key: ["anomalyState", "text"], label: "狀態", size: "100px" },
-		{ key: ["anomaly", "chinese"], label: "異常原因", size: "310px" },
-		{ key: "since", label: "上班時間", size: "160px" },
-		{ key: "until", label: "下班時間", size: "160px" },
-
-		// { key: "until", label: "補單狀況", size: "14%" },
+		{ key: ["type", "chinese"], label: "考勤假別", size: "9%" },
+		{ key: ["user", "fullName"], label: "姓名", size: "12%" },
+		{ key: ["user", "department"], label: "部門", size: "12%" },
+		{ key: "date", label: "日期", size: "14%" },
+		{ key: ["anomalyState", "text"], label: "狀態", size: "8%" },
+		{ key: ["anomaly", "chinese"], label: "異常原因", size: "14%" },
+		{ key: "since", label: "上班時間", size: "12%" },
+		{ key: "until", label: "下班時間", size: "12%" },
 	];
 	const columnsMobile = [
-		// { key: "displayName", label: "LINE 顯示名稱" },
 		{ key: ["user", "fullName"], label: "姓名" },
 		{ key: ["user", "nickname"], label: "暱稱" },
 		{ key: ["user", "department"], label: "部門" },
 		{ key: "date", label: "日期" },
 		{ key: ["anomalyState", "text"], label: "狀態" },
+		{ key: ["type", "chinese"], label: "考勤假別" },
 		{ key: ["anomaly", "chinese"], label: "異常原因" },
 		{ key: "since", label: "上班時間" },
 		{ key: "until", label: "下班時間" },
@@ -387,7 +383,7 @@ const AnomalyReport = () => {
 				<LeaveApplicationModal
 					title={"假單申請"}
 					departmentsList={departmentList}
-					attendanceTypesList={attendanceTypeList}
+					attendanceTypesList={attendanceTypeList.filter((obj) => obj.id !== "ATTENDANCE")}
 					sendDataToBackend={sendDataToBackend}
 					onClose={onClose}
 				/>
@@ -401,8 +397,8 @@ const AnomalyReport = () => {
 		<>
 			{/* PageTitle & Search */}
 			<PageTitle
-				title={"異常考勤"}
-				description="此頁面是用於查看整個部門或全體員工的考勤資訊與狀態，提供列表與月曆形式，同時可檢視員工上下班打卡地點。"
+				title={"考勤假別"}
+				description="此頁面是用於查看整個部門或全體員工的考勤資訊與狀態，同時可檢視員工上下班打卡地點。"
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
 				// 搜尋模式
@@ -412,8 +408,8 @@ const AnomalyReport = () => {
 				handleOpenDialog={handleOpenSearch}
 				handleCloseDialog={handleCloseSearch}
 				handleCloseText={"關閉"}
-				haveValue={
-					!depValue && !userValue && (stateValue === 1 || stateValue === null) && !dateValue
+				isdirty={
+					!depValue && !userValue && (stateValue === 1 || stateValue === null) && !dateValue && type !== "ATTENDANCE"
 					// && (modeValue === dataCAList[0].value
 					// 	|| !dataCAList.some((item) => item.value === modeValue)
 					// 	)
@@ -525,6 +521,21 @@ const AnomalyReport = () => {
 							))}
 						</Select>
 					</div>
+					<div className="inline-flex items-center w-full gap-2">
+						<InputTitle title={"假別"} pb={false} required={false} classnames="whitespace-nowrap" />
+						<Select
+							value={type}
+							onChange={(e) => setType(e.target.value)}
+							className="inputPadding !pe-5"
+							displayEmpty
+							fullWidth>
+							{attendanceTypeList.map((at) => (
+								<MenuItem key={at.id} value={at.id}>
+									{at.label}
+								</MenuItem>
+							))}
+						</Select>
+					</div>
 					<div className="w-full text-left flex mt-1">
 						<InputTitle title={"選擇日期"} pb={false} required={false} classnames="whitespace-nowrap" />
 						<div className="flex ms-2 mt-1">
@@ -573,7 +584,7 @@ const AnomalyReport = () => {
 							columnsMobile={columnsMobile}
 							actions={actions}
 							cardTitleKey={"title"}
-							tableMinWidth={800}
+							tableMinWidth={1024}
 							isLoading={isLoading}
 							handleActionClick={handleActionClick}
 						/>
@@ -614,7 +625,7 @@ const AnomalyReport = () => {
 	);
 };
 
-export default AnomalyReport;
+export default AttendanceView;
 
 const CustomEventContent = ({ event, isTargetScreen }) => {
 	const extendedProps = event._def.extendedProps;
@@ -640,6 +651,7 @@ const CustomEventContent = ({ event, isTargetScreen }) => {
 						<div className="p-2">
 							<p className="text-xl">{extendedProps.user.nickname}</p>
 							<p className="text-base">{event.startStr}</p>
+							<p className="text-base">考勤假別 : {extendedProps.type.chinese}</p>
 							<p className="text-base">
 								異常狀態 : {extendedProps.anomalyState.id === "2" && "異常"}
 								{extendedProps.anomalyState.id === "3" && "正常"}

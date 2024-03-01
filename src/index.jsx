@@ -21,7 +21,7 @@ import DispatchList from "./pages/DispatchList/DispatchList";
 // HRM
 import Users from "./pages/Users/Users";
 import AttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
-import AnomalyReport from "./pages/AnomalyReport/AnomalyReport";
+import AttendanceView from "./pages/AttendanceView/AttendanceView";
 import AttendanceWaiverHRM from "./pages/AttendanceWaiverHRM/AttendanceWaiverHRM";
 import WorkCalendar from "./pages/WorkCalendar/WorkCalendar";
 import AttendanceReport from "./pages/AttendanceReport/AttendanceReport";
@@ -108,8 +108,8 @@ const router = createBrowserRouter([
 				element: <AttendanceCalendar />,
 			},
 			{
-				path: "/anomalyreport",
-				element: <AnomalyReport />,
+				path: "/attendanceview",
+				element: <AttendanceView />,
 			},
 			{
 				path: "/attendancewaiverhrm",
