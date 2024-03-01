@@ -6,7 +6,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
-const AlertDialog = ({ open, onClose, icon, title, content, disagreeText, agreeText }) => {
+const AlertDialog = ({ open, onClose, icon, title, content, disagreeText, agreeText, children, ...otherProps }) => {
 	const handleClose = (agree) => {
 		onClose(agree);
 	};
@@ -16,12 +16,16 @@ const AlertDialog = ({ open, onClose, icon, title, content, disagreeText, agreeT
 			open={open}
 			onClose={() => handleClose(false)}
 			aria-labelledby="alert-dialog-title"
-			aria-describedby="alert-dialog-description">
+			aria-describedby="alert-dialog-description"
+			{...otherProps}>
 			<DialogTitle id="alert-dialog-title" className="flex items-center gap-1">
 				{icon} {title}
 			</DialogTitle>
 			<DialogContent>
-				<DialogContentText id="alert-dialog-description">{content}</DialogContentText>
+				<DialogContentText id="alert-dialog-description">
+					{content}
+					{children}
+				</DialogContentText>
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={() => handleClose(false)}>{disagreeText}</Button>
