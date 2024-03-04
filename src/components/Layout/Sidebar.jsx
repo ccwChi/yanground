@@ -105,7 +105,7 @@ const Sidebar = ({ menuItems, closeSidebar }) => {
 					))}
 				</List>
 			</div>
-			<div className="text-xs">Copyright © 2023 YuanRong.</div>
+			<div className="text-xs">Copyright © {new Date().getFullYear()} YuanRong.</div>
 		</div>
 	);
 };
