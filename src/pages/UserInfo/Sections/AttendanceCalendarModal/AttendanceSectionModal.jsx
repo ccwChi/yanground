@@ -60,10 +60,6 @@ const AttendanceSectionModal = ({ deliverInfo, onClose, isOpen, setReflesh, atte
 	/* 使用 useForm Hook 來管理表單狀態和驗證 */
 	const schema = yup.object().shape({
 		leave: yup.string().required("假別不得為空"),
-		// reason: yup
-		//   .string()
-		//   .max(250, "原因最多只能輸入 250 個字符")
-		//   .required("原因不可為空值！"),
 		sinceDate: yup.string().required("起始時間不可為空值！"),
 		endDate: yup
 			.string()
@@ -72,6 +68,7 @@ const AttendanceSectionModal = ({ deliverInfo, onClose, isOpen, setReflesh, atte
 				const { sinceDate } = this.parent;
 				return value > sinceDate;
 			}),
+		excuse: yup.string().max(250, "原因最多只能輸入 250 個字符"),
 	});
 	const methods = useForm({
 		resolver: yupResolver(schema),
@@ -80,11 +77,19 @@ const AttendanceSectionModal = ({ deliverInfo, onClose, isOpen, setReflesh, atte
 		control,
 		handleSubmit,
 		watch,
+		setValue,
 		reset,
 		formState: { errors, isDirty },
 	} = methods;
 	const watchSinceDate = watch("sinceDate");
-	const watchEndDate = watch("endDate");
+	const watchLeave = watch("leave");
+
+	/* 變更請假類別就將 excuse 清空 */
+	useEffect(() => {
+		if (watchLeave === "ANNUAL_LEAVE") {
+			setValue("excuse", "");
+		}
+	}, [watchLeave]);
 
 	/* MenuItem 選單樣式調整 */
 	const ITEM_HEIGHT = 48;
@@ -132,6 +137,7 @@ const AttendanceSectionModal = ({ deliverInfo, onClose, isOpen, setReflesh, atte
 			type: data.leave,
 			since: deliverInfo.start + "T" + data.sinceDate + ":01",
 			until: deliverInfo.start + "T" + data.endDate + ":00",
+			excuse: data.excuse || "",
 		};
 		const fd = new FormData();
 		for (let key in dataForApi) {
@@ -184,13 +190,13 @@ const AttendanceSectionModal = ({ deliverInfo, onClose, isOpen, setReflesh, atte
 				</div>
 
 				{/* ------------- 表單 開始------------- */}
-				<div className="h-[300px] w-full flex flex-col pt-4">
+				<div className="max-h-[65vh] w-full flex flex-col pt-4">
 					<FormProvider {...methods}>
-						<form className="inline-flex flex-col flex-1  overflow-hidden" onSubmit={handleSubmit(onSubmit)}>
-							<div className="flex flex-col flex-1 gap-4 overflow-y-auto mb-4">
+						<form className="inline-flex flex-col flex-1 overflow-hidden" onSubmit={handleSubmit(onSubmit)}>
+							<div className="flex flex-col flex-1 overflow-y-auto mb-4 px-1">
 								{/* ------------- 請假類別 ------------- */}
 								<div className="w-full flex flex-col">
-									<div className="w-full  sm:mt-0">
+									<div className="w-full sm:mt-0">
 										<InputTitle title={"請假類別"} classnames="whitespace-nowrap " pb={true} required={true} />
 										<Controller
 											name="leave"
@@ -222,7 +228,7 @@ const AttendanceSectionModal = ({ deliverInfo, onClose, isOpen, setReflesh, atte
 								<div className="flex flex-col">
 									<div className="flex sm:flex-row flex-col sm:gap-4">
 										<div className="w-full flex flex-col">
-											<InputTitle title={"請選擇請假時間"} classnames="whitespace-nowrap " />
+											<InputTitle title={"請選擇請假時間"} classnames="whitespace-nowrap" />
 											<ControlledTimeAutoComplete name={"sinceDate"} placeholder="請選擇請假開始時間" />
 											<FormHelperText
 												className="!text-red-600 break-words !text-right !mt-0"
@@ -250,33 +256,29 @@ const AttendanceSectionModal = ({ deliverInfo, onClose, isOpen, setReflesh, atte
 								</div>
 
 								{/* ------------- 原因 ------------- */}
-								{/* <div className="w-full">
-                  <InputTitle
-                    title={"原因"}
-                    required={true}
-                    classnames="whitespace-nowrap  -translate-y-px"
-                  />
-                  <Controller
-                    name="reason"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        multiline
-                        rows={2}
-                        className="inputPadding"
-                        placeholder={"請輸入請假事由"}
-                        fullWidth
-                        {...field}
-                      />
-                    )}
-                  />
-                  <FormHelperText
-                    className="!text-red-600 break-words !text-right !mt-0 !mb-4"
-                    sx={{ minHeight: "1.25rem" }}
-                  >
-                    {errors["reason"]?.message}
-                  </FormHelperText>
-                </div> */}
+								<div
+									className={`sm:flex flex-col ${
+										watchLeave === "ANNUAL_LEAVE" ? "hidden sm:invisible" : "flex visible"
+									}`}>
+									<InputTitle title={"原因"} required={false} classnames="whitespace-nowrap" />
+									<Controller
+										name="excuse"
+										control={control}
+										render={({ field }) => (
+											<TextField
+												multiline
+												rows={2}
+												className="inputPadding"
+												placeholder={"請輸入請假事由"}
+												fullWidth
+												{...field}
+											/>
+										)}
+									/>
+									<FormHelperText className="!text-red-600 break-words !text-right !mt-0" sx={{ minHeight: "1.25rem" }}>
+										{errors["excuse"]?.message}
+									</FormHelperText>
+								</div>
 							</div>
 
 							{/* Footer */}
