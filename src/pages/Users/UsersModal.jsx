@@ -367,7 +367,7 @@ const EditModal = React.memo(
                   {/* 生日 */}
                   <div className="w-full">
                     <InputTitle title={"生日"} required={false} />
-                    <ControlledDatePicker name="birthDate" />
+                    <ControlledDatePicker name="birthDate" mode="rwd" />
                   </div>
 
                   {/* 性別 */}
@@ -512,7 +512,7 @@ const EditModal = React.memo(
                           value={value}
                           onChange={onChange}
                         >
-                          <MenuItem value="" disabled>
+                          <MenuItem value="">
                             <span className="text-neutral-400 font-light">
                               尚無職稱
                             </span>
@@ -607,13 +607,13 @@ const EditModal = React.memo(
                   {/* 到職日 */}
                   <div className="w-full">
                     <InputTitle title={"到職日"} />
-                    <ControlledDatePicker name="startedOn" />
+                    <ControlledDatePicker name="startedOn" mode="rwd" />
                   </div>
 
                   {/* 離職日 */}
                   <div className="w-full">
                     <InputTitle title={"離職日"} required={false} />
-                    <ControlledDatePicker name="termination" />
+                    <ControlledDatePicker name="termination" mode="rwd" />
                   </div>
                 </div>
 
