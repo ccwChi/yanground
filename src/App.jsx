@@ -76,7 +76,6 @@ const App = () => {
 				{ text: "豁免出勤", href: "attendancewaiverhrm" },
 				{ text: "考勤報表", href: "attendancereport" },
 				{ text: "辦公行事曆", href: "workcalendar" },
-				// { text: "排班表", href: "staffRoster" },
 			],
 		},
 		{
@@ -86,6 +85,7 @@ const App = () => {
 			subMenuItems: [
 				{ text: "帳戶資訊", href: "userinfo" },
 				{ text: "主管審核", href: "supervisorapproval" },
+				{ text: "主管用排班表", href: "staffroster" },
 				{ text: "教育訓練", href: "educationtraining" },
 				{ text: "MD 文稿工作區", href: "mdworkspace" },
 			],

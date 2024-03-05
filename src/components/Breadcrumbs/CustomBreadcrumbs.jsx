@@ -23,12 +23,11 @@ const nameMappings = [
 	{ name: "attendancewaiverhrm", display: "豁免出勤" },
 	{ name: "attendancereport", display: "考勤報表" },
 	{ name: "workcalendar", display: "辦公行事曆" },
-	{ name: "StaffRoster", display: "排班表" },
 	// 會員中心
 	{ name: "userinfo", display: "帳戶資訊" },
 	{ name: "educationtraining", display: "教育訓練" },
 	{ name: "supervisorapproval", display: "主管審核" },
-	{ name: "staffRoster", display: "排休月曆表" },
+	{ name: "staffroster", display: "排休月曆表" },
 	{ name: "mdworkspace", display: "MD 文稿工作區" },
 	// Others
 	{ name: "setting", display: "設定" },

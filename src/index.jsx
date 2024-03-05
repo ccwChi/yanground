@@ -42,7 +42,7 @@ import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import "react-markdown-editor-lite/lib/index.css";
-import StaffRoster from "./StaffRoster/StaffRoster";
+import StaffRoster from "./pages/StaffRoster/StaffRoster";
 
 const router = createBrowserRouter([
 	{
@@ -133,7 +133,7 @@ const router = createBrowserRouter([
 				element: <UserInfo />,
 			},
 			{
-				path: "/staffRoster",
+				path: "/staffroster",
 				element: <StaffRoster />,
 			},
 			{
