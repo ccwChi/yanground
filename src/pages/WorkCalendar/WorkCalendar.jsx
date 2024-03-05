@@ -44,15 +44,6 @@ const WorkCalendar = () => {
 	// Button Group
 	const btnGroup = [
 		{
-			mode: "setHolidayConfig",
-			icon: <AddLinkIcon fontSize="small" />,
-			text: "設定例假日行事曆",
-			variant: "contained",
-			color: "primary",
-			fabVariant: "success",
-			fab: <AddLinkIcon />,
-		},
-		{
 			mode: "configureSpecialHoliday",
 			icon: <SettingsSuggestIcon fontSize="small" />,
 			text: "設定特殊假期",
@@ -60,6 +51,15 @@ const WorkCalendar = () => {
 			color: "secondary",
 			fabVariant: "warning",
 			fab: <SettingsSuggestIcon />,
+		},
+		{
+			mode: "setHolidayConfig",
+			icon: <AddLinkIcon fontSize="small" />,
+			text: "設定例假日行事曆",
+			variant: "contained",
+			color: "primary",
+			fabVariant: "success",
+			fab: <AddLinkIcon />,
 		},
 	];
 

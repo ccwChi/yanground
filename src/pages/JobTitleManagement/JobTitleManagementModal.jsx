@@ -275,7 +275,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, departmentsList, sendData
 										/>
 									</div>
 								</div>
-
+								{/* 簽核權限 */}
 								<div
 									className={`inline-flex items-center sm:gap-2 gap-1 mt-4 ${deliverInfo ? "visible" : "invisible"}`}>
 									<InputTitle title={"可進行簽核"} required={false} />

@@ -39,12 +39,13 @@ const RWDTable = ({
 	handleActionClick,
 	actionSpec = false,
 	attendanceWaiverList = null,
+	specStatus = false,
 }) => {
 	const isSmallScreen = useMediaQuery("(max-width:575.98px)");
 
 	if (isSmallScreen) {
 		return (
-			<div className="flex flex-col gap-3 pt-1 pb-[30%]">
+			<div className={`flex flex-col gap-3 pt-1 ${specStatus ? "pb-1" : "pb-[30%]"}`}>
 				{!isLoading ? (
 					data && data.length > 0 ? (
 						data.map((item, rowIndex) => (
@@ -140,6 +141,7 @@ const RWDTable = ({
 																size="small"
 																data-mode={action.value}
 																data-value={item.id}
+																sx={{ width: "34px", aspectRatio: "1/1" }}
 																onClick={handleActionClick}>
 																{action.icon}
 															</IconButton>
@@ -169,7 +171,7 @@ const RWDTable = ({
 																	return item.administrativeDivision ? (
 																		item.administrativeDivision.administeredBy.name + item.administrativeDivision.name
 																	) : (
-																		<span className="italic text-neutral-500 text-sm">(無)</span>
+																		<span className="italic text-neutral-500 text-sm">-</span>
 																	);
 																case "lastname+firstname":
 																	const hasLastname = item.lastname && item.lastname.trim() !== "";
@@ -182,7 +184,7 @@ const RWDTable = ({
 																	} else if (hasFirstname) {
 																		return item.firstname;
 																	} else {
-																		return <span className="italic text-neutral-500 text-sm">(無)</span>;
+																		return <span className="italic text-neutral-500 text-sm">-</span>;
 																	}
 																default:
 																	const columnData = columnsMobile.find((col) => col.key === column.key);
@@ -197,18 +199,18 @@ const RWDTable = ({
 																		}
 																	}
 
-																	return <span className="italic text-neutral-500 text-sm">(無)</span>;
+																	return <span className="italic text-neutral-500 text-sm">-</span>;
 																// if (column.children) {
 																// 	return item[column.key] ? (
 																// 		item[column.key][column.children.key]
 																// 	) : (
-																// 		<span className="italic text-neutral-500 text-sm">(無)</span>
+																// 		<span className="italic text-neutral-500 text-sm">-</span>
 																// 	);
 																// } else {
 																// 	return item[column.key] ? (
 																// 		item[column.key]
 																// 	) : (
-																// 		<span className="italic text-neutral-500 text-sm">(無)</span>
+																// 		<span className="italic text-neutral-500 text-sm">-</span>
 																// 	);
 																// }
 															}
@@ -331,7 +333,7 @@ const RWDTable = ({
 																<Avatar src={item.pictureUrl} alt={item.nickname} />
 															</div>
 														) : (
-															<span className="italic text-neutral-500 text-sm">(無)</span>
+															<span className="italic text-neutral-500 text-sm">-</span>
 														);
 													case "gender":
 														return item.gender ? "男性" : item.gender === false ? "女性" : "?";
@@ -339,7 +341,7 @@ const RWDTable = ({
 														return item.administrativeDivision ? (
 															item.administrativeDivision.administeredBy.name + item.administrativeDivision.name
 														) : (
-															<span className="italic text-neutral-500 text-sm">(無)</span>
+															<span className="italic text-neutral-500 text-sm">-</span>
 														);
 													case "lastname+firstname":
 														const hasLastname = item.lastname && item.lastname.trim() !== "";
@@ -352,7 +354,7 @@ const RWDTable = ({
 														} else if (hasFirstname) {
 															return item.firstname;
 														} else {
-															return <span className="italic text-neutral-500 text-sm">(無)</span>;
+															return <span className="italic text-neutral-500 text-sm">-</span>;
 														}
 													case "approveState":
 														return item.approveState === true ? (
@@ -407,19 +409,19 @@ const RWDTable = ({
 															}
 														}
 
-														return <span className="italic text-neutral-500 text-sm">(無)</span>;
+														return <span className="italic text-neutral-500 text-sm">-</span>;
 													}
 													// if (column.children) {
 													// 	return item[column.key] ? (
 													// 		item[column.key][column.children.key]
 													// 	) : (
-													// 		<span className="italic text-neutral-500 text-sm">(無)</span>
+													// 		<span className="italic text-neutral-500 text-sm">-</span>
 													// 	);
 													// } else {
 													// 	return item[column.key] ? (
 													// 		item[column.key]
 													// 	) : (
-													// 		<span className="italic text-neutral-500 text-sm">(無)</span>
+													// 		<span className="italic text-neutral-500 text-sm">-</span>
 													// 	);
 													// }
 												}
@@ -434,10 +436,10 @@ const RWDTable = ({
 														aria-label={action.value}
 														color="custom"
 														size="small"
+														sx={{ width: "34px", aspectRatio: "1/1" }}
 														data-mode={action.value}
 														data-value={item.id}
-														onClick={handleActionClick}
-														sx={{ background: "pink" }}>
+														onClick={handleActionClick}>
 														{action.icon}
 													</IconButton>
 												</Tooltip>

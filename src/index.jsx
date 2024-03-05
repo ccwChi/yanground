@@ -16,7 +16,7 @@ import DispatchCalendar from "./pages/DispatchCalendar/DispatchCalendar";
 import Maps from "./pages/Project/Maps";
 // Project Manager
 import Project from "./pages/Project/Project";
-import ProjectDocumentsManagement from "./pages/Project/Documents/Doucuments";
+import ProjectDocumentsManagement from "./pages/Project/Documents/Documents";
 import DispatchList from "./pages/DispatchList/DispatchList";
 // HRM
 import Users from "./pages/Users/Users";

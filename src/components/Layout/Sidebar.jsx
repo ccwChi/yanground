@@ -25,7 +25,9 @@ const Sidebar = ({ menuItems, closeSidebar }) => {
 	};
 
 	return (
+		// overflow-hidden
 		<div className="flex flex-col items-center justify-between h-full pointer-events-auto lg:max-w-none max-w-sm overflow-y-auto gap-4 pb-2">
+			{/* flex flex-col flex-1 overflow-hidden w-full */}
 			<div className="w-full">
 				<div
 					className={"flex flex-col items-center justify-center px-6 py-4 mb-3 select-none"}
@@ -58,6 +60,7 @@ const Sidebar = ({ menuItems, closeSidebar }) => {
 						{userProfile ? userProfile.department && userProfile.department.name : "-"}
 					</span>
 				</div>
+				{/* mainMenu !px-3 flex flex-col gap-1 flex-1 overflow-y-auto */}
 				<List className="mainMenu !px-3 flex flex-col gap-1">
 					{menuItems.map((menuItem, index) => (
 						<div key={index} className="item">

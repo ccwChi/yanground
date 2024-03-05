@@ -77,7 +77,7 @@ const Users = () => {
 	// API List Data
 	const [apiData, setApiData] = useState(null);
 	// isLoading 等待請求 api
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 	// Page 頁數設置
 	const [page, setPage] = useState(
 		queryParams.has("p") && !isNaN(+queryParams.get("p")) ? +queryParams.get("p") - 1 : 0
@@ -281,22 +281,18 @@ const Users = () => {
 
 	// 取得部門清單跟權限清單
 	useEffect(() => {
-		setIsLoading(true);
 		const departurl = "department?p=1&s=500";
 		const authorityurl = "authority";
 		getData(departurl).then((result) => {
-			setIsLoading(false);
 			const data = result.result.content;
 			setDepartmentList(data);
 		});
 		getData(authorityurl).then((result) => {
-			setIsLoading(false);
 			const data = result.result;
 			const sortedAuthorityList = data.slice().sort((a, b) => a.id - b.id);
 			setAuthorityList(sortedAuthorityList);
 		});
 		getData("factorySite").then((result) => {
-			setIsLoading(false);
 			const data = result.result;
 			setFactorySiteList([
 				{
@@ -307,7 +303,6 @@ const Users = () => {
 			]);
 		});
 		getData("workDayType").then((result) => {
-			setIsLoading(false);
 			const data = result.result;
 			setWorkDayTypeList([
 				{
@@ -319,7 +314,6 @@ const Users = () => {
 			]);
 		});
 		getData("workHourType").then((result) => {
-			setIsLoading(false);
 			const data = result.result;
 			setWorkHourTypeList([
 				{
@@ -330,7 +324,6 @@ const Users = () => {
 			]);
 		});
 		getData("jobTitle?p=1&s=5000").then((result) => {
-			setIsLoading(false);
 			const data = result.result.content.map((obj) => ({
 				id: obj.id,
 				name: obj.name,
