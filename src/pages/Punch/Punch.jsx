@@ -32,6 +32,8 @@ const LocationMarker = () => {
 	const [punchTime, setPunchTime] = useState("");
 	const [punchIO, setPunchIO] = useState(null);
 	const markerRef = useRef(null);
+	// 是否應該更新位置
+	const [shouldUpdateLocation, setShouldUpdateLocation] = useState(true);
 
 	// 需要把 Marker 的 icon 弄出來，不然會顯示錯誤圖片
 	let iconSize = 54;
@@ -45,6 +47,9 @@ const LocationMarker = () => {
 
 	const map = useMapEvents({
 		locationfound(e) {
+			// 如果不應該更新位置，則直接傳回
+			if (!shouldUpdateLocation) return;
+
 			const newPosition = e.latlng;
 
 			// 檢查位置是否有變化
@@ -113,6 +118,7 @@ const LocationMarker = () => {
 
 		postData("clockPunch", fd).then((result) => {
 			setIsLoading(false);
+			setShouldUpdateLocation(false);
 			if (result.status) {
 				const data = result.result.result;
 				setPunchState(2);
@@ -142,9 +148,12 @@ const LocationMarker = () => {
 					<div className="inline-flex flex-col gap-2">
 						<p className="!my-0 text-rose-400 font-bold text-lg">打卡需開啟定位服務！請確保您的定位功能已啟用。</p>
 						<p className="!my-0 text-rose-400 font-bold text-lg">
+							也有可能是手機定位系統獲取位置中，如此情況請稍後。
+						</p>
+						<p className="!my-0 text-rose-400 font-bold text-lg">
 							若曾經拒絕開啟或提供定位功能，請至後台重新啟用定位。
 						</p>
-						<p className="!my-0 text-rose-400 font-bold text-lg">如有不明，請聯繫人資部門尋求協助。謝謝！</p>
+						<p className="!my-0 text-rose-400 font-bold text-base">如有不明，請聯繫人資部門尋求協助。謝謝！</p>
 					</div>
 				</div>
 			</Popup>

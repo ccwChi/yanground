@@ -83,7 +83,7 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 						{deliverInfo.approveState ? (
 							<>
 								<p className="w-full">
-									簽核主管：
+									簽核人：
 									<span className="font-bold">
 										{deliverInfo.approver.lastname}
 										{deliverInfo.approver.firstname}
