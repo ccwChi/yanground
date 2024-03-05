@@ -30,8 +30,10 @@ import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
 import ClientQuestionnaire from "./pages/Client/ClientQuestionnaire";
 import EducationTrainging from "./pages/EducationTraining/EducationTraining";
-import SupervisorApproval from "./pages/SupervisorApproval/SupervisorApproval";
 import MDWorkspace from "./pages/MDWorkspace/MDWorkspace";
+// Supervisor Zone
+import StaffRoster from "./pages/StaffRoster/StaffRoster";
+import SupervisorApproval from "./pages/SupervisorApproval/SupervisorApproval";
 // Error
 import ErrorMessage from "./pages/Error/ErrorMessage";
 import ErrorPages from "./pages/Error/ErrorPages";
@@ -42,7 +44,6 @@ import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import "react-markdown-editor-lite/lib/index.css";
-import StaffRoster from "./pages/StaffRoster/StaffRoster";
 
 const router = createBrowserRouter([
 	{
@@ -133,14 +134,6 @@ const router = createBrowserRouter([
 				element: <UserInfo />,
 			},
 			{
-				path: "/staffroster",
-				element: <StaffRoster />,
-			},
-			{
-				path: "/supervisorapproval",
-				element: <SupervisorApproval />,
-			},
-			{
 				path: "/mdworkspace",
 				element: <MDWorkspace />,
 			},
@@ -155,6 +148,15 @@ const router = createBrowserRouter([
 			{
 				path: "/clientquestionnaire",
 				element: <ClientQuestionnaire />,
+			},
+			// Supervisor Zone
+			{
+				path: "/staffroster",
+				element: <StaffRoster />,
+			},
+			{
+				path: "/supervisorapproval",
+				element: <SupervisorApproval />,
 			},
 			// Error
 			{

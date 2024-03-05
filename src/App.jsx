@@ -10,6 +10,7 @@ import {
 	faUsersGear,
 	faAddressCard,
 	faFolderTree,
+	faUserShield,
 } from "@fortawesome/free-solid-svg-icons";
 // MUI
 import { ThemeProvider } from "@mui/material/styles";
@@ -84,10 +85,17 @@ const App = () => {
 			href: "#",
 			subMenuItems: [
 				{ text: "帳戶資訊", href: "userinfo" },
-				{ text: "主管審核", href: "supervisorapproval" },
-				{ text: "主管用排班表", href: "staffroster" },
 				{ text: "教育訓練", href: "educationtraining" },
 				{ text: "MD 文稿工作區", href: "mdworkspace" },
+			],
+		},
+		{
+			icon: faUserShield,
+			text: "主管專區",
+			href: "#",
+			subMenuItems: [
+				{ text: "主管審核", href: "supervisorapproval" },
+				{ text: "排班表(主管用)", href: "staffroster" },
 			],
 		},
 	];

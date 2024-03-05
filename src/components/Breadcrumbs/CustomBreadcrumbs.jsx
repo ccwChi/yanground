@@ -26,9 +26,10 @@ const nameMappings = [
 	// 會員中心
 	{ name: "userinfo", display: "帳戶資訊" },
 	{ name: "educationtraining", display: "教育訓練" },
-	{ name: "supervisorapproval", display: "主管審核" },
-	{ name: "staffroster", display: "排休月曆表" },
 	{ name: "mdworkspace", display: "MD 文稿工作區" },
+	// 主管專區
+	{ name: "staffroster", display: "排休月曆表" },
+	{ name: "supervisorapproval", display: "主管審核" },
 	// Others
 	{ name: "setting", display: "設定" },
 	{ name: "punch", display: "打卡" },
