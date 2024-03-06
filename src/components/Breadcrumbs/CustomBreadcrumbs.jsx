@@ -25,6 +25,7 @@ const nameMappings = [
 	{ name: "workcalendar", display: "辦公行事曆" },
 	// 會員中心
 	{ name: "userinfo", display: "帳戶資訊" },
+	{ name: "userleave", display: "請假申請" },
 	{ name: "educationtraining", display: "教育訓練" },
 	{ name: "mdworkspace", display: "MD 文稿工作區" },
 	// 主管專區

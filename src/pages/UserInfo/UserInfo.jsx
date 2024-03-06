@@ -33,7 +33,7 @@ const UserInfo = () => {
   const tabGroup = [
     { f: "info", text: "個人資訊" },
     { f: "punchlog", text: "打卡紀錄" },
-    { f: "attendancelog", text: "請假申請" },
+    { f: "attendancelog", text: "考勤紀錄" },
     // { f: "applicationform", text: "表單申請" },
     // { f: "operationsmanual", text: "本頁說明" },
   ];

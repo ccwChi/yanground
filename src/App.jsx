@@ -85,6 +85,7 @@ const App = () => {
 			href: "#",
 			subMenuItems: [
 				{ text: "帳戶資訊", href: "userinfo" },
+				{ text: "請假申請", href: "userleave" },
 				{ text: "教育訓練", href: "educationtraining" },
 				{ text: "MD 文稿工作區", href: "mdworkspace" },
 			],

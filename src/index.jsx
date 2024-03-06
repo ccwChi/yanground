@@ -44,6 +44,7 @@ import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import "react-markdown-editor-lite/lib/index.css";
+import UserLeave from "./pages/UserLeave/UserLeave";
 
 const router = createBrowserRouter([
 	{
@@ -132,6 +133,10 @@ const router = createBrowserRouter([
 			{
 				path: "/userInfo",
 				element: <UserInfo />,
+			},
+			{
+				path: "/userleave",
+				element: <UserLeave />,
 			},
 			{
 				path: "/mdworkspace",

@@ -93,7 +93,6 @@ const StaffRoster = () => {
             id: dep.id,
           }));
           setDepartmentList(formattedDep);
-          console.log("setDepartmentList", data);
         });
       } else if (!containsHR) {
         // 如果不是人資部門，部門清單只會有自己部門
@@ -131,7 +130,6 @@ const StaffRoster = () => {
       calendarMonthRange?.[0] && calendarMonthRange[0].slice(0, 7);
     const year = calendarMonthRange?.[0] && calendarMonthRange[0].slice(0, 4);
     const month = calendarMonthRange?.[0] && calendarMonthRange[0].slice(5, 7);
-    console.log("monthCache", monthCache);
     if (
       monthCache &&
       !monthCache.has(alreadyget) &&
@@ -267,9 +265,7 @@ const StaffRoster = () => {
   };
 
   const handleNextPreviousClick = (calendarRef) => {
-    console.log("calendarRef", calendarRef);
     const monthAndYears = calendarRef.current.calendar.currentData.viewTitle;
-    console.log("monthAndYears", monthAndYears);
     const regex = /(\d+)年(\d+)月/;
     const match = monthAndYears.match(regex);
     if (match) {
@@ -285,10 +281,6 @@ const StaffRoster = () => {
           locale: zhTW,
         }
       );
-      console.log("[monthFirstDay, monthLastDay]", [
-        monthFirstDay,
-        monthLastDay,
-      ]);
       setCalendarMonthRange([monthFirstDay, monthLastDay]);
     }
   };
@@ -360,11 +352,7 @@ const StaffRoster = () => {
                 }
                 onChange={(event, newValue, reason) => {
                   if (reason === "clear") {
-                    if (
-                      window.confirm(
-                        "確定清空部門欄位？"
-                      )
-                    ) {
+                    if (window.confirm("確定清空部門欄位？")) {
                       const newParams = new URLSearchParams(
                         window.location.search
                       );
