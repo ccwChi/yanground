@@ -16,7 +16,7 @@ const nameMappings = [
 	// 專管系統
 	{ name: "project", display: "專案管理" },
 	{ name: "dispatchList", display: "派工清單" },
-	// HRM
+	// 人事管理系統
 	{ name: "users", display: "人事管理" },
 	{ name: "attendancecalendar", display: "考勤紀錄" },
 	{ name: "attendanceview", display: "考勤檢視" },

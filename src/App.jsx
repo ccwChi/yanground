@@ -68,7 +68,7 @@ const App = () => {
 		},
 		{
 			icon: faUsersGear,
-			text: "HRM",
+			text: "人事管理系統",
 			href: "#",
 			subMenuItems: [
 				{ text: "人事管理", href: "users" },
