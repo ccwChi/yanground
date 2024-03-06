@@ -397,7 +397,7 @@ const AttendanceView = () => {
 		<>
 			{/* PageTitle & Search */}
 			<PageTitle
-				title={"考勤假別"}
+				title={"考勤檢視"}
 				description="此頁面是用於查看整個部門或全體員工的考勤資訊與狀態，同時可檢視員工上下班打卡地點。"
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
