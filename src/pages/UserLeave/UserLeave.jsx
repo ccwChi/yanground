@@ -23,6 +23,7 @@ import Pagination from "../../components/Pagination/Pagination";
 import { Backdrop, TablePagination } from "@mui/material";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import { LoadingFour } from "../../components/Loader/Loading";
+import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
 
 const UserLeave = () => {
   // 解析網址取得參數
@@ -112,6 +113,11 @@ const UserLeave = () => {
           const transformedData = data
             .filter((item) => item.type.value !== "ARRANGED_LEAVE")
             .map((item) => ({
+              spectiallyKey: item.since
+                ? formatDateTime(item.since).slice(0, 10) +
+                  " " +
+                  item.type.chinese
+                : "-",
               fullname: `${item.user.lastname}${item.user.firstname}`,
               department: item.user.department,
               id: item.id,
@@ -130,6 +136,7 @@ const UserLeave = () => {
               }
               return 0;
             });
+          // console.log("transformedData",transformedData)
           setApiData(transformedData);
           const TempCurrentPageData = transformedData.slice(
             page * rowsPerPage,
@@ -170,15 +177,6 @@ const UserLeave = () => {
       color: "primary",
       fabVariant: "success",
       fab: <AssignmentReturnIcon />,
-    },
-    {
-      mode: "filter",
-      icon: null, // 設為 null 就可以避免 PC 出現
-      text: "篩選",
-      variant: "contained",
-      color: "secondary",
-      fabVariant: "secondary",
-      fab: <TuneIcon fontSize="large" />,
     },
   ];
 
@@ -305,7 +303,7 @@ const UserLeave = () => {
           columnsPC={columnsPC}
           columnsMobile={columnsMobile}
           actions={actions}
-          cardTitleKey={"attendance"}
+          cardTitleKey={["spectiallyKey"]}
           tableMinWidth={700}
           isLoading={isLoading}
           handleActionClick={handleActionClick}
@@ -324,6 +322,10 @@ const UserLeave = () => {
       />
       {/* Modal */}
       {config && config.modalComponent}
+
+      {/* <FloatingActionButton btnGroup={btnGroup} handleActionClick={handleActionClick} /> */}
+      <MultipleFAB btnGroup={btnGroup} handleActionClick={handleActionClick} />
+
       <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
         <LoadingFour />
       </Backdrop>
