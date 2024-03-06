@@ -18,10 +18,14 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import DriveFileMoveIcon from "@mui/icons-material/DriveFileMove";
 
-// Custom
-import { getData, postData, deleteData } from "../../utils/api";
-import { UpdatedModal } from "./ProjectModal";
+// Hooks
 import { useNotification } from "../../hooks/useNotification";
+
+// Utils
+import { getData, postData, deleteData } from "../../utils/api";
+
+// Custom
+import { UpdatedModal } from "./ProjectModal";
 
 const Project = () => {
 	const navigate = useNavigate();
@@ -91,7 +95,7 @@ const Project = () => {
 	const actions = [
 		{ value: "edit", icon: <EditIcon />, title: "編輯專案" },
 		{ value: "void", icon: <DeleteIcon />, title: "刪除專案" },
-		// { value: "gotoFM", icon: <DriveFileMoveIcon />, title: "前往專管文件管理頁" },
+		{ value: "gotoFM", icon: <DriveFileMoveIcon />, title: "前往專管文件管理頁" },
 	];
 
 	// 取得列表資料
@@ -103,12 +107,16 @@ const Project = () => {
 			setIsLoading(true);
 			getData(url).then((result) => {
 				setIsLoading(false);
-				const data = result.result;
-				setApiData(data);
-				if (page >= data?.totalPages) {
-					setPage(0);
-					setRowsPerPage(10);
-					navigate(`?p=1&s=10`);
+				if (result.result) {
+					const data = result.result;
+					setApiData(data);
+					if (page >= data?.totalPages) {
+						setPage(0);
+						setRowsPerPage(10);
+						navigate(`?p=1&s=10`);
+					}
+				} else {
+					setApiData(null);
 				}
 			});
 		},
@@ -182,7 +190,7 @@ const Project = () => {
 			setDeliverInfo(dataValue);
 			setAlertOpen(1);
 		} else if (dataMode === "gotoFM") {
-			navigate(`documents`);
+			navigate(`documents?pj=${dataValue}`);
 		} else {
 			setModalValue(dataMode);
 			if (dataValue) {
