@@ -18,7 +18,7 @@ import Maps from "./pages/Project/Maps";
 import Project from "./pages/Project/Project";
 import ProjectDocumentsManagement from "./pages/Project/Documents/Documents";
 import DispatchList from "./pages/DispatchList/DispatchList";
-// HRM
+// 人事管理系統
 import Users from "./pages/Users/Users";
 import AttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
 import AttendanceView from "./pages/AttendanceView/AttendanceView";
@@ -100,7 +100,7 @@ const router = createBrowserRouter([
 				path: "/dispatchList",
 				element: <DispatchList />,
 			},
-			// HRM
+			// 人事管理系統
 			{
 				path: "/users",
 				element: <Users />,

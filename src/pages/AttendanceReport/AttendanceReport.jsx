@@ -178,6 +178,9 @@ const AttendanceReport = () => {
 													disableCloseOnSelect
 													// ={panduan ? true : false}
 													options={departmentsList}
+													noOptionsText={
+														!!departmentsList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
+													}
 													value={value}
 													onChange={(event, selectedOptions) => {
 														if (panduan) {

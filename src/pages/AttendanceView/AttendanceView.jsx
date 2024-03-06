@@ -419,6 +419,9 @@ const AttendanceView = () => {
 						<InputTitle title={"部門"} pb={false} required={false} classnames="whitespace-nowrap" />
 						<Autocomplete
 							options={departmentList}
+							noOptionsText={
+								!!departmentList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
+							}
 							className="flex-1"
 							value={departmentList?.find((obj) => obj.id === depValue) || null}
 							onChange={(event, newValue, reason) => {
@@ -463,6 +466,9 @@ const AttendanceView = () => {
 						<InputTitle title={"人員"} pb={false} required={false} classnames="whitespace-nowrap" />
 						<Autocomplete
 							options={usersList}
+							noOptionsText={
+								!!usersList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
+							}
 							className="flex-1"
 							value={usersList?.find((obj) => obj.id === userValue) || null}
 							onChange={(event, newValue, reason) => {

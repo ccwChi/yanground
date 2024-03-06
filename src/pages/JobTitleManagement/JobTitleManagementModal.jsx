@@ -166,6 +166,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, departmentsList, sendData
 												return (
 													<Autocomplete
 														options={departmentsList}
+														noOptionsText={!!departmentsList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"}
 														value={value}
 														onChange={(event, selectedOptions) => {
 															onChange(selectedOptions);
@@ -241,6 +242,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, departmentsList, sendData
 												return (
 													<Autocomplete
 														options={supervisorTitles}
+														noOptionsText={!!supervisorTitles ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"}
 														value={value}
 														onChange={(event, selectedOptions) => {
 															onChange(selectedOptions);

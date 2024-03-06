@@ -416,6 +416,9 @@ const LeaveApplicationModal = React.memo(
 													return (
 														<Autocomplete
 															options={attendanceTypesList}
+															noOptionsText={
+																!!attendanceTypesList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
+															}
 															value={value}
 															onChange={(event, selectedOptions) => {
 																onChange(selectedOptions);
@@ -466,6 +469,9 @@ const LeaveApplicationModal = React.memo(
 													return (
 														<Autocomplete
 															options={departmentsList}
+															noOptionsText={
+																!!departmentsList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
+															}
 															value={value}
 															onChange={(event, selectedOptions, reason) => {
 																if (reason === "clear") {
@@ -521,6 +527,7 @@ const LeaveApplicationModal = React.memo(
 													return (
 														<Autocomplete
 															options={usersList}
+															noOptionsText={!!usersList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"}
 															value={value}
 															onChange={(event, selectedOptions) => {
 																onChange(selectedOptions);
