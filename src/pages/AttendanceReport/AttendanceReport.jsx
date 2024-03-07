@@ -94,10 +94,15 @@ const AttendanceReport = () => {
 	});
 	const { control, watch, setValue, handleSubmit } = methods;
 	const dateValue = watch("date");
-	const panduan =
-		freezingTime ||
-		new Date(dateValue).getFullYear() * 12 + new Date(dateValue).getMonth() >=
-			new Date().getFullYear() * 12 + new Date().getMonth();
+	const panduan = freezingTime
+		? new Date(dateValue).getFullYear() * 12 + new Date(dateValue).getMonth() >=
+		  new Date().getFullYear() * 12 + new Date().getMonth() - 1
+		: new Date(dateValue).getFullYear() * 12 + new Date(dateValue).getMonth() >=
+		  new Date().getFullYear() * 12 + new Date().getMonth();
+	// const panduan =
+	// 	freezingTime ||
+	// 	new Date(dateValue).getFullYear() * 12 + new Date(dateValue).getMonth() >=
+	// 		new Date().getFullYear() * 12 + new Date().getMonth();
 
 	useEffect(() => {
 		setValue("departments", []);
@@ -178,9 +183,7 @@ const AttendanceReport = () => {
 													disableCloseOnSelect
 													// ={panduan ? true : false}
 													options={departmentsList}
-													noOptionsText={
-														!!departmentsList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
-													}
+													noOptionsText={!!departmentsList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"}
 													value={value}
 													onChange={(event, selectedOptions) => {
 														if (panduan) {
