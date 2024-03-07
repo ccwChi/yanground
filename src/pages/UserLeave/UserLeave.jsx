@@ -88,11 +88,15 @@ const UserLeave = () => {
   // 取得請假類別
   useEffect(() => {
     getData("attendanceType").then((result) => {
-      const data = result.result;
-      const filterData = data.filter(
-        (i) => i.value !== "ATTENDANCE" && i.value !== "ARRANGED_LEAVE"
-      );
-      setAttendanceTypeList(filterData);
+      if (result.result) {
+        const data = result.result;
+        const filterData = data.filter(
+          (i) => i.value !== "ATTENDANCE" && i.value !== "ARRANGED_LEAVE"
+        );
+        setAttendanceTypeList(filterData);
+      } else {
+        setAttendanceTypeList([]);
+      }
     });
   }, []);
 

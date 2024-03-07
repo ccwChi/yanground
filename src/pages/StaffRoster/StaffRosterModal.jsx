@@ -313,9 +313,9 @@ const StaffRosterModal = React.memo(
                         </span>
                       </MenuItem>
                       {!!departmentList &&
-                        departmentList.map((date) => (
-                          <MenuItem key={date.id} value={date.id}>
-                            {date.label}
+                        departmentList.map((data) => (
+                          <MenuItem key={data.id} value={data.id}>
+                            {data.label}
                           </MenuItem>
                         ))}
                     </Select>

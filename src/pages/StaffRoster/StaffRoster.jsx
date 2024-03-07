@@ -1,17 +1,12 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import {
-  LoadingFour,
-  LoadingThree,
-  LoadingTwo,
-} from "../../components/Loader/Loading";
+import { LoadingThree } from "../../components/Loader/Loading";
 import {
   Autocomplete,
   Backdrop,
   CircularProgress,
   TextField,
   Tooltip,
-  useMediaQuery,
 } from "@mui/material";
 import PageTitle from "../../components/Guideline/PageTitle";
 import Calendar from "../../components/Calendar/Calendar";
@@ -19,7 +14,7 @@ import StaffRosterModal from "./StaffRosterModal";
 import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
 import AddLinkIcon from "@mui/icons-material/AddLink";
 import { deleteData, getData, postData } from "../../utils/api";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
@@ -63,9 +58,6 @@ const StaffRoster = () => {
   // SearchDialog Switch
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
 
-  // 人員清單
-  const [usersList, setUsersList] = useState([]);
-
   const [events, setEvents] = useState([]);
   const showNotification = useNotification();
 
@@ -79,24 +71,32 @@ const StaffRoster = () => {
   /** 用 localstorage 的資訊確定是不是人資部，然後決定可以看單一部門還是全部部門 */
   const userProfile = useLocalStorageValue("userProfile");
 
+  /** 取得部門清單 */
   useEffect(() => {
     if (userProfile) {
-      const containsHR = userProfile.authorities.some(
-        (item) => item.id === "5" || item.role === "41"
+      const containsHR = Object.values(userProfile.department).includes(
+        "31" || "29"
       );
+      console.log("containsHR", containsHR);
       if (containsHR) {
         /** 如果給人資部門，現在給全部的部門，理論上給有排班人員的部門就好 31人資 29法務 */
         getData("department").then((result) => {
-          const data = result.result.content;
-          const formattedDep = data.map((dep) => ({
-            label: dep.name,
-            id: dep.id,
-          }));
-          setDepartmentList(formattedDep);
+          if (result.result) {
+            const data = result.result.content;
+            const formattedDep = data.map((dep) => ({
+              label: dep.name,
+              id: dep.id,
+            }));
+            setDepartmentList(formattedDep);
+          } else {
+            setDepartmentList([]);
+          }
         });
       } else if (!containsHR) {
         // 如果不是人資部門，部門清單只會有自己部門
-        setDepartmentList([userProfile.department]);
+        setDepartmentList([
+          { label: userProfile.department.name, id: userProfile.department.id },
+        ]);
       }
     }
   }, [userProfile]);
@@ -346,6 +346,11 @@ const StaffRoster = () => {
               />
               <Autocomplete
                 options={departmentList}
+                noOptionsText={
+                  !!departmentList
+                    ? "無搜尋結果"
+                    : "API 獲取失敗，請重整網頁或檢查連線問題。"
+                }
                 className="flex-1"
                 value={
                   departmentList?.find((obj) => obj.id === depValue) || null

@@ -6,7 +6,6 @@ import ModalTemplete from "../Modal/ModalTemplete";
 import {
   Backdrop,
   Button,
-  Card,
   FormHelperText,
   MenuItem,
   Select,
@@ -30,21 +29,18 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 
 /* 載入中 */
 import { LoadingFour } from "../Loader/Loading";
-import CustomDatePicker from "../DatePicker/DatePicker";
 import ControlledDatePicker from "../DatePicker/ControlledDatePicker";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 
 /**
  * 取得書本價格
- * @param {Object} deliverInfo - 物件包含 anaomly，color，id(考勤)，title，type，start
+ * @param {Object} deliverInfo - 物件包含 anaomly，color，id(考勤)，title，type，start，僅有在個人考勤記錄打開時才會有
  * @param {Function} onClose - 父層決定此 model 的關閉
  * @param {bool} isOpen - 此 model 的開關
  * @param {Function} setReflesh - 用於送出資料後，重新抓畫面清單資料
  * @param {Array} attendanceTypeList - 我資料
  */
-
-const today = new Date();
 
 const UserLeaveModal = ({
   onClose,
@@ -59,8 +55,6 @@ const UserLeaveModal = ({
 
   /* 打 api 的載入時間用 */
   const [sendBackFlag, setSendBackFlag] = useState(false);
-
-  const [dates, setDates] = useState(null);
 
   /* 下面僅關閉汙染警告視窗 */
   const onCheckDirty = (value) => {
@@ -83,7 +77,8 @@ const UserLeaveModal = ({
   const schema = yup.object().shape({
     leave: yup.string().required("假別不得為空"),
     sinceTime: yup.string().required("起始時間不可為空值！"),
-    endTime: yup
+    date: yup.date().required("需選擇請假日期"),
+    untilTime: yup
       .string()
       .required("結束時間不可為空值！")
       .test("is-after-sinceTime", "結束時間必須晚於起始時間", function (value) {
@@ -96,13 +91,21 @@ const UserLeaveModal = ({
       .test("excuse-required", "原因為必填字段", function (value) {
         const { leave } = this.parent;
         if (leave === "ANNUAL_LEAVE") {
-          return true; // 允许任何值，因为 leave 为 "ANNUAL_LEAVE"
+          return true;
         } else {
-          return !!value; // 必须有值
+          return !!value;
         }
       }),
   });
+
+  useEffect(() => {
+    if (deliverInfo) {
+      setValue("date", new Date(deliverInfo.start));
+    }
+  }, [deliverInfo]);
+
   const methods = useForm({
+    // defaultValues,
     resolver: yupResolver(schema),
   });
   const {
@@ -170,7 +173,7 @@ const UserLeaveModal = ({
       type: data.leave,
       date: dateForApi,
       since: dateForApi + "T" + data.sinceTime + ":01",
-      until: dateForApi + "T" + data.sinceTime + ":00",
+      until: dateForApi + "T" + data.untilTime + ":00",
       excuse: data.excuse || "",
     };
     if (dataForApi.type === "ANNUAL_LEAVE") {
@@ -211,25 +214,6 @@ const UserLeaveModal = ({
       >
         {/* ------------- Modal Body 開始 ------------- */}
         {/* ------------- 日期 考勤狀態 ------------- */}
-        <div className="h-22 w-full flex gap-4 mt-3">
-          {/* <Card className="flex-1 p-3">
-						<p>
-							日期：
-							<span className="font-bold mb-2">
-								{deliverInfo.start}
-								{" " +
-									new Date(deliverInfo.start).toLocaleDateString("zh-TW", {
-										weekday: "long",
-									})}
-							</span>
-						</p>
-					</Card> */}
-          {/* <Card
-						className="w-32 justify-center items-center hidden md:flex"
-						sx={{ backgroundColor: deliverInfo.color, color: "white" }}>
-						{deliverInfo.title}
-					</Card> */}
-        </div>
 
         {/* ------------- 表單 開始------------- */}
         <div className="max-h-[65vh] w-full flex flex-col pt-4 ">
@@ -238,7 +222,7 @@ const UserLeaveModal = ({
               className="inline-flex flex-col flex-1 overflow-hidden gap-y-4"
               onSubmit={handleSubmit(onSubmit)}
             >
-              <div className="flex flex-col flex-1 overflow-y-auto px-1 gap-y-4">
+              <div className="flex flex-col flex-1 overflow-y-auto px-1 ">
                 {/* ------------- 請假類別 ------------- */}
                 <div className="w-full flex flex-col">
                   <div className="w-full sm:mt-0">
@@ -279,7 +263,7 @@ const UserLeaveModal = ({
                     />
                   </div>
                   <FormHelperText
-                    className="!text-red-600 break-words !text-right !mt-0 !-mb-5"
+                    className="!text-red-600 break-words !text-right !mt-0"
                     sx={{ minHeight: "1.25rem" }}
                   >
                     {errors["leave"]?.message}
@@ -291,7 +275,7 @@ const UserLeaveModal = ({
                   <InputTitle title={"請假日期"} />
                   <ControlledDatePicker name="date" />
                   <FormHelperText
-                    className="!text-red-600 break-words !text-right !mt-0 !-mb-5"
+                    className="!text-red-600 break-words !text-right !mt-0"
                     sx={{ minHeight: "1.25rem" }}
                   >
                     {errors["date"]?.message}
@@ -311,7 +295,7 @@ const UserLeaveModal = ({
                         placeholder="請選擇請假開始時間"
                       />
                       <FormHelperText
-                        className="!text-red-600 break-words !text-right !mt-0 !-mb-5"
+                        className="!text-red-600 break-words !text-right !mt-0"
                         sx={{ minHeight: "1.25rem" }}
                       >
                         {errors["sinceTime"]?.message}
@@ -324,17 +308,17 @@ const UserLeaveModal = ({
                         classnames="whitespace-nowrap"
                       />
                       <ControlledTimeAutoComplete
-                        name={"endTime"}
+                        name={"untilTime"}
                         placeholder="請選擇請假結束時間"
                         getOptionDisabled={(option) => {
                           return option <= watchSinceDate;
                         }}
                       />
                       <FormHelperText
-                        className="!text-red-600 break-words !text-right !mt-0 !-mb-5"
+                        className="!text-red-600 break-words !text-right !mt-0 "
                         sx={{ minHeight: "1.25rem" }}
                       >
-                        {errors["endTime"]?.message}
+                        {errors["untilTime"]?.message}
                       </FormHelperText>
                     </div>
                   </div>

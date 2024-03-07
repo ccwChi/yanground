@@ -19,8 +19,6 @@ import {
   FormHelperText,
   Backdrop,
   Checkbox,
-  ListItemText,
-  Divider,
   Autocomplete,
   Chip,
   CircularProgress,
@@ -889,6 +887,9 @@ const ExportModal = React.memo(({ title, onClose }) => {
                             multiple
                             disableCloseOnSelect
                             options={departmentList}
+                            noOptionsText={
+                              !!departmentList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
+                            }
                             value={value}
                             onChange={(event, selectedOptions) => {
                               onChange(selectedOptions);

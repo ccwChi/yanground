@@ -29,9 +29,9 @@ const ConstructionSummary = () => {
   // cat = Category 設置 tab 分類
   //   const [cat, setCat] = useState(null);
   // API List Data
-  const [summaryList, setSummaryList] = useState(null);
-  const [projectsList, setProjectsList] = useState(null);
-  const [departMemberList, setDepartMemberList] = useState(null);
+  const [summaryList, setSummaryList] = useState([]);
+  const [projectsList, setProjectsList] = useState([]);
+  const [departMemberList, setDepartMemberList] = useState([]);
 
   // isLoading 等待請求 api
   const [isLoading, setIsLoading] = useState(true);
@@ -137,13 +137,16 @@ const ConstructionSummary = () => {
 
   // 獲取專案 api
   const getProjecstList = () => {
-    setIsLoading(true);
     getData("project?p=1&s=5000").then((result) => {
-      const projectsList = result.result.content;
-      setProjectsList(projectsList);
-      setIsLoading(false);
+      if (result.result) {
+        const projectsList = result.result.content;
+        setProjectsList(projectsList);
+      } else {
+        setProjectsList([])
+      }
     });
   };
+
   // 獲取部門清單 api
   const getDepartMemberList = useCallback((id) => {
     const departMemberList = `department/${id}/staff`;
