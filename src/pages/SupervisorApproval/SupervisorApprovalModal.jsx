@@ -33,6 +33,7 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 	const handleSubmit = () => {
 		const fd = new FormData();
 		fd.append("remark", textFieldValue);
+		// console.log("[deliverInfo.id, userProfile.id]",[deliverInfo.id, userProfile.id])
 		sendDataToBackend(fd, "approval", [deliverInfo.id, userProfile.id]);
 	};
 

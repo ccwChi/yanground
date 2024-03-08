@@ -47,7 +47,7 @@ const SupervisorApproval = () => {
 	// 傳遞至後端是否完成 Flag
 	const [sendBackFlag, setSendBackFlag] = useState(false);
 	// ApiUrl
-	const furl = "attendanceWaiverForm";
+	const furl = "supervisor/attendanceWaiverForm";
 	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
 
 	// 轉換時間
@@ -133,11 +133,11 @@ const SupervisorApproval = () => {
 	// 傳遞給後端資料
 	const sendDataToBackend = (fd, mode, otherData) => {
 		setSendBackFlag(true);
-		let url = "attendanceWaiverForm";
+		let url = "supervisor/attendanceWaiverForm";
 		let message = [];
 		switch (mode) {
 			case "approval":
-				url += `/${otherData[0]}/${otherData[1]}`;
+				url += `/${otherData[0]}/approve`;
 				message = ["審核成功！"];
 				break;
 			default:
