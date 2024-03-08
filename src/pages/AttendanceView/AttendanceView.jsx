@@ -302,12 +302,12 @@ const AttendanceView = () => {
 		{ key: "until", label: "下班時間", size: "12%" },
 	];
 	const columnsMobile = [
+		{ key: "anomalyType", label: "考勤假別" },
 		{ key: ["user", "fullName"], label: "姓名" },
 		{ key: ["user", "nickname"], label: "暱稱" },
 		{ key: ["user", "department"], label: "部門" },
 		{ key: "date", label: "日期" },
 		{ key: ["anomalyState", "text"], label: "狀態" },
-		{ key: "anomalyType", label: "考勤假別" },
 		{ key: "anomalyReason", label: "異常原因" },
 		{ key: "since", label: "上班時間" },
 		{ key: "until", label: "下班時間" },
@@ -653,7 +653,7 @@ const CustomEventContent = ({ event, isTargetScreen }) => {
 						<div className="p-2">
 							<p className="text-xl">{extendedProps.user.nickname}</p>
 							<p className="text-base">{event.startStr}</p>
-							<p className="text-base">考勤假別 : {extendedProps.type.chinese}</p>
+							<p className="text-base">考勤假別 : {extendedProps.anomalyType?.chinese || ""}</p>
 							<p className="text-base">
 								異常狀態 : {extendedProps.anomalyState.id === "2" && "異常"}
 								{extendedProps.anomalyState.id === "3" && "正常"}

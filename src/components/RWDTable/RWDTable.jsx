@@ -162,7 +162,7 @@ const RWDTable = ({
 										{columnsMobile.map((column, index) => (
 											<div key={"AccordionRow-" + rowIndex + "-" + index}>
 												<div className="flex justify-between py-2">
-													<span className="text-neutral-500 pe-2">{column.label}</span>
+													<span className="text-neutral-500 pe-2 whitespace-nowrap">{column.label}</span>
 													<p className="text-black break-all">
 														{(() => {
 															switch (column.key) {
@@ -187,6 +187,17 @@ const RWDTable = ({
 																	} else {
 																		return <span className="italic text-neutral-500 text-sm">-</span>;
 																	}
+																case "anomalyType":
+																	return (
+																		<Chip
+																			label={item.anomalyType.chinese}
+																			size="small"
+																			sx={{
+																				backgroundColor: "#039e8e",
+																				color: "white",
+																			}}
+																		/>
+																	);
 																case "anomalyReason":
 																	return item.anomalyReason ? (
 																		<span className="text-red-500">{item.anomalyReason}</span>
