@@ -25,6 +25,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import WarningIcon from "@mui/icons-material/Warning";
 // Customs
 import Empty from "./Empty";
+
 const SKELETONITEM = 6;
 const CARD_BOX_SHADOW = "0px 2px 2px 0px rgba(0, 0, 0, 0.25)";
 
@@ -186,6 +187,12 @@ const RWDTable = ({
 																	} else {
 																		return <span className="italic text-neutral-500 text-sm">-</span>;
 																	}
+																case "anomalyReason":
+																	return item.anomalyReason ? (
+																		<span className="text-red-500">{item.anomalyReason}</span>
+																	) : (
+																		<span className="italic text-neutral-500 text-sm">-</span>
+																	);
 																default:
 																	const columnData = columnsMobile.find((col) => col.key === column.key);
 																	if (columnData) {
@@ -397,6 +404,23 @@ const RWDTable = ({
 																	color: "white",
 																}}
 															/>
+														);
+													case "anomalyType":
+														return (
+															<Chip
+																label={item.anomalyType.chinese}
+																size="small"
+																sx={{
+																	backgroundColor: "#039e8e",
+																	color: "white",
+																}}
+															/>
+														);
+													case "anomalyReason":
+														return item.anomalyReason ? (
+															<span className="text-red-500">{item.anomalyReason}</span>
+														) : (
+															<span className="italic text-neutral-500 text-sm">-</span>
 														);
 													default: {
 														const columnData = columnsPC.find((col) => col.key === column.key);

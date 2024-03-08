@@ -103,7 +103,7 @@ const AttendanceView = () => {
 		},
 		{
 			id: 2,
-			text: "異常",
+			text: "異常 ",
 		},
 		{
 			id: 3,
@@ -231,11 +231,11 @@ const AttendanceView = () => {
 						const rawData = result.result.content.map(
 							({ id, type, anomaly, date, since, until, user, clockPunchIn, clockPunchOut }) => ({
 								id,
-								type,
-								anomaly,
+								anomalyType: type,
+								anomalyReason: anomaly?.chinese || "",
 								date,
 								title: user.department.name + " - " + user.nickname,
-								anomalyState: anomaly === null ? { text: "正常", id: "3" } : { text: "異常", id: "2" },
+								anomalyState: anomaly === null ? { text: "✔️", id: "3" } : { text: "❌", id: "2" },
 								since: clockPunchIn ? clockPunchIn.occurredAt.slice(11, 19) : "-",
 								until: clockPunchOut ? clockPunchOut.occurredAt.slice(11, 19) : "-",
 								color: getflagColorandText(anomaly).color,
@@ -292,12 +292,12 @@ const AttendanceView = () => {
 	// -----------------------------------------------------
 	// 對照 api table 所顯示 key
 	const columnsPC = [
-		{ key: ["type", "chinese"], label: "考勤假別", size: "9%" },
-		{ key: ["user", "fullName"], label: "姓名", size: "12%" },
-		{ key: ["user", "department"], label: "部門", size: "12%" },
+		{ key: "anomalyType", label: "考勤假別", size: "10%" },
+		{ key: ["user", "fullName"], label: "姓名", size: "10%" },
+		{ key: ["user", "department"], label: "部門", size: "10%" },
 		{ key: "date", label: "日期", size: "14%" },
-		{ key: ["anomalyState", "text"], label: "狀態", size: "8%" },
-		{ key: ["anomaly", "chinese"], label: "異常原因", size: "14%" },
+		{ key: ["anomalyState", "text"], label: "狀態", size: "6%" },
+		{ key: "anomalyReason", label: "異常原因", size: "14%" },
 		{ key: "since", label: "上班時間", size: "12%" },
 		{ key: "until", label: "下班時間", size: "12%" },
 	];
@@ -307,8 +307,8 @@ const AttendanceView = () => {
 		{ key: ["user", "department"], label: "部門" },
 		{ key: "date", label: "日期" },
 		{ key: ["anomalyState", "text"], label: "狀態" },
-		{ key: ["type", "chinese"], label: "考勤假別" },
-		{ key: ["anomaly", "chinese"], label: "異常原因" },
+		{ key: "anomalyType", label: "考勤假別" },
+		{ key: "anomalyReason", label: "異常原因" },
 		{ key: "since", label: "上班時間" },
 		{ key: "until", label: "下班時間" },
 	];
@@ -398,7 +398,7 @@ const AttendanceView = () => {
 			{/* PageTitle & Search */}
 			<PageTitle
 				title={"考勤檢視"}
-				description="此頁面是用於查看整個部門或全體員工的考勤資訊與狀態，同時可檢視員工上下班打卡地點。"
+				description="此頁面是用於查看整個部門或全體員工的考勤資訊與狀態，同時可檢視員工上下班打卡地點。(✔️= 正常, ❌= 異常)"
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
 				// 搜尋模式
@@ -419,9 +419,7 @@ const AttendanceView = () => {
 						<InputTitle title={"部門"} pb={false} required={false} classnames="whitespace-nowrap" />
 						<Autocomplete
 							options={departmentList}
-							noOptionsText={
-								!!departmentList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
-							}
+							noOptionsText={!!departmentList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"}
 							className="flex-1"
 							value={departmentList?.find((obj) => obj.id === depValue) || null}
 							onChange={(event, newValue, reason) => {
@@ -466,9 +464,7 @@ const AttendanceView = () => {
 						<InputTitle title={"人員"} pb={false} required={false} classnames="whitespace-nowrap" />
 						<Autocomplete
 							options={usersList}
-							noOptionsText={
-								!!usersList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
-							}
+							noOptionsText={!!usersList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"}
 							className="flex-1"
 							value={usersList?.find((obj) => obj.id === userValue) || null}
 							onChange={(event, newValue, reason) => {
