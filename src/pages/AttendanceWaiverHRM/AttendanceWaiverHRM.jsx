@@ -41,7 +41,7 @@ const AttendanceWaiverHRM = () => {
 	// 傳送額外資訊給 Modal
 	const [deliverInfo, setDeliverInfo] = useState(null);
 	// ApiUrl
-	const furl = "supervisor/attendanceWaiverForm";
+	const furl = "attendanceWaiverForm";
 	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
 
 	// 轉換時間
