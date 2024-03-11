@@ -98,11 +98,49 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 	// 取得人員資料
 	useEffect(() => {
 		getData("department/5/staff").then((result) => {
-			const data = result.result;
+			const data = result.result.map((item) => {
+				let displayScreenName = "";
+
+				if (item.lastname && item.firstname) {
+					displayScreenName = `${item.lastname}${item.firstname}`;
+				} else if (item.lastname) {
+					displayScreenName = item.lastname;
+				} else if (item.firstname) {
+					displayScreenName = item.firstname;
+				} else if (item.nickname) {
+					displayScreenName = item.nickname;
+				} else {
+					displayScreenName = item.displayName;
+				}
+
+				return {
+					...item,
+					displayScreenName: displayScreenName,
+				};
+			});
 			setBizRepList(data);
 		});
 		getData("department/11/staff").then((result) => {
-			const data = result.result;
+			const data = result.result.map((item) => {
+				let displayScreenName = "";
+
+				if (item.lastname && item.firstname) {
+					displayScreenName = `${item.lastname}${item.firstname}`;
+				} else if (item.lastname) {
+					displayScreenName = item.lastname;
+				} else if (item.firstname) {
+					displayScreenName = item.firstname;
+				} else if (item.nickname) {
+					displayScreenName = item.nickname;
+				} else {
+					displayScreenName = item.displayName;
+				}
+
+				return {
+					...item,
+					displayScreenName: displayScreenName,
+				};
+			});
 			setFRepList(data);
 		});
 	}, []);
@@ -215,7 +253,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 													</MenuItem>
 													{bizRepList.map((user) => (
 														<MenuItem key={user.id} value={user.id}>
-															{user.nickname}
+															{user.displayScreenName}
 														</MenuItem>
 													))}
 												</Select>
@@ -245,7 +283,7 @@ const UpdatedModal = React.memo(({ title, deliverInfo, sendDataToBackend, cityLi
 													</MenuItem>
 													{fRepList.map((user) => (
 														<MenuItem key={user.id} value={user.id}>
-															{user.nickname}
+															{user.displayScreenName}
 														</MenuItem>
 													))}
 												</Select>

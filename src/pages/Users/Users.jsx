@@ -284,7 +284,6 @@ const Users = () => {
 							displayScreenName: displayScreenName,
 						};
 					});
-					console.log(data);
 					setApiData(data);
 
 					if (page > data.totalPages) {
