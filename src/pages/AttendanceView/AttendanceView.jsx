@@ -338,6 +338,10 @@ const AttendanceView = () => {
 			case "create":
 				message = [`「${otherData}」的假單建立成功！`];
 				break;
+			case "arrangeLeave" :
+				url = `user/${otherData[1]}/arrangedLeave/${otherData[2]}`
+				message = [`「${otherData[0]}」的假單建立成功！`];
+				break;
 			default:
 				break;
 		}

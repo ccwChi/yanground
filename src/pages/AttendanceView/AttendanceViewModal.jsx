@@ -376,22 +376,27 @@ const LeaveApplicationModal = React.memo(
 
 		// 提交表單資料到後端並執行相關操作
 		const onSubmit = (data) => {
-			const formattedDate = format(new Date(data.date), "yyyy-MM-dd");
-			const formattedSinceTime = format(new Date(data.since), "HH:mm:ss");
-			const formattedUntilTime = format(new Date(data.until), "HH:mm:ss");
+			if (data.attendanceType.id === "ARRANGED_LEAVE"){
+				const leaveDate = (format(new Date(data.date), "yyyy/MM/dd"))
+				const fd = new FormData();
+				sendDataToBackend(fd, "arrangeLeave", [data.user.label,  data.user.id, leaveDate]);
+			} else {
+				const formattedDate = format(new Date(data.date), "yyyy-MM-dd");
+				const formattedSinceTime = format(new Date(data.since), "HH:mm:ss");
+				const formattedUntilTime = format(new Date(data.until), "HH:mm:ss");
+				const fd = new FormData();
+				fd.append("id", data.user.id);
+				fd.append("type", data.attendanceType.id);
+				fd.append("date", formattedDate);
+				fd.append("since", `${formattedDate}T${formattedSinceTime}`);
+				fd.append("until", `${formattedDate}T${formattedUntilTime}`);
 
-			const fd = new FormData();
-			fd.append("id", data.user.id);
-			fd.append("type", data.attendanceType.id);
-			fd.append("date", formattedDate);
-			fd.append("since", `${formattedDate}T${formattedSinceTime}`);
-			fd.append("until", `${formattedDate}T${formattedUntilTime}`);
+				sendDataToBackend(fd, "create", data.user.label);
 
-			sendDataToBackend(fd, "create", data.user.label);
-
-			// for (const pair of fd.entries()) {
-			// 	console.log(pair[0], pair[1]);
-			// }
+				// for (const pair of fd.entries()) {
+				// 	console.log(pair[0], pair[1]);
+				// }
+			}
 		};
 
 		return (
