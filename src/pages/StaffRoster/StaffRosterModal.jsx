@@ -127,6 +127,7 @@ const StaffRosterModal = React.memo(
     const handleEventClick = (date) => {
       const thisMonth = calendarMonthRange[0].slice(0, 7);
       if (!selectedStaff) {
+        showNotification("請選擇人員", true, 1000);
         return;
       }
 
@@ -178,6 +179,8 @@ const StaffRosterModal = React.memo(
           arrangeLeaveDay[thisMonth]?.length >= selectedStaff?.arrangedLeaveDays
         ) {
           showNotification("該月排休已滿", true, 1000);
+        } else if ( selectedStaff?.arrangedLeaveDays === "-" || selectedStaff?.arrangedLeaveDays === 0 ){
+          showNotification("該員工無法排休", true, 1000);
         }
       }
     };

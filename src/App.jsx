@@ -74,9 +74,9 @@ const App = () => {
 				{ text: "人事管理", href: "users" },
 				// { text: "考勤紀錄", href: "attendancecalendar" },
 				{ text: "考勤檢視", href: "attendanceview" },
-				{ text: "豁免出勤", href: "attendancewaiverhrm" },
 				{ text: "考勤報表", href: "attendancereport" },
 				{ text: "辦公行事曆", href: "workcalendar" },
+				{ text: "豁免出勤審核", href: "attendancewaiverhrm" },
 			],
 		},
 		{

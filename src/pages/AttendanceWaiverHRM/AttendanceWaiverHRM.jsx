@@ -206,7 +206,7 @@ const AttendanceWaiverHRM = () => {
 		<>
 			{/* PageTitle */}
 			<PageTitle
-				title="豁免出勤"
+				title="豁免出勤審核"
 				description="此頁面為提供人資檢視其他同仁員工豁免出勤審核紀錄的功能。"
 			/>
 
