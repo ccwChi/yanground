@@ -7,17 +7,39 @@ import ModalTemplete from "../../components/Modal/ModalTemplete";
 import { LoadingTwo } from "../../components/Loader/Loading";
 // Hooks
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
+import { Button, TextField } from "@mui/material";
 
 /***
  * 檢視審核 Modal
  * @param {string} title - Modal 標題名稱
  * @param {Object} deliverInfo - 顯示資訊
+ * @param {Function} sendDataToBackend - 傳遞給後端的函式
  * @param {Function} onClose - 關閉函式
  * @returns
  ***/
-const ViewModal = React.memo(({ title, deliverInfo, onClose }) => {
+const ViewModal = React.memo(({ title, deliverInfo, onClose, sendDataToBackend }) => {
 	// 取得當前用戶資訊
 	const userProfile = useLocalStorageValue("userProfile");
+	// 用於儲存文字欄位的值
+	const [textFieldValue, setTextFieldValue] = useState("");
+
+	// 當文字欄位的值改變時更新狀態
+	const handleTextFieldChange = (event) => {
+		setTextFieldValue(event.target.value);
+	};
+
+		// 按鈕點擊事件
+	const handleSubmit = () => {
+		const fd = new FormData();
+		fd.append("remark", textFieldValue);
+		// console.log("[deliverInfo.id, userProfile.id]",[deliverInfo.id, userProfile.id])
+		sendDataToBackend(fd, "approval", [deliverInfo.id, userProfile.id]);
+	};
+	// 按鈕點擊退回是件
+	const handleUnapproval = () => {
+		// 串 api
+	};
+
 
 	return (
 		<>
@@ -81,9 +103,29 @@ const ViewModal = React.memo(({ title, deliverInfo, onClose }) => {
 								</p>
 							</>
 						) : (
+
+							<>
 							<div className="flex items-center justify-center">
 								<span className="italic text-neutral-500 text-sm">(尚未被審核，故無資料顯示)</span>
 							</div>
+							{/* <TextField
+									multiline
+									rows={2}
+									className="inputPadding bg-white"
+									placeholder="主管尚未簽核，此欄可輸入備註 (可為空)"
+									value={textFieldValue}
+									onChange={handleTextFieldChange}
+									fullWidth
+								/>
+							<div className="flex gap-x-4 w-full">
+							<Button variant="contained" fullWidth onClick={handleSubmit}>
+								審核
+							</Button>
+							<Button variant="contained" fullWidth onClick={handleUnapproval}>
+								退回
+							</Button> 
+							</div> */}
+						</>
 						)}
 						<div className="absolute right-3 -top-9">
 							{deliverInfo.approveState === true ? (

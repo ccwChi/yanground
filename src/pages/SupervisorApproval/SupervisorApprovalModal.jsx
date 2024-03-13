@@ -36,6 +36,10 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 		// console.log("[deliverInfo.id, userProfile.id]",[deliverInfo.id, userProfile.id])
 		sendDataToBackend(fd, "approval", [deliverInfo.id, userProfile.id]);
 	};
+	// 按鈕點擊退回是件
+	const handleUnapproval = () => {
+		// 串 api
+	};
 
 	return (
 		<>
@@ -109,9 +113,14 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 									onChange={handleTextFieldChange}
 									fullWidth
 								/>
-								<Button variant="contained" onClick={handleSubmit}>
-									送出
+								<div className="flex gap-x-4 w-full">
+								<Button variant="contained" fullWidth onClick={handleSubmit}>
+									審核
 								</Button>
+								{/* <Button variant="contained" fullWidth onClick={handleUnapproval}>
+									退回
+								</Button> */}
+								</div>
 							</>
 						)}
 						<div className="absolute right-3 -top-9">
