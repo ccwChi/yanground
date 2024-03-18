@@ -343,9 +343,6 @@ const SupervisorApproval = () => {
 			setFilters(data);
 			setSearchDialogOpen(false);
 			// delete data.departments;
-			console.log(data)
-			
-			// console.log(fullDepartMember)
 			// data.users.forEach(id => {
 			// 	const filteredUsers = userList.filter(user => user.id === id);
 			// 	fullUserPack.push(...filteredUsers);
