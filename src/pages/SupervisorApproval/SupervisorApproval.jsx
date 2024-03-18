@@ -1,25 +1,55 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation,useNavigate } from "react-router-dom";
+import { useForm, Controller, FormProvider } from "react-hook-form";
 // date-fns
 import { parseISO, format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { utcToZonedTime } from "date-fns-tz";
 // MUI
-import Backdrop from "@mui/material/Backdrop";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Backdrop, Checkbox, MenuItem, Select } from "@mui/material";
 // Components
 import PageTitle from "../../components/Guideline/PageTitle";
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
 import { LoadingFour } from "../../components/Loader/Loading";
+import InputTitle from "../../components/Guideline/InputTitle";
+import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 // Hooks
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 import { useNotification } from "../../hooks/useNotification";
+import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 // Utils
 import { getData, postData } from "../../utils/api";
 // Customs
 import attendanceWaiverList from "../../datas/attendanceWaiverType";
 import { ReviewModal } from "./SupervisorApprovalModal";
+
+
+
+// MenuItem 選單樣式調整
+const ITEM_HEIGHT = 36;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+	PaperProps: {
+		style: {
+			maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+			Width: 250,
+		},
+	},
+};
+
+// 篩選 default 值
+const defaultValue = {
+	// queryString: "",
+	// agents: [],
+	users: [],
+	types: [],
+	since: null,
+	until: null,
+};
+
 
 const SupervisorApproval = () => {
 	// 解析網址取得參數
@@ -27,7 +57,9 @@ const SupervisorApproval = () => {
 	const queryParams = new URLSearchParams(location.search);
 	const navigateWithParams = useNavigateWithParams();
 	const showNotification = useNotification();
-
+	const navigate = useNavigate();
+	const userProfile = useLocalStorageValue("userProfile");
+	const userDepartId = userProfile && userProfile.department.id
 	// API List Data
 	const [apiData, setApiData] = useState(null);
 	// isLoading 等待請求 api
@@ -48,7 +80,67 @@ const SupervisorApproval = () => {
 	const [sendBackFlag, setSendBackFlag] = useState(false);
 	// ApiUrl
 	const furl = "supervisor/attendanceWaiverForm";
-	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
+	const [apiUrl, setApiUrl] = useState("");
+	// 搜尋篩選清單
+	const [filters, setFilters] = useState(defaultValue);
+	const [departmentList, setDepartmentList] = useState([]);
+	const [typeList, setTypeList] = useState([]);
+	const [userList, setUserList] = useState([]);
+	// SearchDialog Switch
+	const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+	// 預設搜尋篩選內容
+	const getValueOrFilter = (queryParam, filter) => {
+		const value = queryParams.get(queryParam);
+		if (queryParam === "users" || queryParam === "agents" || queryParam === "types" ) {
+			return !!value ? value.split(",") : filter;
+		}  else {
+			return !!value ? value : filter;
+		}
+	};
+	const defaultValues = {
+		// queryString: getValueOrFilter("queryString", filters.queryString),
+		// departments :getValueOrFilter("departments", filters.departments),
+		// agents: getValueOrFilter("agents", filters.agents),
+		users: getValueOrFilter("users", filters.users),
+		types: getValueOrFilter("types", filters.types),
+		since: queryParams.get("since") ? new Date(queryParams.get("since")) : null,
+		until: queryParams.get("until") ? new Date(queryParams.get("until")) : null
+	};
+
+	// 使用 useForm Hook 來管理表單狀態和驗證
+	const methods = useForm({
+		defaultValues,
+	});
+	const {
+		control,
+		reset,
+		watch,
+		setValue,
+		formState: { isDirty },
+		handleSubmit,
+	} = methods;
+	const watchSinceDate = watch("since");
+
+	useEffect(() => {
+		if (!!userDepartId){
+			const departurl = `department/${userDepartId}/staff`;
+			getData(departurl)
+				.then((result) => {
+					if (result.result){
+						setUserList(result.result);
+					}else {setUserList([])};
+				})
+		}
+	}, [userDepartId]);
+
+	useEffect(() => {
+		const startedFromDate = new Date(watchSinceDate);
+		const startedToDate = new Date(watch("until"));
+		// 檢查 startedFrom 是否大於 startedTo
+		if (startedFromDate > startedToDate) {
+			setValue("until", null);
+		}
+	}, [watchSinceDate, setValue]);
 
 	// 轉換時間
 	const formatDateTime = (dateTime) => {
@@ -59,9 +151,28 @@ const SupervisorApproval = () => {
 		return formattedDateTime;
 	};
 
+	// 更新 ApiUrl
+	useEffect(() => {
+		let constructedApiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
+
+		const searchquery = Object.fromEntries(queryParams.entries());
+		for (const key in searchquery) {
+			if (
+				key !== "p" &&
+				key !== "s" &&
+				searchquery[key] !== undefined &&
+				searchquery[key] !== null &&
+				searchquery[key] !== ""
+			) {
+				constructedApiUrl += `&${key}=${encodeURIComponent(searchquery[key])}`;
+			}
+		}
+
+		setApiUrl(constructedApiUrl);
+	}, [page, rowsPerPage, queryParams]);
 	// 取得列表資料
 	useEffect(() => {
-		getApiList(apiUrl);
+		if (apiUrl !== "") getApiList(apiUrl);
 	}, [apiUrl]);
 	const getApiList = useCallback(
 		(url) => {
@@ -103,6 +214,22 @@ const SupervisorApproval = () => {
 		},
 		[page]
 	);
+
+
+	// 取得部門清單 & 考勤類別清單
+	useEffect(() => {
+		const typeurl = "attendanceWaiverType?p=1&s=500";
+		getData(typeurl).then((result) => {
+			if (result.result){
+				const data = result.result;
+				setTypeList(data);
+				// console.log("type",data)
+			}else {
+				setTypeList([]);
+			}
+		});
+	}, []);
+
 
 	// 對照 API Table 所顯示 key
 	const columnsPC = [
@@ -190,6 +317,71 @@ const SupervisorApproval = () => {
 		setDeliverInfo(null);
 	};
 
+		//  下面為搜索專用
+		// 開啟 SearchDialog
+		const handleOpenSearch = () => {
+			setSearchDialogOpen(true);
+		};
+		// 關閉 SearchDialog
+		const handleCloseSearch = () => {
+			reset(defaultValues);
+			setSearchDialogOpen(false);
+		};
+		// 恢復為上一次搜尋狀態
+		const handleCoverDialog = () => {
+			reset(defaultValues);
+		};
+		// 重置 SearchDialog
+		const handleClearSearch = () => {
+			reset(defaultValue);
+			setFilters(defaultValue);
+			setSearchDialogOpen(false);
+			navigate(`?p=1&s=10`);
+		};
+		// 搜尋送出
+		const onSubmit = (data) => {
+			setFilters(data);
+			setSearchDialogOpen(false);
+			// delete data.departments;
+			console.log(data)
+			
+			// console.log(fullDepartMember)
+			// data.users.forEach(id => {
+			// 	const filteredUsers = userList.filter(user => user.id === id);
+			// 	fullUserPack.push(...filteredUsers);
+			// });
+			// if (fullUserPack.length !== 0){
+			// 	data.users =  fullUserPack
+			// } else {
+			// 	delete data.users
+			// }
+			const fd = new FormData();
+			for (let key in data) {
+				switch (key) {
+					// case "users":
+					// 	fd.append(key, JSON.stringify(data[key]));
+					// 	break;
+					case "since":
+					case "until":
+						if (data[key] !== null) {
+							fd.append(key, format(data[key], "yyyy-MM-dd"));
+						}
+						break;
+					default:
+						if (data[key] !== null) {
+							fd.append(key, data[key]);
+						}
+						break;
+				}
+			}
+
+			const searchParams = new URLSearchParams(fd);
+			setPage(0);
+			setRowsPerPage(10);
+			navigate(`?p=1&s=10&${searchParams.toString()}`);
+		};
+	// 到上面為止都是搜索功能 //
+
 	// modal 開啟參數與顯示標題
 	const modalConfig = [
 		{
@@ -204,7 +396,113 @@ const SupervisorApproval = () => {
 	return (
 		<>
 			{/* PageTitle */}
-			<PageTitle title="主管審核" description="此頁面是供主管檢視部門成員的請假和考勤紀錄，以便審核和決定是否通過。" />
+			<PageTitle title="主管審核" description="此頁面是供主管檢視部門成員的請假和考勤紀錄，以便審核和決定是否通過。" searchMode
+				// 下面參數前提都是 searchMode = true
+				searchDialogOpen={searchDialogOpen}
+				handleOpenDialog={handleOpenSearch}
+				handleCloseDialog={handleCloseSearch}
+				handleCoverDialog={handleCoverDialog}
+				handleConfirmDialog={handleSubmit(onSubmit)}
+				handleClearDialog={handleClearSearch}
+				haveValue={filters === defaultValue}
+				isDirty={isDirty}
+			>
+				<FormProvider {...methods}>
+					<form className="flex flex-col gap-2">
+						{/* <div className="inline-flex items-center gap-2">
+							<Controller
+								name="queryString"
+								control={control}
+								render={({ field }) => (
+									<TextField
+										className="inputPadding"
+										placeholder="請輸入名稱進行查詢"
+										fullWidth
+										{...field}
+									/>
+								)}
+							/>
+						</div>
+						<Divider /> */}
+						<InputTitle title={"人員選擇"} classnames="whitespace-nowrap min-w-[70px]" pb={false} required={false} />
+						<Controller
+							name="users"
+							control={control}
+							render={({ field }) => (
+								<Select
+									className="inputPadding pe-3"
+									multiple
+									displayEmpty
+									MenuProps={MenuProps}
+									renderValue={(selected) => {
+										if (selected.length === 0) {
+											return <span className="text-neutral-400 font-light">請選擇人員</span>;
+										}
+
+										const roleNames = selected.map((roleId) => {
+											const role = userList?.find((r) => r.id === roleId);
+											return role ? (role.lastname + role.firstname) : null;
+										});
+										return roleNames.join(", ");
+									}}
+									{...field}>
+									{userList?.map((user) => (
+										<MenuItem key={user.id} value={user.id}>
+											<Checkbox checked={watch("users").indexOf(user.id) > -1} />
+											{user.lastname + user.firstname}
+										</MenuItem>
+									))}
+								</Select>
+							)}
+						/>
+						<InputTitle title={"考勤類別"} classnames="whitespace-nowrap min-w-[70px]" pb={false} required={false} />
+						<Controller
+							name="types"
+							control={control}
+							render={({ field }) => (
+								<Select
+									className="inputPadding pe-3"
+									multiple
+									displayEmpty
+									MenuProps={MenuProps}
+									renderValue={(selected) => {
+										if (selected.length === 0) {
+											return <span className="text-neutral-400 font-light">請選擇部門</span>;
+										}
+
+										const roleNames = selected.map((roleId) => {
+											const role = typeList?.find((r) => r.value === roleId);
+											return role ? role.chinese : null;
+										});
+										return roleNames.join(", ");
+									}}
+									{...field}>
+									{typeList?.map((type) => (
+										<MenuItem key={type.value} value={type.value}>
+											<Checkbox checked={watch("types").indexOf(type.value) > -1} />
+											{type.chinese}
+										</MenuItem>
+									))}
+								</Select>
+							)}
+						/>
+						<InputTitle title={"日期區間"} classnames="whitespace-nowrap min-w-[70px]" pb={false} required={false} />
+						<div className="inline-flex items-center">
+							<InputTitle title={"起"} classnames="whitespace-nowrap me-2" pb={false} required={false} />
+							<ControlledDatePicker name="since" maxDate={new Date()} />
+						</div>
+						<div className="inline-flex items-center">
+							<InputTitle title={"迄"} classnames="whitespace-nowrap me-2" pb={false} required={false} />
+							<ControlledDatePicker
+								name="until"
+								minDate={watchSinceDate}
+								disabled={!watchSinceDate}
+								maxDate={new Date()}
+							/>
+						</div>
+					</form>
+				</FormProvider>
+			</PageTitle>
 
 			{/* Table */}
 			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">

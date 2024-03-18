@@ -1,6 +1,8 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
-import { LoadingThree } from "../../components/Loader/Loading";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { deleteData, getData, postData } from "../../utils/api";
+
+/* mui 元件們 */
 import {
   Autocomplete,
   Backdrop,
@@ -8,19 +10,26 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import PageTitle from "../../components/Guideline/PageTitle";
-import Calendar from "../../components/Calendar/Calendar";
-import StaffRosterModal from "./StaffRosterModal";
-import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
 import AddLinkIcon from "@mui/icons-material/AddLink";
-import { deleteData, getData, postData } from "../../utils/api";
-import { useLocation, useNavigate } from "react-router-dom";
-import useLocalStorageValue from "../../hooks/useLocalStorageValue";
+
+/* 自訂元件 */
+import PageTitle from "../Guideline/PageTitle";
+import InputTitle from "../Guideline/InputTitle";
+import Calendar from "../Calendar/Calendar";
+import MultipleFAB from "../FloatingActionButton/MultipleFAB";
+import { LoadingThree } from "../Loader/Loading";
+
+/* 時間轉換相關 */
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
-import { useNotification } from "../../hooks/useNotification";
-import InputTitle from "../../components/Guideline/InputTitle";
+
+/* modal */
+import ArrangeLeaveModal from "./ArrangeLeaveModal";
+
+/* hook */
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
+import { useNotification } from "../../hooks/useNotification";
+import useLocalStorageValue from "../../hooks/useLocalStorageValue";
 
 const today = new Date();
 const fromTodaySevenDay = [];
@@ -31,7 +40,26 @@ for (var i = 0; i < 7; i++) {
   fromTodaySevenDay.push(newDayString);
 }
 
-const StaffRoster = () => {
+/**
+ * 
+ * @param {bool} forSuperVisor // 如果不是給主管專用就是給人資專用，預設false = 給人資專用 
+ * @param {string} title // 頁面顯示title
+ * @param {string} url // 主管用的 api 跟人資用的 api不同
+ * @returns 
+ */
+
+// 篩選 default 值
+const defaultValue = {
+	phrase: "",
+	department: "",
+	gender: "",
+	age: null,
+	authorities: [],
+	startedFrom: null,
+	startedTo: null,
+};
+
+const ArrangeLeave = ({forSuperVisor = true, title , url }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   /** ModalValue 控制開啟的是哪一個 Modal */
@@ -39,6 +67,7 @@ const StaffRoster = () => {
 
   /** 傳送額外資訊給 Modal */
   const [isOpen, setIsOpen] = useState(false);
+  const [sendBackFlag, setSendBackFlag] = useState(false);
 
   /** 儲存部門、部門人員清單 */
   const [departmentList, setDepartmentList] = useState([]);
@@ -75,12 +104,12 @@ const StaffRoster = () => {
   useEffect(() => {
     if (userProfile) {
       const containsHR = Object.values(userProfile.department).includes(
-        "31" || "29"
+        "31"
       );
       console.log("containsHR", containsHR);
       if (containsHR) {
         /** 如果給人資部門，現在給全部的部門，理論上給有排班人員的部門就好 31人資 29法務 */
-        getData("department").then((result) => {
+        getData("department?p=1&s=500").then((result) => {
           if (result.result) {
             const data = result.result.content;
             const formattedDep = data.map((dep) => ({
@@ -139,7 +168,7 @@ const StaffRoster = () => {
       getData(`arrangedLeave/${year}/${month}`).then((result) => {
         const rawData = result.result
           .map(({ anomaly, date, id, since, until, user }, i) => ({
-            title: user.nickname + " - " + user.department.name,
+            title: user.lastname + user.firstname + " - " + user.department.name,
             date,
             id,
             color: "#25B09B",
@@ -186,11 +215,11 @@ const StaffRoster = () => {
     let message = "";
     switch (mode) {
       case "remove":
-        url = `user/${otherdata[0]}/arrangedLeave/${otherdata[1]}/${otherdata[2]}`;
+        url = `arrangedLeave/${otherdata[0]}/${otherdata[1]}/${otherdata[2]}`;
         message = "清除當月排休成功";
         break;
       case "update":
-        url = `user/${otherdata[0]}/arrangedLeave`;
+        url = `arrangedLeave/${otherdata[0]}`;
         message = "建立排休成功";
         break;
       default:
@@ -290,7 +319,7 @@ const StaffRoster = () => {
     {
       modalValue: "buildStaffRoster",
       modalComponent: (
-        <StaffRosterModal
+        <ArrangeLeaveModal
           setIsOpen={setIsOpen}
           isOpen={isOpen}
           isLoading={isLoading}
@@ -326,15 +355,16 @@ const StaffRoster = () => {
           title="排休月曆表"
           btnGroup={btnGroup}
           handleActionClick={handleActionClick}
-          description="此頁面僅提供給人資及各部門主管查看、編輯同部門員工排休值勤表。"
+          description={`此頁面僅提供給${forSuperVisor? "部門主管":"人資"}查看、編輯可排休人員排休值勤表。`}
           // 搜尋模式
-          searchMode
+          searchMode={!forSuperVisor}
           // 下面參數前提都是 searchMode = true
           searchDialogOpen={searchDialogOpen}
           handleOpenDialog={handleOpenSearch}
           handleCloseDialog={handleCloseSearch}
           handleCloseText={"關閉"}
-          isdirty={depValue}
+          haveValue={true}
+          // isdirty={depValue}
         >
           <div className="relative flex flex-col item-start sm:items-center gap-3">
             <div className="inline-flex items-center w-full gap-2">
@@ -445,4 +475,4 @@ const StaffRoster = () => {
   );
 };
 
-export default StaffRoster;
+export default ArrangeLeave;

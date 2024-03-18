@@ -76,6 +76,7 @@ const App = () => {
 				{ text: "考勤檢視", href: "attendanceview" },
 				{ text: "考勤報表", href: "attendancereport" },
 				{ text: "辦公行事曆", href: "workcalendar" },
+				{ text: "輪班排休表", href: "hrarrangeLeave" },
 				{ text: "豁免出勤審核", href: "attendancewaiverhrm" },
 			],
 		},
@@ -96,7 +97,7 @@ const App = () => {
 			href: "#",
 			subMenuItems: [
 				{ text: "主管審核", href: "supervisorapproval" },
-				// { text: "排班表(主管用)", href: "staffroster" },
+				// { text: "排班表(主管用)", href: "supervisorarrangeleave" },
 			],
 		},
 	];

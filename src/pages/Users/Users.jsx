@@ -106,12 +106,13 @@ const Users = () => {
 	// ApiUrl
 	const furl = "user";
 	const [apiUrl, setApiUrl] = useState("");
+	// useEffect(()=>{console.log("queryParams",queryParams,queryParams.get("department"))},[queryParams])
 
 	// 預設搜尋篩選內容
 	const getValueOrFilter = (queryParam, filter) => {
 		const value = queryParams.get(queryParam);
 		if (queryParam === "authorities") {
-			return !!value ? value.split(",").map(Number) : filter;
+			return !!value ? value.split(",") : filter;
 		} else {
 			return !!value ? value : filter;
 		}
@@ -264,26 +265,6 @@ const Users = () => {
 				setIsLoading(false);
 				if (result.result) {
 					const data = result.result;
-					data.content = data.content.map((item) => {
-						let displayScreenName = "";
-
-						if (item.lastname && item.firstname) {
-							displayScreenName = `${item.lastname}${item.firstname}`;
-						} else if (item.lastname) {
-							displayScreenName = item.lastname;
-						} else if (item.firstname) {
-							displayScreenName = item.firstname;
-						} else if (item.nickname) {
-							displayScreenName = item.nickname;
-						} else {
-							displayScreenName = item.displayName;
-						}
-
-						return {
-							...item,
-							displayScreenName: displayScreenName,
-						};
-					});
 					setApiData(data);
 
 					if (page > data.totalPages) {
@@ -291,9 +272,9 @@ const Users = () => {
 						setRowsPerPage(10);
 						navigateWithParams(1, 10);
 					}
-				} else {
-					setApiData(null);
-				}
+				}else {
+          setApiData(null)
+        }
 			});
 		},
 		[page]
@@ -539,7 +520,6 @@ const Users = () => {
 		setRowsPerPage(10);
 		navigate(`?p=1&s=10&${searchParams.toString()}`);
 	};
-
 	const handleCheckboxChange = (event) => {
 		let CBstatus = event.target.checked;
 		setIsAgeEnabled(CBstatus);
@@ -708,7 +688,7 @@ const Users = () => {
 					columnsPC={columnsPC}
 					columnsMobile={columnsMobile}
 					actions={actions}
-					cardTitleKey={"displayScreenName"}
+					cardTitleKey={"displayName"}
 					tableMinWidth={1140}
 					isLoading={isLoading}
 					handleActionClick={handleActionClick}

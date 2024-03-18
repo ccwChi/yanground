@@ -1,10 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useForm, Controller, FormProvider } from "react-hook-form";
+// date-fns
+import { parseISO, format } from "date-fns";
+import { zhTW } from "date-fns/locale";
+import { utcToZonedTime } from "date-fns-tz";
 // FontAwesome
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapLocationDot } from "@fortawesome/free-solid-svg-icons";
 // MUI
-import { TablePagination, Tooltip, useMediaQuery } from "@mui/material";
+import {
+  Checkbox,
+  TablePagination,
+  Tooltip,
+  useMediaQuery,
+} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -26,579 +36,748 @@ import { useNotification } from "../../hooks/useNotification";
 // Utils
 import { getData, postData } from "../../utils/api";
 // Others
-import { PunchLocationModal, LeaveApplicationModal } from "./AttendanceViewModal";
+import {
+  PunchLocationModal,
+  LeaveApplicationModal,
+} from "./AttendanceViewModal";
 // Table 及 Table 所需按鈕、頁數
 import RWDTable from "../../components/RWDTable/RWDTable";
 
 // 用網址傳參數
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
+import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
+import Pagination from "../../components/Pagination/Pagination";
+
+// MenuItem 選單樣式調整
+const ITEM_HEIGHT = 36;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      Width: 250,
+    },
+  },
+};
+
+// 篩選 default 值
+const defaultValue = {
+  // queryString: "",
+  // agents: [],
+  departments: [],
+  users: [],
+  types: [],
+  since: null,
+  until: null,
+};
 
 const AttendanceView = () => {
-	const isTargetScreen = useMediaQuery("(max-width:991.98px)");
-	const navigateWithParams = useNavigateWithParams();
-	const navigate = useNavigate();
-	const showNotification = useNotification();
+  const isTargetScreen = useMediaQuery("(max-width:991.98px)");
+  const navigateWithParams = useNavigateWithParams();
+  const navigate = useNavigate();
+  const showNotification = useNotification();
 
-	// 解析網址取得參數
-	const location = useLocation();
-	const queryParams = new URLSearchParams(location.search);
-	const depValue = queryParams.get("dep");
-	const userValue = queryParams.get("user");
-	const stateValue = queryParams.get("state");
-	const dateValue = queryParams.get("date");
-	const tabCat = queryParams.get("cat");
+  // 解析網址取得參數
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
 
-	// Page 頁數設置
-	const [page, setPage] = useState(
-		queryParams.has("p") && !isNaN(+queryParams.get("p")) ? +queryParams.get("p") - 1 : 0
-	);
-	// rows per Page 多少筆等同於一頁
-	const [rowsPerPage, setRowsPerPage] = useState(
-		queryParams.has("s") && !isNaN(+queryParams.get("s")) ? +queryParams.get("s") : 50
-	);
+  // Page 頁數設置
+  const [page, setPage] = useState(
+    queryParams.has("p") && !isNaN(+queryParams.get("p"))
+      ? +queryParams.get("p") - 1
+      : 0
+  );
+  // rows per Page 多少筆等同於一頁
+  const [rowsPerPage, setRowsPerPage] = useState(
+    queryParams.has("s") && !isNaN(+queryParams.get("s"))
+      ? +queryParams.get("s")
+      : 10
+  );
 
-	const day = new Date();
-	const today = new Date(day).toISOString().slice(0, 10); // 會得到 2024-01-16 這樣的格式
-	// 60天前
-	const daysAgo = new Date(day);
-	daysAgo.setDate(day.getDate() - 30);
+  // const modeValue = queryParams.get("mode");
+  // API List Data
+  const [apiData, setApiData] = useState([]);
+  // ModalValue 控制開啟的是哪一個 Modal
+  const [modalValue, setModalValue] = useState(false);
+  // 傳送額外資訊給 Modal
+  const [deliverInfo, setDeliverInfo] = useState(null);
+  // 搜尋篩選清單
+  const [filters, setFilters] = useState(defaultValue);
+  const [departmentList, setDepartmentList] = useState([]);
+  const [userList, setUserList] = useState([]);
+  const [typeList, setTypeList] = useState([]);
+  // 傳遞至後端是否完成 Flag
+  const [sendBackFlag, setSendBackFlag] = useState(false);
+  // isLoading 等待請求 API
+  const [isLoading, setIsLoading] = useState(true);
+  // SearchDialog Switch
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  // cat = Category 設置 tab 分類
+  const [cat, setCat] = useState("table");
+  // 搜尋日期
+  const [since, setSince] = useState(null);
+  const [until, setUntil] = useState(null);
+  const [type, setType] = useState("ATTENDANCE");
+  // ApiUrl
+  const furl = "attendance";
+  const [apiUrl, setApiUrl] = useState("");
 
-	const [currentPageData, setCurrentPageData] = useState([]);
-	// const modeValue = queryParams.get("mode");
-	// API List Data
-	const [apiData, setApiData] = useState([]);
-	const [events, setEvents] = useState([]);
-	// ModalValue 控制開啟的是哪一個 Modal
-	const [modalValue, setModalValue] = useState(false);
-	// 傳送額外資訊給 Modal
-	const [deliverInfo, setDeliverInfo] = useState(null);
-	// 部門清單
-	const [departmentList, setDepartmentList] = useState([]);
-	// 人員清單
-	const [usersList, setUsersList] = useState([]);
-	// 考勤別清單
-	const [attendanceTypeList, setAttendanceTypeList] = useState([]);
-	// isLoading 等待請求 API
-	const [isLoading, setIsLoading] = useState(false);
-	// SearchDialog Switch
-	const [searchDialogOpen, setSearchDialogOpen] = useState(false);
-	// cat = Category 設置 tab 分類
-	const [cat, setCat] = useState("table");
-	// 傳遞至後端是否完成 Flag
-	const [sendBackFlag, setSendBackFlag] = useState(false);
-	// 搜尋日期
-	const [since, setSince] = useState(null);
-	const [until, setUntil] = useState(null);
-	const [type, setType] = useState("ATTENDANCE");
+  // 預設搜尋篩選內容
+  const getValueOrFilter = (queryParam, filter) => {
+    const value = queryParams.get(queryParam);
+    if (
+      queryParam === "users" ||
+      queryParam === "agents" ||
+      queryParam === "departments" ||
+      queryParam === "types"
+    ) {
+      return !!value ? value.split(",").map(String) : filter;
+    } else {
+      return !!value ? value : filter;
+    }
+  };
 
-	useEffect(() => {
-		setSince(daysAgo);
-		setUntil(day);
-	}, []);
+  const defaultValues = {
+    // queryString: getValueOrFilter("queryString", filters.queryString),
+    // agents: getValueOrFilter("agents", filters.agents),
+    departments: getValueOrFilter("departments", filters.departments),
+    users: getValueOrFilter("users", filters.users),
+    types: getValueOrFilter("types", filters.types),
+    since: queryParams.get("since") ? new Date(queryParams.get("since")) : null,
+    until: queryParams.get("until") ? new Date(queryParams.get("until")) : null,
+  };
 
-	const anomalyList = [
-		{
-			id: 1,
-			text: "全部",
-		},
-		{
-			id: 2,
-			text: "異常 ",
-		},
-		{
-			id: 3,
-			text: "正常",
-		},
-	];
+  // 使用 useForm Hook 來管理表單狀態和驗證
+  const methods = useForm({
+    defaultValues,
+  });
+  const {
+    control,
+    reset,
+    watch,
+    setValue,
+    formState: { isDirty },
+    handleSubmit,
+  } = methods;
+  const watchSinceDate = watch("since");
+  const watchDepartment = watch("departments");
 
-	// 區塊功能按鈕清單
-	const btnGroup = [
-		{
-			mode: "leaveapplication",
-			icon: <AssignmentReturnIcon fontSize="small" />,
-			text: "提出請假申請",
-			variant: "contained",
-			color: "primary",
-			fabVariant: "success",
-			fab: <AssignmentReturnIcon />,
-		},
-		{
-			mode: "filter",
-			icon: null, // 設為 null 就可以避免 PC 出現
-			text: "篩選",
-			variant: "contained",
-			color: "secondary",
-			fabVariant: "secondary",
-			fab: <TuneIcon fontSize="large" />,
-		},
-	];
+  // 更改部門之後，選擇人員部分清空
+  useEffect(() => {
+    if (watchDepartment.length === 0) {
+      setValue("users", []);
+    }
+  }, [watchDepartment]);
 
-	const getflagColorandText = (anomaly) => {
-		if (anomaly === null) {
-			return { color: "#25B09B", text: "考勤正常" };
-		} else if (typeof anomaly === "object") {
-			return { color: "#F03355", text: anomaly.chinese };
-		} else {
-			return null;
-		}
-	};
+  // 取得特定部門人員清單
+  useEffect(() => {
+    if (!!watchDepartment) {
+      const promises = watchDepartment.map((departId) => {
+        const departurl = `department/${departId}/staff`;
+        return getData(departurl).then((result) => {
+          return result.result ? result.result : [];
+        });
+      });
+      Promise.all(promises)
+        .then((results) => {
+          const combinedUserList = results.reduce(
+            (acc, userList) => acc.concat(userList),
+            []
+          );
+          setUserList(combinedUserList);
+        })
+        .catch((error) => {
+          setUserList([]);
+        });
+    }
+  }, [watchDepartment]);
 
-	// 取得部門資料 x 取得考勤別資料
-	useEffect(() => {
-		getData("department").then((result) => {
-			if (result.result) {
-				const data = result.result.content;
-				const formattedDep = data.map((dep) => ({ label: dep.name, id: dep.id }));
-				setDepartmentList(formattedDep);
-			} else {
-				setDepartmentList([]);
-			}
-		});
+  useEffect(() => {
+    const startedFromDate = new Date(watchSinceDate);
+    const startedToDate = new Date(watch("until"));
 
-		getData("attendanceType").then((result) => {
-			if (result.result) {
-				const data = result.result;
-				const formattedList = data.map((obj) => ({ label: obj.chinese, id: obj.value }));
-				setAttendanceTypeList(formattedList);
-			} else {
-				setAttendanceTypeList([]);
-			}
-		});
-	}, []);
+    // 檢查 startedFrom 是否大於 startedTo
+    if (startedFromDate > startedToDate) {
+      setValue("until", null);
+    }
+  }, [watchSinceDate, setValue]);
 
-	// 取得人員資料
-	useEffect(() => {
-		if (depValue) {
-			getData(`department/${depValue}/staff`).then((result) => {
-				if (result.result) {
-					const data = result.result;
-					const formattedUser = data.map((us) => ({
-						label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName,
-						id: us.id,
-					}));
-					setUsersList(formattedUser);
-				} else {
-					setUsersList([]);
-				}
-			});
-		}
-	}, [depValue]);
+  // 轉換時間
+  const formatDateTime = (dateTime) => {
+    const parsedDateTime = parseISO(dateTime);
+    const formattedDateTime = format(
+      utcToZonedTime(parsedDateTime, "Asia/Taipei"),
+      "yyyy-MM-dd HH:mm",
+      {
+        locale: zhTW,
+      }
+    );
+    return formattedDateTime;
+  };
 
-	// 用全部的資料來過濾網址已有的篩選條件
-	useEffect(() => {
-		setEvents(apiData);
-		let tempShowData = apiData;
-		if (depValue !== null) {
-			tempShowData = tempShowData.filter((event) => {
-				return event.user.departmentId === depValue;
-			});
-		}
-		if (userValue !== null) {
-			tempShowData = tempShowData.filter((event) => {
-				return event.user.id === userValue;
-			});
-		}
-		if (stateValue !== null) {
-			tempShowData = tempShowData.filter((event) => {
-				return event.anomalyState.id === stateValue;
-			});
-		}
+  // 更新 ApiUrl
+  useEffect(() => {
+    let constructedApiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
 
-		setEvents(tempShowData);
-		const TempCurrentPageData = tempShowData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-		setCurrentPageData(TempCurrentPageData);
-	}, [depValue, userValue, stateValue, dateValue, apiData, page, rowsPerPage]);
+    const searchquery = Object.fromEntries(queryParams.entries());
+    for (const key in searchquery) {
+      if (
+        key !== "p" &&
+        key !== "s" &&
+        searchquery[key] !== undefined &&
+        searchquery[key] !== null &&
+        searchquery[key] !== ""
+      ) {
+        constructedApiUrl += `&${key}=${encodeURIComponent(searchquery[key])}`;
+      }
+    }
 
-	// 只要搜尋條件有變動就讓頁數返回第一頁
-	useEffect(() => {
-		setPage(0);
-	}, [depValue, userValue, stateValue, dateValue, apiData]);
+    setApiUrl(constructedApiUrl);
+  }, [page, rowsPerPage, queryParams]);
 
-	// 取得日曆資料
-	useEffect(() => {
-		if (!!since && !!until) {
-			setIsLoading(true);
-			setApiData([]);
-			// Define the API calls
-			const sinceForApi = since.toISOString().slice(0, 10);
-			const untilForApi = until.toISOString().slice(0, 10);
-			navigateWithParams(0, 0, { since: sinceForApi }, false);
-			navigateWithParams(0, 0, { until: untilForApi }, false);
-			const anomaly = "";
-			getData(`attendance?type=${type}&since=${sinceForApi}&until=${untilForApi}&anomaly=${anomaly}&s=5000&p=1`).then(
-				(result) => {
-					if (result.result) {
-						const rawData = result.result.content.map(
-							({ id, type, anomaly, date, since, until, user, clockPunchIn, clockPunchOut }) => ({
-								id,
-								anomalyType: type,
-								anomalyReason: anomaly?.chinese || "",
-								date,
-								title: user.department.name + " - " + user.nickname,
-								anomalyState: anomaly === null ? { text: "✔️", id: "3" } : { text: "❌", id: "2" },
-								since: clockPunchIn ? clockPunchIn.occurredAt.slice(11, 19) : "-",
-								until: clockPunchOut ? clockPunchOut.occurredAt.slice(11, 19) : "-",
-								color: getflagColorandText(anomaly).color,
-								user: {
-									id: user.id,
-									nickname: user.nickname,
-									fullName: user.lastname + user.firstname,
-									department: user.department.name,
-									departmentId: user.department.id,
-								},
-								clockPunchIn,
-								clockPunchOut,
-							})
-						);
-						setApiData(rawData);
-					} else {
-						setApiData([]);
-					}
-					setIsLoading(false);
-				}
-			);
-		}
-	}, [since, until, type]);
+  // 取得列表資料
+  useEffect(() => {
+    if (apiUrl !== "") {
+      getApiList(apiUrl);
+    }
+  }, [apiUrl]);
+  const getApiList = useCallback((url) => {
+    setIsLoading(true);
+    getData(url).then((result) => {
+      setIsLoading(false);
+      if (result.result) {
+        const data = result.result;
+        const transformedData = {
+          ...data,
+          content: data.content.map(
+            ({
+              id,
+              type,
+              anomaly,
+              date,
+              since,
+              until,
+              user,
+              clockPunchIn,
+              clockPunchOut,
+            }) => ({
+              id,
+              anomalyType: type,
+              anomalyReason: anomaly?.chinese || "",
+              date,
+              title: user.department.name + " - " + user.nickname,
+              anomalyState:
+                anomaly === null
+                  ? { text: "✔️", id: "3" }
+                  : { text: "❌", id: "2" },
+              since: since ? formatDateTime(since) : "-",
+              until: until ? formatDateTime(until) : "-",
+              color: getflagColorandText(anomaly).color,
+              user: {
+                id: user.id,
+                nickname: user.nickname,
+                fullName: user.lastname + user.firstname,
+                department: user.department.name,
+                departmentId: user.department.id,
+              },
+              clockPunchIn,
+              clockPunchOut,
+            })
+          ),
+        };
+        setApiData(transformedData);
+        if (page > data?.totalPages) {
+          setPage(0);
+          setRowsPerPage(10);
+          navigateWithParams(1, 10);
+        }
+      } else {
+        setApiData([]);
+      }
+      setIsLoading(false);
+    });
+  }, []);
 
-	useEffect(() => {
-		if (tabCat === "calendar") {
-			setCat("calendar");
-		}
-	}, [tabCat]);
-	// 開啟 SearchDialog
-	const handleOpenSearch = () => {
-		setSearchDialogOpen(true);
-	};
-	// 關閉 SearchDialog
-	const handleCloseSearch = () => {
-		setSearchDialogOpen(false);
-	};
+  // 區塊功能按鈕清單
+  const btnGroup = [
+    {
+      mode: "leaveapplication",
+      icon: <AssignmentReturnIcon fontSize="small" />,
+      text: "提出請假申請",
+      variant: "contained",
+      color: "primary",
+      fabVariant: "success",
+      fab: <AssignmentReturnIcon />,
+    },
+    {
+      mode: "filter",
+      icon: null, // 設為 null 就可以避免 PC 出現
+      text: "篩選",
+      variant: "contained",
+      color: "secondary",
+      fabVariant: "secondary",
+      fab: <TuneIcon fontSize="large" />,
+    },
+  ];
 
-	// Tab 列表對應 api 搜尋參數
-	const tabGroup = [
-		{ f: "table", text: "列表" },
-		{ f: "calendar", text: "月曆" },
-	];
-	// -----------------------------------------------------
-	// 對照 api table 所顯示 key
-	const columnsPC = [
-		{ key: "anomalyType", label: "考勤假別", size: "10%" },
-		{ key: ["user", "fullName"], label: "姓名", size: "10%" },
-		{ key: ["user", "department"], label: "部門", size: "10%" },
-		{ key: "date", label: "日期", size: "14%" },
-		{ key: ["anomalyState", "text"], label: "狀態", size: "6%" },
-		{ key: "anomalyReason", label: "異常原因", size: "14%" },
-		{ key: "since", label: "上班時間", size: "12%" },
-		{ key: "until", label: "下班時間", size: "12%" },
-	];
-	const columnsMobile = [
-		{ key: "anomalyType", label: "考勤假別" },
-		{ key: ["user", "fullName"], label: "姓名" },
-		{ key: ["user", "nickname"], label: "暱稱" },
-		{ key: ["user", "department"], label: "部門" },
-		{ key: "date", label: "日期" },
-		{ key: ["anomalyState", "text"], label: "狀態" },
-		{ key: "anomalyReason", label: "異常原因" },
-		{ key: "since", label: "上班時間" },
-		{ key: "until", label: "下班時間" },
-	];
+  const getflagColorandText = (anomaly) => {
+    if (anomaly === null) {
+      return { color: "#25B09B", text: "考勤正常" };
+    } else if (typeof anomaly === "object") {
+      return { color: "#F03355", text: anomaly.chinese };
+    } else {
+      return null;
+    }
+  };
 
-	const actions = [
-		{
-			value: "location",
-			icon: <FontAwesomeIcon icon={faMapLocationDot} size={"lg"} />,
-			title: "打卡地點",
-		},
-	];
+  // 取得部門清單 & 考勤類別清單
+  useEffect(() => {
+    const departurl = "department?p=1&s=500";
+    const typeurl = "attendanceType?p=1&s=500";
+    getData(departurl).then((result) => {
+      if (result.result) {
+        const data = result.result.content;
+        setDepartmentList(data);
+      } else {
+        setDepartmentList([]);
+      }
+    });
+    getData(typeurl).then((result) => {
+      if (result.result) {
+        const data = result.result;
+        setTypeList(data);
+      } else {
+        setTypeList([]);
+      }
+    });
+  }, []);
 
-	const handleChangePage = (event, newPage) => {
-		setPage(newPage);
-	};
+  // useEffect(() => {
+  // 	if (tabCat === "calendar") {
+  // 		setCat("calendar");
+  // 	}
+  // }, [tabCat]);
 
-	const handleChangeRowsPerPage = (event) => {
-		setRowsPerPage(+event.target.value);
-		setPage(0);
-	};
+  // Tab 列表對應 api 搜尋參數
+  const tabGroup = [
+    { f: "table", text: "列表" },
+    { f: "calendar", text: "月曆" },
+  ];
+  // -----------------------------------------------------
+  // 對照 api table 所顯示 key
+  const columnsPC = [
+    { key: "anomalyType", label: "考勤假別", size: "10%" },
+    { key: ["user", "fullName"], label: "姓名", size: "10%" },
+    { key: ["user", "department"], label: "部門", size: "10%" },
+    { key: "date", label: "日期", size: "14%" },
+    { key: ["anomalyState", "text"], label: "狀態", size: "6%" },
+    { key: "anomalyReason", label: "異常原因", size: "14%" },
+    { key: "since", label: "上班時間", size: "12%" },
+    { key: "until", label: "下班時間", size: "12%" },
+  ];
 
-	// 當活動按鈕點擊時開啟 modal 並進行動作
-	const handleActionClick = (event) => {
-		event.stopPropagation();
-		const dataMode = event.currentTarget.getAttribute("data-mode");
-		const dataValue = event.currentTarget.getAttribute("data-value");
-		setModalValue(dataMode);
-		setDeliverInfo(dataValue ? apiData?.find((item) => item.id === dataValue) : null);
-	};
+  const columnsMobile = [
+    { key: "anomalyType", label: "考勤假別" },
+    { key: ["user", "fullName"], label: "姓名" },
+    { key: ["user", "nickname"], label: "暱稱" },
+    { key: ["user", "department"], label: "部門" },
+    { key: "date", label: "日期" },
+    { key: ["anomalyState", "text"], label: "狀態" },
+    { key: "anomalyReason", label: "異常原因" },
+    { key: "since", label: "上班時間" },
+    { key: "until", label: "下班時間" },
+  ];
 
-	// 傳遞給後端資料
-	const sendDataToBackend = (fd, mode, otherData) => {
-		setSendBackFlag(true);
-		let url = "supervisor/attendanceForm";
-		let message = [];
-		switch (mode) {
-			case "create":
-				message = [`「${otherData}」的假單建立成功！`];
-				break;
-			case "arrangeLeave" :
-				url = `user/${otherData[1]}/arrangedLeave/${otherData[2]}`
-				message = [`「${otherData[0]}」的假單建立成功！`];
-				break;
-			default:
-				break;
-		}
-		postData(url, fd).then((result) => {
-			if (result.status) {
-				showNotification(message[0], true);
-				onClose();
-			} else {
-				showNotification(
-					result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
-					false
-				);
-			}
-			setSendBackFlag(false);
-		});
-	};
+  const actions = [
+    {
+      value: "location",
+      icon: <FontAwesomeIcon icon={faMapLocationDot} size={"lg"} />,
+      title: "打卡地點",
+    },
+  ];
 
-	// 關閉 Modal 清除資料
-	const onClose = () => {
-		setModalValue(false);
-		setDeliverInfo(null);
-	};
+  // 設置頁數
+  const handleChangePage = useCallback(
+    (event, newPage) => {
+      setPage(newPage);
+      navigateWithParams(newPage + 1, rowsPerPage);
+    },
+    [rowsPerPage]
+  );
 
-	// modal 開啟參數與顯示標題
-	const modalConfig = [
-		{
-			modalValue: "location",
-			modalComponent: <PunchLocationModal title={"打卡地點"} deliverInfo={deliverInfo} onClose={onClose} />,
-		},
-		{
-			modalValue: "leaveapplication",
-			modalComponent: (
-				<LeaveApplicationModal
-					title={"假單申請"}
-					departmentsList={departmentList}
-					attendanceTypesList={attendanceTypeList.filter((obj) => obj.id !== "ATTENDANCE")}
-					sendDataToBackend={sendDataToBackend}
-					onClose={onClose}
-				/>
-			),
-		},
-	];
-	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
+  // 設置每頁顯示並返回第一頁
+  const handleChangeRowsPerPage = (event) => {
+    const targetValue = parseInt(event.target.value, 10);
+    setRowsPerPage(targetValue);
+    setPage(0);
+    navigateWithParams(1, targetValue);
+  };
 
-	// -----------------------------------------------------
-	return (
-		<>
-			{/* PageTitle & Search */}
-			<PageTitle
-				title={"考勤檢視"}
-				description="此頁面是用於查看整個部門或全體員工的考勤資訊與狀態，同時可檢視員工上下班打卡地點。(✔️= 正常, ❌= 異常)"
-				btnGroup={btnGroup}
-				handleActionClick={handleActionClick}
-				// 搜尋模式
-				searchMode
-				// 下面參數前提都是 searchMode = true
-				searchDialogOpen={searchDialogOpen}
-				handleOpenDialog={handleOpenSearch}
-				handleCloseDialog={handleCloseSearch}
-				handleCloseText={"關閉"}
-				isdirty={
-					!depValue && !userValue && (stateValue === 1 || stateValue === null) && !dateValue && type !== "ATTENDANCE"
-					// && (modeValue === dataCAList[0].value
-					// 	|| !dataCAList.some((item) => item.value === modeValue)
-					// 	)
-				}>
-				<div className="relative flex flex-col item-start sm:items-center gap-3">
-					<div className="inline-flex items-center w-full gap-2">
-						<InputTitle title={"部門"} pb={false} required={false} classnames="whitespace-nowrap" />
-						<Autocomplete
-							options={departmentList}
-							noOptionsText={!!departmentList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"}
-							className="flex-1"
-							value={departmentList?.find((obj) => obj.id === depValue) || null}
-							onChange={(event, newValue, reason) => {
-								if (reason === "clear") {
-									if (window.confirm("清空部門欄位會連帶清空選擇人員，確定清空？")) {
-										const newParams = new URLSearchParams(window.location.search);
-										newParams.delete("dep");
-										newParams.delete("user");
-										navigate(`?${newParams.toString()}`);
-										// setUsersList([]);
-										// navigate(`/anomaly_report`);
-									}
-								} else {
-									setUsersList([]);
-									navigateWithParams(0, 0, { dep: newValue.id }, false);
-								}
-							}}
-							renderInput={(params) => (
-								<TextField
-									{...params}
-									className="inputPadding bg-white"
-									placeholder="請選擇部門"
-									sx={{ "& > div": { padding: "0 !important" } }}
-									InputProps={{
-										...params.InputProps,
-										endAdornment: (
-											<>
-												{departmentList.length <= 0 ? (
-													<CircularProgress className="absolute right-[2.325rem]" size={20} />
-												) : null}
-												{params.InputProps.endAdornment}
-											</>
-										),
-									}}
-								/>
-							)}
-							loading={departmentList.length <= 0}
-							loadingText={"載入中..."}
-						/>
-					</div>
-					<div className="inline-flex items-center w-full gap-2">
-						<InputTitle title={"人員"} pb={false} required={false} classnames="whitespace-nowrap" />
-						<Autocomplete
-							options={usersList}
-							noOptionsText={!!usersList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"}
-							className="flex-1"
-							value={usersList?.find((obj) => obj.id === userValue) || null}
-							onChange={(event, newValue, reason) => {
-								if (reason === "clear") {
-									const newParams = new URLSearchParams(window.location.search);
-									newParams.delete("user");
-									navigate(`?${newParams.toString()}`);
-								} else {
-									navigateWithParams(0, 0, { user: newValue.id }, false);
-								}
-							}}
-							renderInput={(params) => (
-								<TextField
-									{...params}
-									className="inputPadding bg-white"
-									placeholder="請選擇人員"
-									sx={{ "& > div": { padding: "0 !important" } }}
-									InputProps={{
-										...params.InputProps,
-										endAdornment: (
-											<>
-												{depValue && usersList.length <= 0 ? (
-													<CircularProgress className="absolute right-[2.325rem]" size={20} />
-												) : null}
-												{params.InputProps.endAdornment}
-											</>
-										),
-									}}
-								/>
-							)}
-							loading={usersList.length <= 0}
-							loadingText={"載入中..."}
-							disabled={!depValue}
-						/>
-					</div>
-					<div className="inline-flex items-center w-full gap-2">
-						<InputTitle title={"狀態"} pb={false} required={false} classnames="whitespace-nowrap" />
-						<Select
-							value={stateValue ? stateValue : 1}
-							onChange={(event) => {
-								const newParams = new URLSearchParams(window.location.search);
-								if (event.target.value === 1) {
-									newParams.delete("state");
-									navigate(`?${newParams.toString()}`);
-								} else if (event.target.value) {
-									navigateWithParams(0, 0, { state: event.target.value }, false);
-								}
-							}}
-							className="inputPadding !pe-5"
-							displayEmpty
-							fullWidth>
-							{anomalyList.map((dc) => (
-								<MenuItem key={dc.id} value={dc.id}>
-									{dc.text}
-								</MenuItem>
-							))}
-						</Select>
-					</div>
-					<div className="inline-flex items-center w-full gap-2">
-						<InputTitle title={"假別"} pb={false} required={false} classnames="whitespace-nowrap" />
-						<Select
-							value={type}
-							onChange={(e) => setType(e.target.value)}
-							className="inputPadding !pe-5"
-							displayEmpty
-							fullWidth>
-							{attendanceTypeList.map((at) => (
-								<MenuItem key={at.id} value={at.id}>
-									{at.label}
-								</MenuItem>
-							))}
-						</Select>
-					</div>
-					<div className="w-full text-left flex mt-1">
-						<InputTitle title={"選擇日期"} pb={false} required={false} classnames="whitespace-nowrap" />
-						<div className="flex ms-2 mt-1">
-							<p className="!my-0 text-rose-400 font-bold text-xs !me-1">＊</p>
-							<p className="!my-0 text-rose-400 font-bold text-xs">預設選擇日期為今日往前推算30天</p>
-						</div>
-					</div>
-					<div className="inline-flex items-center w-full gap-2">
-						<InputTitle title={"起"} pb={false} required={false} classnames="whitespace-nowrap" />
-						<DatePicker
-							defaultValue={null}
-							value={since}
-							setDates={setSince}
-							// date的網址param在上面用useEffect來進行處理
-							views={["year", "month", "day"]}
-							format={"yyyy 年 MM 月 dd 日"}
-							minDate={new Date("2023-11")}
-						/>
-					</div>
-					<div className="inline-flex items-center w-full gap-2">
-						<InputTitle title={"迄"} pb={false} required={false} classnames="whitespace-nowrap" />
-						<DatePicker
-							defaultValue={null}
-							value={until}
-							setDates={setUntil}
-							// date的網址param在上面用useEffect來進行處理
-							views={["year", "month", "day"]}
-							format={"yyyy 年 MM 月 dd 日"}
-							minDate={since ? new Date(since) : new Date("2023-11")}
-							maxDate={new Date(today)}
-						/>
-					</div>
-				</div>
-			</PageTitle>
+  //  下面為搜索專用
+  // 開啟 SearchDialog
+  const handleOpenSearch = () => {
+    setSearchDialogOpen(true);
+  };
+  // 關閉 SearchDialog
+  const handleCloseSearch = () => {
+    reset(defaultValues);
+    setSearchDialogOpen(false);
+  };
+  // 恢復為上一次搜尋狀態
+  const handleCoverDialog = () => {
+    reset(defaultValues);
+  };
+  // 重置 SearchDialog
+  const handleClearSearch = () => {
+    reset(defaultValue);
+    setFilters(defaultValue);
+    setSearchDialogOpen(false);
+    navigate(`?p=1&s=10`);
+  };
+  // 搜尋送出
+  const onSubmit = (data) => {
+    setFilters(data);
+    setSearchDialogOpen(false);
 
-			{/* TabBar */}
-			<TableTabbar tabGroup={tabGroup} setCat={setCat} cat={cat} />
+    const fullDepartMember = [];
+    if (data.departments.length > 0 && data.users.length === 0) {
+      const allMember = userList.map((user) => user.id);
+      fullDepartMember.push(...allMember);
+      data.users = fullDepartMember;
+    }
 
-			{/* Calendar */}
-			{cat === "table" ? (
+    const fd = new FormData();
+    for (let key in data) {
+      switch (key) {
+        // case "users":
+        // 	fd.append(key, JSON.stringify(data[key]));
+        // 	break;
+        case "since":
+        case "until":
+          if (data[key] !== null) {
+            fd.append(key, format(data[key], "yyyy-MM-dd"));
+          }
+          break;
+        default:
+          if (data[key] !== null) {
+            fd.append(key, data[key]);
+          }
+          break;
+      }
+    }
+
+    const searchParams = new URLSearchParams(fd);
+    setPage(0);
+    setRowsPerPage(10);
+    navigate(`?p=1&s=10&${searchParams.toString()}`);
+  };
+  // 到上面為止都是搜索功能 //
+
+  // 當活動按鈕點擊時開啟 modal 並進行動作
+  const handleActionClick = (event) => {
+    event.stopPropagation();
+    const dataMode = event.currentTarget.getAttribute("data-mode");
+    const dataValue = event.currentTarget.getAttribute("data-value");
+    setModalValue(dataMode);
+    setDeliverInfo(
+      dataValue ? apiData?.content?.find((item) => item.id === dataValue) : null
+    );
+  };
+
+  // 傳遞給後端資料
+  const sendDataToBackend = (fd, mode, otherData) => {
+    setSendBackFlag(true);
+    let url = "supervisor/attendanceForm";
+    let message = [];
+    switch (mode) {
+      case "create":
+        message = [`「${otherData}」的假單建立成功！`];
+        break;
+      case "arrangeLeave":
+        url = `user/${otherData[1]}/arrangedLeave/${otherData[2]}`;
+        message = [`「${otherData[0]}」的假單建立成功！`];
+        break;
+      default:
+        break;
+    }
+    postData(url, fd).then((result) => {
+      if (result.status) {
+        showNotification(message[0], true);
+        onClose();
+      } else {
+        showNotification(
+          result.result.reason
+            ? result.result.reason
+            : result.result
+            ? result.result
+            : "權限不足",
+          false
+        );
+      }
+      setSendBackFlag(false);
+    });
+  };
+
+  // 關閉 Modal 清除資料
+  const onClose = () => {
+    setModalValue(false);
+    setDeliverInfo(null);
+  };
+
+  // modal 開啟參數與顯示標題
+  const modalConfig = [
+    {
+      modalValue: "location",
+      modalComponent: (
+        <PunchLocationModal
+          title={"打卡地點"}
+          deliverInfo={deliverInfo}
+          onClose={onClose}
+        />
+      ),
+    },
+    {
+      modalValue: "leaveapplication",
+      modalComponent: (
+        <LeaveApplicationModal
+          title={"假單申請"}
+          departmentsList={departmentList}
+          attendanceTypesList={typeList.filter(
+            (obj) => obj.value !== "ATTENDANCE"
+          )}
+          sendDataToBackend={sendDataToBackend}
+          onClose={onClose}
+        />
+      ),
+    },
+  ];
+
+  const config = modalValue
+    ? modalConfig.find((item) => item.modalValue === modalValue)
+    : null;
+
+  // -----------------------------------------------------
+  return (
+    <>
+      {/* PageTitle & Search */}
+      <PageTitle
+        title={"考勤檢視"}
+        description="此頁面是用於查看整個部門或全體員工的考勤資訊與狀態，同時可檢視員工上下班打卡地點。(✔️= 正常, ❌= 異常)"
+        btnGroup={btnGroup}
+        handleActionClick={handleActionClick}
+        // 搜尋模式
+        searchMode
+        // 下面參數前提都是 searchMode = true
+        searchDialogOpen={searchDialogOpen}
+        handleOpenDialog={handleOpenSearch}
+        handleCloseDialog={handleCloseSearch}
+        handleCoverDialog={handleCoverDialog}
+        handleConfirmDialog={handleSubmit(onSubmit)}
+        handleClearDialog={handleClearSearch}
+        haveValue={filters === defaultValue}
+        isDirty={isDirty}
+      >
+        <FormProvider {...methods}>
+          <form className="flex flex-col gap-2">
+            <InputTitle
+              title={"部門選擇"}
+              classnames="whitespace-nowrap min-w-[70px]"
+              pb={false}
+              required={false}
+            />
+            <Controller
+              name="departments"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  className="inputPadding pe-3"
+                  multiple
+                  displayEmpty
+                  MenuProps={MenuProps}
+                  renderValue={(selected) => {
+                    if (selected.length === 0) {
+                      return (
+                        <span className="text-neutral-400 font-light">
+                          請選擇部門
+                        </span>
+                      );
+                    }
+
+                    const roleNames = selected.map((roleId) => {
+                      const role = departmentList?.find((r) => r.id === roleId);
+                      return role ? role.name : null;
+                    });
+                    return roleNames.join(", ");
+                  }}
+                  {...field}
+                >
+                  {departmentList?.map((dep) => (
+                    <MenuItem key={dep.id} value={dep.id}>
+                      <Checkbox
+                        checked={watch("departments").indexOf(dep.id) > -1}
+                      />
+                      {dep.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+            <InputTitle
+              title={"人員選擇"}
+              classnames="whitespace-nowrap min-w-[70px]"
+              pb={false}
+              required={false}
+            />
+
+            <Controller
+              name="users"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  className="inputPadding pe-3"
+                  multiple
+                  displayEmpty
+                  MenuProps={MenuProps}
+                  renderValue={(selected) => {
+                    if (selected.length === 0) {
+                      return (
+                        <span className="text-neutral-400 font-light">
+                          請先選擇部門，再選擇人員
+                        </span>
+                      );
+                    }
+
+                    const roleNames = selected.map((roleId) => {
+                      const role = userList?.find((r) => r.id === roleId);
+                      return role ? role.lastname + role.firstname : null;
+                    });
+                    return roleNames.join(", ");
+                  }}
+                  {...field}
+                >
+                  {userList?.map((user) => (
+                    <MenuItem key={user.id} value={user.id}>
+                      <Checkbox
+                        checked={watch("users").indexOf(user.id) > -1}
+                      />
+                      {user.lastname + user.firstname}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+            <InputTitle
+              title={"考勤類別"}
+              classnames="whitespace-nowrap min-w-[70px]"
+              pb={false}
+              required={false}
+            />
+            <Controller
+              name="types"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  className="inputPadding pe-3"
+                  multiple
+                  displayEmpty
+                  MenuProps={MenuProps}
+                  renderValue={(selected) => {
+                    if (selected.length === 0) {
+                      return (
+                        <span className="text-neutral-400 font-light">
+                          請選擇考勤類別
+                        </span>
+                      );
+                    }
+
+                    const roleNames = selected.map((roleId) => {
+                      const role = typeList?.find((r) => r.value === roleId);
+                      return role ? role.chinese : null;
+                    });
+                    return roleNames.join(", ");
+                  }}
+                  {...field}
+                >
+                  {typeList?.map((type) => (
+                    <MenuItem key={type.value} value={type.value}>
+                      <Checkbox
+                        checked={watch("types").indexOf(type.value) > -1}
+                      />
+                      {type.chinese}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+            <div className="inline-flex items-center">
+              <InputTitle
+                title={"日期區間"}
+                classnames="whitespace-nowrap min-w-[70px]"
+                pb={false}
+                required={false}
+              />
+              <div className="flex">
+                <p className="!my-0 text-rose-400 font-bold text-xs">
+                  * 預設選擇日期為前七天。
+                </p>
+              </div>
+            </div>
+            <div className="inline-flex items-center">
+              <InputTitle
+                title={"起"}
+                classnames="whitespace-nowrap me-2"
+                pb={false}
+                required={false}
+              />
+              <ControlledDatePicker name="since" maxDate={new Date()} />
+            </div>
+            <div className="inline-flex items-center">
+              <InputTitle
+                title={"迄"}
+                classnames="whitespace-nowrap me-2"
+                pb={false}
+                required={false}
+              />
+              <ControlledDatePicker
+                name="until"
+                minDate={watchSinceDate}
+                disabled={!watchSinceDate}
+                maxDate={new Date()}
+              />
+            </div>
+          </form>
+        </FormProvider>
+      </PageTitle>
+
+      {/* TabBar */}
+      {/* <TableTabbar tabGroup={tabGroup} setCat={setCat} cat={cat} /> */}
+
+      {/* Calendar */}
+      {/* {cat === "table" ? (
 				<>
-					<div className="overflow-y-auto flex-1 h-full order-3 sm:order-1">
-						<RWDTable
-							data={currentPageData}
-							columnsPC={columnsPC}
-							columnsMobile={columnsMobile}
-							actions={actions}
-							cardTitleKey={"title"}
-							tableMinWidth={1024}
-							isLoading={isLoading}
-							handleActionClick={handleActionClick}
-						/>
-					</div>
-					{/* Pagination */}
-					<TablePagination
-						className="order-2"
-						rowsPerPageOptions={[50, 100, 250]}
-						component="div"
-						count={events ? events.length : 0}
-						rowsPerPage={rowsPerPage}
-						page={page}
-						labelRowsPerPage={"每頁行數:"}
-						onPageChange={handleChangePage}
-						onRowsPerPageChange={handleChangeRowsPerPage}
-					/>
-				</>
-			) : (
+					<div className="overflow-y-auto flex-1 h-full order-3 sm:order-1"> */}
+      <RWDTable
+        data={apiData?.content || []}
+        columnsPC={columnsPC}
+        columnsMobile={columnsMobile}
+        actions={actions}
+        cardTitleKey={"title"}
+        tableMinWidth={1024}
+        isLoading={isLoading}
+        handleActionClick={handleActionClick}
+      />
+      {/* </div> */}
+      {/* Pagination */}
+      {/* Pagination */}
+      <Pagination
+        totalElement={apiData ? apiData.totalElements : 0}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+      {/* </> */}
+      {/* ) : (
 				<Calendar
 					data={events}
 					viewOptions={["dayGridMonth", "dayGridWeek"]}
@@ -606,235 +785,69 @@ const AttendanceView = () => {
 					navLinkDayClick={(date, jsEvent) => {}}
 					eventContent={(e) => CustomEventContent(e, isTargetScreen)}
 				/>
-			)}
+			)} */}
 
-			{/* Floating Action Button */}
-			<FloatingActionButton btnGroup={btnGroup} handleActionClick={handleOpenSearch} />
+      {/* Floating Action Button */}
+      <FloatingActionButton
+        btnGroup={btnGroup}
+        handleActionClick={handleOpenSearch}
+      />
 
-			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={(tabCat === "calendar" && isLoading) || sendBackFlag}>
-				<LoadingFour />
-			</Backdrop>
+      <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
+        <LoadingFour />
+      </Backdrop>
 
-			{/* Modal */}
-			{config && config.modalComponent}
-		</>
-	);
+      {/* Modal */}
+      {config && config.modalComponent}
+    </>
+  );
 };
 
 export default AttendanceView;
 
 const CustomEventContent = ({ event, isTargetScreen }) => {
-	const extendedProps = event._def.extendedProps;
-	// if (isTargetScreen) {
-	//   return null;
-	// }
-	return (
-		<>
-			<div>
-				<Tooltip
-					describeChild={true}
-					className="z-[3000]"
-					componentsProps={{
-						tooltip: {
-							sx: {
-								padding: "0",
-								zIndex: "3000",
-							},
-						},
-					}}
-					placement="right-start"
-					title={
-						<div className="p-2">
-							<p className="text-xl">{extendedProps.user.nickname}</p>
-							<p className="text-base">{event.startStr}</p>
-							<p className="text-base">考勤假別 : {extendedProps.anomalyType?.chinese || ""}</p>
-							<p className="text-base">
-								異常狀態 : {extendedProps.anomalyState.id === "2" && "異常"}
-								{extendedProps.anomalyState.id === "3" && "正常"}
-							</p>
-							<p className="text-base">上班時間 : {extendedProps.since}</p>
-							<p className="text-base">下班時間 : {extendedProps.until}</p>
-							<p className="text-base">異常原因 : {extendedProps?.anomaly ? extendedProps?.anomaly.chinese : "-"}</p>
-						</div>
-					}>
-					<span>{event.title}</span>
-				</Tooltip>
-			</div>
-		</>
-	);
+  const extendedProps = event._def.extendedProps;
+  // if (isTargetScreen) {
+  //   return null;
+  // }
+  return (
+    <>
+      <div>
+        <Tooltip
+          describeChild={true}
+          className="z-[3000]"
+          componentsProps={{
+            tooltip: {
+              sx: {
+                padding: "0",
+                zIndex: "3000",
+              },
+            },
+          }}
+          placement="right-start"
+          title={
+            <div className="p-2">
+              <p className="text-xl">{extendedProps.user.nickname}</p>
+              <p className="text-base">{event.startStr}</p>
+              <p className="text-base">
+                考勤假別 : {extendedProps.anomalyType?.chinese || ""}
+              </p>
+              <p className="text-base">
+                異常狀態 : {extendedProps.anomalyState.id === "2" && "異常"}
+                {extendedProps.anomalyState.id === "3" && "正常"}
+              </p>
+              <p className="text-base">上班時間 : {extendedProps.since}</p>
+              <p className="text-base">下班時間 : {extendedProps.until}</p>
+              <p className="text-base">
+                異常原因 :{" "}
+                {extendedProps?.anomaly ? extendedProps?.anomaly.chinese : "-"}
+              </p>
+            </div>
+          }
+        >
+          <span>{event.title}</span>
+        </Tooltip>
+      </div>
+    </>
+  );
 };
-
-// 說明顯示
-// quizMode
-// // 下面參數前提都是 quizMode = true
-// quizContent={
-//   <div className="pt-3">
-//     <div
-//       className="flex flex-col items-center"
-//       style={{
-//         height: 255,
-//         maxWidth: 400,
-//         width: "100%",
-//         overflowY: "auto",
-//       }}
-//     >
-//       {(() => {
-//         switch (activeStep) {
-//           case 0:
-//             return (
-//               <p className="font-bold text-primary-900 pb-3">
-//                 〔畫面元素介紹〕
-//               </p>
-//             );
-//           case 1:
-//             return (
-//               <p className="font-bold text-primary-900 pb-3">
-//                 〔更新頻率概述〕
-//               </p>
-//             );
-//           case 2:
-//             return (
-//               <p className="font-bold text-primary-900 pb-3">
-//                 〔考勤顏色說明〕
-//               </p>
-//             );
-//           default:
-//             return null;
-//         }
-//       })()}
-//       {(() => {
-//         switch (activeStep) {
-//           case 0:
-//             return (
-//               <div className="flex flex-col items-center h-full text-sm">
-//                 <img
-//                   className="border mt-3 mb-6 rounded"
-//                   src={ARimg}
-//                   alt="考勤與打卡圖片示意"
-//                 />
-//                 <p>
-//                   上方為
-//                   <span className="text-base font-bold text-primary-800">
-//                     「考勤紀錄」
-//                   </span>
-//                 </p>
-//                 <p>
-//                   下方為
-//                   <span className="text-base font-bold text-primary-800">
-//                     「打卡紀錄」
-//                   </span>
-//                 </p>
-//               </div>
-//             );
-//           case 1:
-//             return (
-//               <div className="flex flex-col items-start h-full text-sm gap-3">
-//                 <div className="inline-flex">
-//                   <span className="whitespace-nowrap">考勤紀錄：</span>
-//                   <p>
-//                     <span className="text-base font-bold text-primary-800">
-//                       每日隔日凌晨 12:00 更新考勤數據。
-//                     </span>
-//                   </p>
-//                 </div>
-//                 <div className="inline-flex">
-//                   <span className="whitespace-nowrap">打卡紀錄：</span>
-//                   <p>
-//                     <span className="text-base font-bold text-primary-800">
-//                       即時更新
-//                     </span>
-//                     ，立即刷新頁面即可查看最新紀錄。
-//                   </p>
-//                 </div>
-//                 <p>情境範例：</p>
-//                 <ul>
-//                   <li>
-//                     1/1 大明 8:00 打卡上班，17:00
-//                     打卡下班，地理位置正常，打卡紀錄會即時更新至資料庫。
-//                   </li>
-//                   <li>
-//                     1/2 凌晨 12:00 系統更新資訊，會顯示
-//                     <span className="font-bold">「考勤正常」</span>。
-//                   </li>
-//                 </ul>
-//               </div>
-//             );
-//           case 2:
-//             return (
-//               <div className="flex flex-col w-full h-full text-sm gap-3">
-//                 <div className="inline-flex flex-col gap-1">
-//                   <span className="px-2 py-0.5 bg-[#F03355] rounded text-white w-fit">
-//                     考勤異常
-//                   </span>
-//                   <p>考勤資料異常狀況：</p>
-//                   <ul>
-//                     <li>
-//                       1. <span className="font-bold">上班時間異常</span>
-//                     </li>
-//                     <li>
-//                       2. <span className="font-bold">下班時間異常</span>
-//                     </li>
-//                     <li>
-//                       3. <span className="font-bold">打卡範圍異常</span>
-//                     </li>
-//                     <li>
-//                       4. <span className="font-bold">工時異常</span>{" "}
-//                       (上下班/請假時間不滿 8 小時)
-//                     </li>
-//                   </ul>
-//                 </div>
-//                 <div className="inline-flex flex-col gap-1">
-//                   <span className="px-2 py-0.5 bg-[#FFA516] rounded text-white w-fit">
-//                     考勤已修正
-//                   </span>
-//                   <p>
-//                     代表
-//                     <span className="font-bold">已經進行編輯修正</span>
-//                     的情況。
-//                   </p>
-//                 </div>
-//               </div>
-//             );
-//           default:
-//             return activeStep;
-//         }
-//       })()}
-//     </div>
-//     <MobileStepper
-//       variant="dots"
-//       steps={maxSteps}
-//       position="static"
-//       activeStep={activeStep}
-//       sx={{ maxWidth: 400, flexGrow: 1, px: 0, pb: 0 }}
-//       backButton={
-//         <Button
-//           size="small"
-//           onClick={handleBack}
-//           disabled={activeStep === 0}
-//         >
-//           {theme.direction === "rtl" ? (
-//             <KeyboardArrowRight />
-//           ) : (
-//             <KeyboardArrowLeft />
-//           )}
-//           上一頁
-//         </Button>
-//       }
-//       nextButton={
-//         <Button
-//           size="small"
-//           onClick={handleNext}
-//           disabled={activeStep === maxSteps - 1}
-//         >
-//           下一頁
-//           {theme.direction === "rtl" ? (
-//             <KeyboardArrowLeft />
-//           ) : (
-//             <KeyboardArrowRight />
-//           )}
-//         </Button>
-//       }
-//     />
-//   </div>
-// }
-// quizModalClose={() => setActiveStep(0)}

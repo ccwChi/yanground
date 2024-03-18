@@ -20,16 +20,17 @@ const nameMappings = [
 	{ name: "users", display: "人事管理" },
 	{ name: "attendancecalendar", display: "考勤紀錄" },
 	{ name: "attendanceview", display: "考勤檢視" },
-	{ name: "attendancewaiverhrm", display: "豁免出勤" },
 	{ name: "attendancereport", display: "考勤報表" },
 	{ name: "workcalendar", display: "辦公行事曆" },
+	{ name: "hrarrangeLeave", display: "輪班排休表" },
+	{ name: "attendancewaiverhrm", display: "豁免出勤審核" },
 	// 會員中心
 	{ name: "userinfo", display: "帳戶資訊" },
 	{ name: "userleave", display: "請假申請" },
 	{ name: "educationtraining", display: "教育訓練" },
 	{ name: "mdworkspace", display: "MD 文稿工作區" },
 	// 主管專區
-	{ name: "staffroster", display: "排休月曆表" },
+	{ name: "supervisorarrangeleave", display: "排休月曆表" },
 	{ name: "supervisorapproval", display: "主管審核" },
 	// Others
 	{ name: "setting", display: "設定" },

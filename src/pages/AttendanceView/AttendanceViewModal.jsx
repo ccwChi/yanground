@@ -311,6 +311,8 @@ const LeaveApplicationModal = React.memo(
 		const [usersList, setUsersList] = useState([]);
 		// isLoading 等待請求 API
 		const [isLoading, setIsLoading] = useState(false);
+		const [formateDeptList, setFormateDeptList] = useState([]);
+		const [formateTypeList, setFormateTypeList] = useState([]);
 
 		// 初始預設 default 值
 		const defaultValues = {
@@ -352,6 +354,21 @@ const LeaveApplicationModal = React.memo(
 		} = methods;
 		const depValue = watch("department");
 		const sinceValue = watch("since");
+        
+        // 把部門清單重組成這個元件可以用，因為我不知道怎麼修改 autocomplete 的資料讀取
+		useEffect(()=>{
+			if(departmentsList.length>0){
+				const temDept = departmentsList.map((dep) => ({ label: dep.name, id: dep.id }));
+				setFormateDeptList(temDept)
+			}
+		},[departmentsList])
+        // 把考勤清單重組成這個元件可以用，因為我不知道怎麼修改 autocomplete 的資料讀取
+		useEffect(()=>{
+			if(attendanceTypesList.length>0){
+				const formattedList = attendanceTypesList.map((obj) => ({ label: obj.chinese, id: obj.value }));
+				setFormateTypeList(formattedList)
+			}
+		},[attendanceTypesList])
 
 		// 取得人員資料
 		useEffect(() => {
@@ -420,9 +437,9 @@ const LeaveApplicationModal = React.memo(
 													const { onChange, value } = field;
 													return (
 														<Autocomplete
-															options={attendanceTypesList}
+															options={formateTypeList}
 															noOptionsText={
-																!!attendanceTypesList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
+																!!formateTypeList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
 															}
 															value={value}
 															onChange={(event, selectedOptions) => {
@@ -439,7 +456,7 @@ const LeaveApplicationModal = React.memo(
 																		...params.InputProps,
 																		endAdornment: (
 																			<>
-																				{attendanceTypesList.length <= 0 && depValue !== null ? (
+																				{formateTypeList.length <= 0 && depValue !== null ? (
 																					<CircularProgress className="absolute right-[2.325rem]" size={20} />
 																				) : null}
 																				{params.InputProps.endAdornment}
@@ -449,7 +466,7 @@ const LeaveApplicationModal = React.memo(
 																/>
 															)}
 															ListboxProps={{ style: { maxHeight: "12rem" } }}
-															loading={attendanceTypesList.length <= 0 && depValue !== null}
+															loading={formateTypeList.length <= 0 && depValue !== null}
 															loadingText={"載入中..."}
 															fullWidth
 														/>
@@ -473,9 +490,9 @@ const LeaveApplicationModal = React.memo(
 													const { onChange, value } = field;
 													return (
 														<Autocomplete
-															options={departmentsList}
+															options={formateDeptList}
 															noOptionsText={
-																!!departmentsList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
+																!!formateDeptList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
 															}
 															value={value}
 															onChange={(event, selectedOptions, reason) => {
@@ -500,7 +517,7 @@ const LeaveApplicationModal = React.memo(
 																		...params.InputProps,
 																		endAdornment: (
 																			<>
-																				{departmentsList.length <= 0 ? (
+																				{formateDeptList.length <= 0 ? (
 																					<CircularProgress className="absolute right-[2.325rem]" size={20} />
 																				) : null}
 																				{params.InputProps.endAdornment}
@@ -510,7 +527,7 @@ const LeaveApplicationModal = React.memo(
 																/>
 															)}
 															ListboxProps={{ style: { maxHeight: "12rem" } }}
-															loading={departmentsList.length <= 0}
+															loading={formateDeptList.length <= 0}
 															loadingText={"載入中..."}
 															fullWidth
 														/>

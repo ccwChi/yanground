@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { getData } from "../../utils/api";
 
-/* modal 元件們 */
-import ModalTemplete from "../../components/Modal/ModalTemplete";
+/* mui 元件們 */
+import ModalTemplete from "../Modal/ModalTemplete";
 import { Button, Chip, MenuItem, Select, useMediaQuery } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 /* 用於警告視窗 */
-import AlertDialog from "../../components/Alert/AlertDialog";
+import AlertDialog from "../Alert/AlertDialog";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 
 /* Component */
-import Calendar from "../../components/Calendar/Calendar";
-import CustomDatePicker from "../../components/DatePicker/DatePicker";
-import InputTitle from "../../components/Guideline/InputTitle";
+import Calendar from "../Calendar/Calendar";
+import CustomDatePicker from "../DatePicker/DatePicker";
+import InputTitle from "../Guideline/InputTitle";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { useNotification } from "../../hooks/useNotification";
@@ -33,7 +33,7 @@ import { useNotification } from "../../hooks/useNotification";
 const today = new Date();
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
-const StaffRosterModal = React.memo(
+const ArrangeLeaveModal = React.memo(
   ({
     isOpen,
     setIsOpen,
@@ -127,7 +127,7 @@ const StaffRosterModal = React.memo(
     const handleEventClick = (date) => {
       const thisMonth = calendarMonthRange[0].slice(0, 7);
       if (!selectedStaff) {
-        showNotification("請選擇人員", true, 1000);
+        showNotification("請選擇人員", false, 1000);
         return;
       }
 
@@ -178,10 +178,12 @@ const StaffRosterModal = React.memo(
         } else if (
           arrangeLeaveDay[thisMonth]?.length >= selectedStaff?.arrangedLeaveDays
         ) {
-          showNotification("該月排休已滿", true, 1000);
+          showNotification("該月排休已滿", false, 1000);
         } else if ( selectedStaff?.arrangedLeaveDays === "-" || selectedStaff?.arrangedLeaveDays === 0 ){
-          showNotification("該員工無法排休", true, 1000);
-        }
+          showNotification("該員工無法排休", false, 1500);
+        } 
+      } else if (new Date(date) <= today){
+        showNotification("無法對今天之前更改排休", false, 1000);
       }
     };
 
@@ -564,4 +566,4 @@ const StaffRosterModal = React.memo(
   }
 );
 
-export default StaffRosterModal;
+export default ArrangeLeaveModal;

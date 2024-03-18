@@ -32,8 +32,8 @@ import ClientQuestionnaire from "./pages/Client/ClientQuestionnaire";
 import EducationTrainging from "./pages/EducationTraining/EducationTraining";
 import MDWorkspace from "./pages/MDWorkspace/MDWorkspace";
 // Supervisor Zone
-import StaffRoster from "./pages/StaffRoster/StaffRoster";
 import SupervisorApproval from "./pages/SupervisorApproval/SupervisorApproval";
+import SupervisorArrangeLeave from "./pages/SupervisorArrangeLeave/SupervisorArrangeLeave";
 // Error
 import ErrorMessage from "./pages/Error/ErrorMessage";
 import ErrorPages from "./pages/Error/ErrorPages";
@@ -45,6 +45,7 @@ import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import "react-markdown-editor-lite/lib/index.css";
 import UserLeave from "./pages/UserLeave/UserLeave";
+import HRArrangeLeave from "./pages/HRArrangeLeave/HRArrangeLeave";
 
 const router = createBrowserRouter([
 	{
@@ -125,6 +126,10 @@ const router = createBrowserRouter([
 				path: "/attendancereport",
 				element: <AttendanceReport />,
 			},
+			{
+				path: "/hrarrangeleave",
+				element: <HRArrangeLeave />,
+			},
 			// Member Cencer
 			{
 				path: "/punch",
@@ -156,8 +161,8 @@ const router = createBrowserRouter([
 			},
 			// Supervisor Zone
 			{
-				path: "/staffroster",
-				element: <StaffRoster />,
+				path: "/supervisorarrangeleave",
+				element: <SupervisorArrangeLeave />,
 			},
 			{
 				path: "/supervisorapproval",
