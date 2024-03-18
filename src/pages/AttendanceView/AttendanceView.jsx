@@ -716,11 +716,6 @@ const AttendanceView = () => {
                 pb={false}
                 required={false}
               />
-              <div className="flex">
-                <p className="!my-0 text-rose-400 font-bold text-xs">
-                  * 預設選擇日期為前七天。
-                </p>
-              </div>
             </div>
             <div className="inline-flex items-center">
               <InputTitle
