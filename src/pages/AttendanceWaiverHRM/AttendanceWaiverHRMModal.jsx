@@ -108,7 +108,7 @@ const ViewModal = React.memo(({ title, deliverInfo, onClose, sendDataToBackend }
 							<div className="flex items-center justify-center">
 								<span className="italic text-neutral-500 text-sm">(尚未被審核，故無資料顯示)</span>
 							</div>
-							{/* <TextField
+							<TextField
 									multiline
 									rows={2}
 									className="inputPadding bg-white"
@@ -121,10 +121,10 @@ const ViewModal = React.memo(({ title, deliverInfo, onClose, sendDataToBackend }
 							<Button variant="contained" fullWidth onClick={handleSubmit}>
 								審核
 							</Button>
-							<Button variant="contained" fullWidth onClick={handleUnapproval}>
+							{/* <Button variant="contained" fullWidth onClick={handleUnapproval}>
 								退回
-							</Button> 
-							</div> */}
+							</Button>  */}
+							</div>
 						</>
 						)}
 						<div className="absolute right-3 -top-9">
