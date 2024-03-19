@@ -4,11 +4,15 @@ import Chip from "@mui/material/Chip";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Backdrop from "@mui/material/Backdrop";
+import EditIcon from '@mui/icons-material/Edit';
+import { MenuItem, Select } from "@mui/material";
 // Components
 import ModalTemplete from "../../components/Modal/ModalTemplete";
 import { LoadingTwo } from "../../components/Loader/Loading";
 // Hooks
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
+import { useEffect } from "react";
+import { getData } from "../../utils/api";
 
 /***
  * 審核 Modal
@@ -23,6 +27,12 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 	const userProfile = useLocalStorageValue("userProfile");
 	// 用於儲存文字欄位的值
 	const [textFieldValue, setTextFieldValue] = useState("");
+	// 用於更改編輯代理人的欄位出現
+	const [editAgent, setEditAgent] = useState(false);
+	// 用於更改編輯代理人
+	const [selectAgent, setSelectAgent] = useState("");
+	// 用於儲存代理人清單
+	const [agentList, setAgentList] = useState([]);
 
 	// 當文字欄位的值改變時更新狀態
 	const handleTextFieldChange = (event) => {
@@ -33,7 +43,8 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 	const handleSubmit = () => {
 		const fd = new FormData();
 		fd.append("remark", textFieldValue);
-		// console.log("[deliverInfo.id, userProfile.id]",[deliverInfo.id, userProfile.id])
+		// **要記得添加代理人資訊，目前不知道後端api接受代理人格式
+		// fd.append("agent", !!selectAgent ? selectAgent : deliverInfo.agent);
 		sendDataToBackend(fd, "approval", [deliverInfo.id, userProfile.id]);
 	};
 	// 按鈕點擊退回是件
@@ -41,10 +52,36 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 		// 串 api
 	};
 
+    useEffect(() => {
+		if (userProfile?.department) {
+		  getData(`department/${userProfile.department.id}/staff`).then(
+			(result) => {
+			  const data = result.result;
+			  const formattedUser = data
+				.filter((us) => userProfile.id !== us.id)
+				.map((us) => ({
+				  label:
+					us.lastname && us.firstname
+					  ? us.lastname + us.firstname
+					  : us.displayName,
+				  value: us.id,
+				}));
+			setAgentList(formattedUser);
+			}
+		  );
+		}
+	  }, [userProfile]);
+    
+	useEffect(()=>{
+		if(!editAgent){
+		setSelectAgent("")
+		}
+	},[editAgent])
+
 	return (
 		<>
 			{/* Modal */}
-			<ModalTemplete title={title} show={!!userProfile} maxWidth={"768px"} onClose={onClose}>
+			<ModalTemplete title={title} show={!!userProfile} maxWidth={"768px"} onClose={()=>{onClose();setEditAgent(false)}}>
 				<div className="flex flex-col pt-4 gap-3">
 					{deliverInfo.attendance && (
 						<div className="inline-flex flex-col sm:flex-row border px-3 py-2 rounded-sm border-zinc-300 gap-1">
@@ -78,6 +115,28 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 								申請區間(迄)：<span className="font-bold">{deliverInfo.until}</span>
 							</p>
 						</div>
+						{/* 代理人開始 */}
+						{/* <div className="inline-flex flex-col sm:flex-row py-1 gap-1">
+							<div className="w-full">
+								<span>代理人：<span  className={`${editAgent && "hidden"} font-bold`}>{deliverInfo.agent || "尚未填寫"}</span> </span>
+								<Select
+									labelId="demo-simple-select-label"
+									id="demo-simple-select"
+									value={selectAgent}
+									onChange={(e)=>{setSelectAgent(e.target.value)}}
+									className={`${!editAgent && "!hidden"} !h-6 !border-none !m-0 !p-2`}
+									displayEmpty
+								>
+									<MenuItem value="" >請選擇代理人</MenuItem>
+									{agentList.map((agent,i)=>(
+									<MenuItem key={i} value={agent.value}>{agent.label}</MenuItem>
+									))}
+								</Select>
+								<EditIcon className="ms-5 cursor-pointer" fontSize="small" onClick={()=>{setEditAgent(!editAgent)}}/>
+							</div>
+							
+						</div> */}
+						{/* 代理人結束 */}
 						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">
 							<p className="w-full">
 								申請緣由：<span className="font-bold">{deliverInfo.excuse}</span>
