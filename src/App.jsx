@@ -76,7 +76,7 @@ const App = () => {
 				{ text: "考勤檢視", href: "attendanceview" },
 				{ text: "考勤報表", href: "attendancereport" },
 				{ text: "辦公行事曆", href: "workcalendar" },
-				{ text: "輪班排休表", href: "hrarrangeLeave" },
+				{ text: "輪班排休表", href: "hrarrangeleave" },
 				{ text: "豁免出勤審核", href: "attendancewaiverhrm" },
 			],
 		},
