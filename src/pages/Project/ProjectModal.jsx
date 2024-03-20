@@ -80,7 +80,7 @@ const UpdatedModal = React.memo(
       foremanRepresentative: apiData
         ? apiData.foremanRepresentative?.id || ""
         : "",
-      constructionKind: apiData ? apiData?.constructionKind?.value : "",
+      constructionKind: apiData ? apiData?.constructionKind?.value || "" : "",
       administrativeDivision_: apiData
         ? apiData.administrativeDivision.administeredBy.id || ""
         : "",
