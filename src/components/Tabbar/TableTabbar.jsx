@@ -2,10 +2,21 @@ import React from "react";
 // MUI
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import Skeleton from "@mui/material/Skeleton";
 // Hooks
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 
-const TableTabbar = ({ tabGroup, cat, setCat, classnames = "", onTabChange, dontnavigate = false, ...otherProps }) => {
+const TableTabbar = ({
+	tabGroup,
+	cat,
+	setCat,
+	isLoading = false,
+	classnames = "",
+	onTabChange,
+	dontnavigate = false,
+	transparentBG = true,
+	...otherProps
+}) => {
 	const navigateWithParams = useNavigateWithParams();
 
 	const handleChange = (event, newValue) => {
@@ -19,20 +30,24 @@ const TableTabbar = ({ tabGroup, cat, setCat, classnames = "", onTabChange, dont
 		}
 	};
 
-	return (
+	return !isLoading ? (
 		<Tabs
 			value={cat}
 			onChange={handleChange}
-			className={`!bg-transparent ${classnames} text-primary-800`}
+			className={`${transparentBG ? "!bg-transparent" : "rounded-t-lg"} ${classnames} text-primary-800`}
 			variant="scrollable"
 			scrollButtons
 			allowScrollButtonsMobile
 			aria-label="scrollable auto tabs example"
 			{...otherProps}>
 			{tabGroup.map((tab) => (
-				<Tab key={tab.f} label={tab.text} value={tab.f} />
+				<Tab key={tab.f || tab.value} label={tab.text || tab.chinese} value={tab.f || tab} />
 			))}
 		</Tabs>
+	) : (
+		<div className="bg-white rounded-t-lg px-4">
+			<Skeleton height={48} />
+		</div>
 	);
 };
 

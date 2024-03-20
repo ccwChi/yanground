@@ -38,6 +38,9 @@ const theme = createTheme({
 						width: "24px",
 					},
 				},
+				scroller: {
+					boxShadow: "none !important",
+				},
 			},
 		},
 		MuiTab: {
@@ -99,6 +102,17 @@ const theme = createTheme({
 				root: {
 					".Mui-disabled": {
 						display: "none",
+					},
+				},
+			},
+		},
+		MuiIconButton: {
+			styleOverrides: {
+				colorSecondary: {
+					background: "#808080",
+					"&:hover": {
+						background: "#808080",
+						opacity: "0.8",
 					},
 				},
 			},

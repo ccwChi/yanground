@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 // MUI
 import Button from "@mui/material/Button";
+import Skeleton from "@mui/material/Skeleton";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 
@@ -16,204 +17,109 @@ import {
 	faHelmetSafety,
 	faClipboardCheck,
 	faUserGear,
+	faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 
 // Component
 import PageTitle from "../../../components/Guideline/PageTitle";
 import RWDTable from "../../../components/RWDTable/RWDTable";
 import MultipleFAB from "../../../components/FloatingActionButton/MultipleFAB";
+import TableTabbar from "../../../components/Tabbar/TableTabbar";
 
 // Hooks
 import { useNotification } from "../../../hooks/useNotification";
 import useNavigateWithParams from "../../../hooks/useNavigateWithParams";
 
 // Utils
-import { getData } from "../../../utils/api";
+import { getData, postBPData } from "../../../utils/api";
 
 // Customs
-import FolderManagedIcon from "../../../assets/icons/projectManagementIcon.svg";
-import { UploadModal } from "./DocumentsModal";
+import FolderManageIcon from "../../../assets/icons/projectManagementIcon.svg";
+import { UploadModal, FilesManageModal } from "./DocumentsModal";
 
 // 表單申請按鈕清單
 const applicationBtns = [
 	{
-		id: "a",
 		icon: faUserTie,
 		color: "#e95959",
 		text: "業務",
 	},
 	{
-		id: "b",
 		icon: faTape,
 		color: "#6262a7",
 		text: "測量",
 	},
 	{
-		id: "c",
 		icon: faCompassDrafting,
 		color: "#547db7",
 		text: "設計",
 	},
 	{
-		id: "d",
 		icon: faWarehouse,
 		color: "#3a9fc0",
 		text: "倉庫",
 	},
 	{
-		id: "e",
 		icon: faHelmetSafety,
 		color: "#039E8E",
-		text: "工程",
+		text: "工程/工務",
 	},
 	{
-		id: "f",
 		icon: faClipboardCheck,
 		color: "#F7941D",
 		text: "品檢",
 	},
-	// {
-	// 	id: "g",
-	// 	icon: faUserGear,
-	// 	color: "#F03355",
-	// 	text: "人事",
-	// },
+	{
+		icon: faUserGear,
+		color: "#F03355",
+		text: "人事",
+	},
+];
+
+const isLoadingACBtn = [
+	{
+		value: "XXX",
+		icon: faSpinner,
+		color: "#8b8b8b",
+		chinese: "‧‧‧",
+	},
 ];
 
 const Documents = () => {
 	const navigate = useNavigate();
-	const navigateWithParams = useNavigateWithParams();
 	// 解析網址取得參數
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);
 	// 通知 Hook
 	const showNotification = useNotification();
 
+	// Full Data 資料統合
+	const [fullData, setFullData] = useState([]);
 	// API List Data
-	const [apiData, setApiData] = useState([
-		{
-			value: "ZHUAN_AN_LI_AN",
-			chinese: "專案立案",
-			abbreviation: "P",
-			projectArchiveSubItem: [
-				{
-					id: "2147483647",
-					numericCode: "SP-01",
-					name: "空拍圖",
-					fileNum: 5,
-					mediaNum: 24,
-				},
-				{
-					id: "2147483648",
-					numericCode: "SP-02",
-					name: "現場照片",
-					fileNum: 0,
-					mediaNum: 7,
-				},
-				{
-					id: "2147483649",
-					numericCode: "SP-03",
-					name: "現勘報告書",
-					fileNum: 12,
-					mediaNum: 0,
-				},
-			],
-		},
-		{
-			value: "XXXX",
-			chinese: "合約/承諾書",
-			abbreviation: "C",
-			projectArchiveSubItem: [
-				{
-					id: "2147483650",
-					numericCode: "SC-01",
-					name: "工程承攬合約",
-					fileNum: 1139,
-					mediaNum: 72,
-				},
-				{
-					id: "2147483651",
-					numericCode: "SC-02",
-					name: "採購合約",
-					fileNum: 543,
-					mediaNum: 0,
-				},
-				{
-					id: "2147483652",
-					numericCode: "SC-03",
-					name: "施工規範",
-					fileNum: 7,
-					mediaNum: 0,
-				},
-				{
-					id: "2147483653",
-					numericCode: "SC-04",
-					name: "受託承諾書",
-					fileNum: 0,
-					mediaNum: 0,
-				},
-				{
-					id: "2147483654",
-					numericCode: "SC-05",
-					name: "誠信廉潔暨遵法承諾晝",
-					fileNum: 0,
-					mediaNum: 0,
-				},
-				{
-					id: "2147483655",
-					numericCode: "SC-06",
-					name: "承攬人工作安全承諾書",
-					fileNum: 99,
-					mediaNum: 1,
-				},
-				{
-					id: "2147483656",
-					numericCode: "SC-07",
-					name: "職安衛承諾書",
-					fileNum: 2,
-					mediaNum: 4,
-				},
-			],
-		},
-		{
-			value: "ZHUAN_AN_LI_AN",
-			chinese: "報價單",
-			abbreviation: "P",
-			projectArchiveSubItem: [
-				{
-					id: "2147483688",
-					numericCode: "SQ-01",
-					name: "承攬工程報價單",
-					fileNum: 12,
-					mediaNum: 2,
-				},
-				{
-					id: "2147483689",
-					numericCode: "SQ-02",
-					name: "採購工程報價單",
-					fileNum: 4,
-					mediaNum: 7,
-				},
-				{
-					id: "2147483690",
-					numericCode: "SQ-03",
-					name: "成本分析表",
-					fileNum: 3,
-					mediaNum: 0,
-				},
-			],
-		},
-	]);
+	const [apiData, setApiData] = useState([]);
+	// 專管項目清單
+	const [projectArchiveItem, setprojectArchiveItem] = useState(isLoadingACBtn);
+	// 類型+子項目+工程文件類型清單
+	const [constructionKAList, setconstructionKAList] = useState(null);
 	// ModalValue 控制開啟的是哪一個 Modal
 	const [modalValue, setModalValue] = useState(false);
 	// 傳送額外資訊給 Modal
 	const [deliverInfo, setDeliverInfo] = useState(null);
 	// 選擇當前顯示清單
-	const [mode, setMode] = useState(applicationBtns[0]);
+	const [mode, setMode] = useState(null);
 	// isLoading 等待請求 api
-	const [isLoading, setIsLoading] = useState(false); // 預設為 true 暫時先改為 false
+	// inside  : 框  架 API 使用
+	// outside : 子項目 API 使用
+	const [isLoadingInside, setIsLoadingInside] = useState(true);
+	const [isLoadingOutside, setIsLoadingOutside] = useState(true);
 	// 專案管理 - 專案名稱
 	const [projectName, setProjectName] = useState("(讀取中，請稍後...)");
+	// SearchDialog Switch
+	// const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+	// cat = Category 設置 tab 分類
+	const [cat, setCat] = useState("");
+	// 傳遞稍後用 Flag
+	const [sendBackFlag, setSendBackFlag] = useState(false);
 
 	// 上方區塊功能按鈕清單
 	const btnGroup = [
@@ -240,22 +146,26 @@ const Documents = () => {
 	// 對照 api table 所顯示 key
 	const columnsPC = [
 		{ key: "name", label: "專案子項目", align: "left", size: "40%" },
-		{ key: "fileNum", label: "文檔數", size: "19%" },
-		{ key: "mediaNum", label: "圖檔數", size: "19%" },
+		{ key: ["matchingdata", "count"], label: "檔案數", size: "38%" },
 	];
 	const columnsMobile = [
 		{ key: "name", label: "專案子項目" },
-		{ key: "fileNum", label: "文檔數" },
-		{ key: "mediaNum", label: "圖檔數" },
+		{ key: ["matchingdata", "count"], label: "檔案數" },
 	];
 
 	// Table 上的子項目操作按鈕
 	const actions = [
 		{ value: "upload", icon: <FileUploadIcon />, title: "上傳檔案" },
-		{ value: "filesmanaged", icon: <img src={FolderManagedIcon} style={{ width: "18px" }} />, title: "檔案瀏覽與管理" },
+		{
+			value: "filesmanage",
+			icon: <img src={FolderManageIcon} style={{ width: "18px" }} alt={"Manage Folder Icon"} />,
+			title: "檔案瀏覽與管理",
+		},
 	];
 
 	useEffect(() => {
+		setIsLoadingInside(true);
+
 		// 取得專案名稱
 		if (queryParams.has("pj")) {
 			const projectId = queryParams.get("pj");
@@ -284,17 +194,164 @@ const Documents = () => {
 			return () => clearTimeout(timeoutId);
 		}
 
+		let projectArchiveCategoryList = null;
+		// 取得專管類別
+		getData("projectArchiveCategory").then((result) => {
+			if (result.result) {
+				const data = result.result;
+				projectArchiveCategoryList = data;
+
+				// 取得專管項目
+				getData("projectArchiveItem").then((result) => {
+					setIsLoadingInside(false);
+					if (result.result) {
+						const data = result.result;
+						const newData = data.map((item) => {
+							const matchingdata = applicationBtns.find((btn) => btn.text === item.chinese);
+
+							const newpjac = item.projectArchiveCategories.map((pjac) => {
+								const matchingpjac = projectArchiveCategoryList.find((pj) => pj.value === pjac);
+								return {
+									acronym: matchingpjac.acronym,
+									chinese: matchingpjac.chinese,
+									value: matchingpjac.value,
+								};
+							});
+
+							if (matchingdata) {
+								return {
+									...item,
+									icon: matchingdata.icon,
+									color: matchingdata.color,
+									projectArchiveCategories: newpjac,
+								};
+							}
+
+							return item;
+						});
+						setMode(newData[0] || "");
+						setCat(newData[0]?.projectArchiveCategories[0] || "");
+						setprojectArchiveItem(newData);
+					} else {
+						console.log("--- 獲取專管項目失敗");
+						setprojectArchiveItem([]);
+					}
+				});
+
+				// 取得工程文件類型 變成 類型+子項目+工程文件類型清單
+				getData("constructionKindArchive").then((result) => {
+					if (result.result) {
+						const data = result.result;
+						const newData = data.map((item) => {
+							return {
+								value: item.id,
+								label:
+									item.projectArchiveSubItem.projectArchiveCategory.chinese +
+									" - " +
+									item.projectArchiveSubItem.name +
+									" (" +
+									item.constructionKind.chinese +
+									")",
+								projectArchiveSubIteFlag: item.projectArchiveSubItem.name,
+							};
+						});
+
+						// 取得檔案資料
+						let documentDataList = [];
+						let promises = [];
+						newData.map((item) => {
+							let promise = getData(`project/${queryParams.get("pj")}/kind/${item.value}/archive`).then((result) => {
+								if (result.result) {
+									const data = result.result;
+									const transformedData = {
+										...data,
+										...item,
+									};
+									documentDataList.push(transformedData);
+								} else {
+									console.log("Error: No result found");
+								}
+							});
+
+							promises.push(promise);
+						});
+
+						Promise.all(promises).then(() => {
+							// console.log(documentDataList); // 在這裡列印 documentDataList，確保所有非同步操作都已完成
+
+							// 根據子項目求取文檔數量
+							const pjacl = projectArchiveCategoryList.map((item) => {
+								return {
+									...item,
+									projectArchiveSubItems: item.projectArchiveSubItems.map((obj) => {
+										const matchingdata = documentDataList.find((d) => d.projectArchiveSubIteFlag === obj.name);
+
+										return {
+											...obj,
+											matchingdata,
+										};
+									}),
+								};
+							});
+							setFullData(pjacl);
+						});
+
+						setconstructionKAList(newData);
+					} else {
+						setconstructionKAList(null);
+					}
+				});
+			} else {
+				console.log("--- 獲取專管類別失敗");
+				projectArchiveCategoryList = null;
+			}
+		});
+
 		// 取得 mode 參數
 		const modeParam = queryParams.get("mode");
-		const mode = applicationBtns.find((obj) => obj.id === modeParam);
+		const mode = applicationBtns.find((obj) => obj.value === modeParam);
 
 		if (modeParam) {
 			setMode(mode);
 		}
 	}, []);
 
+	useEffect(() => {
+		if (fullData.length > 0) {
+			setIsLoadingOutside(false);
+			const transformData = fullData.find((d) => d.value === cat.value);
+			setApiData(transformData);
+		}
+	}, [cat, fullData]);
+
 	// 傳遞給後端資料
-	const sendDataToBackend = (fd, mode, otherData) => {
+	const sendDataToBackend = (fd, mode) => {
+		setSendBackFlag(true);
+		let url = "projectArchive";
+		let message = [];
+		switch (mode) {
+			case "create":
+				message = ["子項目文檔新增成功！"];
+				break;
+			default:
+				break;
+		}
+
+		if (mode === "create") {
+			postBPData(url, fd).then((result) => {
+				if (result.status) {
+					showNotification(message[0], true);
+					// getApiList(apiUrl);
+					onClose();
+				} else {
+					showNotification(
+						result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
+						false
+					);
+				}
+				setSendBackFlag(false);
+			});
+		}
 	};
 
 	// 當活動按鈕點擊時開啟 modal 並進行動作
@@ -305,15 +362,12 @@ const Documents = () => {
 
 		if (dataMode === "goback") {
 			navigate("/project");
+			// } else if (dataMode === "filter") {
+			// 	handleOpenSearch();
 		} else {
 			setModalValue(dataMode);
 			// setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
 		}
-	};
-
-	// 選擇項目並修改路由
-	const handleClick = (item) => {
-		navigateWithParams(0, 0, { mode: item.id }, false);
 	};
 
 	// 關閉 Modal 清除資料
@@ -326,10 +380,40 @@ const Documents = () => {
 	const modalConfig = [
 		{
 			modalValue: "upload",
-			modalComponent: <UploadModal title="上傳檔案" sendDataToBackend={sendDataToBackend} onClose={onClose} />,
+			modalComponent: (
+				<UploadModal
+					title="上傳檔案"
+					constructionKAList={constructionKAList || null}
+					sendDataToBackend={sendDataToBackend}
+					onClose={onClose}
+				/>
+			),
+		},
+		{
+			modalValue: "filesmanage",
+			modalComponent: <FilesManageModal title="檔案瀏覽與管理" sendDataToBackend onClose={onClose} />,
 		},
 	];
 	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
+
+	// // 開啟 SearchDialog
+	// const handleOpenSearch = () => {
+	// 	setSearchDialogOpen(true);
+	// };
+	// // 關閉 SearchDialog
+	// const handleCloseSearch = () => {
+	// 	setSearchDialogOpen(false);
+	// };
+	// // 恢復為上一次搜尋狀態
+	// const handleCoverDialog = () => {};
+	// // 重置 SearchDialog
+	// const handleClearSearch = () => {
+	// 	setSearchDialogOpen(false);
+	// };
+	// // 搜尋送出
+	// const onSubmit = () => {
+	// 	setSearchDialogOpen(false);
+	// };
 
 	return (
 		<>
@@ -339,7 +423,15 @@ const Documents = () => {
 				description="此頁面是用於管理專案內的文檔，提供分類檢視管理、上傳和刪除文檔與圖片等功能，以便有效地管理專案資料。"
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
-				isLoading={!isLoading}
+				isLoading={!isLoadingInside}
+				// searchMode
+				// // 下面參數前提都是 searchMode = true
+				// searchDialogOpen={searchDialogOpen}
+				// handleOpenDialog={handleOpenSearch}
+				// handleCloseDialog={handleCloseSearch}
+				// handleCoverDialog={handleCoverDialog}
+				// handleConfirmDialog={onSubmit}
+				// handleClearDialog={handleClearSearch}
 			/>
 			{/* Project Name */}
 			<p className="sm:px-6 px-3 mb-2 text-xs sm:text-sm">
@@ -352,17 +444,17 @@ const Documents = () => {
 				{/* 項目欄 - Start */}
 				<div className="md:max-h-max md:w-min">
 					<div className="flex md:flex-col justify-start max-h-full px-4 py-3 md:py-4 gap-4 md:gap-5 bg-white overflow-auto rounded-lg">
-						{applicationBtns.map((item) => (
-							<div key={item.id} className="inline-flex flex-col items-center gap-2">
+						{projectArchiveItem.map((item) => (
+							<div key={item.value} className="inline-flex flex-col items-center gap-2">
 								<Button
-									id={item.id}
+									id={item.value}
 									variant="contained"
-									className={`gap-5 !p-2 !w-10 md:!w-12 aspect-square !min-w-0 !rounded-2xl ${
-										mode.id === item.id ? "active" : ""
+									className={`gap-5 !p-2 !w-10 md:!w-14 aspect-square !min-w-0 !rounded-2xl ${
+										!isLoadingInside && mode.value === item.value ? "active" : ""
 									}`}
 									onClick={() => {
 										setMode(item);
-										handleClick(item);
+										setCat(item?.projectArchiveCategories[0] || "");
 									}}
 									color="dark"
 									sx={{
@@ -371,9 +463,9 @@ const Documents = () => {
 											boxShadow: `white 0px 0px 0px 3px, ${item.color} 0px 0px 0px 6px`,
 										},
 									}}>
-									<FontAwesomeIcon icon={item.icon} className="text-xl md:text-2xl" />
+									<FontAwesomeIcon icon={item.icon} className="text-xl md:text-2xl" spin={isLoadingInside} />
 								</Button>
-								<span className="text-xs md:text-md">{item.text}</span>
+								<span className="text-xs md:text-md">{item.chinese}</span>
 							</div>
 						))}
 					</div>
@@ -382,27 +474,46 @@ const Documents = () => {
 
 				{/* 主區塊 - Start */}
 				<div className="md:max-h-max flex-1 overflow-hidden">
-					<div className="flex flex-col p-3 md:py-6 mb-0 max-h-full bg-white overflow-auto rounded-lg md:gap-6 gap-4">
+					<TableTabbar
+						tabGroup={mode?.projectArchiveCategories || null}
+						cat={cat}
+						setCat={setCat}
+						isLoading={isLoadingInside}
+						transparentBG={false}
+						dontnavigate={true}
+						sx={{
+							"& .MuiTabs-scroller": {
+								borderRadius: "0.5rem",
+								background: "white",
+								boxShadow: "0 5px 10px rgba(0, 0, 0, 0.1)",
+							},
+						}}
+					/>
+
+					<div
+						className="flex flex-col p-3 md:py-6 mb-0 mt-px bg-white overflow-auto rounded-b-lg md:gap-6 gap-4"
+						style={{ maxHeight: "calc(100% - 50px)" }}>
 						{/* 類別區塊 - Start */}
-						{apiData.map((data) => (
-							<div key={data.value}>
-								<h3 className="text-lg text-primary-500 font-bold md:px-7 px-3 pb-2.5">
-									{data.chinese} ({data.abbreviation})
-								</h3>
-								<div className="md:bg-inherit bg-[#E6E6E6] rounded py-2">
-									<RWDTable
-										data={data.projectArchiveSubItem}
-										columnsPC={columnsPC}
-										columnsMobile={columnsMobile}
-										actions={actions}
-										cardTitleKey={"name"}
-										tableMinWidth={495}
-										handleActionClick={handleActionClick}
-										specStatus={true}
-									/>
-								</div>
-							</div>
-						))}
+						{!isLoadingInside ? (
+							<h3 className="text-lg text-primary-500 font-bold md:px-7 px-3 pb-2.5">
+								{cat.chinese} ({cat.acronym})
+							</h3>
+						) : (
+							<Skeleton width={160} height={38} className="!-translate-y-1 scale-75 md:mx-7 mx-3" />
+						)}
+						<div className="md:bg-inherit bg-[#E6E6E6] rounded py-2">
+							<RWDTable
+								data={apiData.projectArchiveSubItems}
+								columnsPC={columnsPC}
+								columnsMobile={columnsMobile}
+								actions={actions}
+								cardTitleKey={"name"}
+								tableMinWidth={495}
+								isLoading={isLoadingOutside}
+								handleActionClick={handleActionClick}
+								specStatus={true}
+							/>
+						</div>
 						{/* 類別區塊 - End */}
 					</div>
 

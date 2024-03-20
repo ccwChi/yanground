@@ -59,7 +59,6 @@ const getDownloadData = async (
 	const headers = {
 		mode: "no-cors",
 		Authorization: `Bearer ${accessToken}`,
-		"Content-Type": "application/json",
 	};
 
 	return await fetch(`${appUrl}/${url}`, {
@@ -99,7 +98,6 @@ const postData = async (url = "", formData) => {
 	const headers = {
 		mode: "no-cors",
 		Authorization: `Bearer ${accessToken}`,
-		"Content-Type": "application/json",
 	};
 	const params = new URLSearchParams(formData);
 	return await fetch(`${appUrl}/${url}?${params}`, {
@@ -124,17 +122,17 @@ const postData = async (url = "", formData) => {
 		});
 };
 
-// POST BODY AUTHOR: JEFF
+// POST: Body & Params
 const postBodyData = async (url = "", bodyData, paramsData) => {
 	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
 	const headers = {
+		mode: "no-cors",
 		Authorization: `Bearer ${accessToken}`,
-		"Content-Type": "application/json",
 	};
 	const params = new URLSearchParams(paramsData);
 	var raw = JSON.stringify(bodyData);
-	//console.log(raw);
-	return await fetch(`${appUrl}/${url}`, {
+	// console.log(raw);
+	return await fetch(`${appUrl}/${url}?${params}`, {
 		method: "POST",
 		headers,
 		body: raw,
@@ -142,7 +140,40 @@ const postBodyData = async (url = "", bodyData, paramsData) => {
 		.then((response) => {
 			return response.json().then((res) => {
 				if (res.response === 200) return { status: true, result: res };
-				else {
+				else if (res.status === 500) {
+					return { status: false, result: "回傳 500 錯誤" };
+				} else {
+					return { status: false, result: res };
+				}
+			});
+			// return response.json();
+		})
+		.catch((error) => {
+			console.error("System Error：", error);
+			// throw error;
+			return { status: false, result: error.message };
+		});
+};
+
+// POST: Body & Params - without JSON.stringify
+const postBPData = async (url = "", bodyData, paramsData) => {
+	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
+	const headers = {
+		mode: "no-cors",
+		Authorization: `Bearer ${accessToken}`,
+	};
+	const params = new URLSearchParams(paramsData);
+	return await fetch(`${appUrl}/${url}?${params}`, {
+		method: "POST",
+		headers,
+		body: bodyData,
+	})
+		.then((response) => {
+			return response.json().then((res) => {
+				if (res.response === 200) return { status: true, result: res };
+				else if (res.status === 500) {
+					return { status: false, result: "回傳 500 錯誤" };
+				} else {
 					return { status: false, result: res };
 				}
 			});
@@ -160,7 +191,6 @@ const deleteData = async (url = "", formData) => {
 	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
 	const headers = {
 		Authorization: `Bearer ${accessToken}`,
-		"Content-Type": "application/json",
 	};
 	const params = new URLSearchParams(formData);
 	return await fetch(`${appUrl}/${url}?${params}`, {
@@ -183,7 +213,7 @@ const deleteData = async (url = "", formData) => {
 		});
 };
 
-export { getData, getDownloadData, postData, postBodyData, deleteData };
+export { getData, getDownloadData, postData, postBodyData, postBPData, deleteData };
 
 //****** How To Use ? ******//
 
