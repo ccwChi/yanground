@@ -352,7 +352,7 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 						{/* 文件 - Start */}
 						{apiData ? (
 							apiData.map((data) => (
-								<div className="flex flex-col gap-2">
+								<div className="flex flex-col gap-2" key={data.id}>
 									<h4 className="inline-flex items-end">
 										<FontAwesomeIcon icon={faQuoteLeft} className="me-2" style={{ fontSize: "1.5rem" }} />
 										<span className="font-bold">{data.uploader}</span>

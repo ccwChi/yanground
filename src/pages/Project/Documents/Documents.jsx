@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 // MUI
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
+import Backdrop from "@mui/material/Backdrop";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 
@@ -25,6 +26,7 @@ import PageTitle from "../../../components/Guideline/PageTitle";
 import RWDTable from "../../../components/RWDTable/RWDTable";
 import MultipleFAB from "../../../components/FloatingActionButton/MultipleFAB";
 import TableTabbar from "../../../components/Tabbar/TableTabbar";
+import { LoadingFour } from "../../../components/Loader/Loading";
 
 // Hooks
 import { useNotification } from "../../../hooks/useNotification";
@@ -155,7 +157,7 @@ const Documents = () => {
 
 	// Table 上的子項目操作按鈕
 	const actions = [
-		{ value: "upload", icon: <FileUploadIcon />, title: "上傳檔案" },
+		// { value: "upload", icon: <FileUploadIcon />, title: "上傳檔案" },
 		{
 			value: "filesmanage",
 			icon: <img src={FolderManageIcon} style={{ width: "18px" }} alt={"Manage Folder Icon"} />,
@@ -194,6 +196,27 @@ const Documents = () => {
 			return () => clearTimeout(timeoutId);
 		}
 
+		getApiList();
+
+		// 取得 mode 參數
+		const modeParam = queryParams.get("mode");
+		const mode = applicationBtns.find((obj) => obj.value === modeParam);
+
+		if (modeParam) {
+			setMode(mode);
+		}
+	}, []);
+
+	useEffect(() => {
+		if (fullData.length > 0) {
+			setIsLoadingOutside(false);
+			const transformData = fullData.find((d) => d.value === cat.value);
+			setApiData(transformData);
+			console.log(transformData);
+		}
+	}, [cat, fullData]);
+
+	const getApiList = () => {
 		let projectArchiveCategoryList = null;
 		// 取得專管類別
 		getData("projectArchiveCategory").then((result) => {
@@ -284,7 +307,31 @@ const Documents = () => {
 								return {
 									...item,
 									projectArchiveSubItems: item.projectArchiveSubItems.map((obj) => {
-										const matchingdata = documentDataList.find((d) => d.projectArchiveSubIteFlag === obj.name);
+										let matchingdata = documentDataList.filter((d) => d.projectArchiveSubIteFlag === obj.name);
+										if (matchingdata.length === 1) {
+											matchingdata = matchingdata[0];
+										} else if (matchingdata.length > 1) {
+											// 使用 reduce 方法來加總物件
+											const summedObject = matchingdata.reduce(
+												(accumulator, currentValue) => {
+													accumulator.count += currentValue.count; // 加總 count
+													accumulator.label += "+" + currentValue.label; // 組合成字串
+													accumulator.projectArchiveSubIteFlag = currentValue.projectArchiveSubIteFlag; // 照舊
+													accumulator.projectArchives = accumulator.projectArchives.concat(
+														currentValue.projectArchives
+													); // 合併 projectArchives 陣列
+													accumulator.value += "+" + currentValue.value; // 組合成字串
+													return accumulator;
+												},
+												{ count: 0, label: "", projectArchives: [], value: "", projectArchiveSubIteFlag: "" } // 初始化累加器物件
+											);
+											summedObject.projectArchives.sort(
+												(a, b) =>
+													new Date(b.uploadedAt.replace("+08", "").replace("T", " ")) -
+													new Date(a.uploadedAt.replace("+08", "").replace("T", " "))
+											);
+											matchingdata = summedObject;
+										}
 
 										return {
 											...obj,
@@ -306,23 +353,7 @@ const Documents = () => {
 				projectArchiveCategoryList = null;
 			}
 		});
-
-		// 取得 mode 參數
-		const modeParam = queryParams.get("mode");
-		const mode = applicationBtns.find((obj) => obj.value === modeParam);
-
-		if (modeParam) {
-			setMode(mode);
-		}
-	}, []);
-
-	useEffect(() => {
-		if (fullData.length > 0) {
-			setIsLoadingOutside(false);
-			const transformData = fullData.find((d) => d.value === cat.value);
-			setApiData(transformData);
-		}
-	}, [cat, fullData]);
+	};
 
 	// 傳遞給後端資料
 	const sendDataToBackend = (fd, mode) => {
@@ -341,7 +372,8 @@ const Documents = () => {
 			postBPData(url, fd).then((result) => {
 				if (result.status) {
 					showNotification(message[0], true);
-					// getApiList(apiUrl);
+					getApiList();
+					setIsLoadingOutside(true);
 					onClose();
 				} else {
 					showNotification(
@@ -491,7 +523,7 @@ const Documents = () => {
 					/>
 
 					<div
-						className="flex flex-col p-3 md:py-6 mb-0 mt-px bg-white overflow-auto rounded-b-lg md:gap-6 gap-4"
+						className="flex flex-col p-3 md:py-6 pb-12 md:pb-3.5 mb-0 mt-px bg-white overflow-auto rounded-b-lg"
 						style={{ maxHeight: "calc(100% - 50px)" }}>
 						{/* 類別區塊 - Start */}
 						{!isLoadingInside ? (
@@ -516,29 +548,17 @@ const Documents = () => {
 						</div>
 						{/* 類別區塊 - End */}
 					</div>
-
-					{/* {(() => {
-						switch (mode.id) {
-							case "a":
-								return <>123</>;
-							case "b":
-								return <>1233</>;
-							case "c":
-								return <>12333</>;
-							case "d":
-								return <>123333</>;
-							case "e":
-								return <>1233333</>;
-							default:
-								return null;
-						}
-					})()} */}
 				</div>
 				{/* 主區塊 - End */}
 			</div>
 
 			{/* Floating Action Button */}
 			<MultipleFAB btnGroup={btnGroup} handleActionClick={handleActionClick} />
+
+			{/* Backdrop */}
+			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
+				<LoadingFour />
+			</Backdrop>
 
 			{/* Modal */}
 			{config && config.modalComponent}
