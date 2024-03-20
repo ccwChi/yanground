@@ -78,6 +78,7 @@ const UserLeaveModal = ({
     leave: yup.string().required("假別不得為空"),
     sinceTime: yup.string().required("起始時間不可為空值！"),
     date: yup.date().required("需選擇請假日期"),
+    // agent:  yup.string().required("代理人不得為空"),
     untilTime: yup
       .string()
       .required("結束時間不可為空值！")
@@ -139,27 +140,27 @@ const UserLeaveModal = ({
   };
 
   /* 取得自身部門人員清單(去除自己) 因為現在還不用選代理人，先註解 */
-  // const [memberList, setMemberList] = useState([]);
-  // const userProfile = useLocalStorageValue("userProfile");
-  // useEffect(() => {
-  //   if (userProfile?.department) {
-  //     getData(`department/${userProfile.department.id}/staff`).then(
-  //       (result) => {
-  //         const data = result.result;
-  //         const formattedUser = data
-  //           .filter((us) => userProfile.id !== us.id)
-  //           .map((us) => ({
-  //             label:
-  //               us.lastname && us.firstname
-  //                 ? us.lastname + us.firstname
-  //                 : us.displayName,
-  //             value: us.id,
-  //           }));
-  //         setMemberList(formattedUser);
-  //       }
-  //     );
-  //   }
-  // }, [userProfile]);
+  const [memberList, setMemberList] = useState([]);
+  const userProfile = useLocalStorageValue("userProfile");
+  useEffect(() => {
+    if (userProfile?.department) {
+      getData(`department/${userProfile.department.id}/staff`).then(
+        (result) => {
+          const data = result.result;
+          const formattedUser = data
+            .filter((us) => userProfile.id !== us.id)
+            .map((us) => ({
+              label:
+                us.lastname && us.firstname
+                  ? us.lastname + us.firstname
+                  : us.displayName,
+              value: us.id,
+            }));
+          setMemberList(formattedUser);
+        }
+      );
+    }
+  }, [userProfile]);
 
   /* 提交表單資料到後端並執行相關操作 */
   const onSubmit = (data) => {
@@ -269,17 +270,64 @@ const UserLeaveModal = ({
                     {errors["leave"]?.message}
                   </FormHelperText>
                 </div>
-                {/* ------------- 選擇日期 ------------- */}
+                {/* ------------- 選擇日期 x 代理人 ------------- */}
                 {/* 請假日期 */}
-                <div className="w-full">
-                  <InputTitle title={"請假日期"} />
-                  <ControlledDatePicker name="date" />
-                  <FormHelperText
-                    className="!text-red-600 break-words !text-right !mt-0"
-                    sx={{ minHeight: "1.25rem" }}
-                  >
-                    {errors["date"]?.message}
-                  </FormHelperText>
+                <div className="w-full flex md:flex-row flex-col gap-x-4">
+                  <div className="w-full">
+                    <InputTitle title={"請假日期"} />
+                    <ControlledDatePicker name="date" />
+                    <FormHelperText
+                      className="!text-red-600 break-words !text-right !mt-0"
+                      sx={{ minHeight: "1.25rem" }}
+                    >
+                      {errors["date"]?.message}
+                    </FormHelperText>
+                  </div>
+                  {/* <div className="w-full flex flex-col">
+                    <div className="w-full sm:mt-0">
+                      <InputTitle
+                        title={"代理人"}
+                        classnames="whitespace-nowrap "
+                        pb={true}
+                        required={true}
+                      />
+                      <Controller
+                        name="agent"
+                        control={control}
+                        defaultValue={""}
+                        render={({ field }) => (
+                          <Select
+                            className="inputPadding"
+                            displayEmpty
+                            MenuProps={MenuProps}
+                            fullWidth
+                            {...field}
+                          >
+                            <MenuItem value="" disabled>
+                              <span className="text-neutral-400 font-light">
+                                請選擇代理人
+                              </span>
+                            </MenuItem>
+
+                            {memberList?.map((dep) => (
+                              <MenuItem
+                                key={"select" + dep.value}
+                                value={dep.value}
+                              >
+                                {dep.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        )}
+                      />
+                    </div>
+                    <FormHelperText
+                      className="!text-red-600 break-words !text-right !mt-0"
+                      sx={{ minHeight: "1.25rem" }}
+                    >
+                      {errors["agent"]?.message}
+                    </FormHelperText>
+                  </div> */}
                 </div>
 
                 {/* ------------- 開始時間 x 結束時間 ------------- */}

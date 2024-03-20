@@ -106,7 +106,6 @@ const ArrangeLeave = ({forSuperVisor = true, title , url }) => {
       const containsHR = Object.values(userProfile.department).includes(
         "31"
       );
-      console.log("containsHR", containsHR);
       if (containsHR) {
         /** 如果給人資部門，現在給全部的部門，理論上給有排班人員的部門就好 31人資 29法務 */
         getData("department?p=1&s=500").then((result) => {

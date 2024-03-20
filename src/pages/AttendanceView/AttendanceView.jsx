@@ -555,7 +555,7 @@ const AttendanceView = () => {
   const config = modalValue
     ? modalConfig.find((item) => item.modalValue === modalValue)
     : null;
-
+    
   // -----------------------------------------------------
   return (
     <>
@@ -591,9 +591,10 @@ const AttendanceView = () => {
               render={({ field }) => (
                 <Select
                   className="inputPadding pe-3"
-                  multiple
                   displayEmpty
                   MenuProps={MenuProps}
+                  multiple
+                  {...field}
                   renderValue={(selected) => {
                     if (selected.length === 0) {
                       return (
@@ -609,7 +610,6 @@ const AttendanceView = () => {
                     });
                     return roleNames.join(", ");
                   }}
-                  {...field}
                 >
                   {departmentList?.map((dep) => (
                     <MenuItem key={dep.id} value={dep.id}>
@@ -632,6 +632,7 @@ const AttendanceView = () => {
             <Controller
               name="users"
               control={control}
+              disabled={watchDepartment.length===0}
               render={({ field }) => (
                 <Select
                   className="inputPadding pe-3"
@@ -646,7 +647,6 @@ const AttendanceView = () => {
                         </span>
                       );
                     }
-
                     const roleNames = selected.map((roleId) => {
                       const role = userList?.find((r) => r.id === roleId);
                       return role ? role.lastname + role.firstname : null;

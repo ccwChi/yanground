@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 // MUI
 import Chip from "@mui/material/Chip";
 import Backdrop from "@mui/material/Backdrop";
+import EditIcon from '@mui/icons-material/Edit';
+import { Button, MenuItem, Select, TextField } from "@mui/material";
 // Components
 import ModalTemplete from "../../components/Modal/ModalTemplete";
 import { LoadingTwo } from "../../components/Loader/Loading";
 // Hooks
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
-import { Button, TextField } from "@mui/material";
+import { getData } from "../../utils/api";
 
 /***
  * 檢視審核 Modal
@@ -22,7 +24,13 @@ const ViewModal = React.memo(({ title, deliverInfo, onClose, sendDataToBackend }
 	const userProfile = useLocalStorageValue("userProfile");
 	// 用於儲存文字欄位的值
 	const [textFieldValue, setTextFieldValue] = useState("");
-
+	// 用於更改編輯代理人的欄位出現
+	const [editAgent, setEditAgent] = useState(false);
+	// 用於更改編輯代理人
+	const [selectAgent, setSelectAgent] = useState("");
+	// 用於儲存代理人清單
+	const [agentList, setAgentList] = useState([]);
+	const [departmentList, setDepartmentList] = useState([]);
 	// 當文字欄位的值改變時更新狀態
 	const handleTextFieldChange = (event) => {
 		setTextFieldValue(event.target.value);
@@ -32,14 +40,38 @@ const ViewModal = React.memo(({ title, deliverInfo, onClose, sendDataToBackend }
 	const handleSubmit = () => {
 		const fd = new FormData();
 		fd.append("remark", textFieldValue);
-		// console.log("[deliverInfo.id, userProfile.id]",[deliverInfo.id, userProfile.id])
+		// **要記得添加代理人資訊，目前不知道後端api接受代理人格式
 		sendDataToBackend(fd, "approval", [deliverInfo.id, userProfile.id]);
 	};
 	// 按鈕點擊退回是件
 	const handleUnapproval = () => {
 		// 串 api
 	};
-
+    useEffect(() => {
+		if (!!deliverInfo) {
+			// 這邊之後要記得 update 人資可以選法務、法務可以選人資作為代理人
+		  getData(`department/${deliverInfo.department.id}/staff`).then(
+			(result) => {
+			  const data = result.result;
+			  const formattedUser = data
+				.map((us) => ({
+				  label:
+					us.lastname && us.firstname
+					  ? us.lastname + us.firstname
+					  : us.displayName,
+				  value: us.id,
+				}));
+			setAgentList(formattedUser);
+			}
+		  );
+		}
+	  }, [deliverInfo]);
+    
+	useEffect(()=>{
+		if(!editAgent){
+		setSelectAgent("")
+		}
+	},[editAgent])
 
 	return (
 		<>
@@ -78,6 +110,28 @@ const ViewModal = React.memo(({ title, deliverInfo, onClose, sendDataToBackend }
 								申請區間(迄)：<span className="font-bold">{deliverInfo.until}</span>
 							</p>
 						</div>
+						{/* 代理人開始 */}
+						{/* <div className="inline-flex flex-col sm:flex-row py-1 gap-1">
+							<div className="w-full">
+								<span>代理人：<span  className={`${editAgent && "hidden"} font-bold`}>{deliverInfo.agent || "尚未填寫"}</span> </span>
+								<Select
+									labelId="demo-simple-select-label"
+									id="demo-simple-select"
+									value={selectAgent}
+									onChange={(e)=>{console.log("e",e,"e.target.value",e.target.value);setSelectAgent(e.target.value)}}
+									className={`${!editAgent && "!hidden"} !h-6 !border-none !m-0 !p-2`}
+									displayEmpty
+								>
+									<MenuItem value="" >更改代理人</MenuItem>
+									{agentList.map((agent,i)=>(
+									<MenuItem key={i} value={agent.value}>{agent.label}</MenuItem>
+									))}
+								</Select>
+								<EditIcon className="ms-5 cursor-pointer" fontSize="small" onClick={()=>{setEditAgent(!editAgent)}}/>
+							</div>
+							
+						</div> */}
+						{/* 代理人結束 */}
 						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">
 							<p className="w-full">
 								申請緣由：<span className="font-bold">{deliverInfo.excuse}</span>

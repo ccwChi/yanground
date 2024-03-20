@@ -22,7 +22,7 @@ const nameMappings = [
 	{ name: "attendanceview", display: "考勤檢視" },
 	{ name: "attendancereport", display: "考勤報表" },
 	{ name: "workcalendar", display: "辦公行事曆" },
-	{ name: "hrarrangeLeave", display: "輪班排休表" },
+	{ name: "hrarrangeleave", display: "輪班排休表" },
 	{ name: "attendancewaiverhrm", display: "豁免出勤審核" },
 	// 會員中心
 	{ name: "userinfo", display: "帳戶資訊" },
