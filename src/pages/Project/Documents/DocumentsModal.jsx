@@ -292,7 +292,7 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 		} else if (currentDomain === "http://localhost:3000" || currentDomain === "https://erp.yuanrong.goog1e.app") {
 			apiUrl = "https://api.yuanrong.goog1e.app";
 		} else {
-			apiUrl = "https://api.yuanrong-tech.com.tw";
+			apiUrl = "";
 		}
 
 		setImageUrl(apiUrl);
