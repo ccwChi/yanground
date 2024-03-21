@@ -280,6 +280,23 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 	const [deleteId, setDeleteId] = useState(0);
 	// 檢查是否確定要刪除
 	const [alertOpen, setAlertOpen] = useState(false);
+	// 設定圖片網域 URL
+	const [imageUrl, setImageUrl] = useState("");
+
+	useEffect(() => {
+		const currentDomain = window.location.origin;
+
+		let apiUrl;
+		if (currentDomain === "https://erp.yuanrong-tech.com.tw") {
+			apiUrl = "https://api.yuanrong-tech.com.tw";
+		} else if (currentDomain === "http://localhost:3000" || currentDomain === "https://erp.yuanrong.goog1e.app") {
+			apiUrl = "https://api.yuanrong.goog1e.app";
+		} else {
+			apiUrl = "https://api.yuanrong-tech.com.tw";
+		}
+
+		setImageUrl(apiUrl);
+	}, []);
 
 	useEffect(() => {
 		if (deliverInfo) {
@@ -360,10 +377,10 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 										</h4>
 										<div className="ps-4">
 											<div className="flex sm:flex-row flex-col bg-slate-200 rounded-lg px-4 py-3 gap-2.5 justify-between">
-												{data.imgurl ? (
+												{data.mimeType && data.mimeType.template?.includes("image") ? (
 													<div className="flex gap-3 flex-1 overflow-hidden">
 														<img
-															src={data.imgurl}
+															src={`${imageUrl}/projectArchive/${data.id}/${data.mimeType?.value || ""}`}
 															alt={data.originalFilename}
 															className="w-64 h-44 object-cover rounded-lg"
 														/>
@@ -399,9 +416,7 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 															color="secondary"
 															onClick={() =>
 																window.open(
-																	`https://api.yuanrong.goog1e.app/projectArchive/${data.id}/${
-																		data.mimeType?.value || ""
-																	}`,
+																	`${imageUrl}/projectArchive/${data.id}/${data.mimeType?.value || ""}`,
 																	"_blank"
 																)
 															}
