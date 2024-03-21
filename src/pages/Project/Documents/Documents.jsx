@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { format } from "date-fns";
 
 // MUI
 import Button from "@mui/material/Button";
@@ -209,10 +210,8 @@ const Documents = () => {
 
 	useEffect(() => {
 		if (fullData.length > 0) {
-			setIsLoadingOutside(false);
 			const transformData = fullData.find((d) => d.value === cat.value);
 			setApiData(transformData);
-			console.log(transformData);
 		}
 	}, [cat, fullData]);
 
@@ -301,6 +300,7 @@ const Documents = () => {
 
 						Promise.all(promises).then(() => {
 							// console.log(documentDataList); // 在這裡列印 documentDataList，確保所有非同步操作都已完成
+							setIsLoadingOutside(false);
 
 							// 根據子項目求取文檔數量
 							const pjacl = projectArchiveCategoryList.map((item) => {
@@ -325,12 +325,39 @@ const Documents = () => {
 												},
 												{ count: 0, label: "", projectArchives: [], value: "", projectArchiveSubIteFlag: "" } // 初始化累加器物件
 											);
-											summedObject.projectArchives.sort(
-												(a, b) =>
-													new Date(b.uploadedAt.replace("+08", "").replace("T", " ")) -
-													new Date(a.uploadedAt.replace("+08", "").replace("T", " "))
-											);
+											// summedObject.projectArchives.sort(
+											// 	(a, b) =>
+											// 		new Date(b.uploadedAt.replace("+08", "").replace("T", " ")) -
+											// 		new Date(a.uploadedAt.replace("+08", "").replace("T", " "))
+											// );
 											matchingdata = summedObject;
+										}
+
+										let displayScreenName = "";
+										// 確認 projectArchives 是否存在且不為空
+										if (matchingdata.projectArchives && matchingdata.projectArchives.length > 0) {
+											matchingdata.projectArchives.forEach((archive) => {
+												// 格式化日期為 "YYYY-MM-DD HH:mm:ss"
+												archive.uploadedAt = format(
+													new Date(archive.uploadedAt.replace("+08", "").replace("T", " ")),
+													"yyyy-MM-dd HH:mm:ss"
+												);
+
+												// 顯示名稱守則
+												const mdu = archive.uploader;
+												if (mdu.lastname && mdu.firstname) {
+													archive.displayScreenName = `${mdu.lastname}${mdu.firstname}`;
+												} else if (mdu.lastname) {
+													archive.displayScreenName = mdu.lastname;
+												} else if (mdu.firstname) {
+													archive.displayScreenName = mdu.firstname;
+												} else if (mdu.nickname) {
+													archive.displayScreenName = mdu.nickname;
+												}
+											});
+
+											// 對 projectArchives 依照 uploadedAt 由近到遠排序
+											matchingdata.projectArchives.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
 										}
 
 										return {
@@ -372,9 +399,7 @@ const Documents = () => {
 			postBPData(url, fd).then((result) => {
 				if (result.status) {
 					showNotification(message[0], true);
-					getApiList();
-					setIsLoadingOutside(true);
-					onClose();
+					resetScreen();
 				} else {
 					showNotification(
 						result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
@@ -383,6 +408,9 @@ const Documents = () => {
 				}
 				setSendBackFlag(false);
 			});
+		} else if (mode === "delete") {
+			resetScreen();
+			setSendBackFlag(false);
 		}
 	};
 
@@ -396,9 +424,11 @@ const Documents = () => {
 			navigate("/project");
 			// } else if (dataMode === "filter") {
 			// 	handleOpenSearch();
+		} else if (dataMode === "filesmanage") {
+			setModalValue(dataMode);
+			setDeliverInfo(dataValue ? apiData?.projectArchiveSubItems.find((item) => item.id === dataValue) : null);
 		} else {
 			setModalValue(dataMode);
-			// setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
 		}
 	};
 
@@ -406,6 +436,12 @@ const Documents = () => {
 	const onClose = () => {
 		setModalValue(false);
 		setDeliverInfo(null);
+	};
+
+	const resetScreen = () => {
+		setIsLoadingOutside(true);
+		getApiList();
+		onClose();
 	};
 
 	// modal 開啟參數與顯示標題
@@ -423,7 +459,14 @@ const Documents = () => {
 		},
 		{
 			modalValue: "filesmanage",
-			modalComponent: <FilesManageModal title="檔案瀏覽與管理" sendDataToBackend onClose={onClose} />,
+			modalComponent: (
+				<FilesManageModal
+					title="檔案瀏覽與管理"
+					deliverInfo={deliverInfo}
+					sendDataToBackend={sendDataToBackend}
+					onClose={onClose}
+				/>
+			),
 		},
 	];
 	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;

@@ -30,12 +30,16 @@ import AlertDialog from "../../../components/Alert/AlertDialog";
 import { LoadingTwo } from "../../../components/Loader/Loading";
 
 // Utils
-import { getData } from "../../../utils/api";
+import { getData, deleteData } from "../../../utils/api";
+
+// Hooks
+import { useNotification } from "../../../hooks/useNotification";
 
 // Customs
 import FileDownloadIcon from "../../../assets/icons/fileDownloadIcon.svg";
 import DownloadArrowIcon from "../../../assets/icons/downloadArrowIcon.svg";
 import TrashIcon from "../../../assets/icons/trashIcon.svg";
+import emptyImg from "../../../assets/images/emptyCatSleep.png";
 
 /***
  * UploadModal
@@ -256,11 +260,6 @@ const UploadModal = React.memo(({ title, constructionKAList, sendDataToBackend, 
 				disagreeText="取消"
 				agreeText="確定"
 			/>
-
-			{/* Backdrop */}
-			<Backdrop sx={{ color: "#fff", zIndex: 1050 }} open={false} onClick={onCheckDirty}>
-				<LoadingTwo />
-			</Backdrop>
 		</>
 	);
 });
@@ -274,50 +273,21 @@ const UploadModal = React.memo(({ title, constructionKAList, sendDataToBackend, 
  * @returns
  ***/
 const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }) => {
-	const [apiData, setApiData] = useState([
-		{
-			id: "2147483618",
-			uploadedAt: "2024-02-01 13:50:44",
-			constructionKindArchive: "Example.docx",
-			uploader: "李二牛",
-			imgurl: null,
-			docSize: "3.8 KB",
-		},
-		{
-			id: "2147483629",
-			uploadedAt: "2024-01-27 08:12:04",
-			constructionKindArchive: "ExampleExampleExampleExampleExampleExampleExample.pdf",
-			uploader: "王大明",
-			imgurl: null,
-			docSize: "374 B",
-		},
-		{
-			id: "2147483640",
-			uploadedAt: "2024-01-25 11:01:27",
-			constructionKindArchive: "Example.jpeg",
-			uploader: "陳三金",
-			imgurl:
-				"https://images.unsplash.com/photo-1709418354364-8f3e9ad5c32c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-			docSize: "12.17 MB",
-		},
-		{
-			id: "2147483651",
-			uploadedAt: "2024-01-16 16:59:32",
-			constructionKindArchive: "Example.xml",
-			uploader: "王大明",
-			imgurl: null,
-			docSize: "24 B",
-		},
-		{
-			id: "2147483640",
-			uploadedAt: "2024-01-02 07:44:58",
-			constructionKindArchive: "Example.png",
-			uploader: "李二牛",
-			imgurl:
-				"https://images.unsplash.com/photo-1709223328664-f3c5f94a8e70?q=80&w=2038&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-			docSize: "3.91 MB",
-		},
-	]);
+	const showNotification = useNotification();
+	// 取得顯示的文檔資料
+	const [apiData, setApiData] = useState([]);
+	// 設置刪除的 id 旗標
+	const [deleteId, setDeleteId] = useState(0);
+	// 檢查是否確定要刪除
+	const [alertOpen, setAlertOpen] = useState(false);
+
+	useEffect(() => {
+		if (deliverInfo) {
+			const data = deliverInfo?.matchingdata?.projectArchives || [];
+			setApiData(data);
+			console.log(data);
+		}
+	}, [deliverInfo]);
 
 	// 投射更大範圍差異性
 	const convertIDToRange = (id) => {
@@ -334,6 +304,35 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 		return convertedNumber;
 	};
 
+	// 將檔案大小（以位元組為單位）轉換格式（KB、MB、GB 等）
+	const formatFileSize = (bytes) => {
+		if (bytes === 0) return "0 Bytes";
+
+		const k = 1024;
+		const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+		const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+	};
+
+	// Alert 回傳值進行最終結果 --- true: 關閉 modal / all: 關閉 Alert
+	const handleAlertClose = (agree) => {
+		if (agree) {
+			deleteData(`projectArchive/${deleteId}`).then((result) => {
+				let message = "刪除文檔成功！";
+
+				if (result.status) {
+					showNotification(message, true);
+				} else {
+					showNotification(result?.result.reason || "出現錯誤。", false);
+				}
+				setDeleteId(0);
+				sendDataToBackend("", "delete");
+			});
+		}
+		setAlertOpen(false);
+	};
+
 	return (
 		<>
 			{/* Modal */}
@@ -341,7 +340,7 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 				<div className="flex flex-col gap-2.5">
 					{/* 子項目名稱 */}
 					<h3 className="w-full pt-4">
-						子項目：<span className="font-bold">現勘報告書</span>
+						子項目：<span className="font-bold">{deliverInfo.name}</span>
 					</h3>
 
 					{/* 分隔線 */}
@@ -351,78 +350,111 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 					<div className="flex flex-col h-[400px] gap-4 pe-1 overflow-y-auto">
 						{/* 文件 - Start */}
 						{apiData ? (
-							apiData.map((data) => (
-								<div className="flex flex-col gap-2" key={data.id}>
-									<h4 className="inline-flex items-end">
-										<FontAwesomeIcon icon={faQuoteLeft} className="me-2" style={{ fontSize: "1.5rem" }} />
-										<span className="font-bold">{data.uploader}</span>
-										<span className="text-xs text-primary-800">‧{data.uploadedAt}</span>
-									</h4>
-									<div className="ps-4">
-										<div className="flex sm:flex-row flex-col bg-slate-200 rounded-lg px-4 py-3 gap-2.5 justify-between">
-											{data.imgurl ? (
-												<div className="flex gap-3 flex-1 overflow-hidden">
-													<img
-														src={data.imgurl}
-														alt={data.constructionKindArchive}
-														className="w-64 h-44 object-cover rounded-lg"
-													/>
-													<div className="inline-flex flex-col justify-end gap-1">
-														<span className="text-sm break-all text-black">{data.constructionKindArchive}</span>
-														<span className="text-xs text-neutral-500">{data.docSize}</span>
-													</div>
-												</div>
-											) : (
-												<div className="flex gap-3 flex-1 overflow-hidden">
-													<div
-														className="hidden sm:inline-flex items-center justify-center min-w-10 w-10 h-10 bg-[#8AA37D] rounded-full"
-														style={{ filter: `hue-rotate(${convertIDToRange(data.id)}deg)` }}>
+							apiData.length > 0 ? (
+								apiData.map((data) => (
+									<div className="flex flex-col gap-2" key={data.id}>
+										<h4 className="inline-flex items-end">
+											<FontAwesomeIcon icon={faQuoteLeft} className="me-2" style={{ fontSize: "1.5rem" }} />
+											<span className="font-bold">{data.displayScreenName}</span>
+											<span className="text-xs text-primary-800">‧{data.uploadedAt}</span>
+										</h4>
+										<div className="ps-4">
+											<div className="flex sm:flex-row flex-col bg-slate-200 rounded-lg px-4 py-3 gap-2.5 justify-between">
+												{data.imgurl ? (
+													<div className="flex gap-3 flex-1 overflow-hidden">
 														<img
-															src={FileDownloadIcon}
-															className="translate-x-[2px] translate-y-[1.5px]"
-															style={{ width: "24px" }}
-															alt={"File Download Icon"}
+															src={data.imgurl}
+															alt={data.originalFilename}
+															className="w-64 h-44 object-cover rounded-lg"
 														/>
+														<div className="inline-flex flex-col justify-end gap-1">
+															<span className="text-sm break-all text-black">{data.originalFilename}</span>
+															<span className="text-xs text-neutral-500">{formatFileSize(data.size)}</span>
+														</div>
 													</div>
-													<div className="inline-flex flex-col gap-1 -translate-y-1px">
-														<span className="text-sm break-all text-black">{data.constructionKindArchive}</span>
-														<span className="text-xs text-neutral-500">{data.docSize}</span>
+												) : (
+													<div className="flex gap-3 flex-1 overflow-hidden">
+														<div
+															className="hidden sm:inline-flex items-center justify-center min-w-10 w-10 h-10 bg-[#8AA37D] rounded-full"
+															style={{ filter: `hue-rotate(${convertIDToRange(data.id)}deg)` }}>
+															<img
+																src={FileDownloadIcon}
+																className="translate-x-[2px] translate-y-[1.5px]"
+																style={{ width: "24px" }}
+																alt={"File Download Icon"}
+															/>
+														</div>
+														<div className="inline-flex flex-col gap-1 -translate-y-1px">
+															<span className="text-sm break-all text-black">{data.originalFilename}</span>
+															<span className="text-xs text-neutral-500">{formatFileSize(data.size)}</span>
+														</div>
 													</div>
+												)}
+												<Divider className="sm:hidden" />
+												<div className="inline-flex gap-2 sm:justify-start justify-end translate-y-[2px]">
+													<Tooltip title={"下載"}>
+														<IconButton
+															aria-label={"下載"}
+															size="small"
+															color="secondary"
+															onClick={() =>
+																window.open(
+																	`https://api.yuanrong.goog1e.app/projectArchive/${data.id}/${
+																		data.mimeType?.value || ""
+																	}`,
+																	"_blank"
+																)
+															}
+															sx={{ width: "34px", height: "34px" }}>
+															<img src={DownloadArrowIcon} style={{ width: "20px" }} alt={"Download Arrow Icon"} />
+														</IconButton>
+													</Tooltip>
+													<Tooltip title={"刪除"}>
+														<IconButton
+															aria-label={"刪除"}
+															size="small"
+															color="secondary"
+															onClick={() => {
+																setAlertOpen(true);
+																setDeleteId(data.id);
+															}}
+															sx={{ width: "34px", height: "34px" }}>
+															<img src={TrashIcon} style={{ width: "20px" }} alt={"Trash Icon"} />
+														</IconButton>
+													</Tooltip>
 												</div>
-											)}
-											<Divider className="sm:hidden" />
-											<div className="inline-flex gap-2 sm:justify-start justify-end translate-y-[2px]">
-												<Tooltip title={"下載"}>
-													<IconButton
-														aria-label={"下載"}
-														size="small"
-														color="secondary"
-														sx={{ width: "34px", height: "34px" }}>
-														<img src={DownloadArrowIcon} style={{ width: "20px" }} alt={"Download Arrow Icon"} />
-													</IconButton>
-												</Tooltip>
-												<Tooltip title={"刪除"}>
-													<IconButton
-														aria-label={"刪除"}
-														size="small"
-														color="secondary"
-														sx={{ width: "34px", height: "34px" }}>
-														<img src={TrashIcon} style={{ width: "20px" }} alt={"Trash Icon"} />
-													</IconButton>
-												</Tooltip>
 											</div>
 										</div>
 									</div>
+								))
+							) : (
+								<div className="flex-1 flex flex-col items-center justify-center gap-2">
+									<img src={emptyImg} alt="catimage" className="w-2/5 max-w-sm min-w-[10rem]" />
+									<p className="font-bold">尚無已上傳文件 ...</p>
 								</div>
-							))
+							)
 						) : (
-							<>Nope</>
+							<div className="flex-1 flex flex-col items-center justify-center gap-2">
+								<img src={emptyImg} alt="catimage" className="w-2/5 max-w-sm min-w-[10rem]" />
+								<p className="font-bold">資料取得錯誤</p>
+							</div>
 						)}
 
 						{/* 文件 - End */}
 					</div>
 				</div>
 			</ModalTemplete>
+
+			{/* Alert */}
+			<AlertDialog
+				open={alertOpen}
+				onClose={handleAlertClose}
+				icon={<ReportProblemIcon color="secondary" />}
+				title="注意"
+				content="是否確認將此檔案進行刪除處理？"
+				disagreeText="取消"
+				agreeText="確定"
+			/>
 		</>
 	);
 });
