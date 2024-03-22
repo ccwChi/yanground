@@ -11,6 +11,7 @@ import ModalTemplete from "../../components/Modal/ModalTemplete";
 import InputTitle from "../../components/Guideline/InputTitle";
 import AlertDialog from "../../components/Alert/AlertDialog";
 import { LoadingTwo } from "../../components/Loader/Loading";
+import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 
 /** mui 元件 */
 import TextField from "@mui/material/TextField";
@@ -21,7 +22,10 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 
+/** 不知道怎麼分類 */
 import MapDialog from "./MapDialog";
+import { useNotification } from "../../hooks/useNotification";
+import { format } from "date-fns";
 
 const ITEM_HEIGHT = 36;
 const ITEM_PADDING_TOP = 8;
@@ -44,6 +48,8 @@ const UpdatedModal = React.memo(
     const [fRepList, setFRepList] = useState(null);
     // 工程類型清單
     const [constructionKindList, setConstructionKindList] = useState([]);
+    // 可隸屬主案清單
+    const [primaryList, setPrimaryList] = useState([]);
     // 鄉鎮區清單
     const [distList, setDistList] = useState(null);
     // 是否為初始化時
@@ -52,10 +58,11 @@ const UpdatedModal = React.memo(
     const [mapDialog, setMapDialog] = useState(false);
     // Modal Data
     const [apiData, setApiData] = useState(null);
-	// 用來儲存地及編號
-	const [cadastralNumber, setCadastralNumber] = useState("");
-	const [cadastralNumberForApi, setCadastralNumberforApi] = useState([]);
+    // 用來儲存地及編號
+    const [landLot, setLandLot] = useState("");
+    const [landLotForApi, setLandLotforApi] = useState([]);
 
+    const showNotification = useNotification();
     // 使用 Yup 來定義表單驗證規則
     const schema = yup.object().shape({
       name: yup.string().required("不可為空值！"),
@@ -63,34 +70,59 @@ const UpdatedModal = React.memo(
       constructionKind: yup.string().required("不可為空值！"),
       administrativeDivision_: yup.string().required("不可為空值！"),
       administrativeDivision: yup.string().required("不可為空值！"),
-      clientPhone: yup
+      clientContactNumber: yup
         .mixed()
         .test("is-number", "必須為數字", (value, context) => {
           if (!value) {
             return true; // 允許為空
           }
-          return /^[0-9]*$/.test(value); // 檢查是否為數字
+          const contactNumbers = value
+            .split(",")
+            .map((number) => number.trim());
+          // 检查每个号码是否都为数字
+          return contactNumbers.every((phone) => /^[0-9]*$/.test(phone));
         }),
+      landLot: yup.mixed().test("is-number", "必須為數字", (value, context) => {
+        if (!value) {
+          return true; // 允許為空
+        }
+        const landLots = value.split(",").map((number) => number.trim());
+        // 检查每个号码是否都为数字
+        return landLots.every((phone) => /^[0-9]*$/.test(phone));
+      }),
     });
 
     // 初始預設 default 值
     const defaultValues = {
       name: apiData ? apiData.name : "",
+      administrativeDivision_: apiData
+        ? apiData.administrativeDivision?.administeredBy?.id || ""
+        : "",
+      administrativeDivision: apiData
+        ? apiData.administrativeDivision?.id || ""
+        : "",
+      street: apiData ? apiData.street || "" : "",
+      latitude: apiData ? apiData.latitude || "" : "",
+      longitude: apiData ? apiData.longitude || "" : "",
+      radius: apiData ? apiData.radius || "" : "",
       businessRepresentative: apiData ? apiData.businessRepresentative.id : "",
       foremanRepresentative: apiData
         ? apiData.foremanRepresentative?.id || ""
         : "",
-      constructionKind: apiData ? apiData?.constructionKind?.value || "" : "",
-      administrativeDivision_: apiData
-        ? apiData.administrativeDivision.administeredBy.id || ""
-        : "",
-      administrativeDivision: apiData ? apiData.administrativeDivision.id || "" : "",
-      street: apiData ? apiData.street : "",
-      latitude: apiData ? apiData.latitude : "",
-      longitude: apiData ? apiData.longitude : "",
-      radius: apiData ? apiData.radius : "",
-    //   clientName: apiData ? apiData.clientName : "",
-    //   clientPhone: apiData ? apiData.clientPhone : "",
+      //   juridicalPerson: "",
+    //   primary: apiData ? apiData?.primary || "" : "",
+    //   clientName: apiData ? apiData.clientName || "" : "",
+    //   clientIdentifier: apiData ? apiData.clientIdentifier || "" : "",
+      constructionKind: apiData ? apiData.constructionKind?.value || "" : "",
+    //   kiloWatts: apiData ? apiData.kiloWatts || "" : "",
+    //   dateOfContract: apiData?.dateOfContract
+    //     ? new Date(apiData.dateOfContract)
+    //     : null,
+    //   completionDate: apiData?.completionDate
+    //     ? new Date(apiData.completionDate)
+    //     : null,
+      // landLot: 馬的這兩個異類在搞是
+      // clientContactNumber:
     };
 
     // 使用 useForm Hook 來管理表單狀態和驗證
@@ -181,6 +213,16 @@ const UpdatedModal = React.memo(
           setConstructionKindList([]);
         }
       });
+      if (!!deliverInfo) {
+        getData(`project/${deliverInfo}/primaries`).then((result) => {
+          if (result.result) {
+            const data = result.result;
+            setPrimaryList(data);
+          } else {
+            setPrimaryList([]);
+          }
+        });
+      }
     }, []);
 
     // 取得鄉鎮區
@@ -201,10 +243,25 @@ const UpdatedModal = React.memo(
 
     // 提交表單資料到後端並執行相關操作
     const onSubmit = (data) => {
+    //   console.log(data);
+      const dataForApi = {
+        ...data,
+        completionDate: data?.completionDate
+          ? format(data.completionDate, "yyyy-MM-dd")
+          : "",
+        dateOfContract: data?.dateOfContract
+          ? format(data.dateOfContract, "yyyy-MM-dd")
+          : "",
+      };
+	  if (deliverInfo){
+		delete dataForApi.primary;
+		delete dataForApi.landLot;
+		delete dataForApi.clientContactNumber;
+	  }
       const fd = new FormData();
       // console.log(data)
       // delete data.administrativeDivision_;
-      for (let key in data) {
+      for (let key in dataForApi) {
         fd.append(key, data[key] || "");
       }
 
@@ -231,7 +288,24 @@ const UpdatedModal = React.memo(
       }
       setAlertOpen(false);
     };
-useEffect(()=>{},[])
+
+    // const handleDelete = (data) => {
+    //   const index = cadastralNumberForApi.findIndex((num) => num === data);
+    //   if (index !== -1) {
+    //     const newList = [...cadastralNumberForApi];
+    //     newList.slice(index, 1);
+    //     setConstructionKindList(newList);
+    //   }
+    // };
+    const handleDelete = (data) => {
+      const index = landLotForApi.findIndex((num) => num === data);
+      if (index !== -1) {
+        // 检查是否找到匹配的元素
+        const newList = [...landLotForApi]; // 创建原数组的副本
+        newList.splice(index, 1); // 删除匹配的元素
+        setLandLotforApi(newList); // 更新状态
+      }
+    };
     return (
       <>
         {/* Modal */}
@@ -248,7 +322,7 @@ useEffect(()=>{},[])
                   className="flex flex-col overflow-y-auto px-1 pb-1"
                   style={{ maxHeight: "60vh" }}
                 >
-                  {/* 名稱 */}
+                  {/* 名稱 & 隸屬主專案*/}
                   <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
                     <div className="w-full">
                       <InputTitle title={"專案名稱"} />
@@ -276,6 +350,47 @@ useEffect(()=>{},[])
                       </FormHelperText>
                     </div>
                   </div>
+                  {/*  隸屬主專案 ********************************需要有專案id  */}
+                  {/* <div
+                    className={`inline-flex sm:flex-row flex-col sm:gap-2 gap-1 ${
+                      !deliverInfo && "hidden"
+                    }`}
+                  >
+                    <div className="w-full">
+                      <InputTitle title={"隸屬主專案"} required={false} />
+                      <Controller
+                        name="primary"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            error={!!errors["primary"]?.message}
+                            className="inputPadding"
+                            displayEmpty
+                            {...field}
+                            fullWidth
+                            MenuProps={MenuProps}
+                          >
+                            <MenuItem value="">
+                              <span className="text-neutral-400 font-light">
+                                若此案為分案，請選擇隸屬主專案
+                              </span>
+                            </MenuItem>
+                            {primaryList.map((proj) => (
+                              <MenuItem key={proj.id} value={proj.id}>
+                                {proj.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        )}
+                      />
+                      <FormHelperText
+                        className="!text-red-600 break-words !text-right !mt-0"
+                        sx={{ minHeight: "1.25rem" }}
+                      >
+                        {errors["primary"]?.message}
+                      </FormHelperText>
+                    </div>
+                  </div> */}
                   {/* 業務人員 & 工務專管人員 */}
                   <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
                     <div className="w-full">
@@ -383,8 +498,33 @@ useEffect(()=>{},[])
                         {errors["constructionKind"]?.message}
                       </FormHelperText>
                     </div>
+                    {/* <div className="w-full">
+                      <InputTitle title={"kW 數"} required={false} />
+                      <Controller
+                        name="kiloWatts"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            error={!!errors["kiloWatts"]?.message}
+                            variant="outlined"
+                            size="small"
+                            className="inputPadding"
+                            placeholder="請輸入 kW 數"
+                            fullWidth
+                            inputProps={{ maxLength: 25 }}
+                            {...field}
+                          />
+                        )}
+                      />
+                      <FormHelperText
+                        className="!text-red-600 break-words !text-right !mt-0"
+                        sx={{ minHeight: "1.25rem" }}
+                      >
+                        {errors["kiloWatts"]?.message}
+                      </FormHelperText>
+                    </div> */}
                   </div>
-                  {/* 業主名稱 & 業主電話 */}
+                  {/* 業主名稱 & 業主證號 */}
                   {/* <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
                     <div className="w-full">
                       <InputTitle title={"業主名稱"} required={false} />
@@ -412,14 +552,43 @@ useEffect(()=>{},[])
                       </FormHelperText>
                     </div>
                     <div className="w-full">
-                      <InputTitle title={"業主電話"} required={false} />
+                      <InputTitle title={"業主證號"} required={false} />
                       <Controller
-                        name="clientPhone"
+                        name="clientIdentifier"
                         control={control}
                         render={({ field }) => (
                           <TextField
-                            placeholder="ex. 0912345678"
-                            error={!!errors["clientPhone"]?.message}
+                            error={!!errors["clientIdentifier"]?.message}
+                            variant="outlined"
+                            size="small"
+                            className="inputPadding"
+                            placeholder="請輸入業主證號"
+                            fullWidth
+                            inputProps={{ maxLength: 25 }}
+                            {...field}
+                          />
+                        )}
+                      />
+                      <FormHelperText
+                        className="!text-red-600 break-words !text-right !mt-0"
+                        sx={{ minHeight: "1.25rem" }}
+                      >
+                        {errors["clientIdentifier"]?.message}
+                      </FormHelperText>
+                    </div>
+                  </div> */}
+                  {/**************************************** 電話是另一隻api 需要專案id  */}
+                  {/* 業主電話  */}
+                  {/* <div className={`inline-flex sm:flex-row flex-col sm:gap-2 gap-1 ${!deliverInfo && "hidden"}`}>
+                    <div className="w-full">
+                      <InputTitle title={"業主電話"} required={false} />
+                      <Controller
+                        name="clientContactNumber"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            placeholder="如果多筆 請輸入 ex. 0912345678, 06271234567"
+                            error={!!errors["clientContactNumber"]?.message}
                             variant="outlined"
                             type="tel"
                             size="small"
@@ -433,10 +602,11 @@ useEffect(()=>{},[])
                         className="!text-red-600 break-words !text-right !mt-0"
                         sx={{ minHeight: "1.25rem" }}
                       >
-                        {errors["clientPhone"]?.message}
+                        {errors["clientContactNumber"]?.message}
                       </FormHelperText>
                     </div>
                   </div> */}
+
                   {/* 地點 */}
                   <InputTitle title={"專案地點"} />
                   <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
@@ -546,52 +716,60 @@ useEffect(()=>{},[])
                       </FormHelperText>
                     </div>
                   </div>
-                  {/* <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
-                    <div className="w-full">
-                      <InputTitle title={"地籍編號"} />
-                      <div className="w-full flex gap-x-4">
-                        <TextField
-                          variant="outlined"
-                          size="small"
-                          className="inputPadding"
-                          placeholder="請輸入地籍編號"
-                          fullWidth
-                          inputProps={{ maxLength: 25 }}
-						  value={cadastralNumber}
-						  onChange={(e)=>{setCadastralNumber(e.target.value)}}
-                        />
-                        <Button
-                          type="button"
-                          variant="contained"
-                          color="primary"
-                          className="!text-sm !py-0"
-                          onClick={() => {
-                            setCadastralNumberforApi([...cadastralNumber,cadastralNumber])
-                          }}
-                        >
-                          新增
-                        </Button>
-                      </div>
 
+                  {/* **************************************************** 地籍編號是另一隻api */}
+                  {/* <div className={`inline-flex sm:flex-row flex-col sm:gap-2 gap-1 ${!deliverInfo && "hidden"}`}>
+                    <div className="w-full">
+                      <InputTitle title={"地號"} required={false} />
+                      <Controller
+                        name="landLot"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            placeholder="純數字，如多筆請用逗號隔開 ex. 1234, 4567"
+                            error={!!errors["landLot"]?.message}
+                            variant="outlined"
+                            type="tel"
+                            size="small"
+                            className="inputPadding"
+                            fullWidth
+                            {...field}
+                          />
+                        )}
+                      />
                       <FormHelperText
                         className="!text-red-600 break-words !text-right !mt-0"
                         sx={{ minHeight: "1.25rem" }}
                       >
-                        {errors["cadastralNumber"]?.message}
-                      </FormHelperText>
-
-					  <div className="w-full">
-                        <div className="bg-slate-200 rounded-md h-12 -mt-3">{cadastralNumberForApi}</div> 
-
-                      </div>
-					  <FormHelperText
-                        className="!text-red-600 break-words !text-right !mt-0"
-                        sx={{ minHeight: "1.25rem" }}
-                      >
-                        {errors["cadastralNumber"]?.message}
+                        {errors["landLot"]?.message}
                       </FormHelperText>
                     </div>
                   </div> */}
+
+                  {/* 簽約日期 x 完工日期 */}
+                  {/* <div className="w-full flex sm:flex-row flex-col gap-x-4">
+                    <div className="w-full">
+                      <InputTitle title={"簽約日期"} required={false} />
+                      <ControlledDatePicker name="dateOfContract" mode="rwd" />
+                      <FormHelperText
+                        className="!text-red-600 break-words !text-right !mt-0"
+                        sx={{ minHeight: "1.25rem" }}
+                      >
+                        {errors["dateOfContract"]?.message}
+                      </FormHelperText>
+                    </div>{" "}
+                    <div className="w-full">
+                      <InputTitle title={"完工日期"} required={false} />
+                      <ControlledDatePicker name="completionDate" mode="rwd" />
+                      <FormHelperText
+                        className="!text-red-600 break-words !text-right !mt-0"
+                        sx={{ minHeight: "1.25rem" }}
+                      >
+                        {errors["completionDate"]?.message}
+                      </FormHelperText>
+                    </div>
+                  </div> */}
+
                   {/* 經緯度半徑 */}
                   <div className="inline-flex items-center pb-4 pt-0 sm:pt-1 gap-2">
                     <InputTitle title={"案場範圍"} required={false} />

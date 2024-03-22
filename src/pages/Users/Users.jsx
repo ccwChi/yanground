@@ -264,17 +264,37 @@ const Users = () => {
 			getData(url).then((result) => {
 				setIsLoading(false);
 				if (result.result) {
-					const data = result.result;
-					setApiData(data);
+                    const data = result.result;
+                    data.content = data.content.map((item) => {
+                        let displayScreenName = "";
+
+                        if (item.lastname && item.firstname) {
+                            displayScreenName = `${item.lastname}${item.firstname}`;
+                        } else if (item.lastname) {
+                            displayScreenName = item.lastname;
+                        } else if (item.firstname) {
+                            displayScreenName = item.firstname;
+                        } else if (item.nickname) {
+                            displayScreenName = item.nickname;
+                        } else {
+                            displayScreenName = item.displayName;
+                        }
+                        return {
+                            ...item,
+                            displayScreenName: displayScreenName,
+                        };
+                    });
+                    // console.log(data);
+                    setApiData(data);
 
 					if (page > data.totalPages) {
 						setPage(0);
 						setRowsPerPage(10);
 						navigateWithParams(1, 10);
 					}
-				}else {
-          setApiData(null)
-        }
+				} else {
+                    setApiData(null);
+                }
 			});
 		},
 		[page]
@@ -688,7 +708,7 @@ const Users = () => {
 					columnsPC={columnsPC}
 					columnsMobile={columnsMobile}
 					actions={actions}
-					cardTitleKey={"displayName"}
+					cardTitleKey={"displayScreenName"}
 					tableMinWidth={1140}
 					isLoading={isLoading}
 					handleActionClick={handleActionClick}
