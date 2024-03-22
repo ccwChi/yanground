@@ -378,7 +378,7 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 										<div className="ps-4">
 											<div className="flex sm:flex-row flex-col bg-slate-200 rounded-lg px-4 py-3 gap-2.5 justify-between">
 												{data.mimeType && data.mimeType.template?.includes("image") ? (
-													<div className="flex gap-3 flex-1 overflow-hidden">
+													<div className="flex flex-col gap-3 flex-1 overflow-hidden">
 														<img
 															src={`${imageUrl}/projectArchive/${data.id}/${data.mimeType?.value || ""}`}
 															alt={data.originalFilename}
@@ -386,6 +386,7 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 														/>
 														<div className="inline-flex flex-col justify-end gap-1">
 															<span className="text-sm break-all text-black">{data.originalFilename}</span>
+															<span className="text-sm break-all text-black">註記: {data?.remarks}</span>
 															<span className="text-xs text-neutral-500">{formatFileSize(data.size)}</span>
 														</div>
 													</div>
@@ -402,7 +403,9 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 															/>
 														</div>
 														<div className="inline-flex flex-col gap-1 -translate-y-1px">
+															
 															<span className="text-sm break-all text-black">{data.originalFilename}</span>
+															<span className="text-sm break-all text-black">註記: {data?.remarks}</span>
 															<span className="text-xs text-neutral-500">{formatFileSize(data.size)}</span>
 														</div>
 													</div>
