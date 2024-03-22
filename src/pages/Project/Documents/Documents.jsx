@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { format } from "date-fns";
 
 // MUI
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
+import Backdrop from "@mui/material/Backdrop";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 
@@ -25,6 +27,7 @@ import PageTitle from "../../../components/Guideline/PageTitle";
 import RWDTable from "../../../components/RWDTable/RWDTable";
 import MultipleFAB from "../../../components/FloatingActionButton/MultipleFAB";
 import TableTabbar from "../../../components/Tabbar/TableTabbar";
+import { LoadingFour } from "../../../components/Loader/Loading";
 
 // Hooks
 import { useNotification } from "../../../hooks/useNotification";
@@ -155,7 +158,7 @@ const Documents = () => {
 
 	// Table 上的子項目操作按鈕
 	const actions = [
-		{ value: "upload", icon: <FileUploadIcon />, title: "上傳檔案" },
+		// { value: "upload", icon: <FileUploadIcon />, title: "上傳檔案" },
 		{
 			value: "filesmanage",
 			icon: <img src={FolderManageIcon} style={{ width: "18px" }} alt={"Manage Folder Icon"} />,
@@ -194,6 +197,25 @@ const Documents = () => {
 			return () => clearTimeout(timeoutId);
 		}
 
+		getApiList();
+
+		// 取得 mode 參數
+		const modeParam = queryParams.get("mode");
+		const mode = applicationBtns.find((obj) => obj.value === modeParam);
+
+		if (modeParam) {
+			setMode(mode);
+		}
+	}, []);
+
+	useEffect(() => {
+		if (fullData.length > 0) {
+			const transformData = fullData.find((d) => d.value === cat.value);
+			setApiData(transformData);
+		}
+	}, [cat, fullData]);
+
+	const getApiList = () => {
 		let projectArchiveCategoryList = null;
 		// 取得專管類別
 		getData("projectArchiveCategory").then((result) => {
@@ -278,13 +300,65 @@ const Documents = () => {
 
 						Promise.all(promises).then(() => {
 							// console.log(documentDataList); // 在這裡列印 documentDataList，確保所有非同步操作都已完成
+							setIsLoadingOutside(false);
 
 							// 根據子項目求取文檔數量
 							const pjacl = projectArchiveCategoryList.map((item) => {
 								return {
 									...item,
 									projectArchiveSubItems: item.projectArchiveSubItems.map((obj) => {
-										const matchingdata = documentDataList.find((d) => d.projectArchiveSubIteFlag === obj.name);
+										let matchingdata = documentDataList.filter((d) => d.projectArchiveSubIteFlag === obj.name);
+										if (matchingdata.length === 1) {
+											matchingdata = matchingdata[0];
+										} else if (matchingdata.length > 1) {
+											// 使用 reduce 方法來加總物件
+											const summedObject = matchingdata.reduce(
+												(accumulator, currentValue) => {
+													accumulator.count += currentValue.count; // 加總 count
+													accumulator.label += "+" + currentValue.label; // 組合成字串
+													accumulator.projectArchiveSubIteFlag = currentValue.projectArchiveSubIteFlag; // 照舊
+													accumulator.projectArchives = accumulator.projectArchives.concat(
+														currentValue.projectArchives
+													); // 合併 projectArchives 陣列
+													accumulator.value += "+" + currentValue.value; // 組合成字串
+													return accumulator;
+												},
+												{ count: 0, label: "", projectArchives: [], value: "", projectArchiveSubIteFlag: "" } // 初始化累加器物件
+											);
+											// summedObject.projectArchives.sort(
+											// 	(a, b) =>
+											// 		new Date(b.uploadedAt.replace("+08", "").replace("T", " ")) -
+											// 		new Date(a.uploadedAt.replace("+08", "").replace("T", " "))
+											// );
+											matchingdata = summedObject;
+										}
+
+										let displayScreenName = "";
+										// 確認 projectArchives 是否存在且不為空
+										if (matchingdata.projectArchives && matchingdata.projectArchives.length > 0) {
+											matchingdata.projectArchives.forEach((archive) => {
+												// 格式化日期為 "YYYY-MM-DD HH:mm:ss"
+												archive.uploadedAt = format(
+													new Date(archive.uploadedAt.replace("+08", "").replace("T", " ")),
+													"yyyy-MM-dd HH:mm:ss"
+												);
+
+												// 顯示名稱守則
+												const mdu = archive.uploader;
+												if (mdu.lastname && mdu.firstname) {
+													archive.displayScreenName = `${mdu.lastname}${mdu.firstname}`;
+												} else if (mdu.lastname) {
+													archive.displayScreenName = mdu.lastname;
+												} else if (mdu.firstname) {
+													archive.displayScreenName = mdu.firstname;
+												} else if (mdu.nickname) {
+													archive.displayScreenName = mdu.nickname;
+												}
+											});
+
+											// 對 projectArchives 依照 uploadedAt 由近到遠排序
+											matchingdata.projectArchives.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+										}
 
 										return {
 											...obj,
@@ -306,23 +380,7 @@ const Documents = () => {
 				projectArchiveCategoryList = null;
 			}
 		});
-
-		// 取得 mode 參數
-		const modeParam = queryParams.get("mode");
-		const mode = applicationBtns.find((obj) => obj.value === modeParam);
-
-		if (modeParam) {
-			setMode(mode);
-		}
-	}, []);
-
-	useEffect(() => {
-		if (fullData.length > 0) {
-			setIsLoadingOutside(false);
-			const transformData = fullData.find((d) => d.value === cat.value);
-			setApiData(transformData);
-		}
-	}, [cat, fullData]);
+	};
 
 	// 傳遞給後端資料
 	const sendDataToBackend = (fd, mode) => {
@@ -341,8 +399,7 @@ const Documents = () => {
 			postBPData(url, fd).then((result) => {
 				if (result.status) {
 					showNotification(message[0], true);
-					// getApiList(apiUrl);
-					onClose();
+					resetScreen();
 				} else {
 					showNotification(
 						result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
@@ -351,6 +408,9 @@ const Documents = () => {
 				}
 				setSendBackFlag(false);
 			});
+		} else if (mode === "delete") {
+			resetScreen();
+			setSendBackFlag(false);
 		}
 	};
 
@@ -364,9 +424,11 @@ const Documents = () => {
 			navigate("/project");
 			// } else if (dataMode === "filter") {
 			// 	handleOpenSearch();
+		} else if (dataMode === "filesmanage") {
+			setModalValue(dataMode);
+			setDeliverInfo(dataValue ? apiData?.projectArchiveSubItems.find((item) => item.id === dataValue) : null);
 		} else {
 			setModalValue(dataMode);
-			// setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
 		}
 	};
 
@@ -374,6 +436,12 @@ const Documents = () => {
 	const onClose = () => {
 		setModalValue(false);
 		setDeliverInfo(null);
+	};
+
+	const resetScreen = () => {
+		setIsLoadingOutside(true);
+		getApiList();
+		onClose();
 	};
 
 	// modal 開啟參數與顯示標題
@@ -391,7 +459,14 @@ const Documents = () => {
 		},
 		{
 			modalValue: "filesmanage",
-			modalComponent: <FilesManageModal title="檔案瀏覽與管理" sendDataToBackend onClose={onClose} />,
+			modalComponent: (
+				<FilesManageModal
+					title="檔案瀏覽與管理"
+					deliverInfo={deliverInfo}
+					sendDataToBackend={sendDataToBackend}
+					onClose={onClose}
+				/>
+			),
 		},
 	];
 	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
@@ -491,7 +566,7 @@ const Documents = () => {
 					/>
 
 					<div
-						className="flex flex-col p-3 md:py-6 mb-0 mt-px bg-white overflow-auto rounded-b-lg md:gap-6 gap-4"
+						className="flex flex-col p-3 md:py-6 pb-12 md:pb-3.5 mb-0 mt-px bg-white overflow-auto rounded-b-lg"
 						style={{ maxHeight: "calc(100% - 50px)" }}>
 						{/* 類別區塊 - Start */}
 						{!isLoadingInside ? (
@@ -516,29 +591,17 @@ const Documents = () => {
 						</div>
 						{/* 類別區塊 - End */}
 					</div>
-
-					{/* {(() => {
-						switch (mode.id) {
-							case "a":
-								return <>123</>;
-							case "b":
-								return <>1233</>;
-							case "c":
-								return <>12333</>;
-							case "d":
-								return <>123333</>;
-							case "e":
-								return <>1233333</>;
-							default:
-								return null;
-						}
-					})()} */}
 				</div>
 				{/* 主區塊 - End */}
 			</div>
 
 			{/* Floating Action Button */}
 			<MultipleFAB btnGroup={btnGroup} handleActionClick={handleActionClick} />
+
+			{/* Backdrop */}
+			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
+				<LoadingFour />
+			</Backdrop>
 
 			{/* Modal */}
 			{config && config.modalComponent}
