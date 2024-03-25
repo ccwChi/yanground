@@ -128,6 +128,7 @@ const postBodyData = async (url = "", bodyData, paramsData) => {
 	const headers = {
 		mode: "no-cors",
 		Authorization: `Bearer ${accessToken}`,
+		"Content-Type": "application/json"
 	};
 	const params = new URLSearchParams(paramsData);
 	var raw = JSON.stringify(bodyData);
