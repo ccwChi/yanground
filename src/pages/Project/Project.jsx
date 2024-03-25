@@ -95,7 +95,7 @@ const Project = () => {
 	const actions = [
 		{ value: "edit", icon: <EditIcon />, title: "編輯專案" },
 		{ value: "void", icon: <DeleteIcon />, title: "刪除專案" },
-		{ value: "gotoFM", icon: <DriveFileMoveIcon />, title: "前往專管文件管理頁" },
+		// { value: "gotoFM", icon: <DriveFileMoveIcon />, title: "前往專管文件管理頁" },
 	];
 
 	// 取得列表資料
