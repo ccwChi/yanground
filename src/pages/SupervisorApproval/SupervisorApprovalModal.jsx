@@ -77,7 +77,6 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 		setSelectAgent("")
 		}
 	},[editAgent])
-    console.log(deliverInfo)
 	return (
 		<>
 			{/* Modal */}
