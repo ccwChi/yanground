@@ -22,6 +22,7 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import ExtensionIcon from "@mui/icons-material/Extension";
+import UndoIcon from "@mui/icons-material/Undo";
 
 // Components
 import ModalTemplete from "../../../components/Modal/ModalTemplete";
@@ -31,7 +32,7 @@ import LazyImage from "../../../components/LazyImage/LazyImage";
 import { LoadingTwo } from "../../../components/Loader/Loading";
 
 // Utils
-import { getData, deleteData } from "../../../utils/api";
+import { getData, deleteData, putData } from "../../../utils/api";
 
 // Hooks
 import { useNotification } from "../../../hooks/useNotification";
@@ -354,6 +355,19 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 		setAlertOpen(false);
 	};
 
+	const handleRecoverFile = (indexToRecover) => {
+		putData(`projectArchive/${indexToRecover}`).then((result) => {
+			let message = "恢復文檔成功！";
+
+			if (result.status) {
+				showNotification(message, true);
+			} else {
+				showNotification(result?.result.reason || "出現錯誤。", false);
+			}
+			sendDataToBackend("", "recover");
+		});
+	};
+
 	return (
 		<>
 			{/* Modal */}
@@ -380,8 +394,12 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 											<span className="text-xs text-primary-800">‧{data.uploadedAt}</span>
 										</h4>
 										<div className="ps-4">
-											<div className="flex sm:flex-row flex-col bg-slate-200 rounded-lg px-4 py-3 gap-2.5 justify-between">
+											<div
+												className={`flex sm:flex-row flex-col bg-slate-200 rounded-lg px-4 py-3 gap-2.5 justify-between ${
+													data.removed === false ? "contrast-75 grayscale" : ""
+												}`}>
 												{data.mimeType && data.mimeType.template?.includes("image") ? (
+													// 圖片版本
 													<div className="flex flex-col sm:flex-row gap-3 flex-1 overflow-hidden relative">
 														<LazyImage
 															src={`${imageUrl}/projectArchive/${data.id}/${data.mimeType?.value || ""}`}
@@ -398,6 +416,7 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 														</div>
 													</div>
 												) : (
+													// 其它文檔
 													<div className="flex gap-3 flex-1 overflow-hidden">
 														<div
 															className="hidden sm:inline-flex items-center justify-center min-w-10 w-10 h-10 bg-[#8AA37D] rounded-full"
@@ -420,34 +439,51 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 												)}
 												<Divider className="sm:hidden" />
 												<div className="inline-flex gap-2 sm:justify-start justify-end translate-y-[2px]">
-													<Tooltip title={"下載"}>
-														<IconButton
-															aria-label={"下載"}
-															size="small"
-															color="secondary"
-															onClick={() =>
-																window.open(
-																	`${imageUrl}/projectArchive/${data.id}/${data.mimeType?.value || ""}`,
-																	"_blank"
-																)
-															}
-															sx={{ width: "34px", height: "34px" }}>
-															<img src={DownloadArrowIcon} style={{ width: "20px" }} alt={"Download Arrow Icon"} />
-														</IconButton>
-													</Tooltip>
-													<Tooltip title={"刪除"}>
-														<IconButton
-															aria-label={"刪除"}
-															size="small"
-															color="secondary"
-															onClick={() => {
-																setAlertOpen(true);
-																setDeleteId(data.id);
-															}}
-															sx={{ width: "34px", height: "34px" }}>
-															<img src={TrashIcon} style={{ width: "20px" }} alt={"Trash Icon"} />
-														</IconButton>
-													</Tooltip>
+													{data.removed === false ? (
+														<Tooltip title={"恢復"}>
+															<IconButton
+																aria-label={"恢復"}
+																size="small"
+																color="secondary"
+																onClick={() => {
+																	handleRecoverFile(data.id);
+																}}
+																sx={{ width: "34px", height: "34px" }}>
+																<UndoIcon sx={{ color: "white" }} />
+															</IconButton>
+														</Tooltip>
+													) : (
+														<>
+															<Tooltip title={"下載"}>
+																<IconButton
+																	aria-label={"下載"}
+																	size="small"
+																	color="secondary"
+																	onClick={() =>
+																		window.open(
+																			`${imageUrl}/projectArchive/${data.id}/${data.mimeType?.value || ""}`,
+																			"_blank"
+																		)
+																	}
+																	sx={{ width: "34px", height: "34px" }}>
+																	<img src={DownloadArrowIcon} style={{ width: "20px" }} alt={"Download Arrow Icon"} />
+																</IconButton>
+															</Tooltip>
+															<Tooltip title={"刪除"}>
+																<IconButton
+																	aria-label={"刪除"}
+																	size="small"
+																	color="secondary"
+																	onClick={() => {
+																		setAlertOpen(true);
+																		setDeleteId(data.id);
+																	}}
+																	sx={{ width: "34px", height: "34px" }}>
+																	<img src={TrashIcon} style={{ width: "20px" }} alt={"Trash Icon"} />
+																</IconButton>
+															</Tooltip>
+														</>
+													)}
 												</div>
 											</div>
 										</div>

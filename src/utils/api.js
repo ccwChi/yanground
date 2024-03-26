@@ -128,7 +128,6 @@ const postBodyData = async (url = "", bodyData, paramsData) => {
 	const headers = {
 		mode: "no-cors",
 		Authorization: `Bearer ${accessToken}`,
-		"Content-Type": "application/json"
 	};
 	const params = new URLSearchParams(paramsData);
 	var raw = JSON.stringify(bodyData);
@@ -187,7 +186,7 @@ const postBPData = async (url = "", bodyData, paramsData) => {
 		});
 };
 
-// POST - Delete ver
+// DELETE
 const deleteData = async (url = "", formData) => {
 	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
 	const headers = {
@@ -214,7 +213,32 @@ const deleteData = async (url = "", formData) => {
 		});
 };
 
-export { getData, getDownloadData, postData, postBodyData, postBPData, deleteData };
+// PUT
+const putData = async (url = "", customParam = false, forbiddenFunc, unauthorizedFunc, internalservererrorFunc) => {
+	const accessToken = JSON.parse(localStorage.getItem("accessToken"));
+	const headers = {
+		Authorization: `Bearer ${accessToken}`,
+	};
+	return await fetch(`${appUrl}/${url}`, {
+		method: "PUT",
+		headers,
+	})
+		.then((response) => {
+			return response.json().then((res) => {
+				if (res.response === 200) return { status: true, result: res };
+				else {
+					return { status: false, result: res };
+				}
+			});
+		})
+		.catch((error) => {
+			console.error("System Error：", error);
+			// throw error;
+			return { status: false, result: error.message };
+		});
+};
+
+export { getData, getDownloadData, postData, postBodyData, postBPData, deleteData, putData };
 
 //****** How To Use ? ******//
 
