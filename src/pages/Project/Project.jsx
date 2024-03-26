@@ -59,6 +59,8 @@ const Project = () => {
 	// 傳遞稍後用 Flag
 	const [sendBackFlag, setSendBackFlag] = useState(false);
 	// Alert 開關
+	// 如果面板中刪除資料，不想關閉面板而重載
+	const [refreshModal, setRefreshModal] = useState(true);
 	/**
 	 * 0: 關閉
 	 * 1: 是否確認刪除視窗
@@ -145,9 +147,26 @@ const Project = () => {
 				url += "/" + otherData;
 				message = ["專案編輯成功！"];
 				break;
+			case "deleteContact":
+				url = "clientContactNumber/" + otherData;
+				message = ["刪除成功！"];
+				break;
+			case "creatContact":
+				url = "clientContactNumber";
+				message = ["新增成功！"];
+				break;
+			case "creatLandLot":
+				url = "landLot";
+				message = ["新增成功！"];
+			break;
+			case "deleteLandlot":
+				url = "landLot/" + otherData;
+				message = ["刪除成功！"];
+			break;	
 			default:
 				break;
 		}
+		if(mode === "create" || mode === "edit"){
 		postData(url, fd).then((result) => {
 			if (result.status) {
 				showNotification(message[0], true);
@@ -160,7 +179,36 @@ const Project = () => {
 				);
 			}
 			setSendBackFlag(false);
-		});
+		});} 
+		
+		else if (mode === "deleteContact" || mode === "deleteLandlot"){
+		deleteData(url).then((result) => {
+			if (result.status) {
+				showNotification(message[0], true);
+				getApiList(apiUrl);
+				setRefreshModal(true)
+			}else{
+				showNotification(
+					result.result.reason ? result.result.reason : result.result ? result.result : "產生無法預期的錯誤，請洽資訊部",
+					false
+				);
+			}
+			setSendBackFlag(false);
+		})}
+		else if (mode === "creatContact" || mode === "creatLandLot"){
+		postData(url, fd).then((result) => {
+			if (result.status) {
+				showNotification(message[0], true);
+				getApiList(apiUrl);
+				setRefreshModal(true)
+			} else {
+				showNotification(
+					result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
+					false
+				);
+			}
+			setSendBackFlag(false);
+		});} 
 
 		// for (var pair of fd.entries()) {
 		// 	console.log(pair);
@@ -233,7 +281,7 @@ const Project = () => {
 		{
 			modalValue: "create",
 			modalComponent: (
-				<UpdatedModal title="新增專案" sendDataToBackend={sendDataToBackend} cityList={cityList} onClose={onClose} />
+				<UpdatedModal title="新增專案" sendDataToBackend={sendDataToBackend} cityList={cityList} onClose={onClose} refreshModal={refreshModal} setRefreshModal={setRefreshModal}/>
 			),
 		},
 		{
@@ -245,6 +293,8 @@ const Project = () => {
 					sendDataToBackend={sendDataToBackend}
 					cityList={cityList}
 					onClose={onClose}
+					refreshModal={refreshModal}
+					setRefreshModal={setRefreshModal}
 				/>
 			),
 		},
