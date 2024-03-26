@@ -219,10 +219,10 @@ const Documents = () => {
 		const projectId = queryParams.get("pj");
 		let projectArchiveCategoryList = null;
 		// 取得專管類別
-		getData("projectArchiveCategory").then((result) => {
-			if (result.result) {
-				const data = result.result;
-				projectArchiveCategoryList = data;
+		getData("projectArchiveCategory").then((_result) => {
+			if (_result.result) {
+				const _data = _result.result;
+				projectArchiveCategoryList = _data;
 
 				// 取得專管項目
 				getData("projectArchiveItem").then((result) => {
@@ -282,15 +282,24 @@ const Documents = () => {
 							};
 						});
 
+						// 根據 newData 陣列中的 projectArchiveSubIteFlag 收集對應的 name 到一個新陣列
+						let filteredNames = newData.map((item) => item.projectArchiveSubIteFlag);
+						// 更新陣列 projectArchiveCategoryList，只保留包含在 filteredNames 中的 name 的項目
+						projectArchiveCategoryList.forEach((item) => {
+							item.projectArchiveSubItems = item.projectArchiveSubItems.filter((subItem) =>
+								filteredNames.includes(subItem.name)
+							);
+						});
+
 						// 取得檔案資料
 						let documentDataList = [];
 						let promises = [];
 						newData.map((item) => {
-							let promise = getData(`project/${queryParams.get("pj")}/kind/${item.value}/archive`).then((result) => {
-								if (result.result) {
-									const data = result.result;
+							let promise = getData(`project/${queryParams.get("pj")}/kind/${item.value}/archive`).then((result2) => {
+								if (result2.result) {
+									const data2 = result2.result;
 									const transformedData = {
-										...data,
+										...data2,
 										...item,
 									};
 									documentDataList.push(transformedData);
@@ -337,7 +346,6 @@ const Documents = () => {
 											matchingdata = summedObject;
 										}
 
-										let displayScreenName = "";
 										// 確認 projectArchives 是否存在且不為空
 										if (matchingdata.projectArchives && matchingdata.projectArchives.length > 0) {
 											matchingdata.projectArchives.forEach((archive) => {
@@ -425,8 +433,7 @@ const Documents = () => {
 		const dataValue = event.currentTarget.getAttribute("data-value");
 
 		if (dataMode === "goback") {
-			// navigate("/project");
-			window.history.back();
+			navigate("/project");
 			// } else if (dataMode === "filter") {
 			// 	handleOpenSearch();
 		} else if (dataMode === "filesmanage") {
@@ -581,9 +588,12 @@ const Documents = () => {
 						) : (
 							<Skeleton width={160} height={38} className="!-translate-y-1 scale-75 md:mx-7 mx-3" />
 						)}
-						<div className="md:bg-inherit bg-[#E6E6E6] rounded py-2">
+						<div
+							className={`md:bg-inherit bg-[#E6E6E6] rounded py-2 ${
+								((!isLoadingOutside && apiData?.projectArchiveSubItems?.length) || 0) <= 0 ? "h-96" : ""
+							}`}>
 							<RWDTable
-								data={apiData.projectArchiveSubItems}
+								data={apiData?.projectArchiveSubItems || []}
 								columnsPC={columnsPC}
 								columnsMobile={columnsMobile}
 								actions={actions}
