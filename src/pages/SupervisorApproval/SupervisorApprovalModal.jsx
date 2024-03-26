@@ -77,7 +77,6 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 		setSelectAgent("")
 		}
 	},[editAgent])
-
 	return (
 		<>
 			{/* Modal */}
@@ -116,6 +115,11 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 							</p>
 						</div>
 						{/* 代理人開始 */}
+						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">
+							<div className="w-full">
+								<span>代理人：<span  className={`${editAgent && "hidden"} font-bold`}>{deliverInfo?.agent ? (deliverInfo.agent?.lastname + deliverInfo.agent?.firstname) : "尚未填寫"}</span> </span>
+							</div>
+						</div>
 						{/* <div className="inline-flex flex-col sm:flex-row py-1 gap-1">
 							<div className="w-full">
 								<span>代理人：<span  className={`${editAgent && "hidden"} font-bold`}>{deliverInfo.agent || "尚未填寫"}</span> </span>

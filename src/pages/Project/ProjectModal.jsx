@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getData } from "../../utils/api";
+import { deleteData, getData } from "../../utils/api";
 
 /** react-hook-form */
 import { useForm, FormProvider, Controller } from "react-hook-form";
@@ -26,8 +26,9 @@ import MenuItem from "@mui/material/MenuItem";
 import MapDialog from "./MapDialog";
 import { useNotification } from "../../hooks/useNotification";
 import { format } from "date-fns";
-import { Chip } from "@mui/material";
+import { Autocomplete, Chip } from "@mui/material";
 
+// 下拉式選單的style
 const ITEM_HEIGHT = 36;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -39,8 +40,28 @@ const MenuProps = {
   },
 };
 
+/**
+ * 業務建立 / 編輯專案 modal
+ * @param {string} title - Modal 標題名稱
+ * @param {Object} deliverInfo - 如果是編輯才有，專案 id
+ * @param {Function} sendDataToBackend - 傳送 data 給主畫面，由主畫面送 api
+ * @param {array} cityList - 選擇地點用的市縣清單
+ * @param {Function} onClose - 關閉函式
+ * @param {bool} refreshModal - 再不關閉表單的情況下，重新刷新表單資料
+ * @param {Function} setRefreshModal - 再不關閉表單的情況下，重新刷新表單資料
+ * @returns
+ */
+
 const UpdatedModal = React.memo(
-  ({ title, deliverInfo, sendDataToBackend, cityList, onClose }) => {
+  ({
+    title,
+    deliverInfo,
+    sendDataToBackend,
+    cityList,
+    onClose,
+    refreshModal,
+    setRefreshModal,
+  }) => {
     // Alert 開關
     const [alertOpen, setAlertOpen] = useState(false);
     // 專責人員清單
@@ -60,10 +81,11 @@ const UpdatedModal = React.memo(
     // Modal Data
     const [apiData, setApiData] = useState(null);
     // 用來儲存地及編號
-    const [landLot, setLandLot] = useState("");
-    const [landLotForApi, setLandLotforApi] = useState([]);
-    const [clientContactNumber, setClientContactNumber] = useState("");
-
+    const [landLot, setLandLot] = useState([]);
+    const [landLotInput, setLandLotInput] = useState("");
+    const [clientContactNumber, setClientContactNumber] = useState([]);
+    const [clientContactNumberInput, setClientContactNumberInput] =
+      useState("");
     const showNotification = useNotification();
     // 使用 Yup 來定義表單驗證規則
     const schema = yup.object().shape({
@@ -72,26 +94,26 @@ const UpdatedModal = React.memo(
       constructionKind: yup.string().required("不可為空值！"),
       administrativeDivision_: yup.string().required("不可為空值！"),
       administrativeDivision: yup.string().required("不可為空值！"),
-      clientContactNumber: yup
-        .mixed()
-        .test("is-number", "必須為數字", (value, context) => {
-          if (!value) {
-            return true; // 允許為空
-          }
-          const contactNumbers = value
-            .split(",")
-            .map((number) => number.trim());
-          // 检查每个号码是否都为数字
-          return contactNumbers.every((phone) => /^[0-9]*$/.test(phone));
-        }),
-      landLot: yup.mixed().test("is-number", "必須為數字", (value, context) => {
-        if (!value) {
-          return true; // 允許為空
-        }
-        const landLots = value.split(",").map((number) => number.trim());
-        // 检查每个号码是否都为数字
-        return landLots.every((phone) => /^[0-9]*$/.test(phone));
-      }),
+      // clientContactNumber: yup
+      // 	.mixed()
+      // 	.test("is-number", "必須為數字", (value, context) => {
+      // 		if (!value) {
+      // 			return true; // 允許為空
+      // 		}
+      // 		const contactNumbers = value
+      // 			.split(",")
+      // 			.map((number) => number.trim());
+      // 		// 检查每个号码是否都为数字
+      // 		return contactNumbers.every((phone) => /^[0-9]*$/.test(phone));
+      // 	}),
+      // landLot: yup.mixed().test("is-number", "必須為數字", (value, context) => {
+      // 	if (!value) {
+      // 		return true; // 允許為空
+      // 	}
+      // 	const landLots = value.split(",").map((number) => number.trim());
+      // 	// 检查每个号码是否都为数字
+      // 	return landLots.every((phone) => /^[0-9]*$/.test(phone));
+      // }),
     });
 
     // 初始預設 default 值
@@ -123,10 +145,6 @@ const UpdatedModal = React.memo(
       completionDate: apiData?.completionDate
         ? new Date(apiData.completionDate)
         : null,
-      //   landLot: apiData?.landLot ? apiData.landLot.join(", ") : "",
-      //   clientContactNumber: apiData?.clientContactNumber
-      //     ? apiData.clientContactNumber.join(", ")
-      //     : "",
     };
 
     // 使用 useForm Hook 來管理表單狀態和驗證
@@ -148,20 +166,26 @@ const UpdatedModal = React.memo(
 
     // 取得 Modal 資料
     useEffect(() => {
-      if (deliverInfo) {
+      if (deliverInfo && refreshModal) {
         getData(`project/${deliverInfo}`).then((result) => {
           const data = result.result;
           setApiData(data);
         });
       }
-    }, [deliverInfo]);
+    }, [deliverInfo, refreshModal]);
+
+    // 當建立電話或地號，再不關閉畫面的情況下更新畫面
     useEffect(() => {
       if (apiData) {
         reset(defaultValues);
+        setClientContactNumber(apiData?.clientContactNumbers);
+        setClientContactNumberInput("");
+        setLandLot(apiData?.landLots);
+        setLandLotInput("");
       }
     }, [apiData]);
 
-    // 取得人員資料
+    // 取得人員資料，工程類型，主案清單
     useEffect(() => {
       getData("department/5/staff").then((result) => {
         const data = result.result.map((item) => {
@@ -201,7 +225,6 @@ const UpdatedModal = React.memo(
           } else {
             displayScreenName = item.displayName;
           }
-
           return {
             ...item,
             displayScreenName: displayScreenName,
@@ -257,18 +280,11 @@ const UpdatedModal = React.memo(
           ? format(data.dateOfContract, "yyyy-MM-dd")
           : "",
       };
-      if (deliverInfo) {
-        delete dataForApi.primary;
-        // delete dataForApi.landLot;
-        // delete dataForApi.clientContactNumber;
-      }
       const fd = new FormData();
-      console.log(data);
       // delete data.administrativeDivision_;
       for (let key in dataForApi) {
-        fd.append(key, data[key] || "");
+        fd.append(key, dataForApi[key] || "");
       }
-
       if (deliverInfo) {
         sendDataToBackend(fd, "edit", deliverInfo);
       } else {
@@ -293,23 +309,45 @@ const UpdatedModal = React.memo(
       setAlertOpen(false);
     };
 
-    // const handleDelete = (data) => {
-    //   const index = cadastralNumberForApi.findIndex((num) => num === data);
-    //   if (index !== -1) {
-    //     const newList = [...cadastralNumberForApi];
-    //     newList.slice(index, 1);
-    //     setConstructionKindList(newList);
-    //   }
-    // };
-    const handleDelete = (data) => {
-      const index = landLotForApi.findIndex((num) => num === data);
-      if (index !== -1) {
-        // 检查是否找到匹配的元素
-        const newList = [...landLotForApi]; // 创建原数组的副本
-        newList.splice(index, 1); // 删除匹配的元素
-        setLandLotforApi(newList); // 更新状态
+    const handleDeleteContactNum = (index) => {
+      // 使用过滤函数过滤掉要删除的标签
+      const [deleteClientContactNumber] = clientContactNumber.filter(
+        (_, i) => i === index
+      );
+      setRefreshModal(false);
+      const fd = new FormData();
+      sendDataToBackend(fd, "deleteContact", deleteClientContactNumber.id);
+    };
+
+    const handleCreateContactNum = (e) => {
+      e.preventDefault();
+      if (clientContactNumberInput.length > 0 && deliverInfo) {
+        const fd = new FormData();
+        fd.append("project", deliverInfo);
+        fd.append("number", clientContactNumberInput);
+        setRefreshModal(false);
+        sendDataToBackend(fd, "creatContact");
       }
     };
+    const handleDeleteLandLot = (index) => {
+      // 使用过滤函数过滤掉要删除的标签
+      const [deleteLandLot] = landLot.filter((_, i) => i === index);
+      setRefreshModal(false);
+      const fd = new FormData();
+      sendDataToBackend(fd, "deleteLandlot", deleteLandLot.id);
+    };
+
+    const handleCreateLandLot = (e) => {
+      e.preventDefault();
+      if (landLotInput.length > 0 && deliverInfo) {
+        const fd = new FormData();
+        fd.append("project", deliverInfo);
+        fd.append("number", landLotInput);
+        setRefreshModal(false);
+        sendDataToBackend(fd, "creatLandLot");
+      }
+    };
+
     return (
       <>
         {/* Modal */}
@@ -328,7 +366,12 @@ const UpdatedModal = React.memo(
                 >
                   {/* 名稱 & 隸屬主專案*/}
                   <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
-                    <div className="w-full">
+                    <div
+                      className="w-full"
+                      onClick={() => {
+                        console.log(apiData);
+                      }}
+                    >
                       <InputTitle title={"專案名稱"} />
                       <Controller
                         name="name"
@@ -355,7 +398,7 @@ const UpdatedModal = React.memo(
                     </div>
                   </div>
                   {/*  隸屬主專案 ********************************需要有專案id  */}
-                  {/* <div
+                  <div
                     className={`inline-flex sm:flex-row flex-col sm:gap-2 gap-1 ${
                       !deliverInfo && "hidden"
                     }`}
@@ -365,6 +408,7 @@ const UpdatedModal = React.memo(
                       <Controller
                         name="primary"
                         control={control}
+                        disabled={apiData && apiData.projects.length > 0}
                         render={({ field }) => (
                           <Select
                             error={!!errors["primary"]?.message}
@@ -376,7 +420,11 @@ const UpdatedModal = React.memo(
                           >
                             <MenuItem value="">
                               <span className="text-neutral-400 font-light">
-                                若此案為分案，請選擇隸屬主專案
+                                {apiData && apiData.projects.length > 0
+                                  ? `此專案已為"${apiData.projects[0].name}${
+                                      apiData.projects.length > 1 && "..等專案"
+                                    }"的主案`
+                                  : "若此案為分案，請選擇隸屬主專案"}
                               </span>
                             </MenuItem>
                             {primaryList.map((proj) => (
@@ -394,7 +442,7 @@ const UpdatedModal = React.memo(
                         {errors["primary"]?.message}
                       </FormHelperText>
                     </div>
-                  </div> */}
+                  </div>
                   {/* 業務人員 & 工務專管人員 */}
                   <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
                     <div className="w-full">
@@ -502,7 +550,7 @@ const UpdatedModal = React.memo(
                         {errors["constructionKind"]?.message}
                       </FormHelperText>
                     </div>
-                    {/* <div className="w-full">
+                    <div className="w-full">
                       <InputTitle title={"kW 數"} required={false} />
                       <Controller
                         name="kiloWatts"
@@ -526,10 +574,10 @@ const UpdatedModal = React.memo(
                       >
                         {errors["kiloWatts"]?.message}
                       </FormHelperText>
-                    </div> */}
+                    </div>
                   </div>
                   {/* 業主名稱 & 業主證號 */}
-                  {/* <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
+                  <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
                     <div className="w-full">
                       <InputTitle title={"業主名稱"} required={false} />
                       <Controller
@@ -580,59 +628,69 @@ const UpdatedModal = React.memo(
                         {errors["clientIdentifier"]?.message}
                       </FormHelperText>
                     </div>
-                  </div> */}
+                  </div>
                   {/**************************************** 電話是另一隻api 需要專案id  */}
                   {/* 業主電話  */}
-                  {/* <div
+                  <div
                     className={`inline-flex sm:flex-row flex-col sm:gap-2 gap-1 ${
                       !deliverInfo && "hidden"
                     }`}
                   >
                     <div className="w-full">
                       <InputTitle title={"業主電話"} required={false} />
-
-                      <TextField
-                        placeholder="如果多筆 請輸入 ex. 0912345678, 06271234567"
-                        error={!!errors["clientContactNumber"]?.message}
-                        value={clientContactNumber}
-                        onChange={(e) => {
-                          setClientContactNumber(e.target.value);
-                        }}
-						inputProps={{
-							
-						}}
-                        variant="outlined"
-                        type="tel"
-                        size="small"
-                        className="inputPadding"
-                        fullWidth
-                        // {...field}
-                      >
-                        
-                      </TextField>
-
-                      <InputWrapper
-                        ref={setAnchorEl}
-                        className={focused ? "focused" : ""}
-                      >
-                        {value.map((option, index) => (
-                          <StyledTag
-                            label={option.title}
-                            {...getTagProps({ index })}
-                          />
-                        ))}
-                        <input {...getInputProps()} />
-                      </InputWrapper>
-             
+                      <div className="flex w-full gap-x-4">
+                        <TextField
+                          placeholder="建議先儲存其他欄位再建立電話"
+                          error={!!errors["clientContactNumber"]?.message}
+                          value={clientContactNumberInput}
+                          onChange={(e) => {
+                            setClientContactNumberInput(e.target.value);
+                          }}
+                          variant="outlined"
+                          type="tel"
+                          size="small"
+                          className="inputPadding"
+                          fullWidth
+                        ></TextField>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          className=""
+                          onClick={(e) => handleCreateContactNum(e)}
+                        >
+                          建立
+                        </Button>
+                      </div>
+                      <div className="min-h-11 border border-gray-300 rounded-md shadow-sm mt-4 p-1.5 flex items-center gap-x-2">
+                        {clientContactNumber.length > 0 ? (
+                          clientContactNumber.map((option, index) => (
+                            <Chip
+                              key={index}
+                              label={option.number}
+                              onDelete={() => handleDeleteContactNum(index)}
+                            />
+                          ))
+                        ) : (
+                          <span className="text-gray-400 font-light ps-2">
+                            尚未儲存任何業主電話
+                          </span>
+                        )}
+                      </div>
                       <FormHelperText
                         className="!text-red-600 break-words !text-right !mt-0"
                         sx={{ minHeight: "1.25rem" }}
                       >
-                        {errors["clientContactNumber"]?.message}
+                        <div className="flex justify-end">
+                          <p className="!my-0 text-rose-400 font-bold text-xs !me-1">
+                            ＊
+                          </p>
+                          <p className="!my-0 text-rose-400 font-bold text-xs">
+                            業主電話的建立、刪除都是對資料庫進行即時更新。
+                          </p>
+                        </div>
                       </FormHelperText>
                     </div>
-                  </div> */}
-
+                  </div>
                   {/* 地點 */}
                   <InputTitle title={"專案地點"} />
                   <div className="inline-flex sm:flex-row flex-col sm:gap-2 gap-1">
@@ -744,40 +802,68 @@ const UpdatedModal = React.memo(
                   </div>
 
                   {/* **************************************************** 地籍編號是另一隻api */}
-                  {/* <div
+                  <div
                     className={`inline-flex sm:flex-row flex-col sm:gap-2 gap-1 ${
                       !deliverInfo && "hidden"
                     }`}
                   >
                     <div className="w-full">
                       <InputTitle title={"地號"} required={false} />
-                      <Controller
-                        name="landLot"
-                        control={control}
-                        render={({ field }) => (
-                          <TextField
-                            placeholder="純數字，如多筆請用逗號隔開 ex. 1234, 4567"
-                            error={!!errors["landLot"]?.message}
-                            variant="outlined"
-                            type="tel"
-                            size="small"
-                            className="inputPadding"
-                            fullWidth
-                            {...field}
-                          />
+                      <div className="flex w-full gap-x-4">
+                        <TextField
+                          placeholder="建議先儲存其他欄位再建立地號"
+                          value={landLotInput}
+                          onChange={(e) => {
+                            setLandLotInput(e.target.value);
+                          }}
+                          variant="outlined"
+                          type="tel"
+                          size="small"
+                          className="inputPadding"
+                          fullWidth
+                        ></TextField>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          className=""
+                          onClick={(e) => handleCreateLandLot(e)}
+                        >
+                          建立
+                        </Button>
+                      </div>
+                      <div className="min-h-11 border border-gray-300 rounded-md shadow-sm mt-4 p-1.5 flex items-center gap-x-2">
+                        {landLot.length > 0 ? (
+                          landLot.map((option, index) => (
+                            <Chip
+                              key={index}
+                              label={option.number}
+                              onDelete={() => handleDeleteLandLot(index)}
+                            />
+                          ))
+                        ) : (
+                          <span className="text-gray-400 font-light ps-2">
+                            尚未儲存任何地號
+                          </span>
                         )}
-                      />
+                      </div>
                       <FormHelperText
                         className="!text-red-600 break-words !text-right !mt-0"
                         sx={{ minHeight: "1.25rem" }}
                       >
-                        {errors["landLot"]?.message}
+                        <div className="flex justify-end">
+                          <p className="!my-0 text-rose-400 font-bold text-xs !me-1">
+                            ＊
+                          </p>
+                          <p className="!my-0 text-rose-400 font-bold text-xs">
+                            地號的建立、刪除都是對資料庫進行即時更新。
+                          </p>
+                        </div>
                       </FormHelperText>
                     </div>
-                  </div> */}
+                  </div>
 
                   {/* 簽約日期 x 完工日期 */}
-                  {/* <div className="w-full flex sm:flex-row flex-col gap-x-4">
+                  <div className="w-full flex sm:flex-row flex-col gap-x-4">
                     <div className="w-full">
                       <InputTitle title={"簽約日期"} required={false} />
                       <ControlledDatePicker name="dateOfContract" mode="rwd" />
@@ -798,7 +884,7 @@ const UpdatedModal = React.memo(
                         {errors["completionDate"]?.message}
                       </FormHelperText>
                     </div>
-                  </div> */}
+                  </div>
 
                   {/* 經緯度半徑 */}
                   <div className="inline-flex items-center pb-4 pt-0 sm:pt-1 gap-2">
