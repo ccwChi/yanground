@@ -250,8 +250,8 @@ const JobTitleManagement = () => {
 		<>
 			{/* PageTitle */}
 			<PageTitle
-				title="權限管理"
-				description={"此頁面是用於管理權限，提供新增、檢視、編輯和刪除權限的功能，以便有效地管理用戶的權限設置。"}
+				title="職稱管理"
+				description={"此頁面是用於職稱管理，提供新增、檢視、編輯和刪除職稱的功能，以便有效地管理用戶的職稱設置。"}
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
 				isLoading={!isLoading}
@@ -297,7 +297,7 @@ const JobTitleManagement = () => {
 				onClose={handleAlertClose}
 				icon={<ReportProblemIcon color="secondary" />}
 				title="注意"
-				content={"是否確認將此專案進行刪除處理？"}
+				content={"是否確認將此職稱進行刪除處理？"}
 				disagreeText="取消"
 				agreeText="確定"
 			/>

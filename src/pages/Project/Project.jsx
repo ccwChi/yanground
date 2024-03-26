@@ -82,17 +82,37 @@ const Project = () => {
 
 	// 對照 api table 所顯示 key
 	const columnsPC = [
-		{ key: "name", label: "專案名稱", align: "left" },
-		{ key: ["businessRepresentative", "nickname"], label: "負責人", size: "12%" },
-		{ key: ["foremanRepresentative", "nickname"], label: "工務專管人員", size: "12%" },
-		{ key: "administrativeDivision", label: "地點", size: "15%" },
+    { key: "name", label: "專案名稱", align: "left" },
+    {
+      key: ["constructionKind", "chinese"],
+      label: "工程類型",
+      size: "10%",
+    },
+    {
+      key: ["businessRepresentative", "nickname"],
+      label: "負責人",
+      size: "10%",
+    },
+    {
+      key: ["foremanRepresentative", "nickname"],
+      label: "工務專管人員",
+      size: "10%",
+    },
+    { key: ["primary", "name"], label: "隸屬主專案", size: "20%" },
+    { key: "administrativeDivision", label: "地點", size: "12%" },
+
 	];
 	const columnsMobile = [
-		{ key: "name", label: "專案名稱" },
-		{ key: ["businessRepresentative", "nickname"], label: "負責人" },
-		{ key: ["foremanRepresentative", "nickname"], label: "工務專管人員" },
-		{ key: "administrativeDivision", label: "地點" },
-	];
+    { key: "name", label: "專案名稱" },
+    {
+      key: ["constructionKind", "chinese"],
+      label: "工程類型",
+    },
+    { key: ["businessRepresentative", "nickname"], label: "負責人" },
+    { key: ["foremanRepresentative", "nickname"], label: "工務專管人員" },
+    { key: ["primary", "name"], label: "隸屬主專案", size: "20%" },
+    { key: "administrativeDivision", label: "地點" },
+  ];
 
 	const actions = [
 		{ value: "edit", icon: <EditIcon />, title: "編輯專案" },
@@ -320,7 +340,7 @@ const Project = () => {
 					columnsMobile={columnsMobile}
 					actions={actions}
 					cardTitleKey={"name"}
-					tableMinWidth={1024}
+					tableMinWidth={1200}
 					isLoading={isLoading}
 					handleActionClick={handleActionClick}
 				/>
