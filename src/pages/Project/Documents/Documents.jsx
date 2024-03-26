@@ -216,6 +216,7 @@ const Documents = () => {
 	}, [cat, fullData]);
 
 	const getApiList = () => {
+		const projectId = queryParams.get("pj");
 		let projectArchiveCategoryList = null;
 		// 取得專管類別
 		getData("projectArchiveCategory").then((result) => {
@@ -261,19 +262,22 @@ const Documents = () => {
 				});
 
 				// 取得工程文件類型 變成 類型+子項目+工程文件類型清單
-				getData("constructionKindArchive").then((result) => {
+				getData(`project/${projectId}/kind`).then((result) => {
 					if (result.result) {
 						const data = result.result;
 						const newData = data.map((item) => {
 							return {
 								value: item.id,
 								label:
+									"〔" +
+									item.projectArchiveSubItem.projectArchiveCategory.projectArchiveItem.chinese +
+									"〕" +
 									item.projectArchiveSubItem.projectArchiveCategory.chinese +
 									" - " +
-									item.projectArchiveSubItem.name +
-									" (" +
-									item.constructionKind.chinese +
-									")",
+									item.projectArchiveSubItem.name,
+								// + " (" +
+								// item.constructionKind.chinese +
+								// ")"
 								projectArchiveSubIteFlag: item.projectArchiveSubItem.name,
 							};
 						});
@@ -421,7 +425,8 @@ const Documents = () => {
 		const dataValue = event.currentTarget.getAttribute("data-value");
 
 		if (dataMode === "goback") {
-			navigate("/project");
+			// navigate("/project");
+			window.history.back();
 			// } else if (dataMode === "filter") {
 			// 	handleOpenSearch();
 		} else if (dataMode === "filesmanage") {

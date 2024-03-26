@@ -27,6 +27,7 @@ import ExtensionIcon from "@mui/icons-material/Extension";
 import ModalTemplete from "../../../components/Modal/ModalTemplete";
 import InputTitle from "../../../components/Guideline/InputTitle";
 import AlertDialog from "../../../components/Alert/AlertDialog";
+import LazyImage from "../../../components/LazyImage/LazyImage";
 import { LoadingTwo } from "../../../components/Loader/Loading";
 
 // Utils
@@ -34,6 +35,7 @@ import { getData, deleteData } from "../../../utils/api";
 
 // Hooks
 import { useNotification } from "../../../hooks/useNotification";
+import useLocalStorageValue from "../../../hooks/useLocalStorageValue";
 
 // Customs
 import FileDownloadIcon from "../../../assets/icons/fileDownloadIcon.svg";
@@ -274,6 +276,8 @@ const UploadModal = React.memo(({ title, constructionKAList, sendDataToBackend, 
  ***/
 const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose }) => {
 	const showNotification = useNotification();
+	// 取得 AccessToken
+	const accessToken = useLocalStorageValue("accessToken");
 	// 取得顯示的文檔資料
 	const [apiData, setApiData] = useState([]);
 	// 設置刪除的 id 旗標
@@ -353,8 +357,8 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 	return (
 		<>
 			{/* Modal */}
-			<ModalTemplete title={title} show={true} maxWidth={"640px"} onClose={onClose}>
-				<div className="flex flex-col gap-2.5">
+			<ModalTemplete title={title} show={true} maxWidth={"680px"} onClose={onClose}>
+				<div className="relative flex flex-col gap-2.5 mb-3">
 					{/* 子項目名稱 */}
 					<h3 className="w-full pt-4">
 						子項目：<span className="font-bold">{deliverInfo.name}</span>
@@ -378,16 +382,19 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 										<div className="ps-4">
 											<div className="flex sm:flex-row flex-col bg-slate-200 rounded-lg px-4 py-3 gap-2.5 justify-between">
 												{data.mimeType && data.mimeType.template?.includes("image") ? (
-													<div className="flex flex-col gap-3 flex-1 overflow-hidden">
-														<img
+													<div className="flex flex-col sm:flex-row gap-3 flex-1 overflow-hidden relative">
+														<LazyImage
 															src={`${imageUrl}/projectArchive/${data.id}/${data.mimeType?.value || ""}`}
+															// ?token=${accessToken} 等待後端補邏輯
 															alt={data.originalFilename}
-															className="w-64 h-44 object-cover rounded-lg"
+															classnames="lg:w-64 lg:min-w-64 lg:h-44 sm:w-52 sm:min-w-52 sm:h-36 w-full h-44 object-cover rounded-lg"
 														/>
 														<div className="inline-flex flex-col justify-end gap-1">
 															<span className="text-sm break-all text-black">{data.originalFilename}</span>
-															<span className="text-sm break-all text-black">註記: {data?.remarks}</span>
 															<span className="text-xs text-neutral-500">{formatFileSize(data.size)}</span>
+															{data.remarks && (
+																<span className="text-sm break-all text-zinc-600 mt-2">註記： {data.remarks}</span>
+															)}
 														</div>
 													</div>
 												) : (
@@ -403,10 +410,11 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 															/>
 														</div>
 														<div className="inline-flex flex-col gap-1 -translate-y-1px">
-															
 															<span className="text-sm break-all text-black">{data.originalFilename}</span>
-															<span className="text-sm break-all text-black">註記: {data?.remarks}</span>
 															<span className="text-xs text-neutral-500">{formatFileSize(data.size)}</span>
+															{data.remarks && (
+																<span className="text-sm break-all text-zinc-600 mt-2">註記： {data.remarks}</span>
+															)}
 														</div>
 													</div>
 												)}
@@ -460,6 +468,11 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 
 						{/* 文件 - End */}
 					</div>
+
+					{/* 文檔數顯示 */}
+					{apiData && (
+						<div className="absolute -bottom-7 right-1 text-xs text-neutral-500">共 {apiData.length} 個檔案</div>
+					)}
 				</div>
 			</ModalTemplete>
 
