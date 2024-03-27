@@ -307,7 +307,7 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 		if (deliverInfo) {
 			const data = deliverInfo?.matchingdata?.projectArchives || [];
 			setApiData(data);
-			console.log(data);
+			// console.log(data);
 		}
 	}, [deliverInfo]);
 

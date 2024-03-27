@@ -270,7 +270,7 @@ const UpdatedModal = React.memo(
 
     // 提交表單資料到後端並執行相關操作
     const onSubmit = (data) => {
-      console.log(data);
+      // console.log(data);
       const dataForApi = {
         ...data,
         completionDate: data?.completionDate
@@ -369,7 +369,7 @@ const UpdatedModal = React.memo(
                     <div
                       className="w-full"
                       onClick={() => {
-                        console.log(apiData);
+                        // console.log(apiData);
                       }}
                     >
                       <InputTitle title={"專案名稱"} />
