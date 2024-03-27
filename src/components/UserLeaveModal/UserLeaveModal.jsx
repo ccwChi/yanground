@@ -131,16 +131,19 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
 	const userProfile = useLocalStorageValue("userProfile");
 	useEffect(() => {
 		if (userProfile?.department) {
-			getData(`department/${userProfile.department.id}/staff`).then((result) => {
-				const data = result.result;
-				const formattedUser = data
-					.filter((us) => userProfile.id !== us.id)
-					.map((us) => ({
-						label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName,
-						value: us.id,
-					}));
-				setMemberList(formattedUser);
-			});
+			getData(
+              `attendance/agent?p=1&s=50&id=${userProfile.id}`
+            ).then((result) => {
+              const data = result.result;
+              const formattedUser = data.content.map((us) => ({
+                label:
+                  us.lastname && us.firstname
+                    ? us.lastname + us.firstname
+                    : us.displayName,
+                value: us.id,
+              }));
+              setMemberList(formattedUser);
+            });
 		}
 	}, [userProfile]);
 
