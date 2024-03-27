@@ -140,7 +140,7 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
                   us.lastname && us.firstname
                     ? us.lastname + us.firstname
                     : us.displayName,
-                id: us.id,
+                value: us.id,
               }));
               setMemberList(formattedUser);
             });
