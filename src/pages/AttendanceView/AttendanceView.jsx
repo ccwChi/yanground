@@ -503,6 +503,7 @@ const AttendanceView = () => {
     postData(url, fd).then((result) => {
       if (result.status) {
         showNotification(message[0], true);
+        getApiList(apiUrl);
         onClose();
       } else {
         showNotification(
@@ -555,7 +556,7 @@ const AttendanceView = () => {
   const config = modalValue
     ? modalConfig.find((item) => item.modalValue === modalValue)
     : null;
-    
+
   // -----------------------------------------------------
   return (
     <>
@@ -632,7 +633,7 @@ const AttendanceView = () => {
             <Controller
               name="users"
               control={control}
-              disabled={watchDepartment.length===0}
+              disabled={watchDepartment.length === 0}
               render={({ field }) => (
                 <Select
                   className="inputPadding pe-3"

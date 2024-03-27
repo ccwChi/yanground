@@ -313,22 +313,26 @@ const LeaveApplicationModal = React.memo(
 		const [isLoading, setIsLoading] = useState(false);
 		const [formateDeptList, setFormateDeptList] = useState([]);
 		const [formateTypeList, setFormateTypeList] = useState([]);
+		const [agentList, setAgentList] = useState([])
 
 		// 初始預設 default 值
 		const defaultValues = {
 			department: null,
 			user: null,
+			agent:null,
 			attendanceType: null,
 			date: new Date(),
 			since: null,
 			until: null,
 		};
 
+		
 		// 使用 Yup 來定義表單驗證規則
 		const schema = yup.object().shape({
 			attendanceType: yup.object().required("不可為空值！"),
 			department: yup.object().required("不可為空值！"),
 			user: yup.object().required("不可為空值！"),
+			agent: yup.object().required("不可為空值！"),
 			date: yup.date().required("日期不可為空值！"),
 			since: yup.date().required("起始時間不可為空值！"),
 			until: yup
@@ -340,6 +344,7 @@ const LeaveApplicationModal = React.memo(
 				}),
 		});
 
+		
 		// 使用 useForm Hook 來管理表單狀態和驗證
 		const methods = useForm({
 			defaultValues,
@@ -353,8 +358,10 @@ const LeaveApplicationModal = React.memo(
 			formState: { errors, isDirty },
 		} = methods;
 		const depValue = watch("department");
+		const userValue = watch("user");
 		const sinceValue = watch("since");
-        
+
+
         // 把部門清單重組成這個元件可以用，因為我不知道怎麼修改 autocomplete 的資料讀取
 		useEffect(()=>{
 			if(departmentsList.length>0){
@@ -391,6 +398,29 @@ const LeaveApplicationModal = React.memo(
 			}
 		}, [depValue]);
 
+		// 取得代理人清單
+		useEffect(() => {
+		if (userValue) {
+				setValue("agent", null);
+				setAgentList([]);
+
+			getData(`attendance/agent?p=1&s=50&id=${userValue.id}`).then(
+			(result) => {
+				const data = result.result;
+				const formattedUser = data.content
+				.map((us) => ({
+					label:
+					us.lastname && us.firstname
+						? us.lastname + us.firstname
+						: us.displayName,
+					id: us.id,
+				}));
+				setAgentList(formattedUser);
+			}
+			);
+		}
+		}, [userValue]);
+
 		// 提交表單資料到後端並執行相關操作
 		const onSubmit = (data) => {
 			if (data.attendanceType.id === "ARRANGED_LEAVE"){
@@ -405,6 +435,7 @@ const LeaveApplicationModal = React.memo(
 				fd.append("id", data.user.id);
 				fd.append("type", data.attendanceType.id);
 				fd.append("date", formattedDate);
+				fd.append("agent", data.agent.id)
 				fd.append("since", `${formattedDate}T${formattedSinceTime}`);
 				fd.append("until", `${formattedDate}T${formattedUntilTime}`);
 
@@ -417,238 +448,364 @@ const LeaveApplicationModal = React.memo(
 		};
 
 		return (
-			<>
-				{/* Modal */}
-				<ModalTemplete title={title} show={true} maxWidth={"640px"} onClose={onClose}>
-					<div className="mt-3">
-						<FormProvider {...methods}>
-							<form onSubmit={handleSubmit(onSubmit)}>
-								{/* 表單區 */}
-								<div className="flex flex-col gap-1 max-h-[67vh] overflow-y-auto">
-									{/* 請假單 */}
-									<div className="flex sm:flex-row flex-col sm:gap-3">
-										{/* 請假單 */}
-										<div className="inline-flex flex-col w-full">
-											<InputTitle classnames="whitespace-nowrap" title={"請假類別"} />
-											<Controller
-												control={control}
-												name="attendanceType"
-												render={({ field }) => {
-													const { onChange, value } = field;
-													return (
-														<Autocomplete
-															options={formateTypeList}
-															noOptionsText={
-																!!formateTypeList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
-															}
-															value={value}
-															onChange={(event, selectedOptions) => {
-																onChange(selectedOptions);
-															}}
-															isOptionEqualToValue={(option, value) => option.label === value.label}
-															renderInput={(params) => (
-																<TextField
-																	{...params}
-																	className="inputPadding bg-white"
-																	placeholder="請選擇請假單類別"
-																	sx={{ "& > div": { padding: "0 !important" } }}
-																	InputProps={{
-																		...params.InputProps,
-																		endAdornment: (
-																			<>
-																				{formateTypeList.length <= 0 && depValue !== null ? (
-																					<CircularProgress className="absolute right-[2.325rem]" size={20} />
-																				) : null}
-																				{params.InputProps.endAdornment}
-																			</>
-																		),
-																	}}
-																/>
-															)}
-															ListboxProps={{ style: { maxHeight: "12rem" } }}
-															loading={formateTypeList.length <= 0 && depValue !== null}
-															loadingText={"載入中..."}
-															fullWidth
-														/>
-													);
-												}}
-											/>
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">
-												{errors["attendanceType"]?.message}
-											</FormHelperText>
-										</div>
-									</div>
-									{/* 部門 x 人員 */}
-									<div className="flex sm:flex-row flex-col sm:gap-3">
-										{/* 部門 */}
-										<div className="inline-flex flex-col w-full">
-											<InputTitle classnames="whitespace-nowrap" title={"部門"} />
-											<Controller
-												control={control}
-												name="department"
-												render={({ field }) => {
-													const { onChange, value } = field;
-													return (
-														<Autocomplete
-															options={formateDeptList}
-															noOptionsText={
-																!!formateDeptList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"
-															}
-															value={value}
-															onChange={(event, selectedOptions, reason) => {
-																if (reason === "clear") {
-																	if (window.confirm("是否確認清空部門欄位？")) {
-																		setValue("user", null);
-																		setValue("department", null);
-																		setUsersList([]);
-																	}
-																} else {
-																	onChange(selectedOptions);
-																}
-															}}
-															isOptionEqualToValue={(option, value) => option.label === value.label}
-															renderInput={(params) => (
-																<TextField
-																	{...params}
-																	className="inputPadding bg-white"
-																	placeholder="請選擇部門"
-																	sx={{ "& > div": { padding: "0 !important" } }}
-																	InputProps={{
-																		...params.InputProps,
-																		endAdornment: (
-																			<>
-																				{formateDeptList.length <= 0 ? (
-																					<CircularProgress className="absolute right-[2.325rem]" size={20} />
-																				) : null}
-																				{params.InputProps.endAdornment}
-																			</>
-																		),
-																	}}
-																/>
-															)}
-															ListboxProps={{ style: { maxHeight: "12rem" } }}
-															loading={formateDeptList.length <= 0}
-															loadingText={"載入中..."}
-															fullWidth
-														/>
-													);
-												}}
-											/>
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">
-												{errors["department"]?.message}
-											</FormHelperText>
-										</div>
-										{/* 人員 */}
-										<div className="inline-flex flex-col w-full">
-											<InputTitle classnames="whitespace-nowrap" title={"人員"} />
-											<Controller
-												control={control}
-												name="user"
-												render={({ field }) => {
-													const { onChange, value } = field;
-													return (
-														<Autocomplete
-															options={usersList}
-															noOptionsText={!!usersList ? "無搜尋結果" : "API 獲取失敗，請重整網頁或檢查連線問題。"}
-															value={value}
-															onChange={(event, selectedOptions) => {
-																onChange(selectedOptions);
-															}}
-															isOptionEqualToValue={(option, value) => option.label === value.label}
-															renderInput={(params) => (
-																<TextField
-																	{...params}
-																	className="inputPadding bg-white"
-																	placeholder="請選擇人員"
-																	sx={{ "& > div": { padding: "0 !important" } }}
-																	InputProps={{
-																		...params.InputProps,
-																		endAdornment: (
-																			<>
-																				{usersList.length <= 0 && depValue !== null ? (
-																					<CircularProgress className="absolute right-[2.325rem]" size={20} />
-																				) : null}
-																				{params.InputProps.endAdornment}
-																			</>
-																		),
-																	}}
-																/>
-															)}
-															ListboxProps={{ style: { maxHeight: "12rem" } }}
-															loading={usersList.length <= 0 && depValue !== null}
-															loadingText={"載入中..."}
-															fullWidth
-														/>
-													);
-												}}
-											/>
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">
-												{errors["user"]?.message}
-											</FormHelperText>
-										</div>
-									</div>
-									{/* 日期 */}
-									<div className="flex sm:flex-row flex-col sm:gap-3">
-										{/* 日期 */}
-										<div className="inline-flex flex-col w-full">
-											<InputTitle classnames="whitespace-nowrap" title={"日期"} />
-											<ControlledDatePicker
-												name="date"
-												mode="rwd"
-												views={["year", "month", "day"]}
-												format={"yyyy 年 MM 月 dd 日 (EE)"}
-												minDate={new Date("2023-11")}
-												closeOnSelect={false}
-												// sx={{ width: isTargetScreen ? "100%" : "max-content" }}
-											/>
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">
-												{errors["date"]?.message}
-											</FormHelperText>
-										</div>
-									</div>
-									{/* 時間起迄 */}
-									<div className="flex sm:flex-row flex-col sm:gap-3">
-										{/* 時間(起) */}
-										<div className="inline-flex flex-col w-full">
-											<InputTitle classnames="whitespace-nowrap" title={"請假時間(起)"} />
-											<ControlledOnlyTimePicker name="since" minutesStep={30} />
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">
-												{errors["since"]?.message}
-											</FormHelperText>
-										</div>
+      <>
+        {/* Modal */}
+        <ModalTemplete
+          title={title}
+          show={true}
+          maxWidth={"640px"}
+          onClose={onClose}
+        >
+          <div className="mt-3">
+            <FormProvider {...methods}>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                {/* 表單區 */}
+                <div className="flex flex-col gap-1 max-h-[67vh] overflow-y-auto">
+                  {/* 請假單 */}
+                  <div className="flex sm:flex-row flex-col sm:gap-3">
+                    {/* 請假單 */}
+                    <div className="inline-flex flex-col w-full">
+                      <InputTitle
+                        classnames="whitespace-nowrap"
+                        title={"請假類別"}
+                      />
+                      <Controller
+                        control={control}
+                        name="attendanceType"
+                        render={({ field }) => {
+                          const { onChange, value } = field;
+                          return (
+                            <Autocomplete
+                              options={formateTypeList}
+                              noOptionsText={
+                                !!formateTypeList
+                                  ? "無搜尋結果"
+                                  : "API 獲取失敗，請重整網頁或檢查連線問題。"
+                              }
+                              value={value}
+                              onChange={(event, selectedOptions) => {
+                                onChange(selectedOptions);
+                              }}
+                              isOptionEqualToValue={(option, value) =>
+                                option.label === value.label
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  className="inputPadding bg-white"
+                                  placeholder="請選擇請假單類別"
+                                  sx={{
+                                    "& > div": { padding: "0 !important" },
+                                  }}
+                                  InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                      <>
+                                        {formateTypeList.length <= 0 &&
+                                        depValue !== null ? (
+                                          <CircularProgress
+                                            className="absolute right-[2.325rem]"
+                                            size={20}
+                                          />
+                                        ) : null}
+                                        {params.InputProps.endAdornment}
+                                      </>
+                                    ),
+                                  }}
+                                />
+                              )}
+                              ListboxProps={{ style: { maxHeight: "12rem" } }}
+                              loading={
+                                formateTypeList.length <= 0 && depValue !== null
+                              }
+                              loadingText={"載入中..."}
+                              fullWidth
+                            />
+                          );
+                        }}
+                      />
+                      <FormHelperText className="!text-red-600 break-words !text-right h-5">
+                        {errors["attendanceType"]?.message}
+                      </FormHelperText>
+                    </div>
+                    {/* 部門 */}
+                    <div className="inline-flex flex-col w-full">
+                      <InputTitle
+                        classnames="whitespace-nowrap"
+                        title={"部門"}
+                      />
+                      <Controller
+                        control={control}
+                        name="department"
+                        render={({ field }) => {
+                          const { onChange, value } = field;
+                          return (
+                            <Autocomplete
+                              options={formateDeptList}
+                              noOptionsText={
+                                !!formateDeptList
+                                  ? "無搜尋結果"
+                                  : "API 獲取失敗，請重整網頁或檢查連線問題。"
+                              }
+                              value={value}
+                              onChange={(event, selectedOptions, reason) => {
+                                if (reason === "clear") {
+                                  if (
+                                    window.confirm("是否確認清空部門欄位？")
+                                  ) {
+                                    setValue("user", null);
+                                    setValue("department", null);
+                                    setUsersList([]);
+                                  }
+                                } else {
+                                  onChange(selectedOptions);
+                                }
+                              }}
+                              isOptionEqualToValue={(option, value) =>
+                                option.label === value.label
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  className="inputPadding bg-white"
+                                  placeholder="請選擇部門"
+                                  sx={{
+                                    "& > div": { padding: "0 !important" },
+                                  }}
+                                  InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                      <>
+                                        {formateDeptList.length <= 0 ? (
+                                          <CircularProgress
+                                            className="absolute right-[2.325rem]"
+                                            size={20}
+                                          />
+                                        ) : null}
+                                        {params.InputProps.endAdornment}
+                                      </>
+                                    ),
+                                  }}
+                                />
+                              )}
+                              ListboxProps={{ style: { maxHeight: "12rem" } }}
+                              loading={formateDeptList.length <= 0}
+                              loadingText={"載入中..."}
+                              fullWidth
+                            />
+                          );
+                        }}
+                      />
+                      <FormHelperText className="!text-red-600 break-words !text-right h-5">
+                        {errors["department"]?.message}
+                      </FormHelperText>
+                    </div>
+                  </div>
+                  {/* 部門 x 人員 */}
+                  <div className="flex sm:flex-row flex-col sm:gap-3">
+                    {/* 人員 */}
+                    <div className="inline-flex flex-col w-full">
+                      <InputTitle
+                        classnames="whitespace-nowrap"
+                        title={"人員"}
+                      />
+                      <Controller
+                        control={control}
+                        name="user"
+                        render={({ field }) => {
+                          const { onChange, value } = field;
+                          return (
+                            <Autocomplete
+                              options={usersList}
+                              noOptionsText={
+                                !!usersList
+                                  ? "無搜尋結果"
+                                  : "API 獲取失敗，請重整網頁或檢查連線問題。"
+                              }
+                              value={value}
+                              onChange={(event, selectedOptions) => {
+                                onChange(selectedOptions);
+                              }}
+                              isOptionEqualToValue={(option, value) =>
+                                option.label === value.label
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  className="inputPadding bg-white"
+                                  placeholder="請選擇人員"
+                                  sx={{
+                                    "& > div": { padding: "0 !important" },
+                                  }}
+                                  InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                      <>
+                                        {usersList.length <= 0 &&
+                                        depValue !== null ? (
+                                          <CircularProgress
+                                            className="absolute right-[2.325rem]"
+                                            size={20}
+                                          />
+                                        ) : null}
+                                        {params.InputProps.endAdornment}
+                                      </>
+                                    ),
+                                  }}
+                                />
+                              )}
+                              ListboxProps={{ style: { maxHeight: "12rem" } }}
+                              loading={
+                                usersList.length <= 0 && depValue !== null
+                              }
+                              loadingText={"載入中..."}
+                              fullWidth
+                            />
+                          );
+                        }}
+                      />
+                      <FormHelperText className="!text-red-600 break-words !text-right h-5">
+                        {errors["user"]?.message}
+                      </FormHelperText>
+                    </div>
+                    {/* 代理人 */}
+                    <div className="inline-flex flex-col w-full">
+                      <InputTitle
+                        classnames="whitespace-nowrap"
+                        title={"代理人"}
+                      />
+                      <Controller
+                        control={control}
+                        name="agent"
+                        render={({ field }) => {
+                          const { onChange, value } = field;
+                          return (
+                            <Autocomplete
+                              options={agentList}
+                              noOptionsText={
+                                !!agentList
+                                  ? "無搜尋結果"
+                                  : "API 獲取失敗，請重整網頁或檢查連線問題。"
+                              }
+                              value={value}
+                              onChange={(event, selectedOptions) => {
+                                onChange(selectedOptions);
+                              }}
+                              isOptionEqualToValue={(option, value) =>
+                                option.label === value.label
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  className="inputPadding bg-white"
+                                  placeholder="請選擇人員"
+                                  sx={{
+                                    "& > div": { padding: "0 !important" },
+                                  }}
+                                  InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                      <>
+                                        {agentList.length <= 0 &&
+                                        userValue !== null ? (
+                                          <CircularProgress
+                                            className="absolute right-[2.325rem]"
+                                            size={20}
+                                          />
+                                        ) : null}
+                                        {params.InputProps.endAdornment}
+                                      </>
+                                    ),
+                                  }}
+                                />
+                              )}
+                              ListboxProps={{ style: { maxHeight: "12rem" } }}
+                              loading={
+                                agentList.length <= 0 && userValue !== null
+                              }
+                              loadingText={"載入中..."}
+                              fullWidth
+                            />
+                          );
+                        }}
+                      />
+                      <FormHelperText className="!text-red-600 break-words !text-right h-5">
+                        {errors["agent"]?.message}
+                      </FormHelperText>
+                    </div>
+                  </div>
+                  {/* 日期 */}
+                  <div className="flex sm:flex-row flex-col sm:gap-3">
+                    {/* 日期 */}
+                    <div className="inline-flex flex-col w-full">
+                      <InputTitle
+                        classnames="whitespace-nowrap"
+                        title={"日期"}
+                      />
+                      <ControlledDatePicker
+                        name="date"
+                        mode="rwd"
+                        views={["year", "month", "day"]}
+                        format={"yyyy 年 MM 月 dd 日 (EE)"}
+                        minDate={new Date("2023-11")}
+                        closeOnSelect={false}
+                        // sx={{ width: isTargetScreen ? "100%" : "max-content" }}
+                      />
+                      <FormHelperText className="!text-red-600 break-words !text-right h-5">
+                        {errors["date"]?.message}
+                      </FormHelperText>
+                    </div>
+                  </div>
+                  {/* 時間起迄 */}
+                  <div className="flex sm:flex-row flex-col sm:gap-3">
+                    {/* 時間(起) */}
+                    <div className="inline-flex flex-col w-full">
+                      <InputTitle
+                        classnames="whitespace-nowrap"
+                        title={"請假時間(起)"}
+                      />
+                      <ControlledOnlyTimePicker name="since" minutesStep={30} />
+                      <FormHelperText className="!text-red-600 break-words !text-right h-5">
+                        {errors["since"]?.message}
+                      </FormHelperText>
+                    </div>
 
-										{/* 時間(迄) */}
-										<div className="inline-flex flex-col w-full">
-											<InputTitle classnames="whitespace-nowrap" title={"請假時間(迄)"} />
-											<ControlledOnlyTimePicker
-												name="until"
-												minutesStep={30}
-												minTime={sinceValue}
-												disabled={!sinceValue}
-											/>
-											<FormHelperText className="!text-red-600 break-words !text-right h-5">
-												{errors["until"]?.message}
-											</FormHelperText>
-										</div>
-									</div>
-								</div>
-								{/* 按鈕 Btn Group */}
-								<div className="flex sm:flex-row flex-col gap-2">
-									<Button
-										type="submit"
-										variant="contained"
-										color="success"
-										className="!text-base !h-12 !mt-3"
-										fullWidth>
-										送出
-									</Button>
-								</div>
-							</form>
-						</FormProvider>
-					</div>
-				</ModalTemplete>
-			</>
-		);
+                    {/* 時間(迄) */}
+                    <div className="inline-flex flex-col w-full">
+                      <InputTitle
+                        classnames="whitespace-nowrap"
+                        title={"請假時間(迄)"}
+                      />
+                      <ControlledOnlyTimePicker
+                        name="until"
+                        minutesStep={30}
+                        minTime={sinceValue}
+                        disabled={!sinceValue}
+                      />
+                      <FormHelperText className="!text-red-600 break-words !text-right h-5">
+                        {errors["until"]?.message}
+                      </FormHelperText>
+                    </div>
+                  </div>
+                </div>
+                {/* 按鈕 Btn Group */}
+                <div className="flex sm:flex-row flex-col gap-2">
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="success"
+                    className="!text-base !h-12 !mt-3"
+                    fullWidth
+                  >
+                    送出
+                  </Button>
+                </div>
+              </form>
+            </FormProvider>
+          </div>
+        </ModalTemplete>
+      </>
+    );
 	}
 );
 
