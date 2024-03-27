@@ -5,7 +5,7 @@ import { useSnackbar } from "notistack";
 export const useNotification = () => {
 	const { enqueueSnackbar } = useSnackbar();
 
-	const showNotification = (message, isSuccess, time = 5000) => {
+	const showNotification = (message, isSuccess, time = 3000) => {
 		enqueueSnackbar(message, {
 			variant: isSuccess ? "success" : "error",
 			anchorOrigin: {
