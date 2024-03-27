@@ -676,7 +676,7 @@ const UpdatedModal = React.memo(
                           </span>
                         )}
                       </div>
-                      <FormHelperText
+                      <div
                         className="!text-red-600 break-words !text-right !mt-0"
                         sx={{ minHeight: "1.25rem" }}
                       >
@@ -688,7 +688,7 @@ const UpdatedModal = React.memo(
                             業主電話的建立、刪除都是對資料庫進行即時更新。
                           </p>
                         </div>
-                      </FormHelperText>
+                      </div>
                     </div>
                   </div>
                   {/* 地點 */}
@@ -846,7 +846,7 @@ const UpdatedModal = React.memo(
                           </span>
                         )}
                       </div>
-                      <FormHelperText
+                      <div
                         className="!text-red-600 break-words !text-right !mt-0"
                         sx={{ minHeight: "1.25rem" }}
                       >
@@ -858,7 +858,7 @@ const UpdatedModal = React.memo(
                             地號的建立、刪除都是對資料庫進行即時更新。
                           </p>
                         </div>
-                      </FormHelperText>
+                      </div>
                     </div>
                   </div>
 
