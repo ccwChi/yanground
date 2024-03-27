@@ -82,37 +82,36 @@ const Project = () => {
 
 	// 對照 api table 所顯示 key
 	const columnsPC = [
-    { key: "name", label: "專案名稱", align: "left" },
-    {
-      key: ["constructionKind", "chinese"],
-      label: "工程類型",
-      size: "10%",
-    },
-    {
-      key: ["businessRepresentative", "nickname"],
-      label: "負責人",
-      size: "10%",
-    },
-    {
-      key: ["foremanRepresentative", "nickname"],
-      label: "工務專管人員",
-      size: "10%",
-    },
-    { key: ["primary", "name"], label: "隸屬主專案", size: "20%" },
-    { key: "administrativeDivision", label: "地點", size: "12%" },
-
+		{ key: "name", label: "專案名稱", align: "left" },
+		{
+			key: ["constructionKind", "chinese"],
+			label: "工程類型",
+			size: "10%",
+		},
+		{
+			key: ["businessRepresentative", "nickname"],
+			label: "負責人",
+			size: "10%",
+		},
+		{
+			key: ["foremanRepresentative", "nickname"],
+			label: "工務專管人員",
+			size: "10%",
+		},
+		{ key: ["primary", "name"], label: "隸屬主專案", align: "left", size: "20%" },
+		{ key: "administrativeDivision", label: "地點", size: "12%" },
 	];
 	const columnsMobile = [
-    { key: "name", label: "專案名稱" },
-    {
-      key: ["constructionKind", "chinese"],
-      label: "工程類型",
-    },
-    { key: ["businessRepresentative", "nickname"], label: "負責人" },
-    { key: ["foremanRepresentative", "nickname"], label: "工務專管人員" },
-    { key: ["primary", "name"], label: "隸屬主專案", size: "20%" },
-    { key: "administrativeDivision", label: "地點" },
-  ];
+		{ key: "name", label: "專案名稱" },
+		{
+			key: ["constructionKind", "chinese"],
+			label: "工程類型",
+		},
+		{ key: ["businessRepresentative", "nickname"], label: "負責人" },
+		{ key: ["foremanRepresentative", "nickname"], label: "工務專管人員" },
+		{ key: ["primary", "name"], label: "隸屬主專案" },
+		{ key: "administrativeDivision", label: "地點" },
+	];
 
 	const actions = [
 		{ value: "edit", icon: <EditIcon />, title: "編輯專案" },
@@ -178,57 +177,61 @@ const Project = () => {
 			case "creatLandLot":
 				url = "landLot";
 				message = ["新增成功！"];
-			break;
+				break;
 			case "deleteLandlot":
 				url = "landLot/" + otherData;
 				message = ["刪除成功！"];
-			break;	
+				break;
 			default:
 				break;
 		}
-		if(mode === "create" || mode === "edit"){
-		postData(url, fd).then((result) => {
-			if (result.status) {
-				showNotification(message[0], true);
-				getApiList(apiUrl);
-				onClose();
-			} else {
-				showNotification(
-					result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
-					false
-				);
-			}
-			setSendBackFlag(false);
-		});} 
-		
-		else if (mode === "deleteContact" || mode === "deleteLandlot"){
-		deleteData(url).then((result) => {
-			if (result.status) {
-				showNotification(message[0], true);
-				getApiList(apiUrl);
-				setRefreshModal(true)
-			}else{
-				showNotification(
-					result.result.reason ? result.result.reason : result.result ? result.result : "產生無法預期的錯誤，請洽資訊部",
-					false
-				);
-			}
-			setSendBackFlag(false);
-		})}
-		else if (mode === "creatContact" || mode === "creatLandLot"){
-		postData(url, fd).then((result) => {
-			if (result.status) {
-				showNotification(message[0], true);
-				getApiList(apiUrl);
-				setRefreshModal(true)
-			} else {
-				showNotification(
-					result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
-					false
-				);
-			}
-			setSendBackFlag(false);
-		});} 
+		if (mode === "create" || mode === "edit") {
+			postData(url, fd).then((result) => {
+				if (result.status) {
+					showNotification(message[0], true);
+					getApiList(apiUrl);
+					onClose();
+				} else {
+					showNotification(
+						result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
+						false
+					);
+				}
+				setSendBackFlag(false);
+			});
+		} else if (mode === "deleteContact" || mode === "deleteLandlot") {
+			deleteData(url).then((result) => {
+				if (result.status) {
+					showNotification(message[0], true);
+					getApiList(apiUrl);
+					setRefreshModal(true);
+				} else {
+					showNotification(
+						result.result.reason
+							? result.result.reason
+							: result.result
+							? result.result
+							: "產生無法預期的錯誤，請洽資訊部",
+						false
+					);
+				}
+				setSendBackFlag(false);
+			});
+		} else if (mode === "creatContact" || mode === "creatLandLot") {
+			postData(url, fd).then((result) => {
+				if (result.status) {
+					showNotification(message[0], true);
+					getApiList(apiUrl);
+					setRefreshModal(true);
+				} else {
+					showNotification(
+						result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
+						false
+					);
+				}
+				setSendBackFlag(false);
+			});
+		}
 
 		// for (var pair of fd.entries()) {
 		// 	console.log(pair);
@@ -259,14 +262,18 @@ const Project = () => {
 			setDeliverInfo(dataValue);
 			setAlertOpen(1);
 		} else if (dataMode === "gotoFM") {
-			navigate(`documents?pj=${dataValue}`);
+			// 查看有無工程類型於專案
+			if (!apiData.content.find((item) => item.id === dataValue).constructionKind) {
+				showNotification("無工程類型，無法開啟專管文件管理頁！", false);
+			} else {
+				navigate(`documents?pj=${dataValue}`);
+			}
 		} else {
 			setModalValue(dataMode);
 			if (dataValue) {
 				setDeliverInfo(dataValue);
 			}
 		}
-		// setDeliverInfo(dataValue ? apiData.content.find((item) => item.id === dataValue) : "");
 	};
 
 	// 關閉 Modal 清除資料
@@ -301,7 +308,14 @@ const Project = () => {
 		{
 			modalValue: "create",
 			modalComponent: (
-				<UpdatedModal title="新增專案" sendDataToBackend={sendDataToBackend} cityList={cityList} onClose={onClose} refreshModal={refreshModal} setRefreshModal={setRefreshModal}/>
+				<UpdatedModal
+					title="新增專案"
+					sendDataToBackend={sendDataToBackend}
+					cityList={cityList}
+					onClose={onClose}
+					refreshModal={refreshModal}
+					setRefreshModal={setRefreshModal}
+				/>
 			),
 		},
 		{
@@ -340,7 +354,7 @@ const Project = () => {
 					columnsMobile={columnsMobile}
 					actions={actions}
 					cardTitleKey={"name"}
-					tableMinWidth={1200}
+					tableMinWidth={1280}
 					isLoading={isLoading}
 					handleActionClick={handleActionClick}
 				/>
