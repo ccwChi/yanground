@@ -420,7 +420,7 @@ const Documents = () => {
 				}
 				setSendBackFlag(false);
 			});
-		} else if (mode === "delete") {
+		} else if (mode === "delete" || mode === "recover") {
 			resetScreen();
 			setSendBackFlag(false);
 		}
