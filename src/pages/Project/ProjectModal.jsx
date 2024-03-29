@@ -61,6 +61,8 @@ const UpdatedModal = React.memo(
     onClose,
     refreshModal,
     setRefreshModal,
+    constructionKindList,
+    setConstructionKindList,
   }) => {
     // Alert 開關
     const [alertOpen, setAlertOpen] = useState(false);
@@ -68,8 +70,6 @@ const UpdatedModal = React.memo(
     const [bizRepList, setBizRepList] = useState(null);
     // 工務專案人員清單
     const [fRepList, setFRepList] = useState(null);
-    // 工程類型清單
-    const [constructionKindList, setConstructionKindList] = useState([]);
     // 可隸屬主案清單
     const [primaryList, setPrimaryList] = useState([]);
     // 鄉鎮區清單
@@ -422,7 +422,7 @@ const UpdatedModal = React.memo(
                               <span className="text-neutral-400 font-light">
                                 {apiData && apiData.projects.length > 0
                                   ? `此專案已為"${apiData.projects[0].name}${
-                                      apiData.projects.length > 1 && "..等專案"
+                                      apiData.projects.length > 1 ? "..等專案" :""
                                     }"的主案`
                                   : "若此案為分案，請選擇隸屬主專案"}
                               </span>
