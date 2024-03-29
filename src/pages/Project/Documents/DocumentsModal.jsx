@@ -401,8 +401,9 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 													// 圖片版本
 													<div className="flex flex-col sm:flex-row gap-3 flex-1 overflow-hidden relative">
 														<LazyImage
-															src={`${imageUrl}/projectArchive/${data.id}/${data.mimeType?.value || ""}`}
-															// ?token=${accessToken} 等待後端補邏輯
+															src={`${imageUrl}/projectArchive/${data.id}/${
+																data.mimeType?.value || ""
+															}?token=${accessToken}`}
 															alt={data.originalFilename}
 															classnames="lg:w-64 lg:min-w-64 lg:h-44 sm:w-52 sm:min-w-52 sm:h-36 w-full h-44 object-cover rounded-lg"
 														/>
@@ -460,7 +461,9 @@ const FilesManageModal = React.memo(({ title, deliverInfo, sendDataToBackend, on
 																	color="secondary"
 																	onClick={() =>
 																		window.open(
-																			`${imageUrl}/projectArchive/${data.id}/${data.mimeType?.value || ""}`,
+																			`${imageUrl}/projectArchive/${data.id}/${
+																				data.mimeType?.value || ""
+																			}?token=${accessToken}`,
 																			"_blank"
 																		)
 																	}
