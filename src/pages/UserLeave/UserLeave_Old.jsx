@@ -1,32 +1,34 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { deleteData, getData } from "../../utils/api";
+import { useLocation } from "react-router-dom";
 
-// date-fns
+/** mui 元件 */
+import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
+import TuneIcon from "@mui/icons-material/Tune";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+
+/** 時間用功能 */
 import { parseISO, format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { utcToZonedTime } from "date-fns-tz";
 
-// MUI
-import Backdrop from "@mui/material/Backdrop";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ReportProblemIcon from "@mui/icons-material/ReportProblem";
-import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
+/** MUI **/
+import { Backdrop } from "@mui/material";
 
-// Component
-import PageTitle from "../../components/Guideline/PageTitle";
-import FloatingActionButton from "../../components/FloatingActionButton/FloatingActionButton";
+/** 自訂元件 */
 import RWDTable from "../../components/RWDTable/RWDTable";
 import Pagination from "../../components/Pagination/Pagination";
-import { LoadingFour } from "../../components/Loader/Loading";
+import PageTitle from "../../components/Guideline/PageTitle";
 import AlertDialog from "../../components/Alert/AlertDialog";
+import { LoadingFour } from "../../components/Loader/Loading";
+import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
 import UserLeaveModal from "../../components/UserLeaveModal/UserLeaveModal";
 
-// Hooks
+/** hook */
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 import { useNotification } from "../../hooks/useNotification";
-
-// Utils
-import { getData, postData, deleteData } from "../../utils/api";
 
 const UserLeave = () => {
 	// 解析網址取得參數
@@ -37,6 +39,7 @@ const UserLeave = () => {
 
 	// API List Data
 	const [apiData, setApiData] = useState(null);
+
 	// isLoading 等待請求 api
 	const [isLoading, setIsLoading] = useState(true);
 	// Page 頁數設置
@@ -51,21 +54,23 @@ const UserLeave = () => {
 	const [modalValue, setModalValue] = useState(false);
 	// 傳送額外資訊給 Modal
 	const [deliverInfo, setDeliverInfo] = useState(null);
-	// 傳遞稍後用 Flag
+	// 部門清單
+	const [departmentList, setDepartmentList] = useState([]);
+	// 人員清單
+	const [usersList, setUsersList] = useState([]);
+	// 考勤別清單
+	const [alertOpen, setAlertOpen] = useState(false);
+
+	/* 打 api 的載入時間用 */
 	const [sendBackFlag, setSendBackFlag] = useState(false);
-	// Alert 開關
-	/**
-	 * 0: 關閉
-	 * 1: 是否確認刪除視窗
-	 */
-	const [alertOpen, setAlertOpen] = useState(0);
-	const [attendanceTypeList, setAttendanceTypeList] = useState([]);
 
 	const [reflesh, setReflesh] = useState(true);
+	const [attendanceTypeList, setAttendanceTypeList] = useState([]);
+	const [currentPageData, setCurrentPageData] = useState([]);
+
 	const [isOpen, setIsOpen] = useState(false);
-	// ApiUrl
-	const furl = "me/leave";
-	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
+
+	const apiUrl = `me/leave?p=1&s=5000`;
 
 	// 轉換時間
 	const formatDateTime = (dateTime) => {
@@ -75,35 +80,6 @@ const UserLeave = () => {
 		});
 		return formattedDateTime;
 	};
-
-	// 上方區塊功能按鈕清單
-	const btnGroup = [
-		{
-			mode: "leaveapplication",
-			icon: <AssignmentReturnIcon fontSize="small" />,
-			text: "提出請假申請",
-			variant: "contained",
-			color: "primary",
-			fabVariant: "success",
-			fab: <AssignmentReturnIcon />,
-		},
-	];
-
-	// 對照 api table 所顯示 key
-	const columnsPC = [
-		{ key: "fullname", label: "姓名", size: "20%" },
-		{ key: "attendance", label: "請假假別", size: "14%" },
-		{ key: "since", label: "起始時間", size: "25%" },
-		{ key: "until", label: "結束時間", size: "25%" },
-	];
-	const columnsMobile = [
-		{ key: "fullname", label: "姓名" },
-		{ key: "attendance", label: "請假假別" },
-		{ key: "since", label: "起始時間" },
-		{ key: "until", label: "結束時間" },
-	];
-
-	const actions = [{ value: "delete", icon: <DeleteIcon />, title: "刪除" }];
 
 	// 取得請假類別
 	useEffect(() => {
@@ -131,10 +107,11 @@ const UserLeave = () => {
 			getData(url).then((result) => {
 				setIsLoading(false);
 				if (result.result) {
-					const data = result.result;
-					const transformedData = {
-						...data,
-						content: data.content.map((item) => ({
+					const data = result.result.content;
+					console.log(data);
+					const transformedData = data
+						.filter((item) => item.type.value !== "ARRANGED_LEAVE")
+						.map((item) => ({
 							spectiallyKey: item.since ? formatDateTime(item.since).slice(0, 10) + " " + item.type.chinese : "-",
 							fullname: `${item.user.lastname}${item.user.firstname}`,
 							department: item.user.department,
@@ -144,9 +121,21 @@ const UserLeave = () => {
 							excuse: item.excuse ? item.excuse : "",
 							since: item.since ? formatDateTime(item.since) : "-",
 							until: item.until ? formatDateTime(item.until) : "-",
-						})),
-					};
+						}))
+						.sort((a, b) => {
+							if (a.date < b.date) {
+								return 1;
+							}
+							if (a.date > b.date) {
+								return -1;
+							}
+							return 0;
+						});
+					// console.log("transformedData",transformedData)
+
 					setApiData(transformedData);
+					const TempCurrentPageData = transformedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+					setCurrentPageData(TempCurrentPageData);
 
 					if (page >= data?.totalPages) {
 						setPage(0);
@@ -155,36 +144,40 @@ const UserLeave = () => {
 					}
 				} else {
 					setApiData(null);
-					showNotification("主資料 API 請求失敗", false, 10000);
 				}
 			});
 		},
-		[page]
+		[page, rowsPerPage]
 	);
 
-	// 設置頁數
-	const handleChangePage = useCallback((event, newPage) => {
-		setPage(newPage);
-		navigateWithParams(newPage + 1, rowsPerPage);
-	}, []);
+	useEffect(() => {
+		if (apiData) {
+			const TempCurrentPageData = apiData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+			setCurrentPageData(TempCurrentPageData);
+		}
+	}, [page, rowsPerPage, apiData]);
 
-	// 設置每頁顯示並返回第一頁
-	const handleChangeRowsPerPage = (event) => {
-		const targetValue = parseInt(event.target.value, 10);
-		setRowsPerPage(targetValue);
-		setPage(0);
-		navigateWithParams(1, targetValue);
-	};
+	// 區塊功能按鈕清單
+	const btnGroup = [
+		{
+			mode: "leaveapplication",
+			icon: <AssignmentReturnIcon fontSize="small" />,
+			text: "提出請假申請",
+			variant: "contained",
+			color: "primary",
+			fabVariant: "success",
+			fab: <AssignmentReturnIcon />,
+		},
+	];
 
 	// 當活動按鈕點擊時開啟 modal 並進行動作
 	const handleActionClick = (event) => {
 		event.stopPropagation();
 		const dataMode = event.currentTarget.getAttribute("data-mode");
 		const dataValue = event.currentTarget.getAttribute("data-value");
-
 		setModalValue(dataMode);
 		setIsOpen(true);
-		setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
+		setDeliverInfo(dataValue ? apiData?.find((item) => item.id === dataValue) : null);
 		if (dataMode === "delete") {
 			setAlertOpen(true);
 		}
@@ -225,10 +218,43 @@ const UserLeave = () => {
 		});
 	};
 
+	// 對照 api table 所顯示 key
+	const columnsPC = [
+		{ key: "fullname", label: "姓名", size: "20%" },
+		{ key: "attendance", label: "請假假別", size: "14%" },
+		{ key: "since", label: "起始時間", size: "25%" },
+		{ key: "until", label: "結束時間", size: "25%" },
+	];
+	const columnsMobile = [
+		{ key: "fullname", label: "姓名", size: "20%" },
+		{ key: "attendance", label: "請假假別", size: "14%" },
+		{ key: "since", label: "起始時間", size: "25%" },
+		{ key: "until", label: "結束時間", size: "25%" },
+	];
+
+	// Table 操作按鈕
+	const actions = [{ value: "delete", icon: <DeleteIcon />, title: "刪除" }];
+
+	// 設置頁數
+	const handleChangePage = useCallback(
+		(event, newPage) => {
+			setPage(newPage);
+			navigateWithParams(newPage + 1, rowsPerPage);
+		},
+		[rowsPerPage]
+	);
+
+	// 設置每頁顯示並返回第一頁
+	const handleChangeRowsPerPage = (event) => {
+		const targetValue = parseInt(event.target.value, 10);
+		setRowsPerPage(targetValue);
+		setPage(0);
+		navigateWithParams(1, targetValue);
+	};
+
 	// 關閉 Modal 清除資料
 	const onClose = () => {
 		setModalValue(false);
-		setDeliverInfo(null);
 	};
 
 	// modal 開啟參數與顯示標題
@@ -238,6 +264,7 @@ const UserLeave = () => {
 			modalComponent: (
 				<UserLeaveModal
 					title={"假單申請"}
+					departmentsList={departmentList}
 					attendanceTypeList={attendanceTypeList}
 					onClose={onClose}
 					isOpen={isOpen}
@@ -250,19 +277,15 @@ const UserLeave = () => {
 
 	return (
 		<>
-			{/* PageTitle */}
 			<PageTitle
-				title="請假申請"
-				description={"此頁面是用於查看自己請假清單以及請假申請用。"}
+				title={"請假申請"}
+				description="此頁面是用於查看自己請假清單以及請假申請用。"
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
-				isLoading={!isLoading}
 			/>
-
-			{/* Table */}
 			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
 				<RWDTable
-					data={apiData?.content || []}
+					data={currentPageData || []}
 					columnsPC={columnsPC}
 					columnsMobile={columnsMobile}
 					actions={actions}
@@ -272,8 +295,6 @@ const UserLeave = () => {
 					handleActionClick={handleActionClick}
 				/>
 			</div>
-
-			{/* Pagination */}
 			<Pagination
 				totalElement={apiData ? apiData.totalElements : 0}
 				page={apiData && page < apiData.totalPages ? page : 0}
@@ -281,19 +302,15 @@ const UserLeave = () => {
 				rowsPerPage={rowsPerPage}
 				onRowsPerPageChange={handleChangeRowsPerPage}
 			/>
-
-			{/* Floating Action Button */}
-			<FloatingActionButton btnGroup={btnGroup} handleActionClick={handleActionClick} />
-
 			{/* Modal */}
 			{config && config.modalComponent}
 
-			{/* Backdrop */}
+			{/* <FloatingActionButton btnGroup={btnGroup} handleActionClick={handleActionClick} /> */}
+			<MultipleFAB btnGroup={btnGroup} handleActionClick={handleActionClick} />
+
 			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
 				<LoadingFour />
 			</Backdrop>
-
-			{/* Alert */}
 			<AlertDialog
 				open={alertOpen}
 				onClose={handleAlertClose}

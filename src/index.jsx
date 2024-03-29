@@ -28,6 +28,7 @@ import AttendanceReport from "./pages/AttendanceReport/AttendanceReport";
 // Member Cencer
 import Punch from "./pages/Punch/Punch";
 import UserInfo from "./pages/UserInfo/UserInfo";
+import UserLeave from "./pages/UserLeave/UserLeave";
 import ClientQuestionnaire from "./pages/Client/ClientQuestionnaire";
 import EducationTrainging from "./pages/EducationTraining/EducationTraining";
 import MDWorkspace from "./pages/MDWorkspace/MDWorkspace";
@@ -44,7 +45,6 @@ import reportWebVitals from "./test/reportWebVitals";
 import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import "react-markdown-editor-lite/lib/index.css";
-import UserLeave from "./pages/UserLeave/UserLeave";
 import HRArrangeLeave from "./pages/HRArrangeLeave/HRArrangeLeave";
 
 const router = createBrowserRouter([
