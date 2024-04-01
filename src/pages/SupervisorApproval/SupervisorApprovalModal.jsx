@@ -4,7 +4,7 @@ import Chip from "@mui/material/Chip";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Backdrop from "@mui/material/Backdrop";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import { MenuItem, Select } from "@mui/material";
 // Components
 import ModalTemplete from "../../components/Modal/ModalTemplete";
@@ -52,35 +52,37 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 		// 串 api
 	};
 
-    useEffect(() => {
+	useEffect(() => {
 		if (userProfile?.department) {
-		  getData(`department/${userProfile.department.id}/staff`).then(
-			(result) => {
-			  const data = result.result;
-			  const formattedUser = data
-				.filter((us) => userProfile.id !== us.id)
-				.map((us) => ({
-				  label:
-					us.lastname && us.firstname
-					  ? us.lastname + us.firstname
-					  : us.displayName,
-				  value: us.id,
-				}));
-			setAgentList(formattedUser);
-			}
-		  );
+			getData(`department/${userProfile.department.id}/staff`).then((result) => {
+				const data = result.result;
+				const formattedUser = data
+					.filter((us) => userProfile.id !== us.id)
+					.map((us) => ({
+						label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName,
+						value: us.id,
+					}));
+				setAgentList(formattedUser);
+			});
 		}
-	  }, [userProfile]);
-    
-	useEffect(()=>{
-		if(!editAgent){
-		setSelectAgent("")
+	}, [userProfile]);
+
+	useEffect(() => {
+		if (!editAgent) {
+			setSelectAgent("");
 		}
-	},[editAgent])
+	}, [editAgent]);
 	return (
 		<>
 			{/* Modal */}
-			<ModalTemplete title={title} show={!!userProfile} maxWidth={"768px"} onClose={()=>{onClose();setEditAgent(false)}}>
+			<ModalTemplete
+				title={title}
+				show={!!userProfile}
+				maxWidth={"768px"}
+				onClose={() => {
+					onClose();
+					setEditAgent(false);
+				}}>
 				<div className="flex flex-col pt-4 gap-3">
 					{deliverInfo.attendance && (
 						<div className="inline-flex flex-col sm:flex-row border px-3 py-2 rounded-sm border-zinc-300 gap-1">
@@ -114,36 +116,19 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 								申請區間(迄)：<span className="font-bold">{deliverInfo.until}</span>
 							</p>
 						</div>
-						{/* 代理人開始 */}
 						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">
 							<div className="w-full">
-								<span>代理人：<span  className={`${editAgent && "hidden"} font-bold`}>{deliverInfo?.agent ? (deliverInfo.agent?.lastname + deliverInfo.agent?.firstname) : "尚未填寫"}</span> </span>
+								<span>
+									代理人：
+									<span className={`${editAgent && "hidden"} font-bold`}>
+										{deliverInfo.agent.displayScreenName || "-"}
+									</span>
+								</span>
 							</div>
 						</div>
-						{/* <div className="inline-flex flex-col sm:flex-row py-1 gap-1">
-							<div className="w-full">
-								<span>代理人：<span  className={`${editAgent && "hidden"} font-bold`}>{deliverInfo.agent || "尚未填寫"}</span> </span>
-								<Select
-									labelId="demo-simple-select-label"
-									id="demo-simple-select"
-									value={selectAgent}
-									onChange={(e)=>{setSelectAgent(e.target.value)}}
-									className={`${!editAgent && "!hidden"} !h-6 !border-none !m-0 !p-2`}
-									displayEmpty
-								>
-									<MenuItem value="" >請選擇代理人</MenuItem>
-									{agentList.map((agent,i)=>(
-									<MenuItem key={i} value={agent.value}>{agent.label}</MenuItem>
-									))}
-								</Select>
-								<EditIcon className="ms-5 cursor-pointer" fontSize="small" onClick={()=>{setEditAgent(!editAgent)}}/>
-							</div>
-							
-						</div> */}
-						{/* 代理人結束 */}
 						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">
 							<p className="w-full">
-								申請緣由：<span className="font-bold">{deliverInfo.excuse}</span>
+								申請緣由：<span className="font-bold">{deliverInfo.excuse || "-"}</span>
 							</p>
 						</div>
 					</div>
@@ -152,17 +137,19 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 							<>
 								<p className="w-full">
 									簽核人：
-									<span className="font-bold">
-										{deliverInfo.approver.lastname}
-										{deliverInfo.approver.firstname}
-									</span>
+									<span className="font-bold">{deliverInfo.approver.displayScreenName}</span>
 								</p>
 								<p className="w-full">
 									簽核日期：
 									<span className="font-bold">{deliverInfo.approvedAt}</span>
 								</p>
 								<p className="w-full">
-									簽核備註：<span className="font-bold">{deliverInfo.remark}</span>
+									簽核備註：
+									{deliverInfo.remark ? (
+										<span className="font-bold">{deliverInfo.remark}</span>
+									) : (
+										<span className="italic text-neutral-500 text-sm">(無備註)</span>
+									)}
 								</p>
 							</>
 						) : (
@@ -177,10 +164,10 @@ const ReviewModal = React.memo(({ title, deliverInfo, sendDataToBackend, onClose
 									fullWidth
 								/>
 								<div className="flex gap-x-4 w-full">
-								<Button variant="contained" fullWidth onClick={handleSubmit}>
-									審核
-								</Button>
-								{/* <Button variant="contained" fullWidth onClick={handleUnapproval}>
+									<Button variant="contained" fullWidth onClick={handleSubmit}>
+										審核
+									</Button>
+									{/* <Button variant="contained" fullWidth onClick={handleUnapproval}>
 									退回
 								</Button> */}
 								</div>

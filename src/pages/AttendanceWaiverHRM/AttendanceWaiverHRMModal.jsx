@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 // MUI
 import Chip from "@mui/material/Chip";
 import Backdrop from "@mui/material/Backdrop";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import { Button, MenuItem, Select, TextField } from "@mui/material";
 // Components
 import ModalTemplete from "../../components/Modal/ModalTemplete";
@@ -36,7 +36,7 @@ const ViewModal = React.memo(({ title, deliverInfo, onClose, sendDataToBackend }
 		setTextFieldValue(event.target.value);
 	};
 
-		// 按鈕點擊事件
+	// 按鈕點擊事件
 	const handleSubmit = () => {
 		const fd = new FormData();
 		fd.append("remark", textFieldValue);
@@ -47,31 +47,25 @@ const ViewModal = React.memo(({ title, deliverInfo, onClose, sendDataToBackend }
 	const handleUnapproval = () => {
 		// 串 api
 	};
-    useEffect(() => {
+	useEffect(() => {
 		if (!!deliverInfo) {
 			// 這邊之後要記得 update 人資可以選法務、法務可以選人資作為代理人
-		  getData(`department/${deliverInfo.department.id}/staff`).then(
-			(result) => {
-			  const data = result.result;
-			  const formattedUser = data
-				.map((us) => ({
-				  label:
-					us.lastname && us.firstname
-					  ? us.lastname + us.firstname
-					  : us.displayName,
-				  value: us.id,
+			getData(`department/${deliverInfo.department.id}/staff`).then((result) => {
+				const data = result.result;
+				const formattedUser = data.map((us) => ({
+					label: us.lastname && us.firstname ? us.lastname + us.firstname : us.displayName,
+					value: us.id,
 				}));
-			setAgentList(formattedUser);
-			}
-		  );
+				setAgentList(formattedUser);
+			});
 		}
-	  }, [deliverInfo]);
-    
-	useEffect(()=>{
-		if(!editAgent){
-		setSelectAgent("")
+	}, [deliverInfo]);
+
+	useEffect(() => {
+		if (!editAgent) {
+			setSelectAgent("");
 		}
-	},[editAgent])
+	}, [editAgent]);
 
 	return (
 		<>
@@ -110,36 +104,19 @@ const ViewModal = React.memo(({ title, deliverInfo, onClose, sendDataToBackend }
 								申請區間(迄)：<span className="font-bold">{deliverInfo.until}</span>
 							</p>
 						</div>
-						{/* 代理人開始 */}
 						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">
 							<div className="w-full">
-								<span>代理人：<span  className={`${editAgent && "hidden"} font-bold`}>{deliverInfo?.agent ? (deliverInfo.agent?.lastname + deliverInfo.agent?.firstname) : "尚未填寫"}</span> </span>
+								<span>
+									代理人：
+									<span className={`${editAgent && "hidden"} font-bold`}>
+										{deliverInfo.agent.displayScreenName || "-"}
+									</span>{" "}
+								</span>
 							</div>
 						</div>
-						{/* <div className="inline-flex flex-col sm:flex-row py-1 gap-1">
-							<div className="w-full">
-								<span>代理人：<span  className={`${editAgent && "hidden"} font-bold`}>{deliverInfo.agent || "尚未填寫"}</span> </span>
-								<Select
-									labelId="demo-simple-select-label"
-									id="demo-simple-select"
-									value={selectAgent}
-									onChange={(e)=>{console.log("e",e,"e.target.value",e.target.value);setSelectAgent(e.target.value)}}
-									className={`${!editAgent && "!hidden"} !h-6 !border-none !m-0 !p-2`}
-									displayEmpty
-								>
-									<MenuItem value="" >更改代理人</MenuItem>
-									{agentList.map((agent,i)=>(
-									<MenuItem key={i} value={agent.value}>{agent.label}</MenuItem>
-									))}
-								</Select>
-								<EditIcon className="ms-5 cursor-pointer" fontSize="small" onClick={()=>{setEditAgent(!editAgent)}}/>
-							</div>
-							
-						</div> */}
-						{/* 代理人結束 */}
 						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">
 							<p className="w-full">
-								申請緣由：<span className="font-bold">{deliverInfo.excuse}</span>
+								申請緣由：<span className="font-bold">{deliverInfo.excuse || "-"}</span>
 							</p>
 						</div>
 					</div>
@@ -148,26 +125,27 @@ const ViewModal = React.memo(({ title, deliverInfo, onClose, sendDataToBackend }
 							<>
 								<p className="w-full">
 									簽核主管：
-									<span className="font-bold">
-										{deliverInfo.approver.lastname}
-										{deliverInfo.approver.firstname}
-									</span>
+									<span className="font-bold">{deliverInfo.approver.displayScreenName}</span>
 								</p>
 								<p className="w-full">
 									簽核日期：
 									<span className="font-bold">{deliverInfo.approvedAt}</span>
 								</p>
 								<p className="w-full">
-									簽核備註：<span className="font-bold">{deliverInfo.remark}</span>
+									簽核備註：
+									{deliverInfo.remark ? (
+										<span className="font-bold">{deliverInfo.remark}</span>
+									) : (
+										<span className="italic text-neutral-500 text-sm">(無備註)</span>
+									)}
 								</p>
 							</>
 						) : (
-
 							<>
-							<div className="flex items-center justify-center">
-								<span className="italic text-neutral-500 text-sm">(尚未被審核，故無資料顯示)</span>
-							</div>
-							<TextField
+								<div className="flex items-center justify-center">
+									<span className="italic text-neutral-500 text-sm">(尚未被審核，故無資料顯示)</span>
+								</div>
+								<TextField
 									multiline
 									rows={2}
 									className="inputPadding bg-white"
@@ -176,15 +154,15 @@ const ViewModal = React.memo(({ title, deliverInfo, onClose, sendDataToBackend }
 									onChange={handleTextFieldChange}
 									fullWidth
 								/>
-							<div className="flex gap-x-4 w-full">
-							<Button variant="contained" fullWidth onClick={handleSubmit}>
-								審核
-							</Button>
-							{/* <Button variant="contained" fullWidth onClick={handleUnapproval}>
+								<div className="flex gap-x-4 w-full">
+									<Button variant="contained" fullWidth onClick={handleSubmit}>
+										審核
+									</Button>
+									{/* <Button variant="contained" fullWidth onClick={handleUnapproval}>
 								退回
 							</Button>  */}
-							</div>
-						</>
+								</div>
+							</>
 						)}
 						<div className="absolute right-3 -top-9">
 							{deliverInfo.approveState === true ? (

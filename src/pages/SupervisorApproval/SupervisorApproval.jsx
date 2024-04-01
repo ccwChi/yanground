@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useLocation,useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 // date-fns
 import { parseISO, format } from "date-fns";
@@ -26,8 +26,6 @@ import { getData, postData } from "../../utils/api";
 import attendanceWaiverList from "../../datas/attendanceWaiverType";
 import { ReviewModal } from "./SupervisorApprovalModal";
 
-
-
 // MenuItem 選單樣式調整
 const ITEM_HEIGHT = 36;
 const ITEM_PADDING_TOP = 8;
@@ -50,7 +48,6 @@ const defaultValue = {
 	until: null,
 };
 
-
 const SupervisorApproval = () => {
 	// 解析網址取得參數
 	const location = useLocation();
@@ -59,7 +56,7 @@ const SupervisorApproval = () => {
 	const showNotification = useNotification();
 	const navigate = useNavigate();
 	const userProfile = useLocalStorageValue("userProfile");
-	const userDepartId = userProfile && userProfile.department.id
+	const userDepartId = userProfile && userProfile.department.id;
 	// API List Data
 	const [apiData, setApiData] = useState(null);
 	// isLoading 等待請求 api
@@ -91,9 +88,9 @@ const SupervisorApproval = () => {
 	// 預設搜尋篩選內容
 	const getValueOrFilter = (queryParam, filter) => {
 		const value = queryParams.get(queryParam);
-		if (queryParam === "users" || queryParam === "agents" || queryParam === "types" ) {
+		if (queryParam === "users" || queryParam === "agents" || queryParam === "types") {
 			return !!value ? value.split(",") : filter;
-		}  else {
+		} else {
 			return !!value ? value : filter;
 		}
 	};
@@ -104,7 +101,7 @@ const SupervisorApproval = () => {
 		users: getValueOrFilter("users", filters.users),
 		types: getValueOrFilter("types", filters.types),
 		since: queryParams.get("since") ? new Date(queryParams.get("since")) : null,
-		until: queryParams.get("until") ? new Date(queryParams.get("until")) : null
+		until: queryParams.get("until") ? new Date(queryParams.get("until")) : null,
 	};
 
 	// 使用 useForm Hook 來管理表單狀態和驗證
@@ -122,14 +119,15 @@ const SupervisorApproval = () => {
 	const watchSinceDate = watch("since");
 
 	useEffect(() => {
-		if (!!userDepartId){
+		if (!!userDepartId) {
 			const departurl = `department/${userDepartId}/staff`;
-			getData(departurl)
-				.then((result) => {
-					if (result.result){
-						setUserList(result.result);
-					}else {setUserList([])};
-				})
+			getData(departurl).then((result) => {
+				if (result.result) {
+					setUserList(result.result);
+				} else {
+					setUserList([]);
+				}
+			});
 		}
 	}, [userDepartId]);
 
@@ -193,8 +191,50 @@ const SupervisorApproval = () => {
 							excuse: item.excuse,
 							since: item.since ? formatDateTime(item.since) : "-",
 							until: item.until ? formatDateTime(item.until) : "-",
-							agent: item.agent,
-							approver: item.approver,
+							agent: {
+								...item.agent,
+								displayScreenName: (() => {
+									const _item = item.agent;
+									let displayScreenName = "";
+
+									if (_item) {
+										if (_item.lastname && _item.firstname) {
+											displayScreenName = `${_item.lastname}${_item.firstname}`;
+										} else if (_item.lastname) {
+											displayScreenName = _item.lastname;
+										} else if (_item.firstname) {
+											displayScreenName = _item.firstname;
+										} else if (_item.nickname) {
+											displayScreenName = _item.nickname;
+										} else {
+											displayScreenName = _item.displayName;
+										}
+									}
+									return displayScreenName;
+								})(),
+							},
+							approver: {
+								...item.approver,
+								displayScreenName: (() => {
+									const _item = item.approver;
+									let displayScreenName = "";
+
+									if (_item) {
+										if (_item.lastname && _item.firstname) {
+											displayScreenName = `${_item.lastname}${_item.firstname}`;
+										} else if (_item.lastname) {
+											displayScreenName = _item.lastname;
+										} else if (_item.firstname) {
+											displayScreenName = _item.firstname;
+										} else if (_item.nickname) {
+											displayScreenName = _item.nickname;
+										} else {
+											displayScreenName = _item.displayName;
+										}
+									}
+									return displayScreenName;
+								})(),
+							},
 							approvedAt: item.approvedAt ? formatDateTime(item.approvedAt) : "-",
 							approveState: item.approvedAt ? true : null,
 							remark: item.remark,
@@ -215,21 +255,19 @@ const SupervisorApproval = () => {
 		[page]
 	);
 
-
 	// 取得部門清單 & 考勤類別清單
 	useEffect(() => {
 		const typeurl = "attendanceWaiverType?p=1&s=500";
 		getData(typeurl).then((result) => {
-			if (result.result){
+			if (result.result) {
 				const data = result.result;
 				setTypeList(data);
 				// console.log("type",data)
-			}else {
+			} else {
 				setTypeList([]);
 			}
 		});
 	}, []);
-
 
 	// 對照 API Table 所顯示 key
 	const columnsPC = [
@@ -248,8 +286,8 @@ const SupervisorApproval = () => {
 		{ key: "since", label: "申請區間 (起)" },
 		{ key: "until", label: "申請區間 (迄)" },
 		{ key: "appliedAt", label: "提出申請時間" },
-		{ key: "agent", label: "代理人" },
-		{ key: ["approver", "fullName"], label: "審核主管" },
+		{ key: ["agent", "displayScreenName"], label: "代理人" },
+		{ key: ["approver", "displayScreenName"], label: "審核主管" },
 		{ key: "approvedAt", label: "審核時間" },
 		{ key: "remark", label: "審核備註" },
 	];
@@ -317,66 +355,66 @@ const SupervisorApproval = () => {
 		setDeliverInfo(null);
 	};
 
-		//  下面為搜索專用
-		// 開啟 SearchDialog
-		const handleOpenSearch = () => {
-			setSearchDialogOpen(true);
-		};
-		// 關閉 SearchDialog
-		const handleCloseSearch = () => {
-			reset(defaultValues);
-			setSearchDialogOpen(false);
-		};
-		// 恢復為上一次搜尋狀態
-		const handleCoverDialog = () => {
-			reset(defaultValues);
-		};
-		// 重置 SearchDialog
-		const handleClearSearch = () => {
-			reset(defaultValue);
-			setFilters(defaultValue);
-			setSearchDialogOpen(false);
-			navigate(`?p=1&s=10`);
-		};
-		// 搜尋送出
-		const onSubmit = (data) => {
-			setFilters(data);
-			setSearchDialogOpen(false);
-			// delete data.departments;
-			// data.users.forEach(id => {
-			// 	const filteredUsers = userList.filter(user => user.id === id);
-			// 	fullUserPack.push(...filteredUsers);
-			// });
-			// if (fullUserPack.length !== 0){
-			// 	data.users =  fullUserPack
-			// } else {
-			// 	delete data.users
-			// }
-			const fd = new FormData();
-			for (let key in data) {
-				switch (key) {
-					// case "users":
-					// 	fd.append(key, JSON.stringify(data[key]));
-					// 	break;
-					case "since":
-					case "until":
-						if (data[key] !== null) {
-							fd.append(key, format(data[key], "yyyy-MM-dd"));
-						}
-						break;
-					default:
-						if (data[key] !== null) {
-							fd.append(key, data[key]);
-						}
-						break;
-				}
+	//  下面為搜索專用
+	// 開啟 SearchDialog
+	const handleOpenSearch = () => {
+		setSearchDialogOpen(true);
+	};
+	// 關閉 SearchDialog
+	const handleCloseSearch = () => {
+		reset(defaultValues);
+		setSearchDialogOpen(false);
+	};
+	// 恢復為上一次搜尋狀態
+	const handleCoverDialog = () => {
+		reset(defaultValues);
+	};
+	// 重置 SearchDialog
+	const handleClearSearch = () => {
+		reset(defaultValue);
+		setFilters(defaultValue);
+		setSearchDialogOpen(false);
+		navigate(`?p=1&s=10`);
+	};
+	// 搜尋送出
+	const onSubmit = (data) => {
+		setFilters(data);
+		setSearchDialogOpen(false);
+		// delete data.departments;
+		// data.users.forEach(id => {
+		// 	const filteredUsers = userList.filter(user => user.id === id);
+		// 	fullUserPack.push(...filteredUsers);
+		// });
+		// if (fullUserPack.length !== 0){
+		// 	data.users =  fullUserPack
+		// } else {
+		// 	delete data.users
+		// }
+		const fd = new FormData();
+		for (let key in data) {
+			switch (key) {
+				// case "users":
+				// 	fd.append(key, JSON.stringify(data[key]));
+				// 	break;
+				case "since":
+				case "until":
+					if (data[key] !== null) {
+						fd.append(key, format(data[key], "yyyy-MM-dd"));
+					}
+					break;
+				default:
+					if (data[key] !== null) {
+						fd.append(key, data[key]);
+					}
+					break;
 			}
+		}
 
-			const searchParams = new URLSearchParams(fd);
-			setPage(0);
-			setRowsPerPage(10);
-			navigate(`?p=1&s=10&${searchParams.toString()}`);
-		};
+		const searchParams = new URLSearchParams(fd);
+		setPage(0);
+		setRowsPerPage(10);
+		navigate(`?p=1&s=10&${searchParams.toString()}`);
+	};
 	// 到上面為止都是搜索功能 //
 
 	// modal 開啟參數與顯示標題
@@ -393,7 +431,10 @@ const SupervisorApproval = () => {
 	return (
 		<>
 			{/* PageTitle */}
-			<PageTitle title="主管審核" description="此頁面是供主管檢視部門成員的請假和考勤紀錄，以便審核和決定是否通過。" searchMode
+			<PageTitle
+				title="主管審核"
+				description="此頁面是供主管檢視部門成員的請假和考勤紀錄，以便審核和決定是否通過。"
+				searchMode
 				// 下面參數前提都是 searchMode = true
 				searchDialogOpen={searchDialogOpen}
 				handleOpenDialog={handleOpenSearch}
@@ -402,8 +443,7 @@ const SupervisorApproval = () => {
 				handleConfirmDialog={handleSubmit(onSubmit)}
 				handleClearDialog={handleClearSearch}
 				haveValue={filters === defaultValue}
-				isDirty={isDirty}
-			>
+				isDirty={isDirty}>
 				<FormProvider {...methods}>
 					<form className="flex flex-col gap-2">
 						{/* <div className="inline-flex items-center gap-2">
@@ -438,7 +478,7 @@ const SupervisorApproval = () => {
 
 										const roleNames = selected.map((roleId) => {
 											const role = userList?.find((r) => r.id === roleId);
-											return role ? (role.lastname + role.firstname) : null;
+											return role ? role.lastname + role.firstname : null;
 										});
 										return roleNames.join(", ");
 									}}
