@@ -12,6 +12,7 @@ import AlertDialog from "../../components/Alert/AlertDialog";
 // Mui
 import Backdrop from "@mui/material/Backdrop";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import TuneIcon from "@mui/icons-material/Tune";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -36,6 +37,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 import { Divider, TextField } from "@mui/material";
+import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
 
 // MenuItem 選單樣式調整
 const ITEM_HEIGHT = 36;
@@ -156,6 +158,15 @@ const Project = () => {
       fabVariant: "success",
       fab: <AddIcon fontSize="large" />,
     },
+    // {
+    //   mode: "filter",
+    //   icon: null, // 設為 null 就可以避免 PC 出現
+    //   text: "篩選",
+    //   variant: "contained",
+    //   color: "secondary",
+    //   fabVariant: "secondary",
+    //   fab: <TuneIcon />,
+    // },
   ];
 
   // 對照 api table 所顯示 key
@@ -292,28 +303,28 @@ const Project = () => {
         setConstructionKindList([]);
       }
     });
-	const getDepartMemberList = () => {
-    const idArray = [5,11];
-    const promises = idArray.map((id) => {
-      const departMemberListEndpoint = `department/${id}/staff`;
-      return getData(departMemberListEndpoint).then((result) => {
-        const filterList = result.result.map((data) => {
-          const { id, nickname, department } = data;
-          return { id, nickname, department };
+    const getDepartMemberList = () => {
+      const idArray = [5, 11];
+      const promises = idArray.map((id) => {
+        const departMemberListEndpoint = `department/${id}/staff`;
+        return getData(departMemberListEndpoint).then((result) => {
+          const filterList = result.result.map((data) => {
+            const { id, nickname, department } = data;
+            return { id, nickname, department };
+          });
+          return filterList;
         });
-        return filterList;
       });
-    });
-    Promise.all(promises)
-      .then((allResults) => {
-        const mergedList = allResults.flat();
-        setRepresentativeList(mergedList);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  };
-	getDepartMemberList()
+      Promise.all(promises)
+        .then((allResults) => {
+          const mergedList = allResults.flat();
+          setRepresentativeList(mergedList);
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    };
+    getDepartMemberList();
   }, []);
 
   // 傳遞給後端資料
@@ -494,6 +505,8 @@ const Project = () => {
     if (dataMode === "void") {
       setDeliverInfo(dataValue);
       setAlertOpen(1);
+    } else if (dataMode === "filter") {
+      handleOpenSearch();
     } else if (dataMode === "gotoFM") {
       // 查看有無工程類型於專案
       if (
@@ -587,7 +600,7 @@ const Project = () => {
         btnGroup={btnGroup}
         handleActionClick={handleActionClick}
         // 搜尋模式
-        searchMode
+        searchMode={false}
         // 下面參數前提都是 searchMode = true
         searchDialogOpen={searchDialogOpen}
         handleOpenDialog={handleOpenSearch}
@@ -756,7 +769,6 @@ const Project = () => {
           </form>
         </FormProvider>
       </PageTitle>
-
       {/* Table */}
       <div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
         <RWDTable
@@ -770,7 +782,6 @@ const Project = () => {
           handleActionClick={handleActionClick}
         />
       </div>
-
       {/* Pagination */}
       <Pagination
         totalElement={apiData ? apiData.totalElements : 0}
@@ -779,21 +790,20 @@ const Project = () => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-
       {/* Floating Action Button */}
-      <FloatingActionButton
+      {/* <FloatingActionButton
         btnGroup={btnGroup}
         handleActionClick={handleActionClick}
-      />
-
+      /> */}
       {/* Modal */}
       {config && config.modalComponent}
 
+      {/* Floating Action Button */}
+      <MultipleFAB btnGroup={btnGroup} handleActionClick={handleActionClick} />
       {/* Backdrop */}
       <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
         <LoadingFour />
       </Backdrop>
-
       {/* Alert */}
       <AlertDialog
         open={alertOpen !== 0}

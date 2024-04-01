@@ -2,6 +2,9 @@ import React from "react";
 import PageTitle from "../../components/Guideline/PageTitle";
 import "./tree.css";
 import { useState } from "react";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Avatar, Chip } from "@mui/material";
+
 const Tree = () => {
   const MenuNode = ({ node }) => {
     const { name, subordinates } = node;
@@ -12,17 +15,22 @@ const Tree = () => {
     };
 
     return (
-      <li className={`${subordinates.length > 0 ? "parent_li" : ""} !ms-10 relative m-0 list-none`}>
+      <li
+        className={`${
+          subordinates.length > 0 ? "parent_li" : ""
+        } !ms-16 relative m-0 px-2 py-2 list-none`}
+      >
         <span
           onClick={toggleOpen}
           title={isOpen ? "Collapse this branch" : "Expand this branch"}
+          className=""
         >
-          {name}
-          {subordinates.length > 0 && (
-            <i
-            //這邊可以放icon
-            ></i>
-          )}
+          {node.department.name} - {name}
+          <div className="size-8 absolute top-0 -right-8">
+            <Chip className="bg-transparent !shadow-[1px_1px_1px_1px_rgba(50,50,50,0.3)]">
+              <DeleteIcon />
+            </Chip>
+          </div>
         </span>
         {isOpen && subordinates.length > 0 && (
           <ul>
@@ -38,7 +46,7 @@ const Tree = () => {
     <>
       {/* PageTitle */}
       <PageTitle title="樹" />
-      <div className="overflow-y-auto h-full order-3 sm:order-1 p-2 bg-gray-300">
+      <div className="overflow-y-auto h-full order-3 sm:order-1 p-2">
         <div className="tree ">
           <ul>
             {data.map((node, index) => (
