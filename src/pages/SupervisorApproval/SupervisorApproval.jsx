@@ -8,6 +8,7 @@ import { utcToZonedTime } from "date-fns-tz";
 // MUI
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import TuneIcon from "@mui/icons-material/Tune";
 import { Backdrop, Checkbox, MenuItem, Select } from "@mui/material";
 // Components
 import PageTitle from "../../components/Guideline/PageTitle";
@@ -25,6 +26,7 @@ import { getData, postData } from "../../utils/api";
 // Customs
 import attendanceWaiverList from "../../datas/attendanceWaiverType";
 import { ReviewModal } from "./SupervisorApprovalModal";
+import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
 
 // MenuItem 選單樣式調整
 const ITEM_HEIGHT = 36;
@@ -294,6 +296,19 @@ const SupervisorApproval = () => {
 
 	// Table 操作按鈕
 	const actions = [{ value: "review", icon: <ReceiptLongIcon />, title: "審核" }];
+	const btnGroup = [
+    {
+      mode: "filter",
+      icon: null, // 設為 null 就可以避免 PC 出現
+      text: "篩選",
+      variant: "contained",
+      color: "secondary",
+      fabVariant: "secondary",
+      fab: <TuneIcon />,
+    },
+  ];
+
+
 
 	// 傳遞給後端資料
 	const sendDataToBackend = (fd, mode, otherData) => {
@@ -344,9 +359,12 @@ const SupervisorApproval = () => {
 		event.stopPropagation();
 		const dataMode = event.currentTarget.getAttribute("data-mode");
 		const dataValue = event.currentTarget.getAttribute("data-value");
-
+// if (dataMode === "filter") {
+//   handleOpenSearch();
+// }else{
 		setModalValue(dataMode);
 		setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
+	// }
 	};
 
 	// 關閉 Modal 清除資料
@@ -355,6 +373,7 @@ const SupervisorApproval = () => {
 		setDeliverInfo(null);
 	};
 
+	
 	//  下面為搜索專用
 	// 開啟 SearchDialog
 	const handleOpenSearch = () => {
@@ -429,24 +448,25 @@ const SupervisorApproval = () => {
 	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
 
 	return (
-		<>
-			{/* PageTitle */}
-			<PageTitle
-				title="主管審核"
-				description="此頁面是供主管檢視部門成員的請假和考勤紀錄，以便審核和決定是否通過。"
-				searchMode
-				// 下面參數前提都是 searchMode = true
-				searchDialogOpen={searchDialogOpen}
-				handleOpenDialog={handleOpenSearch}
-				handleCloseDialog={handleCloseSearch}
-				handleCoverDialog={handleCoverDialog}
-				handleConfirmDialog={handleSubmit(onSubmit)}
-				handleClearDialog={handleClearSearch}
-				haveValue={filters === defaultValue}
-				isDirty={isDirty}>
-				<FormProvider {...methods}>
-					<form className="flex flex-col gap-2">
-						{/* <div className="inline-flex items-center gap-2">
+    <>
+      {/* PageTitle */}
+      <PageTitle
+        title="主管審核"
+        description="此頁面是供主管檢視部門成員的請假和考勤紀錄，以便審核和決定是否通過。"
+        searchMode={false}
+        // 下面參數前提都是 searchMode = true
+        searchDialogOpen={searchDialogOpen}
+        handleOpenDialog={handleOpenSearch}
+        handleCloseDialog={handleCloseSearch}
+        handleCoverDialog={handleCoverDialog}
+        handleConfirmDialog={handleSubmit(onSubmit)}
+        handleClearDialog={handleClearSearch}
+        haveValue={filters === defaultValue}
+        isDirty={isDirty}
+      >
+        <FormProvider {...methods}>
+          <form className="flex flex-col gap-2">
+            {/* <div className="inline-flex items-center gap-2">
 							<Controller
 								name="queryString"
 								control={control}
@@ -461,119 +481,161 @@ const SupervisorApproval = () => {
 							/>
 						</div>
 						<Divider /> */}
-						<InputTitle title={"人員選擇"} classnames="whitespace-nowrap min-w-[70px]" pb={false} required={false} />
-						<Controller
-							name="users"
-							control={control}
-							render={({ field }) => (
-								<Select
-									className="inputPadding pe-3"
-									multiple
-									displayEmpty
-									MenuProps={MenuProps}
-									renderValue={(selected) => {
-										if (selected.length === 0) {
-											return <span className="text-neutral-400 font-light">請選擇人員</span>;
-										}
+            <InputTitle
+              title={"人員選擇"}
+              classnames="whitespace-nowrap min-w-[70px]"
+              pb={false}
+              required={false}
+            />
+            <Controller
+              name="users"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  className="inputPadding pe-3"
+                  multiple
+                  displayEmpty
+                  MenuProps={MenuProps}
+                  renderValue={(selected) => {
+                    if (selected.length === 0) {
+                      return (
+                        <span className="text-neutral-400 font-light">
+                          請選擇人員
+                        </span>
+                      );
+                    }
 
-										const roleNames = selected.map((roleId) => {
-											const role = userList?.find((r) => r.id === roleId);
-											return role ? role.lastname + role.firstname : null;
-										});
-										return roleNames.join(", ");
-									}}
-									{...field}>
-									{userList?.map((user) => (
-										<MenuItem key={user.id} value={user.id}>
-											<Checkbox checked={watch("users").indexOf(user.id) > -1} />
-											{user.lastname + user.firstname}
-										</MenuItem>
-									))}
-								</Select>
-							)}
-						/>
-						<InputTitle title={"考勤類別"} classnames="whitespace-nowrap min-w-[70px]" pb={false} required={false} />
-						<Controller
-							name="types"
-							control={control}
-							render={({ field }) => (
-								<Select
-									className="inputPadding pe-3"
-									multiple
-									displayEmpty
-									MenuProps={MenuProps}
-									renderValue={(selected) => {
-										if (selected.length === 0) {
-											return <span className="text-neutral-400 font-light">請選擇部門</span>;
-										}
+                    const roleNames = selected.map((roleId) => {
+                      const role = userList?.find((r) => r.id === roleId);
+                      return role ? role.lastname + role.firstname : null;
+                    });
+                    return roleNames.join(", ");
+                  }}
+                  {...field}
+                >
+                  {userList?.map((user) => (
+                    <MenuItem key={user.id} value={user.id}>
+                      <Checkbox
+                        checked={watch("users").indexOf(user.id) > -1}
+                      />
+                      {user.lastname + user.firstname}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+            <InputTitle
+              title={"考勤類別"}
+              classnames="whitespace-nowrap min-w-[70px]"
+              pb={false}
+              required={false}
+            />
+            <Controller
+              name="types"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  className="inputPadding pe-3"
+                  multiple
+                  displayEmpty
+                  MenuProps={MenuProps}
+                  renderValue={(selected) => {
+                    if (selected.length === 0) {
+                      return (
+                        <span className="text-neutral-400 font-light">
+                          請選擇部門
+                        </span>
+                      );
+                    }
 
-										const roleNames = selected.map((roleId) => {
-											const role = typeList?.find((r) => r.value === roleId);
-											return role ? role.chinese : null;
-										});
-										return roleNames.join(", ");
-									}}
-									{...field}>
-									{typeList?.map((type) => (
-										<MenuItem key={type.value} value={type.value}>
-											<Checkbox checked={watch("types").indexOf(type.value) > -1} />
-											{type.chinese}
-										</MenuItem>
-									))}
-								</Select>
-							)}
-						/>
-						<InputTitle title={"日期區間"} classnames="whitespace-nowrap min-w-[70px]" pb={false} required={false} />
-						<div className="inline-flex items-center">
-							<InputTitle title={"起"} classnames="whitespace-nowrap me-2" pb={false} required={false} />
-							<ControlledDatePicker name="since" maxDate={new Date()} />
-						</div>
-						<div className="inline-flex items-center">
-							<InputTitle title={"迄"} classnames="whitespace-nowrap me-2" pb={false} required={false} />
-							<ControlledDatePicker
-								name="until"
-								minDate={watchSinceDate}
-								disabled={!watchSinceDate}
-								maxDate={new Date()}
-							/>
-						</div>
-					</form>
-				</FormProvider>
-			</PageTitle>
+                    const roleNames = selected.map((roleId) => {
+                      const role = typeList?.find((r) => r.value === roleId);
+                      return role ? role.chinese : null;
+                    });
+                    return roleNames.join(", ");
+                  }}
+                  {...field}
+                >
+                  {typeList?.map((type) => (
+                    <MenuItem key={type.value} value={type.value}>
+                      <Checkbox
+                        checked={watch("types").indexOf(type.value) > -1}
+                      />
+                      {type.chinese}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+            <InputTitle
+              title={"日期區間"}
+              classnames="whitespace-nowrap min-w-[70px]"
+              pb={false}
+              required={false}
+            />
+            <div className="inline-flex items-center">
+              <InputTitle
+                title={"起"}
+                classnames="whitespace-nowrap me-2"
+                pb={false}
+                required={false}
+              />
+              <ControlledDatePicker name="since" maxDate={new Date()} />
+            </div>
+            <div className="inline-flex items-center">
+              <InputTitle
+                title={"迄"}
+                classnames="whitespace-nowrap me-2"
+                pb={false}
+                required={false}
+              />
+              <ControlledDatePicker
+                name="until"
+                minDate={watchSinceDate}
+                disabled={!watchSinceDate}
+                maxDate={new Date()}
+              />
+            </div>
+          </form>
+        </FormProvider>
+      </PageTitle>
 
-			{/* Table */}
-			<div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
-				<RWDTable
-					data={apiData?.content}
-					columnsPC={columnsPC}
-					columnsMobile={columnsMobile}
-					actions={actions}
-					cardTitleKey={"fullname"}
-					tableMinWidth={800}
-					isLoading={isLoading}
-					handleActionClick={handleActionClick}
-					attendanceWaiverList={attendanceWaiverList}
-				/>
-			</div>
+      {/* Table */}
+      <div className="overflow-y-auto sm:overflow-y-hidden h-full order-3 sm:order-1">
+        <RWDTable
+          data={apiData?.content}
+          columnsPC={columnsPC}
+          columnsMobile={columnsMobile}
+          actions={actions}
+          cardTitleKey={"fullname"}
+          tableMinWidth={800}
+          isLoading={isLoading}
+          handleActionClick={handleActionClick}
+          attendanceWaiverList={attendanceWaiverList}
+        />
+      </div>
 
-			{/* Pagination */}
-			<Pagination
-				totalElement={apiData ? apiData.totalElements : 0}
-				page={apiData && page < apiData.totalPages ? page : 0}
-				onPageChange={handleChangePage}
-				rowsPerPage={rowsPerPage}
-				onRowsPerPageChange={handleChangeRowsPerPage}
-			/>
+      {/* Pagination */}
+      <Pagination
+        totalElement={apiData ? apiData.totalElements : 0}
+        page={apiData && page < apiData.totalPages ? page : 0}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
 
-			{/* Modal */}
-			{config && config.modalComponent}
+      {/* Modal */}
+      {config && config.modalComponent}
+	  
+      {/* Floating Action Button */}
+      {/* <MultipleFAB btnGroup={btnGroup} handleActionClick={handleActionClick} /> */}
 
-			{/* Backdrop */}
-			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
-				<LoadingFour />
-			</Backdrop>
-		</>
-	);
+      {/* Backdrop */}
+      <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
+        <LoadingFour />
+      </Backdrop>
+    </>
+  );
 };
 
 export default SupervisorApproval;

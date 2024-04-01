@@ -162,8 +162,8 @@ const RWDTable = ({
 										{columnsMobile.map((column, index) => (
 											<div key={"AccordionRow-" + rowIndex + "-" + index}>
 												<div className="flex justify-between py-2">
-													<span className="text-neutral-500 pe-2 whitespace-nowrap">{column.label}</span>
-													<p className="text-black break-all">
+													<div className="text-neutral-500 pe-2 whitespace-nowrap">{column.label}</div>
+													<div className="text-black break-all">
 														{(() => {
 															switch (column.key) {
 																case "gender":
@@ -233,7 +233,7 @@ const RWDTable = ({
 																// }
 															}
 														})()}
-													</p>
+													</div>
 												</div>
 												<Divider />
 											</div>

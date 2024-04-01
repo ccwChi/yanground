@@ -47,6 +47,7 @@ import RWDTable from "../../components/RWDTable/RWDTable";
 import useNavigateWithParams from "../../hooks/useNavigateWithParams";
 import ControlledDatePicker from "../../components/DatePicker/ControlledDatePicker";
 import Pagination from "../../components/Pagination/Pagination";
+import MultipleFAB from "../../components/FloatingActionButton/MultipleFAB";
 
 // MenuItem 選單樣式調整
 const ITEM_HEIGHT = 36;
@@ -478,11 +479,15 @@ const AttendanceView = () => {
     event.stopPropagation();
     const dataMode = event.currentTarget.getAttribute("data-mode");
     const dataValue = event.currentTarget.getAttribute("data-value");
+    
+     if (dataMode === "filter") {
+       handleOpenSearch();
+     } else{
     setModalValue(dataMode);
     setDeliverInfo(
       dataValue ? apiData?.content?.find((item) => item.id === dataValue) : null
     );
-  };
+  }};
 
   // 傳遞給後端資料
   const sendDataToBackend = (fd, mode, otherData) => {
@@ -749,9 +754,8 @@ const AttendanceView = () => {
       {/* <TableTabbar tabGroup={tabGroup} setCat={setCat} cat={cat} /> */}
 
       {/* Calendar */}
-      {/* {cat === "table" ? (
-				<>
-					<div className="overflow-y-auto flex-1 h-full order-3 sm:order-1"> */}
+
+			<div className="overflow-y-auto flex-1 h-full order-3 sm:order-1">
       <RWDTable
         data={apiData?.content || []}
         columnsPC={columnsPC}
@@ -762,7 +766,7 @@ const AttendanceView = () => {
         isLoading={isLoading}
         handleActionClick={handleActionClick}
       />
-      {/* </div> */}
+      </div>
       {/* Pagination */}
       {/* Pagination */}
       <Pagination
@@ -784,10 +788,11 @@ const AttendanceView = () => {
 			)} */}
 
       {/* Floating Action Button */}
-      <FloatingActionButton
+      {/* <FloatingActionButton
         btnGroup={btnGroup}
         handleActionClick={handleOpenSearch}
-      />
+      /> */}
+      <MultipleFAB btnGroup={btnGroup} handleActionClick={handleActionClick} />
 
       <Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
         <LoadingFour />
