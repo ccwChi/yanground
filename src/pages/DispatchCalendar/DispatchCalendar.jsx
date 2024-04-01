@@ -149,7 +149,7 @@ const DispatchCalendar = () => {
     );
     const monthArray = [
       formatDate(currentMonth).slice(0, 7),
-      // formatDate(previousMonth).slice(0, 7),
+      formatDate(previousMonth).slice(0, 7),
       formatDate(nextMonth).slice(0, 7),
     ];
 
