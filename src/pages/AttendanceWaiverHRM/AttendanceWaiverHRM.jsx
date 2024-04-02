@@ -366,7 +366,7 @@ const AttendanceWaiverHRM = () => {
 		let message = [];
 		switch (mode) {
 			case "approval":
-				url += `/${otherData[0]}/${otherData[1]}`;
+				url += `/${otherData[0]}/approve`;
 				message = ["審核成功！"];
 				break;
 			default:

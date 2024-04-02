@@ -13,7 +13,7 @@ const AlertDialog = ({ open, onClose, icon, title, content, disagreeText, agreeT
 
 	return (
 		<Dialog
-			open={open}
+			open={!!open}   //改個強迫轉bool 不然個人請假頁面log會出現紅色警訊
 			onClose={() => handleClose(false)}
 			aria-labelledby="alert-dialog-title"
 			aria-describedby="alert-dialog-description"
