@@ -18,6 +18,9 @@ import Maps from "./pages/Project/Maps";
 import Project from "./pages/Project/Project";
 import ProjectDocumentsManagement from "./pages/Project/Documents/Documents";
 import DispatchList from "./pages/DispatchList/DispatchList";
+// 行政管理系統
+import CarDispatch from "./pages/CarDispatch/CarDispatch";
+import MeetingRoomReservation from "./pages/MeetingRoomReservation/MeetingRoomReservation";
 // 人事管理系統
 import Users from "./pages/Users/Users";
 import AttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
@@ -105,6 +108,15 @@ const router = createBrowserRouter([
 			{
 				path: "/dispatchList",
 				element: <DispatchList />,
+			},
+			// 行政管理系統
+			{
+				path: "/cardispatch",
+				element: <CarDispatch />,
+			},
+			{
+				path: "/meetingroomreservation",
+				element: <MeetingRoomReservation />,
 			},
 			// 人事管理系統
 			{
