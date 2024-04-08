@@ -126,7 +126,7 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
 		},
 	};
 
-	/* 取得自身部門人員清單(去除自己) 因為現在還不用選代理人，先註解 */
+	/* 取得自身部門人員清單(去除自己) 代理人用 */
 	const [memberList, setMemberList] = useState([]);
 	const userProfile = useLocalStorageValue("userProfile");
 	useEffect(() => {
