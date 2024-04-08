@@ -165,7 +165,7 @@ const ViewModal = React.memo(
                   </Select>
                   {!editAgent && (
                     <EditIcon
-                      className="ms-5 cursor-pointer"
+                      className="translate-y-[2px] cursor-pointer"
                       fontSize="small"
                       onClick={() => {
                         setEditAgent(true);
