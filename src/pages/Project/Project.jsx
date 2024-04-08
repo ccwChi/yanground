@@ -158,15 +158,15 @@ const Project = () => {
       fabVariant: "success",
       fab: <AddIcon fontSize="large" />,
     },
-    // {
-    //   mode: "filter",
-    //   icon: null, // 設為 null 就可以避免 PC 出現
-    //   text: "篩選",
-    //   variant: "contained",
-    //   color: "secondary",
-    //   fabVariant: "secondary",
-    //   fab: <TuneIcon />,
-    // },
+    {
+      mode: "filter",
+      icon: null, // 設為 null 就可以避免 PC 出現
+      text: "篩選",
+      variant: "contained",
+      color: "secondary",
+      fabVariant: "secondary",
+      fab: <TuneIcon />,
+    },
   ];
 
   // 對照 api table 所顯示 key
@@ -463,19 +463,9 @@ const Project = () => {
     setFilters(data);
     setSearchDialogOpen(false);
 
-    // const fullDepartMember = [];
-    // if (data.departments.length > 0 && data.users.length === 0) {
-    //   const allMember = userList.map((user) => user.id);
-    //   fullDepartMember.push(...allMember);
-    //   data.users = fullDepartMember;
-    // }
-
     const fd = new FormData();
     for (let key in data) {
       switch (key) {
-        // case "users":
-        // 	fd.append(key, JSON.stringify(data[key]));
-        // 	break;
         case "since":
         case "until":
           if (data[key] !== null) {
@@ -600,7 +590,7 @@ const Project = () => {
         btnGroup={btnGroup}
         handleActionClick={handleActionClick}
         // 搜尋模式
-        searchMode={false}
+        searchMode={true}
         // 下面參數前提都是 searchMode = true
         searchDialogOpen={searchDialogOpen}
         handleOpenDialog={handleOpenSearch}

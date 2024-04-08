@@ -1,0 +1,44 @@
+/* original idea http://www.bootply.com/phf8mnMtpe */
+
+/* .tree {
+    min-height: 20px;
+    padding: 40px 30px;
+    margin-bottom: 20px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 5px;
+    overflow: auto;
+    height: 100%;
+} */
+
+@media (min-width: 640px) {
+  .tree li::before,
+  .tree li::after {
+    content: "";
+    left: -2.4rem;
+    position: absolute;
+    right: auto;
+  }
+
+  .tree li::before {
+    border-left: 3px solid rgb(214, 214, 214);
+    bottom: 5rem;
+    height: calc(100% + 3rem);
+    top: -0.55rem;
+    width: 1px;
+  }
+
+  .tree li::after {
+    border-top: 3px solid rgb(214, 214, 214);
+    height: 2rem;
+    top: 2.4rem;
+    width: 2.925rem;
+  }
+
+  .tree li:last-child:not([data-onlyOne="true"])::before {
+    height: 30px;
+  }
+
+  .tree li[data-onlyOne="true"]::before {
+    height: 50px;
+  }
+}

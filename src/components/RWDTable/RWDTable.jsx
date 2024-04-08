@@ -90,7 +90,7 @@ const RWDTable = ({
 															// icon={<DoneIcon />}
 															sx={{ fontWeight: "700", borderRadius: "4px", backgroundColor: "#21AA9C19" }}
 														/>
-													) : item.approveState === false ? (
+													) : item.rejectedAt === true ? (
 														<Chip
 															variant="outlined"
 															label={"審核不通過"}
@@ -384,7 +384,7 @@ const RWDTable = ({
 																// icon={<DoneIcon />}
 																sx={{ fontWeight: "700", borderRadius: "4px", backgroundColor: "#21AA9C19" }}
 															/>
-														) : item.approveState === false ? (
+														) : item.rejectedAt === true ? (
 															<Chip
 																variant="outlined"
 																label={"審核不通過"}

@@ -83,6 +83,7 @@ const AttendanceWaiverHRM = () => {
 	const [departmentList, setDepartmentList] = useState([]);
 	const [typeList, setTypeList] = useState([]);
 	const [userList, setUserList] = useState([]);
+	const [refreshDelivery, setRefreshDilivery] = useState(false);
 	// SearchDialog Switch
 	const [searchDialogOpen, setSearchDialogOpen] = useState(false);
 	/** 用 localstorage 的資訊確定是不是人資部，然後決定可以看單一部門還是全部部門 */
@@ -256,6 +257,7 @@ const AttendanceWaiverHRM = () => {
 							},
 							approvedAt: item.approvedAt ? formatDateTime(item.approvedAt) : "-",
 							approveState: item.approvedAt ? true : null,
+							rejectedAt: item.rejectedAt ? true: null,
 							remark: item.remark,
 						})),
 					};
@@ -366,8 +368,16 @@ const AttendanceWaiverHRM = () => {
 		let message = [];
 		switch (mode) {
 			case "approval":
-				url += `/${otherData[0]}/${otherData[1]}`;
+				url += `/${otherData[0]}/approve`;
 				message = ["審核成功！"];
+				break;
+			case "unapproval":
+				url += `/${otherData[0]}/approveBack`;
+				message = ["已退回此單！"];
+			break;
+			case "editAgent":
+				url += `/${otherData[0]}/agent`;
+				message = ["編輯代理人成功！"];
 				break;
 			default:
 				break;
@@ -376,6 +386,11 @@ const AttendanceWaiverHRM = () => {
 			if (result.status) {
 				showNotification(message[0], true);
 				getApiList(apiUrl);
+				if (mode === "editAgent") {
+					setRefreshDilivery(true);
+					setSendBackFlag(false);
+					return;
+				  }
 				onClose();
 			} else {
 				showNotification(
@@ -452,6 +467,15 @@ const AttendanceWaiverHRM = () => {
 		navigate(`?p=1&s=10&${searchParams.toString()}`);
 	};
 	// 到上面為止都是搜索功能 //
+
+  // 如果apiData被更新了 && 如果有deliveryInfo == 有打開model && 如果有refreshDelivery ==正在要求更改代理人
+  useEffect(() => {
+    if (refreshDelivery && deliverInfo) {
+      const prevDevId = deliverInfo.id;
+      setDeliverInfo(apiData?.content.find((item) => item.id === prevDevId));
+      setRefreshDilivery(false);
+    }
+  }, [apiData]);
 
 	// console.log("departmentList",departmentList)
 	// modal 開啟參數與顯示標題
