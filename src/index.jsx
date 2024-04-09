@@ -49,7 +49,7 @@ import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import "react-markdown-editor-lite/lib/index.css";
 import HRArrangeLeave from "./pages/HRArrangeLeave/HRArrangeLeave";
-import JobTitleManagementTree from "./pages/JobTitleManagement/JobTitleManagementTree";
+
 
 const router = createBrowserRouter([
 	{
@@ -82,10 +82,6 @@ const router = createBrowserRouter([
 			{
 				path: "/jobtitlemanagement",
 				element: <JobTitleManagement />,
-			},
-			{
-				path: "/jobtitlemanagementtree",
-				element: <JobTitleManagementTree />,
 			},
 			// Task Manager
 			{
