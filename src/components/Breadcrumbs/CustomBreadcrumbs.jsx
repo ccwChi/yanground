@@ -14,6 +14,7 @@ const nameMappings = [
 	{ name: "constructionsummary", display: "施工清單" },
 	{ name: "jobtitlemanagement", display: "職稱管理" },
 	{ name: "jobtitlemanagementtree", display: "職稱管理" },
+	{ name: "documentregistry", display: "專管文件總表" },
 	// 專管系統
 	{ name: "project", display: "專案管理" },
 	{ name: "dispatchList", display: "派工清單" },

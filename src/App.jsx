@@ -47,6 +47,7 @@ const App = () => {
 			subMenuItems: [
 				{ text: "工程類別", href: "constructionTypes" },
 				{ text: "職稱管理", href: "jobtitlemanagement" },
+				// { text: "專管文件總表", href: "documentregistry" },
 			],
 		},
 		{

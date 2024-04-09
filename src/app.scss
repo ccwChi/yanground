@@ -142,6 +142,58 @@ $z-index-a: 1040;
 	}
 }
 
+.custom_table table {
+	border-collapse: separate;
+	th,
+	td {
+		padding: 10px 6px;
+		outline: 1px solid rgb(212 212 212);
+		word-break: break-word;
+		&:nth-of-type(1),
+		&:nth-of-type(2),
+		&:nth-of-type(3),
+		&:nth-of-type(4) {
+			position: sticky;
+			left: 2px;
+			z-index: 1;
+			background-color: $bg-l-color-1;
+		}
+		&:nth-of-type(2) {
+			left: 44px;
+		}
+		&:nth-of-type(3) {
+			left: 166px;
+		}
+		&:nth-of-type(4) {
+			left: 308px;
+		}
+	}
+	thead tr {
+		th {
+			position: sticky;
+			top: 0;
+		}
+		&:nth-of-type(2) th {
+			top: 50px;
+		}
+	}
+	tr:nth-of-type(1) th {
+		&:nth-of-type(1),
+		&:nth-of-type(2),
+		&:nth-of-type(3),
+		&:nth-of-type(4) {
+			z-index: 2;
+		}
+	}
+	th {
+		text-align: center;
+		font-weight: 700;
+	}
+	td {
+		background-color: white;
+	}
+}
+
 //****** MUI END ******//
 
 .custom_Licon {

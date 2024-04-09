@@ -10,6 +10,7 @@ import ConstructionTypes from "./pages/Construction/ConstructionTypes";
 import ConstructionType from "./pages/Construction/Types/ConstructionType";
 import ConstructionJob from "./pages/Construction/Jobs/ConstructionJob";
 import JobTitleManagement from "./pages/JobTitleManagement/JobTitleManagement";
+import DocumentRegistry from "./pages/DocumentRegistry/DocumentRegistry";
 // Task Manager
 import ConstructionSummary from "./pages/ConstructionSummary/ConstructionSummary";
 import DispatchCalendar from "./pages/DispatchCalendar/DispatchCalendar";
@@ -86,6 +87,10 @@ const router = createBrowserRouter([
 			{
 				path: "/jobtitlemanagementtree",
 				element: <JobTitleManagementTree />,
+			},
+			{
+				path: "/documentregistry",
+				element: <DocumentRegistry />,
 			},
 			// Task Manager
 			{
