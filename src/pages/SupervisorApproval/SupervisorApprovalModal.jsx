@@ -79,31 +79,11 @@ const ReviewModal = React.memo(
     };
 
     const handleEditAgent = () => {
+      if (!selectAgent) {return}
       const fd = new FormData();
       fd.append("agent", selectAgent);
       sendDataToBackend(fd, "editAgent", [deliverInfo.id]);
     };
-
-
-    useEffect(() => {
-      if (userProfile?.department) {
-        getData(`department/${userProfile.department.id}/staff`).then(
-          (result) => {
-            const data = result.result;
-            const formattedUser = data
-              .filter((us) => userProfile.id !== us.id)
-              .map((us) => ({
-                label:
-                  us.lastname && us.firstname
-                    ? us.lastname + us.firstname
-                    : us.displayName,
-                value: us.id,
-              }));
-            setAgentList(formattedUser);
-          }
-        );
-      }
-    }, [userProfile]);
 
     useEffect(() => {
       if (!editAgent) {
@@ -194,7 +174,7 @@ const ReviewModal = React.memo(
                   </Select>
                   {!editAgent && (
                     <EditIcon
-                      className="ms-5 cursor-pointer"
+                      className="translate-y-[2px] cursor-pointer"
                       fontSize="small"
                       onClick={() => {
                         setEditAgent(true);
@@ -223,22 +203,6 @@ const ReviewModal = React.memo(
                   )}
                 </div>
               </div>
-              {/* 代理人結束 */}
-              {/* <div className="inline-flex flex-col sm:flex-row py-1 gap-1">
-							<div className="w-full">
-								<span>
-									代理人：
-									<span className={`${editAgent && "hidden"} font-bold`}>
-										{deliverInfo.agent.displayScreenName || "-"}
-									</span>
-								</span>
-							</div>
-						</div>
-						<div className="inline-flex flex-col sm:flex-row py-1 gap-1">
-							<p className="w-full">
-								申請緣由：<span className="font-bold">{deliverInfo.excuse || "-"}</span>
-							</p>
-						</div> */}
             </div>
             <div className="relative inline-flex flex-col justify-center border sm:px-4 px-3 py-2 rounded-sm bg-zinc-100 min-h-[140px] gap-2">
               {deliverInfo.approveState ? (

@@ -10,7 +10,7 @@
     height: 100%;
 } */
 
-@media (min-width: 640px) {
+@media (min-width: 576px) {
   .tree li::before,
   .tree li::after {
     content: "";
