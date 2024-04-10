@@ -107,6 +107,8 @@ const Users = () => {
 	const furl = "user";
 	const [apiUrl, setApiUrl] = useState("");
 	// useEffect(()=>{console.log("queryParams",queryParams,queryParams.get("department"))},[queryParams])
+	// 刷新 modal
+	const [refleshModal, setRefleshModal] = useState(true);
 
 	// 預設搜尋篩選內容
 	const getValueOrFilter = (queryParam, filter) => {
@@ -264,28 +266,28 @@ const Users = () => {
 			getData(url).then((result) => {
 				setIsLoading(false);
 				if (result.result) {
-                    const data = result.result;
-                    data.content = data.content.map((item) => {
-                        let displayScreenName = "";
+					const data = result.result;
+					data.content = data.content.map((item) => {
+						let displayScreenName = "";
 
-                        if (item.lastname && item.firstname) {
-                            displayScreenName = `${item.lastname}${item.firstname}`;
-                        } else if (item.lastname) {
-                            displayScreenName = item.lastname;
-                        } else if (item.firstname) {
-                            displayScreenName = item.firstname;
-                        } else if (item.nickname) {
-                            displayScreenName = item.nickname;
-                        } else {
-                            displayScreenName = item.displayName;
-                        }
-                        return {
-                            ...item,
-                            displayScreenName: displayScreenName,
-                        };
-                    });
-                    // console.log(data);
-                    setApiData(data);
+						if (item.lastname && item.firstname) {
+							displayScreenName = `${item.lastname}${item.firstname}`;
+						} else if (item.lastname) {
+							displayScreenName = item.lastname;
+						} else if (item.firstname) {
+							displayScreenName = item.firstname;
+						} else if (item.nickname) {
+							displayScreenName = item.nickname;
+						} else {
+							displayScreenName = item.displayName;
+						}
+						return {
+							...item,
+							displayScreenName: displayScreenName,
+						};
+					});
+					// console.log(data);
+					setApiData(data);
 
 					if (page > data.totalPages) {
 						setPage(0);
@@ -293,8 +295,8 @@ const Users = () => {
 						navigateWithParams(1, 10);
 					}
 				} else {
-                    setApiData(null);
-                }
+					setApiData(null);
+				}
 			});
 		},
 		[page]
@@ -436,6 +438,7 @@ const Users = () => {
 		} else {
 			setModalValue(dataMode);
 			setDeliverInfo(dataValue);
+			setRefleshModal(true);
 			// setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
 		}
 	};
@@ -444,6 +447,29 @@ const Users = () => {
 	const onClose = () => {
 		setModalValue(false);
 		setDeliverInfo(null);
+	};
+
+	// 產生員工編號
+	const generateEmployeeId = (id) => {
+		setSendBackFlag(true);
+		postData(`user/${id}/employeeId`).then((result) => {
+			if (result.status) {
+				showNotification("產生員工編號成功！", true);
+				getApiList(apiUrl);
+				setSendBackFlag(false);
+				setRefleshModal(true);
+			} else {
+				showNotification(
+					result.result.reason
+						? result.result.reason
+						: result.result
+						? result.result
+						: "發生無法預期的錯誤，請聯繫資訊部",
+					false
+				);
+				setSendBackFlag(false);
+			}
+		});
 	};
 
 	// modal 開啟參數與顯示標題
@@ -462,6 +488,9 @@ const Users = () => {
 					factorySiteList={factorySiteList}
 					WorkHourTypeList={workHourTypeList}
 					jobTitleList={jobTitleList}
+					generateEmployeeId={generateEmployeeId}
+					refleshModal={refleshModal}
+					setRefleshModal={setRefleshModal}
 				/>
 			),
 		},
