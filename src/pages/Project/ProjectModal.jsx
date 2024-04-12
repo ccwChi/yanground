@@ -310,7 +310,6 @@ const UpdatedModal = React.memo(
     };
 
     const handleDeleteContactNum = (index) => {
-      // 使用过滤函数过滤掉要删除的标签
       const [deleteClientContactNumber] = clientContactNumber.filter(
         (_, i) => i === index
       );
@@ -330,7 +329,6 @@ const UpdatedModal = React.memo(
       }
     };
     const handleDeleteLandLot = (index) => {
-      // 使用过滤函数过滤掉要删除的标签
       const [deleteLandLot] = landLot.filter((_, i) => i === index);
       setRefreshModal(false);
       const fd = new FormData();
