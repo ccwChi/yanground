@@ -3,7 +3,7 @@ import { getData, postData } from "../../utils/api";
 
 /* modal 元件們 */
 import ModalTemplete from "../Modal/ModalTemplete";
-import { Backdrop, Button, FormHelperText, MenuItem, Select, TextField } from "@mui/material";
+import { Backdrop, Button, CircularProgress, FormHelperText, MenuItem, Select, TextField } from "@mui/material";
 
 /* 用於抓自己資料 等之後開放選擇請假代理人會用到 */
 import useLocalStorageValue from "../../hooks/useLocalStorageValue";
@@ -39,9 +39,11 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
 	/* 汙染警告 modal 開啟 */
 	const [alertOpen, setAlertOpen] = useState(false);
 	const showNotification = useNotification();
-
+	const [memberList, setMemberList] = useState([]);
 	/* 打 api 的載入時間用 */
 	const [sendBackFlag, setSendBackFlag] = useState(false);
+    
+	const [isLoading, setIsLoading] = useState(true);
 
 	/* 下面僅關閉汙染警告視窗 */
 	const onCheckDirty = (value) => {
@@ -86,14 +88,32 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
 			}),
 	});
 
+	// 從帳戶資訊->考勤資訊進來的deliverInfo 跟從 請假申請進來的deliveryInfo結構不一樣
+	// 考勤進來的只有 deliverInfo.start: yyyy-MM-dd
+	// 請假進來的只有 date: yyyy-MM-dd
 	useEffect(() => {
-		if (deliverInfo) {
+		if (!!deliverInfo?.start) {
 			setValue("date", new Date(deliverInfo.start));
-		}
+		} 
 	}, [deliverInfo]);
 
+	const defaultValues = {
+		leave:deliverInfo?.attendanceValue ? deliverInfo?.attendanceValue || "" : "",
+		date:deliverInfo?.date ? new Date(deliverInfo.date) : null,
+		agent:"",
+		sinceTime:deliverInfo?.date ? deliverInfo.since.slice(11) || null : null,
+		untilTime:deliverInfo?.date ? deliverInfo.until.slice(11) || null : null,
+		excuse:deliverInfo?.excuse ? deliverInfo?.excuse || "" : "",
+	}
+	
+	useEffect(()=>{
+		if(memberList.length>0){
+			setValue("agent", deliverInfo?.agent ? deliverInfo?.agent || "" : "",);
+	}},[memberList])
+
+
 	const methods = useForm({
-		// defaultValues,
+		defaultValues,
 		resolver: yupResolver(schema),
 	});
 	const {
@@ -127,10 +147,11 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
 	};
 
 	/* 取得自身部門人員清單(去除自己) 代理人用 */
-	const [memberList, setMemberList] = useState([]);
+
 	const userProfile = useLocalStorageValue("userProfile");
 	useEffect(() => {
 		if (userProfile?.department) {
+			setIsLoading(true)
 			getData(
               `attendance/agent?p=1&s=50&id=${userProfile.id}`
             ).then((result) => {
@@ -143,6 +164,7 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
                 value: us.id,
               }));
               setMemberList(formattedUser);
+			  setIsLoading(false)
             });
 		}
 	}, [userProfile]);
@@ -150,6 +172,7 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
 	/* 提交表單資料到後端並執行相關操作 */
 	const onSubmit = (data) => {
 		setSendBackFlag(true);
+		// console.log("data", data)
 		let url = "me/leave";
 		let message = "送出表單成功";
 		const dateForApi = format(data.date, "yyyy-MM-dd", {
@@ -166,10 +189,13 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
 		if (dataForApi.type === "ANNUAL_LEAVE") {
 			delete dataForApi.excuse;
 		}
-
+		// console.log("dataForApi", dataForApi)
 		const fd = new FormData();
 		for (let key in dataForApi) {
 			fd.append(key, dataForApi[key]);
+		}
+		if (!!deliverInfo){
+			url = `me/attendanceWaiverForm/${deliverInfo.waiverId}`
 		}
 		postData(url, fd).then((result) => {
 			if (result.status) {
@@ -248,10 +274,16 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
 												name="agent"
 												control={control}
 												defaultValue={""}
+												disabled={isLoading}
 												render={({ field }) => (
+													
 													<Select className="inputPadding" displayEmpty MenuProps={MenuProps} fullWidth {...field}>
 														<MenuItem value="" disabled>
 															<span className="text-neutral-400 font-light">請選擇代理人</span>
+															{isLoading && 
+															<span className="absolute right-12 top-3">
+															<CircularProgress color="primary" size={18} />
+															</span>}
 														</MenuItem>
 
 														{memberList?.map((dep) => (
@@ -260,6 +292,7 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
 															</MenuItem>
 														))}
 													</Select>
+													
 												)}
 											/>
 										</div>
