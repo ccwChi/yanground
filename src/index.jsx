@@ -50,6 +50,7 @@ import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import "react-markdown-editor-lite/lib/index.css";
 import HRArrangeLeave from "./pages/HRArrangeLeave/HRArrangeLeave";
+import UserNew from "./pages/UserNew/UserNew";
 
 
 const router = createBrowserRouter([
@@ -123,6 +124,10 @@ const router = createBrowserRouter([
 			{
 				path: "/users",
 				element: <Users />,
+			},
+			{
+				path: "/usernew",
+				element: <UserNew />,
 			},
 			{
 				path: "/attendancecalendar",

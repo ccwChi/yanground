@@ -492,7 +492,7 @@ const AttendanceView = () => {
   // 傳遞給後端資料
   const sendDataToBackend = (fd, mode, otherData) => {
     setSendBackFlag(true);
-    let url = "supervisor/attendanceForm";
+    let url = "attendanceWaiverForm";
     let message = [];
     switch (mode) {
       case "create":

@@ -169,6 +169,7 @@ const UpdatedModal = React.memo(
       if (deliverInfo && refreshModal) {
         getData(`project/${deliverInfo}`).then((result) => {
           const data = result.result;
+          // console.log(data)
           setApiData(data);
         });
       }

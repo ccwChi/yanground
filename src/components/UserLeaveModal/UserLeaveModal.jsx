@@ -173,7 +173,7 @@ const UserLeaveModal = ({ onClose, isOpen, setReflesh, attendanceTypeList, deliv
 	const onSubmit = (data) => {
 		setSendBackFlag(true);
 		// console.log("data", data)
-		let url = "me/leave";
+		let url = "me/attendance";
 		let message = "送出表單成功";
 		const dateForApi = format(data.date, "yyyy-MM-dd", {
 			locale: zhTW,

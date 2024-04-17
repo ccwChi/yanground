@@ -338,11 +338,11 @@ const SupervisorApproval = () => {
         message = ["審核成功！"];
         break;
       case "unapproval":
-        url = `supervisor/${otherData[0]}/approveBack`;
+        url += `/${otherData[0]}/approveBack`;
         message = ["已退回此單！"];
         break;
       case "editAgent":
-        url += `/new/${otherData[0]}`;
+        url += `/${otherData[0]}`;
         message = ["編輯代理人成功！"];
         break;
       default:
