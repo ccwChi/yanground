@@ -20,7 +20,7 @@ const nameMappings = [
 	{ name: "dispatchList", display: "派工清單" },
 	// 行政管理系統
 	{ name: "cardispatch", display: "公務車調度" },
-	{ name: "meetingroomreservation", display: "會議室預約" },
+	{ name: "conferenceroomappointment", display: "會議室預約" },
 	// 人事管理系統
 	{ name: "users", display: "人事管理" },
 	{ name: "attendancecalendar", display: "考勤紀錄" },

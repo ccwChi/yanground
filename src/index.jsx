@@ -21,7 +21,7 @@ import ProjectDocumentsManagement from "./pages/Project/Documents/Documents";
 import DispatchList from "./pages/DispatchList/DispatchList";
 // 行政管理系統
 import CarDispatch from "./pages/CarDispatch/CarDispatch";
-import MeetingRoomReservation from "./pages/MeetingRoomReservation/MeetingRoomReservation";
+import ConferenceRoomAppointment from "./pages/ConferenceRoomAppointment/ConferenceRoomAppointment";
 // 人事管理系統
 import Users from "./pages/Users/Users";
 import AttendanceCalendar from "./pages/AttendanceCalendar/AttendanceCalendar";
@@ -50,7 +50,6 @@ import "./assets/styles/tailwindcss.sass";
 import "./index.scss";
 import "react-markdown-editor-lite/lib/index.css";
 import HRArrangeLeave from "./pages/HRArrangeLeave/HRArrangeLeave";
-
 
 const router = createBrowserRouter([
 	{
@@ -116,8 +115,8 @@ const router = createBrowserRouter([
 				element: <CarDispatch />,
 			},
 			{
-				path: "/meetingroomreservation",
-				element: <MeetingRoomReservation />,
+				path: "/conferenceroomappointment",
+				element: <ConferenceRoomAppointment />,
 			},
 			// 人事管理系統
 			{
@@ -210,7 +209,7 @@ const router = createBrowserRouter([
 			{
 				path: "*",
 				element: <ErrorPages />,
-			}
+			},
 		],
 	},
 ]);

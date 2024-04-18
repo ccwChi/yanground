@@ -49,7 +49,7 @@ const CarDispatch = () => {
 	// Category
 	const tabGroup = [
 		{ f: "loanStatusTable", text: "狀況管理" },
-		{ f: "reservationCalendar", text: "預約月曆" },
+		{ f: "appointmentCalendar", text: "預約月曆" },
 	];
 	const [cat, setCat] = useState(
 		queryParams.has("cat") && tabGroup.some((tab) => tab.f === queryParams.get("cat"))
@@ -193,7 +193,7 @@ const CarDispatch = () => {
 						// ) : (
 						// 	<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
 						// );
-						case "reservationCalendar": // 預約月曆
+						case "appointmentCalendar": // 預約月曆
 							// return apiDataCalendar ? (
 							return (
 								<Calendar
