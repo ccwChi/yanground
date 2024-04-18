@@ -9,6 +9,7 @@ import { utcToZonedTime } from "date-fns-tz";
 // MUI
 import Backdrop from "@mui/material/Backdrop";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
 
@@ -64,7 +65,7 @@ const UserLeave = () => {
 	const [reflesh, setReflesh] = useState(true);
 	const [isOpen, setIsOpen] = useState(false);
 	// ApiUrl
-	const furl = "me/leave";
+	const furl = "me/attendanceWaiverForm";
 	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
 
 	// 轉換時間
@@ -103,7 +104,10 @@ const UserLeave = () => {
 		{ key: "until", label: "結束時間" },
 	];
 
-	const actions = [{ value: "delete", icon: <DeleteIcon />, title: "刪除" }];
+	const actions = [
+		{ value: "delete", icon: <DeleteIcon />, title: "刪除" },
+		{ value: "leaveEdit", icon: <EditIcon />, title: "編輯" },
+	];
 
 	// 取得請假類別
 	useEffect(() => {
@@ -135,15 +139,21 @@ const UserLeave = () => {
 					const transformedData = {
 						...data,
 						content: data.content.map((item) => ({
-							spectiallyKey: item.since ? formatDateTime(item.since).slice(0, 10) + " " + item.type.chinese : "-",
-							fullname: `${item.user.lastname}${item.user.firstname}`,
-							department: item.user.department,
-							id: item.id,
-							date: item.date,
-							attendance: item.type.chinese,
+							spectiallyKey: item.attendance.since ? formatDateTime(item.attendance.since).slice(0, 10) + " " + item.attendance.type.chinese : item.attendance.date+" 缺勤",
+							fullname: `${item.attendance.user.lastname}${item.attendance.user.firstname}`,
+							department: item.attendance.user.department,
+							id: item.attendance.id,
+							date: item.attendance.date,
+							attendance: item.type.value !== "LEAVE" ? item.type.chinese  : !item.attendance.type.leave ? "缺勤" : item.attendance.type.chinese ,
+							attendanceValue: item.type.value !== "LEAVE" ? item.type.chinese  : !item.attendance.type.leave ? null : item.attendance.type.value ,
 							excuse: item.excuse ? item.excuse : "",
-							since: item.since ? formatDateTime(item.since) : "-",
-							until: item.until ? formatDateTime(item.until) : "-",
+							since: item.attendance.since ? formatDateTime(item.attendance.since) :  !item.attendance.type.leave ?item.attendance.date :"-",
+							until: item.attendance.until ? formatDateTime(item.attendance.until) :  !item.attendance.type.leave ?item.attendance.date :"-",
+							waiverId:item.id,
+							isLeaveApplication: item.attendance.type.leave,
+							agent:item.agent?.id ? item.agent.id : null,
+							approvedAt: item.approvedAt ? item.approvedAt : null,
+							approver: item.approver ? item.approver : null,
 						})),
 					};
 					setApiData(transformedData);
@@ -161,7 +171,7 @@ const UserLeave = () => {
 		},
 		[page]
 	);
-
+    //
 	// 設置頁數
 	const handleChangePage = useCallback((event, newPage) => {
 		setPage(newPage);
@@ -182,13 +192,26 @@ const UserLeave = () => {
 		const dataMode = event.currentTarget.getAttribute("data-mode");
 		const dataValue = event.currentTarget.getAttribute("data-value");
 
-		setModalValue(dataMode);
+		// setModalValue(dataMode);
 		setIsOpen(true);
 		setDeliverInfo(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null);
-		if (dataMode === "delete") {
-			setAlertOpen(true);
+		// console.log(dataValue ? apiData?.content.find((item) => item.id === dataValue) : null)
+		const isLeaveApplication = apiData?.content.find((item) => item.id === dataValue)?.isLeaveApplication || null
+		if (dataMode === "leaveapplication"){
+			setModalValue(dataMode);
 		}
-	};
+		if (dataMode === "delete" && isLeaveApplication) 
+		{
+			setAlertOpen(true);
+		} else if (dataMode === "delete" && !isLeaveApplication) {
+			showNotification("非假單，無法刪除！", false);
+		}
+		if (dataMode === "leaveEdit" && isLeaveApplication) {
+			setModalValue(dataMode);
+		} else if (dataMode === "leaveEdit" && !isLeaveApplication){
+			showNotification("非假單，無法編輯！", false);
+		}
+		};
 
 	const handleAlertClose = async (agree) => {
 		if (agree) {
@@ -199,8 +222,8 @@ const UserLeave = () => {
 
 	const deleteLeave = () => {
 		setSendBackFlag(true);
-		const deleteId = deliverInfo.id;
-		const url = `me/leave/${deleteId}`;
+		const deleteId = deliverInfo.waiverId;
+		const url = `me/attendanceWaiverForm/${deleteId}`;
 		const message = "刪除該筆假單成功";
 		deleteData(url).then((result) => {
 			if (result.status) {
@@ -244,6 +267,18 @@ const UserLeave = () => {
 					setReflesh={setReflesh}
 				/>
 			),
+		},{
+			modalValue: "leaveEdit",
+			modalComponent: (
+				<UserLeaveModal
+					title={"假單編輯"}
+					attendanceTypeList={attendanceTypeList}
+					deliverInfo={deliverInfo}
+					onClose={onClose}
+					isOpen={isOpen}
+					setReflesh={setReflesh}
+				/>
+			),
 		},
 	];
 	const config = modalValue ? modalConfig.find((item) => item.modalValue === modalValue) : null;
@@ -253,7 +288,7 @@ const UserLeave = () => {
 			{/* PageTitle */}
 			<PageTitle
 				title="請假申請"
-				description={"此頁面是用於查看自己請假清單以及請假申請用。"}
+				description={"此頁面是用於查看自己請假清單以及請假申請用，僅有自己申請的假單可以編輯刪除，系統產生的則無法。"}
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
 				isLoading={!isLoading}

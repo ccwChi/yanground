@@ -59,6 +59,7 @@ const defaultValue = {
 	authorities: [],
 	startedFrom: null,
 	startedTo: null,
+	isResign:false
 };
 
 const Users = () => {
@@ -133,6 +134,7 @@ const Users = () => {
 		authorities: getValueOrFilter("authorities", filters.authorities),
 		startedFrom: filters.startedFrom, // getValueOrFilter("startedFrom", filters.startedFrom),
 		startedTo: filters.startedTo, // getValueOrFilter("startedTo", filters.startedTo),
+		isResign: filters.isResign
 	};
 
 	// 使用 useForm Hook 來管理表單狀態和驗證
@@ -651,6 +653,20 @@ const Users = () => {
 										<FormControlLabel value={""} control={<Radio color="secondary" size="small" />} label="全部" />
 										<FormControlLabel value={false} control={<Radio color="secondary" size="small" />} label="女性" />
 										<FormControlLabel value={true} control={<Radio color="secondary" size="small" />} label="男性" />
+									</RadioGroup>
+								)}
+							/>
+						</div>
+						<div className="inline-flex items-center justify-between gap-2">
+							<InputTitle title={"在職狀態"} classnames="whitespace-nowrap pb-1" pb={false} required={false} />
+							<Controller
+								name="isResign"
+								control={control}
+								render={({ field }) => (
+									<RadioGroup className="inputPadding" row label="在職中" {...field}>
+										<FormControlLabel value={""} control={<Radio color="secondary" size="small" />} label="全部" />
+										<FormControlLabel value={false} control={<Radio color="secondary" size="small" />} label="在職中" />
+										<FormControlLabel value={true} control={<Radio color="secondary" size="small" />} label="離職" />
 									</RadioGroup>
 								)}
 							/>

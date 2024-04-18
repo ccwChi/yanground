@@ -82,7 +82,7 @@ const App = () => {
 			text: "人事管理系統",
 			href: "#",
 			subMenuItems: [
-				{ text: "人事管理", href: "users" },
+				{ text: "人事管理", href: "users?isResign=false" },
 				// { text: "考勤紀錄", href: "attendancecalendar" },
 				{ text: "考勤檢視", href: "attendanceview" },
 				{ text: "考勤報表", href: "attendancereport" },
