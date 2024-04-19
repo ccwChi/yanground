@@ -51,7 +51,12 @@ const ConferenceRoomAppointment = () => {
 	// 解析網址取得參數
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);
-	const calendardate = [queryParams.get("calendaryears"), queryParams.get("calendarmonths")];
+	// 定義年份和月份的狀態// 取得當前月份
+	const currentMonth = new Date().getMonth() + 1;
+	const [year, setYear] = useState(queryParams.get("calendaryears") || new Date().getFullYear());
+	const [month, setMonth] = useState(
+		queryParams.get("calendarmonths") || currentMonth < 10 ? "0" + currentMonth : currentMonth
+	);
 	// 路由記憶切換
 	const navigateWithParams = useNavigateWithParams();
 	// 通知
@@ -97,8 +102,26 @@ const ConferenceRoomAppointment = () => {
 	 * 1: 是否確認刪除視窗
 	 **/
 	const [alertOpen, setAlertOpen] = useState(0);
+
 	// API URL
 	const furl = cat === "roomManage" ? "conferenceRoom" : "conferenceRoomBooking";
+
+	// 監聽 URL 查詢參數的變化並更新相應的狀態
+	useEffect(() => {
+		const yearParam = queryParams.get("calendaryears");
+		const monthParam = queryParams.get("calendarmonths");
+
+		if (yearParam) {
+			setYear(yearParam);
+		}
+
+		if (monthParam) {
+			setMonth(monthParam.length === 1 ? "0" + monthParam : monthParam);
+		}
+	}, [queryParams]);
+
+	const calendardate = [year, month];
+
 	let apiUrl;
 	if (cat === "appointmentCalendar") {
 		apiUrl = `${furl}/${calendardate[0]}/${calendardate[1]}?p=1&s=500`;
