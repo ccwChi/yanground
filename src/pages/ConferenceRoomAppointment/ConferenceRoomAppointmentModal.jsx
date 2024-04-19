@@ -276,15 +276,19 @@ const AppointmentModal = React.memo(({ title, deliverInfo, departmentsList, send
 	});
 
 	// 初始預設 default 值
-	console.log(apiData);
 	const defaultValues = {
 		dep: apiData ? { id: apiData.applicant.department.id, label: apiData.applicant.department.name } : null,
 		applicant: apiData
 			? { id: apiData.applicant.id, label: `${apiData.applicant.lastname}${apiData.applicant.firstname}` }
 			: null,
-		conferenceRoom: apiData ? { id: apiData.conferenceRoom.id, label: apiData.conferenceRoom.name } : null,
-		sinceDate: null,
-		endDate: null,
+		conferenceRoom: apiData
+			? {
+					id: apiData.conferenceRoom.id,
+					label: `〔${apiData.conferenceRoom.factorySite.chinese}〕${apiData.conferenceRoom.name}`,
+			  }
+			: null,
+		sinceDate: apiData ? new Date(apiData.since.slice(0, -6)) : null,
+		endDate: apiData ? new Date(apiData.until.slice(0, -6)) : null,
 	};
 
 	// 使用 useForm Hook 來管理表單狀態和驗證
@@ -304,12 +308,6 @@ const AppointmentModal = React.memo(({ title, deliverInfo, departmentsList, send
 	} = methods;
 	const watchSinceDate = watch("sinceDate");
 	const watchDep = watch("dep");
-
-	useEffect(() => {
-		if (getValues("endDate") !== null) {
-			setValue("endDate", null);
-		}
-	}, [watchSinceDate]);
 
 	useEffect(() => {
 		if (getValues("dep") !== null) {
@@ -345,7 +343,10 @@ const AppointmentModal = React.memo(({ title, deliverInfo, departmentsList, send
 		getData("conferenceRoom?p=1&s=500").then((result) => {
 			if (result.result) {
 				const data = result.result.content;
-				const formattedDep = data.map((item) => ({ label: item.name, id: item.id }));
+				const formattedDep = data.map((item) => ({
+					label: `〔${item.factorySite.chinese}〕${item.name}`,
+					id: item.id,
+				}));
 				setConferenceRoomList(formattedDep);
 			} else {
 				setConferenceRoomList([]);
@@ -356,7 +357,6 @@ const AppointmentModal = React.memo(({ title, deliverInfo, departmentsList, send
 
 	// 提交表單資料到後端並執行相關操作
 	const onSubmit = (data) => {
-		console.log(data);
 		const fd = new FormData();
 		fd.append("applicant", data.applicant.id);
 		fd.append("conferenceRoomId", data.conferenceRoom.id);
@@ -364,7 +364,7 @@ const AppointmentModal = React.memo(({ title, deliverInfo, departmentsList, send
 		fd.append("until", format(new Date(data.endDate), "yyyy-MM-dd'T'HH:mm"));
 
 		if (deliverInfo) {
-			sendDataToBackend(fd, "editAppointment", data.name, deliverInfo);
+			sendDataToBackend(fd, "editAppointment", null, deliverInfo);
 		} else {
 			sendDataToBackend(fd, "createAppointment", { room: data.conferenceRoom.label, applicant: data.applicant.label });
 		}
@@ -585,6 +585,10 @@ const AppointmentModal = React.memo(({ title, deliverInfo, departmentsList, send
 										minDateTime={new Date("2023-11")}
 										minutesStep={1}
 										views={["year", "day", "hours", "minutes"]}
+										onChange={(newValue) => {
+											setValue("sinceDate", newValue, { isDirty: true });
+											setValue("endDate", null);
+										}}
 									/>
 								</div>
 								<div className="w-full">
@@ -592,20 +596,19 @@ const AppointmentModal = React.memo(({ title, deliverInfo, departmentsList, send
 									<ControlledTimePicker
 										name="endDate"
 										format="yyyy-MM-dd a h:m"
-										// minDateTime={watchSinceDate}
 										minDateTime={(() => {
 											if (watchSinceDate) {
 												const adjustedDate = new Date(watchSinceDate);
-												adjustedDate.setHours(adjustedDate.getHours() + 1);
+												adjustedDate.setMinutes(adjustedDate.getMinutes() + 1);
 												return adjustedDate;
 											} else {
 												return null;
 											}
 										})()}
 										maxDateTime={(() => {
-											const today = new Date();
-											today.setHours(23, 59, 59, 999);
-											return today;
+											const day = new Date(watchSinceDate);
+											day.setHours(23, 59, 59, 999);
+											return day;
 										})()}
 										disabled={!watchSinceDate}
 										views={["year", "day", "hours", "minutes"]}

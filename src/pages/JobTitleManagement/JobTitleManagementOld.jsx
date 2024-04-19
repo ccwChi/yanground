@@ -117,7 +117,7 @@ const JobTitleManagement = () => {
 	);
 	// 取得部門資料
 	useEffect(() => {
-		getData("department").then((result) => {
+		getData("department?p=1&s=100").then((result) => {
 			if (result.result) {
 				const data = result.result.content;
 				const formattedDep = data.map((dep) => ({ label: dep.name, id: dep.id }));

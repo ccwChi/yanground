@@ -25,7 +25,7 @@ const Home = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	useEffect(() => {
 		// let staffNum, depNum;
-		// Promise.all([getData("user?p=1&s=1"), getData("department")])
+		// Promise.all([getData("user?p=1&s=1"), getData("department?p=1&s=100")])
 		// 	.then(([userResult, departmentResult]) => {
 		// 		staffNum = userResult.result.totalElements;
 		// 		depNum = departmentResult.result.totalElements;

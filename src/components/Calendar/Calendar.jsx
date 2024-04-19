@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { format } from "date-fns";
+
 // FullCalendar
 import interactionPlugin from "@fullcalendar/interaction";
 import zhTwLocale from "@fullcalendar/core/locales/zh-tw";
@@ -7,6 +9,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import listPlugin from "@fullcalendar/list";
 import multiMonthPlugin from "@fullcalendar/multimonth";
+
 // MUI
 import useMediaQuery from "@mui/material/useMediaQuery";
 import IconButton from "@mui/material/IconButton";
@@ -49,6 +52,22 @@ const Calendar = ({
 	const [activeButton, setActiveButton] = useState("");
 	const [calendarTitle, setCalendarTitle] = useState("");
 	const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+
+	useEffect(() => {
+		const currentDate = new Date();
+		const year = currentDate.getFullYear();
+		const month = currentDate.getMonth() + 1;
+
+		navigateWithParams(
+			0,
+			0,
+			{
+				calendaryears: year,
+				calendarmonths: month < 10 ? "0" + month : month,
+			},
+			false
+		);
+	}, []);
 
 	useEffect(() => {
 		if (!customInitialView || isIOS) {
@@ -141,11 +160,13 @@ const Calendar = ({
 							</Tooltip>
 						</>
 					)}
-					{todayButton &&	<Tooltip title="今日">
-						<IconButton onClick={() => calendarRef.current.getApi().today()} sx={{ mr: 0.5 }}>
-							<TodayIcon fontSize="small" />
-						</IconButton>
-					</Tooltip>}
+					{todayButton && (
+						<Tooltip title="今日">
+							<IconButton onClick={() => calendarRef.current.getApi().today()} sx={{ mr: 0.5 }}>
+								<TodayIcon fontSize="small" />
+							</IconButton>
+						</Tooltip>
+					)}
 				</div>
 				{!isTargetScreenSm && (
 					<div className="sm:absolute left-0 right-0 mx-auto font-bold text-primary-900 lg:text-2xl md:text-xl text-lg opacity-80 tracking-wide w-fit">
@@ -192,8 +213,17 @@ const Calendar = ({
 				firstDay={1}
 				datesSet={(dateInfo) => {
 					const ctitle = dateInfo.view.title;
+					const cmonth = dateInfo.view.currentStart;
 					setCalendarTitle(ctitle);
-					navigateWithParams(0, 0, { calendaryears: ctitle.slice(0, 4) }, false);
+					navigateWithParams(
+						0,
+						0,
+						{
+							calendaryears: ctitle.slice(0, 4),
+							calendarmonths: format(new Date(cmonth), "yyyy-MM-dd", { timeZone: "Asia/Taipei" }).match(/-(\d+)-/)[1],
+						},
+						false
+					);
 				}}
 				events={data}
 				// 最多顯示多少個

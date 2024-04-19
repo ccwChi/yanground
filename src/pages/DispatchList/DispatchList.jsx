@@ -124,7 +124,7 @@ const DispatchList = () => {
 
 	// 取得部門資料
 	useEffect(() => {
-		getData("department").then((result) => {
+		getData("department?p=1&s=100").then((result) => {
 			const data = result.result?.content;
 			setDepartmentList(data);
 		});
@@ -157,13 +157,9 @@ const DispatchList = () => {
 				onClose();
 			} else {
 				showNotification(
-					result.result.reason
-					  ? result.result.reason
-					  : (result.result
-					  ? result.result
-					  : "權限不足"),
+					result.result.reason ? result.result.reason : result.result ? result.result : "權限不足",
 					false
-				  );
+				);
 			}
 			setSendBackFlag(false);
 		});

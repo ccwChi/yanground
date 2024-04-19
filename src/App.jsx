@@ -68,15 +68,15 @@ const App = () => {
 				// { text: "派工清單 (臨時)", href: "dispatchList" },
 			],
 		},
-		// {
-		// 	icon: faCalendarCheck,
-		// 	text: "行政管理系統",
-		// 	href: "#",
-		// 	subMenuItems: [
-		// 		{ text: "會議室預約", href: "conferenceroomappointment" },
-		// 		{ text: "公務車調度", href: "cardispatch" },
-		// 	],
-		// },
+		{
+			icon: faCalendarCheck,
+			text: "行政管理系統",
+			href: "#",
+			subMenuItems: [
+				{ text: "會議室預約", href: "conferenceroomappointment" },
+				// { text: "公務車調度", href: "cardispatch" },
+			],
+		},
 		{
 			icon: faUsersGear,
 			text: "人事管理系統",

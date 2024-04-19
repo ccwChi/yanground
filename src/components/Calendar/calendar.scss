@@ -35,6 +35,10 @@
 	background-color: $white-color;
 	border-radius: 0.5rem;
 	overflow: hidden;
+	.fc-timegrid-axis-frame a {
+		font-weight: 700;
+		color: white;
+	}
 	.fc-col-header-cell a {
 		font-weight: 700;
 		color: white;
@@ -104,8 +108,8 @@
 		}
 	}
 }
-.staffrosterCalendar{
-	.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events{
+.staffrosterCalendar {
+	.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events {
 		min-height: 0;
 	}
 }

@@ -9,6 +9,7 @@ import { utcToZonedTime } from "date-fns-tz";
 
 // MUI
 import Backdrop from "@mui/material/Backdrop";
+import Tooltip from "@mui/material/Tooltip";
 import AddIcon from "@mui/icons-material/Add";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
@@ -32,6 +33,15 @@ import { useNotification } from "../../hooks/useNotification";
 // Utils
 import { getData, postData, deleteData } from "../../utils/api";
 
+// 轉換時間
+const formatDateTime = (dateTime) => {
+	const parsedDateTime = parseISO(dateTime);
+	const formattedDateTime = format(utcToZonedTime(parsedDateTime, "Asia/Taipei"), "yyyy-MM-dd HH:mm", {
+		locale: zhTW,
+	});
+	return formattedDateTime;
+};
+
 /***
  * Conference Room Appointment
  * 會議室預約
@@ -41,6 +51,7 @@ const ConferenceRoomAppointment = () => {
 	// 解析網址取得參數
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);
+	const calendardate = [queryParams.get("calendaryears"), queryParams.get("calendarmonths")];
 	// 路由記憶切換
 	const navigateWithParams = useNavigateWithParams();
 	// 通知
@@ -66,7 +77,7 @@ const ConferenceRoomAppointment = () => {
 	const [sendBackFlag, setSendBackFlag] = useState(false);
 	// 部門清單
 	const [departmentsList, setDepartmentsList] = useState([]);
-	// 部門清單
+	// 廠別清單
 	const [factorySiteList, setFactorySiteList] = useState([]);
 	// Category
 	const tabGroup = [
@@ -79,14 +90,21 @@ const ConferenceRoomAppointment = () => {
 			? queryParams.get("cat")
 			: tabGroup[0].f
 	);
+
 	/**
 	 * Alert 開關
 	 * 0: 關閉
 	 * 1: 是否確認刪除視窗
 	 **/
 	const [alertOpen, setAlertOpen] = useState(0);
+	// API URL
 	const furl = cat === "roomManage" ? "conferenceRoom" : "conferenceRoomBooking";
-	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
+	let apiUrl;
+	if (cat === "appointmentCalendar") {
+		apiUrl = `${furl}/${calendardate[0]}/${calendardate[1]}?p=1&s=500`;
+	} else {
+		apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
+	}
 
 	// 上方區塊功能按鈕清單
 	const btnGroup = [
@@ -116,8 +134,8 @@ const ConferenceRoomAppointment = () => {
 	if (cat === "roomManage") {
 		// 對照 api table 所顯示 key
 		columnsPC = [
-			{ key: ["factorySite", "chinese"], label: "廠別", size: "33%" },
-			{ key: ["name"], label: "會議室名稱", size: "33%" },
+			{ key: ["factorySite", "chinese"], label: "廠別", size: "20%", align: "left" },
+			{ key: ["name"], label: "會議室名稱", size: "60%", align: "left" },
 		];
 		columnsMobile = [
 			{ key: ["factorySite", "chinese"], label: "廠別" },
@@ -134,18 +152,18 @@ const ConferenceRoomAppointment = () => {
 		columnsPC = [
 			{ key: ["applicant"], label: "預約者", size: "12%" },
 			{ key: ["appliedAt"], label: "預約時間", size: "16%" },
-			{ key: ["conferenceRoom", "factorySite", "chinese"], label: "工廠站點", size: "12%" },
-			{ key: ["conferenceRoom", "name"], label: "會議室名稱", size: "15%" },
-			{ key: ["since"], label: "開始時間", size: "16%" },
-			{ key: ["until"], label: "結束時間", size: "16%" },
+			{ key: ["conferenceRoom", "factorySite", "chinese"], label: "工廠站點", size: "10%", align: "left" },
+			{ key: ["conferenceRoom", "name"], label: "會議室名稱", size: "18%", align: "left" },
+			{ key: ["start"], label: "開始時間", size: "16%" },
+			{ key: ["end"], label: "結束時間", size: "16%" },
 		];
 		columnsMobile = [
 			{ key: ["applicant"], label: "預約者" },
 			{ key: ["appliedAt"], label: "預約時間" },
 			{ key: ["conferenceRoom", "factorySite", "chinese"], label: "工廠站點" },
 			{ key: ["conferenceRoom", "name"], label: "會議室名稱" },
-			{ key: ["since"], label: "開始時間" },
-			{ key: ["until"], label: "結束時間" },
+			{ key: ["start"], label: "開始時間" },
+			{ key: ["end"], label: "結束時間" },
 		];
 
 		// 功能操作按鈕
@@ -155,13 +173,23 @@ const ConferenceRoomAppointment = () => {
 		];
 	}
 
-	// 轉換時間
-	const formatDateTime = (dateTime) => {
-		const parsedDateTime = parseISO(dateTime);
-		const formattedDateTime = format(utcToZonedTime(parsedDateTime, "Asia/Taipei"), "yyyy-MM-dd HH:mm", {
-			locale: zhTW,
-		});
-		return formattedDateTime;
+	// Event 點擊
+	const handleEventClick = (eventClickInfo) => {
+		const event = eventClickInfo.event;
+		alert(
+			"會議室：" +
+				event.title +
+				"\n" +
+				"預約者：" +
+				event.extendedProps.applicant +
+				"\n" +
+				"預約時間(起)：" +
+				formatDateTime(event.extendedProps.since) +
+				"\n" +
+				"預約時間(迄)：" +
+				formatDateTime(event.extendedProps.until) +
+				"\n"
+		);
 	};
 
 	// 取得列表資料
@@ -175,20 +203,21 @@ const ConferenceRoomAppointment = () => {
 				setIsLoading(false);
 				if (result.result) {
 					const data = result.result;
-					if (data?.content[0].factorySite !== undefined) {
+					if (data?.content[0]?.factorySite !== undefined) {
 						setApiData(data);
 					} else {
 						const formattedData = {
 							...data,
 							content: data.content.map((item) => ({
 								...item,
+								title: `〔${item.conferenceRoom.factorySite.chinese}〕${item.conferenceRoom.name}`,
 								applicant: `${item.applicant.lastname}${item.applicant.firstname}`,
 								appliedAt: formatDateTime(item.appliedAt),
-								since: formatDateTime(item.since),
-								until: formatDateTime(item.until),
-								displayTable: `〔${formatDateTime(item.since).slice(0, 10)}〕${item.conferenceRoom.name} (${
-									item.conferenceRoom.factorySite.chinese
-								})`,
+								start: formatDateTime(item.since),
+								end: formatDateTime(item.until),
+								displayTable: `〔${item.conferenceRoom.factorySite.chinese}〕${
+									item.conferenceRoom.name
+								} (${formatDateTime(item.since).slice(0, 10)})`,
 							})),
 						};
 						setApiData(formattedData);
@@ -249,15 +278,19 @@ const ConferenceRoomAppointment = () => {
 		switch (mode) {
 			case "createRoom":
 				url = "conferenceRoom";
-				message = [`名為「${otherData}」的會議室建立成功！`];
+				message = `名為「${otherData}」的會議室建立成功！`;
 				break;
 			case "editRoom":
 				url = "conferenceRoom/" + id;
-				message = [`名為「${otherData}」的會議室編輯成功！`];
+				message = `名為「${otherData}」的會議室編輯成功！`;
 				break;
 			case "createAppointment":
 				url = "conferenceRoomBooking";
-				message = [`「${otherData.room}」會議室已被「${otherData.applicant}」申請成功！`];
+				message = "已建立會議室預約單成功！";
+				break;
+			case "editAppointment":
+				url = "conferenceRoomBooking/" + id;
+				message = "已編輯會議室預約單成功！";
 				break;
 			default:
 				break;
@@ -265,7 +298,7 @@ const ConferenceRoomAppointment = () => {
 
 		postData(url, fd).then((result) => {
 			if (result.status) {
-				showNotification(message[0], true);
+				showNotification(message, true);
 				getApiList(apiUrl);
 				onClose();
 			} else {
@@ -298,7 +331,7 @@ const ConferenceRoomAppointment = () => {
 		const dataMode = event.currentTarget.getAttribute("data-mode");
 		const dataValue = event.currentTarget.getAttribute("data-value");
 
-		if (dataMode === "voidRoom") {
+		if (dataMode === "voidRoom" || dataMode === "voidAppointment") {
 			setDeliverInfo(dataValue);
 			setAlertOpen(1);
 		} else {
@@ -449,18 +482,18 @@ const ConferenceRoomAppointment = () => {
 								</>
 							);
 						case "appointmentCalendar": // 預約月曆
-							// return apiDataCalendar ? (
 							return (
-								<Calendar
-									data={[]}
-									viewOptions={["dayGridMonth", "timeGridDay"]}
-									navLinks={false}
-									customInitialView={true}
-								/>
+								<>
+									<Calendar
+										data={apiData?.content || []}
+										viewOptions={["dayGridMonth", "timeGridWeek", "timeGridDay"]}
+										customInitialView={true}
+										navLinks={false}
+										eventContent={renderEventContent}
+										eventClick={handleEventClick}
+									/>
+								</>
 							);
-						// ) : (
-						// 	<LoadingTwo size={isSmallScreen ? 120 : 160} textSize={"text-lg sm:text-xl"} />
-						// );
 						default: {
 							return null;
 						}
@@ -478,6 +511,11 @@ const ConferenceRoomAppointment = () => {
 			<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={sendBackFlag}>
 				<LoadingFour />
 			</Backdrop>
+			{isLoading && cat === "appointmentCalendar" && (
+				<Backdrop sx={{ color: "#fff", zIndex: 1400 }} open={true}>
+					<LoadingTwo />
+				</Backdrop>
+			)}
 
 			{/* Alert */}
 			<AlertDialog
@@ -494,3 +532,37 @@ const ConferenceRoomAppointment = () => {
 };
 
 export default ConferenceRoomAppointment;
+
+const renderEventContent = (eventInfo) => {
+	const event = eventInfo.event;
+
+	return (
+		<Tooltip
+			title={
+				<>
+					<p>會議室：{event.title}</p>
+					<p>預約者：{event.extendedProps.applicant}</p>
+					<p>預約時間(起)：{formatDateTime(event.extendedProps.since)}</p>
+					<p>預約時間(迄)：{formatDateTime(event.extendedProps.until)}</p>
+				</>
+			}
+			slotProps={{
+				popper: {
+					modifiers: [
+						{
+							name: "offset",
+							options: {
+								offset: [0, -10],
+							},
+						},
+					],
+				},
+			}}
+			arrow>
+			<div className="w-full px-1 py-px bg-[#F48A64] text-white rounded">
+				<b>{eventInfo.timeText}</b>
+				<p className="truncate">{eventInfo.event.title}</p>
+			</div>
+		</Tooltip>
+	);
+};
