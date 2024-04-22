@@ -62,11 +62,11 @@ const UserLeave = () => {
 	const [alertOpen, setAlertOpen] = useState(0);
 	const [attendanceTypeList, setAttendanceTypeList] = useState([]);
 
-	const [reflesh, setReflesh] = useState(true);
+	const [reflesh, setReflesh] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
 	// ApiUrl
 	const furl = "me/attendanceWaiverForm";
-	const apiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
+	const [apiUrl, setApiUrl] = useState("");
 
 	// 轉換時間
 	const formatDateTime = (dateTime) => {
@@ -109,6 +109,27 @@ const UserLeave = () => {
 		{ value: "leaveEdit", icon: <EditIcon />, title: "編輯" },
 	];
 
+	// 更新 ApiUrl
+	useEffect(() => {
+		let constructedApiUrl = `${furl}?p=${page + 1}&s=${rowsPerPage}`;
+
+		const searchquery = Object.fromEntries(queryParams.entries());
+		for (const key in searchquery) {
+			if (
+				key !== "p" &&
+				key !== "s" &&
+				searchquery[key] !== undefined &&
+				searchquery[key] !== null &&
+				searchquery[key] !== ""
+			) {
+				constructedApiUrl += `&${key}=${encodeURIComponent(searchquery[key])}`;
+			}
+		}
+
+		setApiUrl(constructedApiUrl);
+	}, [page, rowsPerPage, queryParams]);
+
+
 	// 取得請假類別
 	useEffect(() => {
 		getData("attendanceType").then((result) => {
@@ -124,11 +145,13 @@ const UserLeave = () => {
 
 	// 取得列表資料
 	useEffect(() => {
-		if (reflesh) {
-			getApiList(apiUrl);
-			setReflesh(false);
+		if (apiUrl !== "" ) { 
+			getApiList(apiUrl); 
+		} else if (apiUrl !== "" && reflesh){
+			getApiList(apiUrl); setReflesh(false)
 		}
 	}, [apiUrl, reflesh]);
+
 	const getApiList = useCallback(
 		(url) => {
 			setIsLoading(true);
@@ -173,10 +196,11 @@ const UserLeave = () => {
 	);
     //
 	// 設置頁數
-	const handleChangePage = useCallback((event, newPage) => {
-		setPage(newPage);
-		navigateWithParams(newPage + 1, rowsPerPage);
-	}, []);
+	const handleChangePage = 
+		(event, newPage) => {
+			setPage(newPage);
+			navigateWithParams(newPage + 1, rowsPerPage);
+		}
 
 	// 設置每頁顯示並返回第一頁
 	const handleChangeRowsPerPage = (event) => {
