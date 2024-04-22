@@ -546,7 +546,7 @@ const ConferenceRoomAppointment = () => {
 				onClose={handleAlertClose}
 				icon={<ReportProblemIcon color="secondary" />}
 				title="注意"
-				content={"是否確認將此會議室進行刪除處理？"}
+				content={cat === "roomManage" ? "是否確認將此會議室進行刪除處理？" : "是否確認將此預約進行刪除處理？"}
 				disagreeText="取消"
 				agreeText="確定"
 			/>

@@ -437,9 +437,9 @@ const AppointmentModal = React.memo(({ title, deliverInfo, departmentsList, send
 															...params.InputProps,
 															endAdornment: (
 																<>
-																	{conferenceRoomList.length <= 0 ? (
+																	{/* {conferenceRoomList.length <= 0 ? (
 																		<CircularProgress className="absolute right-[2.325rem]" size={20} />
-																	) : null}
+																	) : null} */}
 																	{params.InputProps.endAdornment}
 																</>
 															),
@@ -447,8 +447,8 @@ const AppointmentModal = React.memo(({ title, deliverInfo, departmentsList, send
 													/>
 												)}
 												ListboxProps={{ style: { maxHeight: "12rem" } }}
-												loading={conferenceRoomList.length <= 0}
-												loadingText={"載入中..."}
+												// loading={conferenceRoomList.length <= 0}
+												// loadingText={"載入中..."}
 												fullWidth
 											/>
 										);
