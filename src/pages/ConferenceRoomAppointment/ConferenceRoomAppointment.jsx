@@ -51,7 +51,7 @@ const ConferenceRoomAppointment = () => {
 	// 解析網址取得參數
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);
-	// 定義年份和月份的狀態// 取得當前月份
+	// 定義年份和月份的狀態
 	const currentMonth = new Date().getMonth() + 1;
 	const [year, setYear] = useState(queryParams.get("calendaryears") || new Date().getFullYear());
 	const [month, setMonth] = useState(
@@ -284,8 +284,8 @@ const ConferenceRoomAppointment = () => {
 		getData("factorySite").then((result) => {
 			if (result.result) {
 				const data = result.result;
-				const formattedDep = data.map((fs) => ({ label: fs.chinese, id: fs.value }));
-				setFactorySiteList(formattedDep);
+				const formattedList = data.map((fs) => ({ label: fs.chinese, id: fs.value }));
+				setFactorySiteList(formattedList);
 			} else {
 				setFactorySiteList([]);
 				showNotification("廠別 API 請求失敗", false, 10000);
@@ -296,7 +296,7 @@ const ConferenceRoomAppointment = () => {
 	// 傳遞給後端資料
 	const sendDataToBackend = (fd, mode, otherData, id) => {
 		setSendBackFlag(true);
-		let url = "conferenceRoom";
+		let url = "";
 		let message = [];
 		switch (mode) {
 			case "createRoom":
