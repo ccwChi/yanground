@@ -29,26 +29,28 @@ const AttendanceSection = React.memo(({ apiAttData, setReflesh }) => {
     setIsOpen(false);
   };
   const handleClickEvent = (date) => {
-    if (apiAttData) {
-      const eventContent = apiAttData.filter((data) => data.start === date);
-      if (!!eventContent[0]) {
-        setDeliverInfo(eventContent[0]);
-      } else {
-        setDeliverInfo({
-          color: "#4b5563",
-          id: null,
-          start: date,
-          title: "尚無考勤資料",
-        });
-      }
-      // console.log("eventContent[0]", eventContent[0]);
-      setIsOpen(true);
-    }
-    setIsOpen(true);
+    return
+    // if (apiAttData) {
+    //   const eventContent = apiAttData.filter((data) => data.start === date);
+    //   if (!!eventContent[0]) {
+    //     setDeliverInfo(eventContent[0]);
+    //   } else {
+    //     setDeliverInfo({
+    //       color: "#4b5563",
+    //       id: null,
+    //       start: date,
+    //       title: "尚無考勤資料",
+    //     });
+    //   }
+    //   // console.log("eventContent[0]", eventContent[0]);
+    //   setIsOpen(true);
+    // }
+    // setIsOpen(true);
   };
 
   const handleDayClick = (e) => {
-    handleClickEvent(e.dateStr);
+    return
+    // handleClickEvent(e.dateStr);
     // console.log("handleDayClick", e);
   };
   return (

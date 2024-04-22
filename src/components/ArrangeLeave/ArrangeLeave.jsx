@@ -45,6 +45,8 @@ for (var i = 0; i < 7; i++) {
  * @param {bool} forSuperVisor // 如果不是給主管專用就是給人資專用，預設false = 給人資專用 
  * @param {string} title // 頁面顯示title
  * @param {string} url // 主管用的 api 跟人資用的 api不同
+ * 人資用的url是 arrangedLeave
+ * 主管用的url是 supervisor/arrangedLeave
  * @returns 
  */
 
@@ -164,7 +166,7 @@ const ArrangeLeave = ({forSuperVisor = true, title , url }) => {
       calendarMonthRange.length > 0
     ) {
       setIsLoading(true);
-      getData(`arrangedLeave/${year}/${month}`).then((result) => {
+      getData(`${url}/${year}/${month}`).then((result) => {
         const rawData = result.result
           .map(({ anomaly, date, id, since, until, user }, i) => ({
             title: user.lastname + user.firstname + " - " + user.department.name,
