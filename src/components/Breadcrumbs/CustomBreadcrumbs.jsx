@@ -19,7 +19,7 @@ const nameMappings = [
 	{ name: "project", display: "專案管理" },
 	{ name: "dispatchList", display: "派工清單" },
 	// 行政管理系統
-	{ name: "cardispatch", display: "公務車調度" },
+	{ name: "transportationvehicle", display: "公務車調度" },
 	{ name: "conferenceroomappointment", display: "會議室預約" },
 	// 人事管理系統
 	{ name: "users", display: "人事管理" },

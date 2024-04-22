@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { ConferenceRoomModal, AppointmentModal } from "./ConferenceRoomAppointmentModal";
+import { ConferenceRoomModal, AppointmentModal } from "./TransportationVehicleModal";
 
 // date-fns
 import { parseISO, format } from "date-fns";
@@ -43,11 +43,11 @@ const formatDateTime = (dateTime) => {
 };
 
 /***
- * Conference Room Appointment
- * 會議室預約
+ * Transportation Vehicle
+ * 公務車調度
  * @returns
  ***/
-const ConferenceRoomAppointment = () => {
+const TransportationVehicle = () => {
 	// 解析網址取得參數
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);
@@ -82,13 +82,15 @@ const ConferenceRoomAppointment = () => {
 	const [sendBackFlag, setSendBackFlag] = useState(false);
 	// 部門清單
 	const [departmentsList, setDepartmentsList] = useState([]);
-	// 廠別清單
-	const [factorySiteList, setFactorySiteList] = useState([]);
+	// 獲得方式清單
+	const [acquiredHowList, setAcquiredHowList] = useState([]);
+	// 汽車稅費清單
+	const [transportationVehicleTaxList, setTransportationVehicleTaxList] = useState([]);
 	// Category
 	const tabGroup = [
 		{ f: "loanStatusTable", text: "狀況管理" },
-		{ f: "appointmentCalendar", text: "預約月曆" },
-		{ f: "roomManage", text: "會議室管理" },
+		{ f: "appointmentCalendar", text: "調度月曆" },
+		{ f: "carManage", text: "車輛管理" },
 	];
 	const [cat, setCat] = useState(
 		queryParams.has("cat") && tabGroup.some((tab) => tab.f === queryParams.get("cat"))
@@ -104,7 +106,7 @@ const ConferenceRoomAppointment = () => {
 	const [alertOpen, setAlertOpen] = useState(0);
 
 	// API URL
-	const furl = cat === "roomManage" ? "conferenceRoom" : "conferenceRoomBooking";
+	const furl = cat === "carManage" ? "transportationVehicle" : "transportationVehicleDispatchment";
 
 	// 監聽 URL 查詢參數的變化並更新相應的狀態
 	useEffect(() => {
@@ -132,9 +134,9 @@ const ConferenceRoomAppointment = () => {
 	// 上方區塊功能按鈕清單
 	const btnGroup = [
 		{
-			mode: "createRoom",
+			mode: "createCar",
 			icon: <AddCircleIcon fontSize="small" />,
-			text: "新增會議室",
+			text: "新增車輛",
 			variant: "contained",
 			color: "secondary",
 			fabVariant: "success",
@@ -143,7 +145,7 @@ const ConferenceRoomAppointment = () => {
 		{
 			mode: "createAppointment",
 			icon: <AddCircleIcon fontSize="small" />,
-			text: "新增預約",
+			text: "新增調度",
 			variant: "contained",
 			color: "primary",
 			fabVariant: "success",
@@ -154,45 +156,51 @@ const ConferenceRoomAppointment = () => {
 	var columnsPC = [],
 		columnsMobile = [],
 		actions = [];
-	if (cat === "roomManage") {
+	if (cat === "carManage") {
 		// 對照 api table 所顯示 key
 		columnsPC = [
-			{ key: ["factorySite", "chinese"], label: "廠別", size: "20%", align: "left" },
-			{ key: ["name"], label: "會議室名稱", size: "60%", align: "left" },
+			{ key: ["licenseTag"], label: "車牌號碼", size: "18%" },
+			{ key: ["acquiredHow", "chinese"], label: "獲得方式", size: "18%" },
+			{ key: ["tax", "chinese"], label: "汽車稅費", size: "48%", align: "left" },
 		];
 		columnsMobile = [
-			{ key: ["factorySite", "chinese"], label: "廠別" },
-			{ key: ["name"], label: "會議室名稱" },
+			{ key: ["licenseTag"], label: "車牌號碼" },
+			{ key: ["acquiredHow", "chinese"], label: "獲得方式" },
+			{ key: ["tax", "chinese"], label: "汽車稅費" },
 		];
 
 		// 功能操作按鈕
 		actions = [
-			{ value: "editRoom", icon: <EditIcon />, title: "編輯會議室" },
-			{ value: "voidRoom", icon: <DeleteIcon />, title: "刪除會議室" },
+			{ value: "editCar", icon: <EditIcon />, title: "編輯車輛" },
+			{ value: "voidCar", icon: <DeleteIcon />, title: "刪除車輛" },
 		];
 	} else {
 		// 對照 api table 所顯示 key
 		columnsPC = [
-			{ key: ["applicant"], label: "預約者", size: "12%" },
-			{ key: ["appliedAt"], label: "預約時間", size: "16%" },
-			{ key: ["conferenceRoom", "factorySite", "chinese"], label: "工廠站點", size: "10%", align: "left" },
-			{ key: ["conferenceRoom", "name"], label: "會議室名稱", size: "18%", align: "left" },
-			{ key: ["start"], label: "開始時間", size: "16%" },
-			{ key: ["end"], label: "結束時間", size: "16%" },
+			{ key: ["applicant"], label: "申請人", size: "10%" },
+			{ key: ["vehicle", "licenseTag"], label: "車輛", size: "10%" },
+			{ key: ["driver"], label: "使用者", size: "10%" },
+			{ key: ["usage"], label: "用途", size: "15%", align: "left" },
+			{ key: ["mileageBefore"], label: "出發前里程數 (km)", size: "10%" },
+			{ key: ["mileageAfter"], label: "返回後里程數 (km)", size: "10%" },
+			{ key: ["start"], label: "開始使用時間", size: "12%" },
+			{ key: ["end"], label: "結束使用時間", size: "12%" },
 		];
 		columnsMobile = [
-			{ key: ["applicant"], label: "預約者" },
-			{ key: ["appliedAt"], label: "預約時間" },
-			{ key: ["conferenceRoom", "factorySite", "chinese"], label: "工廠站點" },
-			{ key: ["conferenceRoom", "name"], label: "會議室名稱" },
-			{ key: ["start"], label: "開始時間" },
-			{ key: ["end"], label: "結束時間" },
+			{ key: ["applicant"], label: "申請人" },
+			{ key: ["vehicle", "licenseTag"], label: "車輛" },
+			{ key: ["driver"], label: "使用者" },
+			{ key: ["usage"], label: "用途" },
+			{ key: ["mileageBefore"], label: "出發前里程數 (km)" },
+			{ key: ["mileageAfter"], label: "返回後里程數 (km)" },
+			{ key: ["start"], label: "開始使用時間" },
+			{ key: ["end"], label: "結束使用時間" },
 		];
 
 		// 功能操作按鈕
 		actions = [
-			{ value: "editAppointment", icon: <EditIcon />, title: "編輯預約" },
-			{ value: "voidAppointment", icon: <DeleteIcon />, title: "刪除預約" },
+			{ value: "editAppointment", icon: <EditIcon />, title: "編輯調度" },
+			{ value: "voidAppointment", icon: <DeleteIcon />, title: "刪除調度" },
 		];
 	}
 
@@ -200,18 +208,29 @@ const ConferenceRoomAppointment = () => {
 	const handleEventClick = (eventClickInfo) => {
 		const event = eventClickInfo.event;
 		alert(
-			"會議室：" +
+			"車輛：" +
 				event.title +
 				"\n" +
-				"預約者：" +
+				"申請人：" +
 				event.extendedProps.applicant +
 				"\n" +
-				"預約時間(起)：" +
-				formatDateTime(event.extendedProps.since) +
+				"使用者：" +
+				event.extendedProps.driver +
 				"\n" +
-				"預約時間(迄)：" +
-				formatDateTime(event.extendedProps.until) +
-				"\n"
+				"申請時間：" +
+				formatDateTime(event.extendedProps.appliedAt) +
+				"\n" +
+				"調度時間(起)：" +
+				formatDateTime(event.extendedProps.estimatedSince) +
+				"\n" +
+				"調度時間(迄)：" +
+				formatDateTime(event.extendedProps.estimatedUntil) +
+				"\n" +
+				"用途：" +
+				event.extendedProps.usage +
+				"\n" +
+				(event.extendedProps.mileageBefore ? "出發前里程數：" + event.extendedProps.mileageBefore + " 公里\n" : "") +
+				(event.extendedProps.mileageAfter ? "返回後里程數：" + event.extendedProps.mileageAfter + " 公里\n" : "")
 		);
 	};
 
@@ -226,23 +245,23 @@ const ConferenceRoomAppointment = () => {
 				setIsLoading(false);
 				if (result.result) {
 					const data = result.result;
-					if (data?.content[0]?.factorySite !== undefined) {
+					if (data?.content[0]?.licenseTag !== undefined) {
 						setApiData(data);
 					} else {
 						const formattedData = {
 							...data,
 							content: data.content.map((item) => ({
 								...item,
-								title: `〔${item.conferenceRoom.factorySite.chinese}〕${item.conferenceRoom.name}`,
+								title: item.vehicle.licenseTag,
 								applicant: `${item.applicant.lastname}${item.applicant.firstname}`,
+								driver: `${item.driver.lastname}${item.driver.firstname}`,
 								appliedAt: formatDateTime(item.appliedAt),
-								start: formatDateTime(item.since),
-								end: formatDateTime(item.until),
-								displayTable: `〔${item.conferenceRoom.factorySite.chinese}〕${
-									item.conferenceRoom.name
-								} (${formatDateTime(item.since).slice(0, 10)})`,
+								start: formatDateTime(item.estimatedSince),
+								end: formatDateTime(item.estimatedUntil),
+								displayTable: `${item.vehicle.licenseTag} (${formatDateTime(item.estimatedSince).slice(0, 10)})`,
 							})),
 						};
+						console.log(formattedData.content);
 						setApiData(formattedData);
 					}
 
@@ -259,7 +278,7 @@ const ConferenceRoomAppointment = () => {
 		},
 		[page]
 	);
-	// 取得部門資料 x 廠別資料
+	// 取得部門資料 x 獲得方式資料 x 汽車稅費資料
 	useEffect(() => {
 		// 取得部門資料
 		getData("department?p=1&s=100").then((result) => {
@@ -280,15 +299,27 @@ const ConferenceRoomAppointment = () => {
 			}
 		});
 
-		// 取得廠別資料
-		getData("factorySite").then((result) => {
+		// 獲得方式資料
+		getData("acquiredHow").then((result) => {
 			if (result.result) {
 				const data = result.result;
-				const formattedList = data.map((fs) => ({ label: fs.chinese, id: fs.value }));
-				setFactorySiteList(formattedList);
+				const formattedList = data.map((item) => ({ label: item.chinese, id: item.value }));
+				setAcquiredHowList(formattedList);
 			} else {
-				setFactorySiteList([]);
-				showNotification("廠別 API 請求失敗", false, 10000);
+				setAcquiredHowList([]);
+				showNotification("獲得方式 API 請求失敗", false, 10000);
+			}
+		});
+
+		// 汽車稅費資料
+		getData("transportationVehicleTax").then((result) => {
+			if (result.result) {
+				const data = result.result;
+				const formattedList = data.map((item) => ({ label: item.chinese, id: item.value }));
+				setTransportationVehicleTaxList(formattedList);
+			} else {
+				setTransportationVehicleTaxList([]);
+				showNotification("汽車稅費 API 請求失敗", false, 10000);
 			}
 		});
 	}, []);
@@ -299,21 +330,21 @@ const ConferenceRoomAppointment = () => {
 		let url = "";
 		let message = [];
 		switch (mode) {
-			case "createRoom":
-				url = "conferenceRoom";
-				message = `名為「${otherData}」的會議室建立成功！`;
+			case "createCar":
+				url = "transportationVehicle";
+				message = `名為「${otherData}」的車輛建立成功！`;
 				break;
-			case "editRoom":
-				url = "conferenceRoom/" + id;
-				message = `名為「${otherData}」的會議室編輯成功！`;
+			case "editCar":
+				url = "transportationVehicle/" + id;
+				message = `名為「${otherData}」的車輛編輯成功！`;
 				break;
 			case "createAppointment":
-				url = "conferenceRoomBooking";
-				message = "已建立會議室預約單成功！";
+				url = "transportationVehicleDispatchment";
+				message = "已建立車輛調度單成功！";
 				break;
 			case "editAppointment":
-				url = "conferenceRoomBooking/" + id;
-				message = "已編輯會議室預約單成功！";
+				url = "transportationVehicleDispatchment/" + id;
+				message = "已編輯車輛調度單成功！";
 				break;
 			default:
 				break;
@@ -354,7 +385,7 @@ const ConferenceRoomAppointment = () => {
 		const dataMode = event.currentTarget.getAttribute("data-mode");
 		const dataValue = event.currentTarget.getAttribute("data-value");
 
-		if (dataMode === "voidRoom" || dataMode === "voidAppointment") {
+		if (dataMode === "voidCar" || dataMode === "voidAppointment") {
 			setDeliverInfo(dataValue);
 			setAlertOpen(1);
 		} else {
@@ -394,23 +425,25 @@ const ConferenceRoomAppointment = () => {
 	// modal 開啟參數與顯示標題
 	const modalConfig = [
 		{
-			modalValue: "createRoom",
+			modalValue: "createCar",
 			modalComponent: (
 				<ConferenceRoomModal
-					title="新增會議室"
-					factorySiteList={factorySiteList}
+					title="新增車輛"
+					acquiredHowList={acquiredHowList}
+					transportationVehicleTaxList={transportationVehicleTaxList}
 					sendDataToBackend={sendDataToBackend}
 					onClose={onClose}
 				/>
 			),
 		},
 		{
-			modalValue: "editRoom",
+			modalValue: "editCar",
 			modalComponent: (
 				<ConferenceRoomModal
-					title="編輯會議室"
+					title="編輯車輛"
 					deliverInfo={deliverInfo}
-					factorySiteList={factorySiteList}
+					acquiredHowList={acquiredHowList}
+					transportationVehicleTaxList={transportationVehicleTaxList}
 					sendDataToBackend={sendDataToBackend}
 					onClose={onClose}
 				/>
@@ -420,7 +453,7 @@ const ConferenceRoomAppointment = () => {
 			modalValue: "createAppointment",
 			modalComponent: (
 				<AppointmentModal
-					title="新增預約"
+					title="新增調度"
 					departmentsList={departmentsList}
 					sendDataToBackend={sendDataToBackend}
 					onClose={onClose}
@@ -431,7 +464,7 @@ const ConferenceRoomAppointment = () => {
 			modalValue: "editAppointment",
 			modalComponent: (
 				<AppointmentModal
-					title="編輯預約"
+					title="編輯調度"
 					deliverInfo={deliverInfo}
 					departmentsList={departmentsList}
 					sendDataToBackend={sendDataToBackend}
@@ -446,8 +479,8 @@ const ConferenceRoomAppointment = () => {
 		<>
 			{/* PageTitle */}
 			<PageTitle
-				title="會議室預約"
-				description="此頁面是用於會議室預約，提供新增、編輯、刪除申請的功能，並可查看月曆會議室的當前狀態和預約情況。"
+				title="公務車調度"
+				description="此頁面是用於公務車調度，提供新增、編輯、刪除申請的功能，並可查看月曆車輛的當前狀態和調度情況。"
 				btnGroup={btnGroup}
 				handleActionClick={handleActionClick}
 			/>
@@ -477,7 +510,7 @@ const ConferenceRoomAppointment = () => {
 				{(() => {
 					switch (cat) {
 						case "loanStatusTable": // 狀態管理
-						case "roomManage": // 會議室管理
+						case "carManage": // 車輛管理
 							return (
 								<>
 									{/* Table */}
@@ -487,8 +520,8 @@ const ConferenceRoomAppointment = () => {
 											columnsPC={columnsPC}
 											columnsMobile={columnsMobile}
 											actions={actions}
-											cardTitleKey={cat === "roomManage" ? "name" : "displayTable"}
-											tableMinWidth={cat === "roomManage" ? 540 : 1024}
+											cardTitleKey={cat === "carManage" ? "licenseTag" : "displayTable"}
+											tableMinWidth={cat === "carManage" ? 640 : 1200}
 											isLoading={isLoading}
 											handleActionClick={handleActionClick}
 										/>
@@ -504,7 +537,7 @@ const ConferenceRoomAppointment = () => {
 									/>
 								</>
 							);
-						case "appointmentCalendar": // 預約月曆
+						case "appointmentCalendar": // 調度月曆
 							return (
 								<>
 									<Calendar
@@ -546,7 +579,7 @@ const ConferenceRoomAppointment = () => {
 				onClose={handleAlertClose}
 				icon={<ReportProblemIcon color="secondary" />}
 				title="注意"
-				content={cat === "roomManage" ? "是否確認將此會議室進行刪除處理？" : "是否確認將此預約進行刪除處理？"}
+				content={cat === "carManage" ? "是否確認將此車輛進行刪除處理？" : "是否確認將此預約調度進行刪除處理？"}
 				disagreeText="取消"
 				agreeText="確定"
 			/>
@@ -554,7 +587,7 @@ const ConferenceRoomAppointment = () => {
 	);
 };
 
-export default ConferenceRoomAppointment;
+export default TransportationVehicle;
 
 const renderEventContent = (eventInfo) => {
 	const event = eventInfo.event;
@@ -563,10 +596,15 @@ const renderEventContent = (eventInfo) => {
 		<Tooltip
 			title={
 				<>
-					<p>會議室：{event.title}</p>
-					<p>預約者：{event.extendedProps.applicant}</p>
-					<p>預約時間(起)：{formatDateTime(event.extendedProps.since)}</p>
-					<p>預約時間(迄)：{formatDateTime(event.extendedProps.until)}</p>
+					<p>車輛：{event.title}</p>
+					<p>申請人：{event.extendedProps.applicant}</p>
+					<p>使用者：{event.extendedProps.driver}</p>
+					<p>申請時間：{formatDateTime(event.extendedProps.appliedAt)}</p>
+					<p>調度時間(起)：{formatDateTime(event.extendedProps.estimatedSince)}</p>
+					<p>調度時間(迄)：{formatDateTime(event.extendedProps.estimatedUntil)}</p>
+					<p>用途：{event.extendedProps.usage}</p>
+					{event.extendedProps.mileageBefore ? <p>出發前里程數：{event.extendedProps.mileageBefore} 公里</p> : null}
+					{event.extendedProps.mileageAfter ? <p>返回後里程數：{event.extendedProps.mileageAfter} 公里</p> : null}
 				</>
 			}
 			slotProps={{

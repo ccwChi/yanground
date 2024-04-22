@@ -20,7 +20,7 @@ import Project from "./pages/Project/Project";
 import ProjectDocumentsManagement from "./pages/Project/Documents/Documents";
 import DispatchList from "./pages/DispatchList/DispatchList";
 // 行政管理系統
-import CarDispatch from "./pages/CarDispatch/CarDispatch";
+import TransportationVehicle from "./pages/TransportationVehicle/TransportationVehicle";
 import ConferenceRoomAppointment from "./pages/ConferenceRoomAppointment/ConferenceRoomAppointment";
 // 人事管理系統
 import Users from "./pages/Users/Users";
@@ -112,12 +112,12 @@ const router = createBrowserRouter([
 			},
 			// 行政管理系統
 			{
-				path: "/cardispatch",
-				element: <CarDispatch />,
-			},
-			{
 				path: "/conferenceroomappointment",
 				element: <ConferenceRoomAppointment />,
+			},
+			{
+				path: "/transportationvehicle",
+				element: <TransportationVehicle />,
 			},
 			// 人事管理系統
 			{
