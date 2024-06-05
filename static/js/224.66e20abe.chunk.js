@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkerplication_react_ver2=self.webpackChunkerplication_react_ver2||[]).push([[224],{67224:function(e,a,c){e.exports=c.p+"static/media/ooo.5d026b284a3c2a39f4d3.md"}}]);

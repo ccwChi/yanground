@@ -1,0 +1,36 @@
+{
+  "files": {
+    "main.css": "/yanground/static/css/main.2e522b00.css",
+    "main.js": "/yanground/static/js/main.cecbc6a4.js",
+    "static/js/859.56723d40.chunk.js": "/yanground/static/js/859.56723d40.chunk.js",
+    "static/js/224.66e20abe.chunk.js": "/yanground/static/js/224.66e20abe.chunk.js",
+    "static/js/809.22e612a7.chunk.js": "/yanground/static/js/809.22e612a7.chunk.js",
+    "static/js/805.79cbea1b.chunk.js": "/yanground/static/js/805.79cbea1b.chunk.js",
+    "static/js/948.69a9c087.chunk.js": "/yanground/static/js/948.69a9c087.chunk.js",
+    "static/js/787.232c0ea7.chunk.js": "/yanground/static/js/787.232c0ea7.chunk.js",
+    "static/media/emptyCatSleep.png": "/yanground/static/media/emptyCatSleep.7a3d7e9b6a3755f1dbc1.png",
+    "static/media/Logo.png": "/yanground/static/media/Logo.2b3be74eab472c6e8004.png",
+    "static/media/Profile.png": "/yanground/static/media/Profile.6f3cf546513e9a401148.png",
+    "static/media/noImgAvailable.jpg": "/yanground/static/media/noImgAvailable.bf08049bc30cabfc6be6.jpg",
+    "static/media/ooo.md": "/yanground/static/media/ooo.5d026b284a3c2a39f4d3.md",
+    "static/media/ggg.md": "/yanground/static/media/ggg.90506eba0a6ffc3dbb75.md",
+    "static/media/rrr.md": "/yanground/static/media/rrr.18a357b85e0300f5fd21.md",
+    "static/media/ttt.md": "/yanground/static/media/ttt.a0655c997a4ab5d0a910.md",
+    "static/media/undraw_dog_c7i6.svg": "/yanground/static/media/undraw_dog_c7i6.524926514894dc767bcd3fbdcfa7d6df.svg",
+    "static/media/projectManagementIcon.svg": "/yanground/static/media/projectManagementIcon.5923989026b44e082d59cf2730ea1047.svg",
+    "static/media/xxx.md": "/yanground/static/media/xxx.471741cd16eb2a95da0a.md",
+    "static/media/loading.svg": "/yanground/static/media/loading.4e9754775c02ff877c26ce09e36a18c7.svg",
+    "static/media/undraw_cat_epte.svg": "/yanground/static/media/undraw_cat_epte.aa2f3b6a745b1c3c78d0ec042dadb993.svg",
+    "static/media/trashIcon.svg": "/yanground/static/media/trashIcon.7abf3609a0f5ad9f94e0136cb65d8457.svg",
+    "static/media/downloadArrowIcon.svg": "/yanground/static/media/downloadArrowIcon.36593cad540f51664f65e457ea2c4911.svg",
+    "static/media/fileDownloadIcon.svg": "/yanground/static/media/fileDownloadIcon.8dc2ab66e27b9dd9bd4a247197cfa98a.svg",
+    "index.html": "/yanground/index.html",
+    "main.2e522b00.css.map": "/yanground/static/css/main.2e522b00.css.map",
+    "main.cecbc6a4.js.map": "/yanground/static/js/main.cecbc6a4.js.map",
+    "787.232c0ea7.chunk.js.map": "/yanground/static/js/787.232c0ea7.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.2e522b00.css",
+    "static/js/main.cecbc6a4.js"
+  ]
+}
